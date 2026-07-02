@@ -15,6 +15,7 @@ leaks test statistics.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 import numpy as np
@@ -59,20 +60,52 @@ def build_feature_set(epochs: TrialEpochs, cfg: dict) -> FeatureSet:
                       modality=epochs.modality, classes=list(epochs.classes))
 
 
-def feature_level_fusion(a: FeatureSet, b: FeatureSet) -> FeatureSet:
-    """Concatenate two FeatureSets on the trials they share (matched by UID)."""
-    index_b = {u: i for i, u in enumerate(b.uids)}
+def _trial_number(uid: str) -> int:
+    m = re.search(r"t(\d+)$", str(uid))
+    return int(m.group(1)) if m else -1
+
+
+def _align_trials(a: "FeatureSet", b: "FeatureSet"):
+    """Return matched index arrays (ia, ib) pairing the SAME trial across two
+    modalities. EEG and fNIRS are recorded on separate devices and occasionally
+    disagree on marker count (e.g. a spurious extra fNIRS cue), so we cannot
+    align by positional index. Instead, within each (subject, run) we align the
+    two label sequences with difflib -- the paradigm's class order is fixed and
+    identical across modalities, so matching blocks pair genuinely-corresponding
+    trials and drop spurious/dropped ones."""
+    import difflib
+
+    def group(fs: "FeatureSet"):
+        g: dict[tuple[str, int], list[int]] = {}
+        for i in range(fs.n_trials):
+            g.setdefault((str(fs.subjects[i]), int(fs.runs[i])), []).append(i)
+        for key in g:
+            g[key].sort(key=lambda i: _trial_number(fs.uids[i]))
+        return g
+
+    ga, gb = group(a), group(b)
     ia, ib = [], []
-    for i, u in enumerate(a.uids):
-        j = index_b.get(u)
-        if j is not None:
-            ia.append(i)
-            ib.append(j)
-    if not ia:
+    for key, idxa in ga.items():
+        idxb = gb.get(key)
+        if not idxb:
+            continue
+        ya = [int(a.y[i]) for i in idxa]
+        yb = [int(b.y[i]) for i in idxb]
+        sm = difflib.SequenceMatcher(a=ya, b=yb, autojunk=False)
+        for blk in sm.get_matching_blocks():
+            for k in range(blk.size):
+                ia.append(idxa[blk.a + k])
+                ib.append(idxb[blk.b + k])
+    return np.array(ia, dtype=int), np.array(ib, dtype=int)
+
+
+def feature_level_fusion(a: FeatureSet, b: FeatureSet) -> FeatureSet:
+    """Concatenate two FeatureSets on the trials they share (label-sequence aligned)."""
+    ia, ib = _align_trials(a, b)
+    if ia.size == 0:
         raise ValueError("no overlapping trials between the two modalities")
-    ia, ib = np.array(ia), np.array(ib)
-    if not np.array_equal(a.y[ia], b.y[ib]):
-        raise ValueError("label mismatch on aligned trials -- check UID logic")
+    if not np.array_equal(a.y[ia], b.y[ib]):  # guaranteed by matching blocks
+        raise ValueError("label mismatch after alignment -- unexpected")
 
     X = np.hstack([a.X[ia], b.X[ib]])
     names = [f"eeg:{n}" for n in a.names] + [f"fnirs:{n}" for n in b.names]

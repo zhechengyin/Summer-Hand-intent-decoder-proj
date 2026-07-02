@@ -48,10 +48,11 @@ Patients with Orthopedic Impairment"* (Lee et al., CC0).
    onset) and in the fNIRS BBCI marker struct (`mrk.toe` codes 3–6). The loader
    reads them from annotations, not TSVs.
 2. **fNIRS raw signal is a MATLAB `table` (MCOS object)** inside `cnt.x`, which
-   `scipy`/`h5py` cannot deserialise. Markers + montage load fine; the intensity
-   matrix needs a one-time conversion (`tools/convert_fnirs_octave.m`). Until
-   then the EEG pipeline and the synthetic demo run fully, and the fNIRS branch is
-   skipped with a clear message.
+   `scipy`/`h5py` cannot deserialise. The loader recovers the channel columns
+   **directly from the `.mat` subsystem in pure Python**
+   (`extract_mcos_double_columns` in `src/load_bids.py`) — no MATLAB/Octave
+   needed — so the real fNIRS and fused branches work out of the box.
+   (`tools/convert_fnirs_octave.m` remains as a fallback.)
 
 See [`data/README.md`](data/README.md) for the download options and the caveat.
 
@@ -278,6 +279,28 @@ The pipeline itself is correct: on synthetic data with separable classes both
 bandpower and FBCSP reach 1.0, so the low real numbers reflect **data difficulty,
 not implementation bugs**.
 
+## 7c. Multimodal fusion (EEG + fNIRS)
+
+ds004022's unique asset is *simultaneous* EEG (fast electrical) + fNIRS (slow
+hemodynamic). The loader recovers the fNIRS signal straight from the MATLAB-table
+subsystem in pure Python, so all three N1 modes run on **real** data:
+
+| Modality (all 7 subjects) | subject-specific | leave-one-run-out | LOSO |
+|---|---|---|---|
+| EEG-only            | 0.239 | 0.224 | 0.256 |
+| fNIRS-only          | 0.251 | 0.227 | 0.251 |
+| **EEG + fNIRS fused** | 0.240 | 0.239 | 0.254 |
+
+Chance = 0.25. Fusion is **feature-level** (concatenate EEG + fNIRS features →
+one `StandardScaler` + classifier Pipeline), with trials aligned across the two
+devices by matching each run's label sequence (robust to the occasional spurious
+fNIRS marker). Consistent with the single-modality results, **fusion does not beat
+chance here** — there is little separable 4-class same-limb signal in *either*
+modality, so combining them cannot manufacture it (fused leave-one-run-out 0.239
+edges out either alone, but within noise). What this delivers is a *correct,
+real-data multimodal N1* and an honest three-way comparison — exactly the
+"don't assume fusion wins" check — not an inflated number.
+
 ## 8. Limitations
 
 * High-level **motor-imagery classification**, not muscle/joint/torque decoding.
@@ -293,8 +316,9 @@ not implementation bugs**.
 
 ## 9. Future work (after the baseline)
 
-1. **fNIRS conversion in-pipeline** (drop the Octave step) and proper motion
-   correction (TDDR / spline) + short-separation regression.
+1. **fNIRS preprocessing depth** — the raw signal already loads in pure Python;
+   add proper motion correction (TDDR / spline) + short-separation regression and
+   verify the intensity/OD auto-detection against the acquisition metadata.
 2. **Better EEG features/models**: CSP / Riemannian tangent-space, FBCSP; then the
    temporal-CNN branch once augmentation/more data support it.
 3. **Late + learned fusion**: per-modality probabilities into a meta-classifier;

@@ -72,10 +72,18 @@ def intensity_to_hb(data: np.ndarray, ch_names: list[str], cfg: dict):
     E = np.array([e1, e2], dtype=float)          # [[HbO,HbR]@wl1, ...@wl2]
     E_inv = np.linalg.inv(E)
 
+    # Auto-detect the input type. Raw intensity is strictly positive -> convert
+    # to optical density via -log(I/mean). ds004022's recovered signal is already
+    # AC-coupled/optical-density-like (contains negatives), so we treat it as
+    # delta-OD and skip the log.
+    is_intensity = bool(np.all(data > 0))
+
     def od(col_idx):
         sig = data[:, col_idx].astype(float)
-        mean = np.maximum(np.mean(sig, axis=0, keepdims=True), 1e-12)
-        return -np.log(np.clip(sig, 1e-12, None) / mean)   # (n_samples, n_pairs)
+        if is_intensity:
+            mean = np.maximum(np.mean(sig, axis=0, keepdims=True), 1e-12)
+            return -np.log(np.clip(sig, 1e-12, None) / mean)
+        return sig - np.mean(sig, axis=0, keepdims=True)   # already delta-OD
 
     od1, od2 = od(wl_cols[wl1]), od(wl_cols[wl2])            # each (T, n_pairs)
     # concentration = E_inv @ [od1; od2] / path_len, per pair

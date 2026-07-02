@@ -13,7 +13,9 @@ Design principles (per the project brief):
 from __future__ import annotations
 
 import re
+import struct
 import warnings
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -180,6 +182,65 @@ def _is_mcos_table(x) -> bool:
     return isinstance(x, np.ndarray) and x.dtype.names is not None and x.dtype != float
 
 
+def _mcos_read_tag(buf, pos):
+    """Read a MAT5 data-element tag; returns (dtype, nbytes, data_pos, next_pos)."""
+    if pos + 8 > len(buf):
+        return None
+    a, b = struct.unpack_from("<II", buf, pos)
+    if (a >> 16) != 0:                       # small-element format (tag+data in 8B)
+        return (a & 0xFFFF), (a >> 16), pos + 4, pos + 8
+    return a, b, pos + 8, pos + 8 + ((b + 7) & ~7)
+
+
+def extract_mcos_double_columns(ss_bytes: bytes, n_channels: int | None = None):
+    """Recover numeric columns from a MATLAB ``table`` stored as an MCOS object.
+
+    In ds004022 the fNIRS ``cnt.x`` is a MATLAB table -- an MCOS object that
+    scipy/h5py cannot deserialise. But the table's underlying column arrays are
+    stored as ordinary MAT5 ``miMATRIX`` elements inside the file's
+    ``__function_workspace__`` subsystem. We brute-scan the subsystem for
+    double/single column vectors and keep the dominant-length group (= the
+    channels), returning an (n_samples, n_channels) array. This is what lets the
+    real fNIRS branch work in pure Python without MATLAB/Octave.
+    """
+    ss = ss_bytes
+    n = len(ss)
+    cols = []
+    for pos in range(0, n - 16, 8):
+        t = _mcos_read_tag(ss, pos)
+        if not t or t[0] != 6 or t[1] != 8:          # array-flags = miUINT32(8)
+            continue
+        cls = struct.unpack_from("<I", ss, t[2])[0] & 0xFF
+        if cls not in (6, 7):                        # mxDOUBLE / mxSINGLE
+            continue
+        t2 = _mcos_read_tag(ss, t[3])                # dimensions = miINT32
+        if not t2 or t2[0] != 5 or t2[1] not in (8, 12):
+            continue
+        dims = struct.unpack_from("<%di" % (t2[1] // 4), ss, t2[2])
+        if any(d <= 0 or d > 5_000_000 for d in dims):
+            continue
+        t3 = _mcos_read_tag(ss, t2[3])               # name = miINT8
+        if not t3 or t3[0] != 1:
+            continue
+        t4 = _mcos_read_tag(ss, t3[3])               # real data
+        if not t4:
+            continue
+        npt = {9: "<f8", 7: "<f4"}.get(t4[0])
+        if not npt:
+            continue
+        cnt = t4[1] // np.dtype(npt).itemsize
+        if cnt < 500 or cnt != int(np.prod(dims)):
+            continue
+        cols.append((pos, cnt, np.frombuffer(ss, dtype=npt, count=cnt, offset=t4[2])))
+    if not cols:
+        return None
+    N = Counter(c[1] for c in cols).most_common(1)[0][0]
+    chans = [a.astype(float) for (_, c, a) in sorted(cols) if c == N]
+    if n_channels and len(chans) > n_channels:
+        chans = chans[:n_channels]
+    return np.stack(chans, axis=1) if len(chans) >= 2 else None
+
+
 def load_fnirs_bbci(path: str | Path) -> FnirsRun:
     """Load a ds004022 fNIRS ``*_nirs.mat`` (BBCI format).
 
@@ -189,7 +250,8 @@ def load_fnirs_bbci(path: str | Path) -> FnirsRun:
     MATLAB table object Python cannot read.
     """
     path = Path(path)
-    m = sio.loadmat(path, struct_as_record=False, squeeze_me=True)["nirs_data"]
+    mat = sio.loadmat(path, struct_as_record=False, squeeze_me=True)
+    m = mat["nirs_data"]
     cnt = _unwrap(m.cnt, "cnt")
     mrk = _unwrap(m.mrk, "mrk")
 
@@ -213,12 +275,19 @@ def load_fnirs_bbci(path: str | Path) -> FnirsRun:
     else:
         x = getattr(cnt, "x")
         if _is_mcos_table(x):
-            warnings.warn(
-                f"{path.name}: fNIRS intensity is a MATLAB table (MCOS) and cannot "
-                "be read in Python. Run tools/convert_fnirs_octave.m to enable the "
-                "real-data fNIRS branch. Skipping this run's signal.",
-                RuntimeWarning,
-            )
+            # The intensity is a MATLAB table (MCOS). Recover its columns straight
+            # from the .mat subsystem -- no MATLAB/Octave needed.
+            fw = mat.get("__function_workspace__")
+            if fw is not None:
+                data = extract_mcos_double_columns(fw.tobytes(), len(clab))
+                source = "mcos-extracted" if data is not None else "unavailable"
+            if data is None:
+                warnings.warn(
+                    f"{path.name}: fNIRS intensity is a MATLAB table (MCOS) and "
+                    "could not be recovered from the subsystem. Run "
+                    "tools/convert_fnirs_octave.m as a fallback.",
+                    RuntimeWarning,
+                )
         elif isinstance(x, np.ndarray) and x.dtype != object:
             data = np.asarray(x, dtype=float)
             source = "mat"

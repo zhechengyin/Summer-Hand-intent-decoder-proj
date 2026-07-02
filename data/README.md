@@ -53,17 +53,12 @@ Helper wrapper: `python tools/download_data.py --target data/ds004022`
 **Trial timeline (15 s):** 3 s fixation → 4 s visual cue (reveals the action) →
 3 s ready → **5 s motor imagery**.
 
-### ⚠️ fNIRS raw signal caveat
+### fNIRS raw signal note
 In this dataset the fNIRS intensity matrix (`nirs_data.cnt.x`) is serialised as a
-MATLAB **`table` (MCOS) object**, which `scipy.io.loadmat` / `h5py` **cannot**
-deserialise. The markers (`mrk`) and montage (`mnt`) *do* load, so labels and
-geometry are available, but the raw signal needs a one-time conversion. Run:
-
-```bash
-octave --no-gui tools/convert_fnirs_octave.m data/ds004022   # or use MATLAB
-```
-
-This re-exports each `*_nirs.mat` to `*_nirs_converted.mat` (plain arrays) that
-`src/preprocess_fnirs.py` loads directly. Until you convert, the EEG pipeline and
-the synthetic smoke test run fully; the real-data fNIRS branch is skipped with a
-clear warning.
+MATLAB **`table` (MCOS) object**, which `scipy.io.loadmat` / `h5py` cannot
+deserialise directly. **The loader handles this automatically**:
+`extract_mcos_double_columns` in `src/load_bids.py` recovers the channel columns
+straight from the `.mat` file's `__function_workspace__` subsystem in pure Python
+— no MATLAB/Octave required — so the real fNIRS and fused branches work out of the
+box. `tools/convert_fnirs_octave.m` remains as an optional MATLAB/Octave fallback
+(it writes `*_nirs_converted.mat`, which the loader prefers if present).
