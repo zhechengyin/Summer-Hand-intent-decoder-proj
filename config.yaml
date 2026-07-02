@@ -1,0 +1,119 @@
+# =============================================================================
+# Neural Intent Decoder -- central configuration
+# =============================================================================
+# Every stage reads from this file so the pipeline is reproducible and there
+# are no magic numbers buried in the code. Values were chosen from the verified
+# ds004022 recording parameters (18-ch EEG @ 500 Hz, NIRx fNIRS @ 7.8125 Hz,
+# 4 imagined right-upper-limb actions).
+
+project: neural_intent_decoder
+seed: 42
+
+paths:
+  bids_root: data/ds004022       # where the OpenNeuro dataset is extracted
+  cache_dir: data/cache          # cached epochs / features (.npz)
+  results_dir: results
+  figures_dir: results/figures
+  metrics_dir: results/metrics
+
+# -----------------------------------------------------------------------------
+# Dataset / event coding
+# -----------------------------------------------------------------------------
+# ds004022 has NO events.tsv files. Labels live inside the EEGLAB .set event
+# struct (BrainVision markers "S  3".."S  6") and inside the fNIRS BBCI .mat
+# marker struct (mrk.toe codes 3..6). Both share the same order, verified from
+# the fNIRS mrk.clab names: ['Session Start','Trial Onset','Reach','Grasp',
+# 'Lift','Twist','Ready Onset','MI Start Onset','Rest Onset'].
+dataset:
+  task: motorimagery
+  classes: [reach, grasp, lift, twist]   # fixed order -> class ids 0,1,2,3
+
+  # EEG (BrainVision) marker strings. Matching is whitespace-insensitive, so
+  # "S  3", "S 3" and "3" all match. Give any aliases you observe with
+  #   `python main.py inspect`.
+  eeg_class_markers:
+    reach: ["S  3", "3"]
+    grasp: ["S  4", "4"]
+    lift:  ["S  5", "5"]
+    twist: ["S  6", "6"]
+  eeg_mi_onset_markers: ["S  8", "8"]     # "MI Start Onset" -> imagery begins
+
+  # fNIRS BBCI marker codes (mrk.toe, 1-based into mrk.clab)
+  fnirs_class_toe:
+    reach: 3
+    grasp: 4
+    lift:  5
+    twist: 6
+  fnirs_mi_onset_toe: 8
+
+# -----------------------------------------------------------------------------
+# EEG preprocessing + epoching
+# -----------------------------------------------------------------------------
+eeg:
+  l_freq: 1.0          # bandpass low edge (Hz)
+  h_freq: 40.0         # bandpass high edge (Hz)
+  notch: [60, 120]     # line noise + harmonic (Korea University -> 60 Hz)
+  resample: null       # e.g. 250 to downsample; null keeps 500 Hz
+  tmin: 0.0            # epoch start relative to MI-onset marker (s)
+  tmax: 5.0            # epoch end   relative to MI-onset marker (s) -> 5 s imagery
+  baseline: null       # e.g. [-0.5, 0.0]; null = no baseline correction
+  # Anchor epochs on the MI-onset marker when present, else on the class-cue
+  # marker plus this offset (fixation 3 s + cue 4 s + ready 3 s = 10 s).
+  fallback_onset_offset: 10.0
+  reject_uv: null      # peak-to-peak reject threshold in microvolts; null = off
+  picks: null          # null = all 18 channels; or a list e.g. [C3, C4, Cz]
+
+# -----------------------------------------------------------------------------
+# fNIRS preprocessing + epoching
+# -----------------------------------------------------------------------------
+# The hemodynamic response is slow (~5-8 s to peak), so we epoch a longer window
+# than for EEG and low-pass hard.
+fnirs:
+  tmin: -2.0           # includes a short pre-onset baseline
+  tmax: 15.0
+  l_freq: 0.01
+  h_freq: 0.2
+  ppf: 6.0             # partial pathlength factor for modified Beer-Lambert
+  baseline: [-2.0, 0.0]
+  source_detector_distance_cm: 3.0
+
+# -----------------------------------------------------------------------------
+# Feature extraction
+# -----------------------------------------------------------------------------
+features:
+  eeg_bands:
+    mu:   [8, 13]      # sensorimotor mu / alpha
+    beta: [13, 30]     # beta
+  eeg_window_sec: 1.0        # sub-window length for time-windowed bandpower
+  eeg_window_overlap: 0.5    # fraction overlap between sub-windows
+  eeg_log_power: true        # log-transform bandpower (stabilises variance)
+  fnirs_windows: 3           # split the response into N equal windows
+  fnirs_stats: [mean, peak, slope, auc]
+
+# -----------------------------------------------------------------------------
+# N1 -- neural evidence decoder (classifier)
+# -----------------------------------------------------------------------------
+model:
+  classifier: lda      # lda | logreg | svm | rf | gb
+  cv_folds: 5          # stratified K-fold for subject-specific evaluation
+
+# -----------------------------------------------------------------------------
+# N2 -- state-injected intent-to-command interpreter
+# -----------------------------------------------------------------------------
+n2:
+  confidence_threshold: 0.50   # min top-1 probability to act
+  margin_threshold: 0.15       # min gap between top-1 and top-2 probability
+  smoothing_window: 5          # majority vote / smoothing over recent steps
+  smoothing_min_agreement: 3   # votes required within the window to commit
+  wrist_limit_deg: 90          # safe rotation limit for TWIST
+  wrist_step_deg: 30           # rotation applied per accepted TWIST
+  arm_extend_step: 1           # discrete arm-extension increment
+  arm_raise_step: 1            # discrete arm-raise increment
+
+# -----------------------------------------------------------------------------
+# Time-domain replay / demo
+# -----------------------------------------------------------------------------
+replay:
+  windows_per_trial: 5   # slide N windows across each trial to feel "online"
+  step_seconds: 0.5      # spacing between successive N1 inferences (display)
+  animate: false         # true -> matplotlib animation; false -> CLI table
