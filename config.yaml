@@ -50,9 +50,11 @@ dataset:
 # EEG preprocessing + epoching
 # -----------------------------------------------------------------------------
 eeg:
-  l_freq: 1.0          # bandpass low edge (Hz)
-  h_freq: 40.0         # bandpass high edge (Hz)
+  l_freq: 1.0          # bandpass low edge (Hz). Broadband here so bandpower can
+  h_freq: 40.0         #   read mu+beta and FBCSP can re-filter per band. For a
+                       #   pure MI setup you may prefer 8-30 Hz.
   notch: [60, 120]     # line noise + harmonic (Korea University -> 60 Hz)
+  car: false           # common average reference (no EOG channels to drop here)
   resample: null       # e.g. 250 to downsample; null keeps 500 Hz
   tmin: 0.0            # epoch start relative to MI-onset marker (s)
   tmax: 5.0            # epoch end   relative to MI-onset marker (s) -> 5 s imagery
@@ -96,6 +98,28 @@ features:
 model:
   classifier: lda      # lda | logreg | svm | rf | gb
   cv_folds: 5          # stratified K-fold for subject-specific evaluation
+  n1_features: bandpower  # bandpower | fbcsp  (feature front-end for N1)
+
+# -----------------------------------------------------------------------------
+# Window sweep (find the best analysis window per modality)
+# -----------------------------------------------------------------------------
+# Windows are [start, end] seconds relative to imagery onset. EEG stays within
+# the 5 s imagery period; fNIRS windows are shifted/longer for the ~5 s
+# hemodynamic lag.
+sweep:
+  eeg_windows:   [[0.0, 5.0], [0.5, 4.5], [0.0, 4.0], [1.0, 5.0], [2.0, 5.0]]
+  fnirs_windows: [[0.0, 10.0], [2.0, 7.0], [3.0, 8.0], [4.0, 10.0], [5.0, 12.0]]
+
+# -----------------------------------------------------------------------------
+# FBCSP -- Filter Bank Common Spatial Pattern (EEG N1 front-end)
+# -----------------------------------------------------------------------------
+fbcsp:
+  bands: [[8, 12], [12, 16], [16, 20], [20, 24], [24, 30]]  # filter bank (Hz)
+  n_components: 2      # CSP pairs per one-vs-rest class (-> 2*n per band/class).
+                       #   Use 1 for very small per-subject data (less overfit).
+  n_select: 16         # top features kept by mutual-information selection
+  reg: 1.0e-5          # covariance regularisation (numerical stability)
+  filter_order: 4      # Butterworth order per band
 
 # -----------------------------------------------------------------------------
 # N2 -- state-injected intent-to-command interpreter

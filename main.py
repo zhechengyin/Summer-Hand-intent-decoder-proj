@@ -151,6 +151,27 @@ def cmd_all(cfg, args):
         run_replay(cfg, eeg, animate=args.animate, max_trials=args.max_trials)
 
 
+def cmd_sweep(cfg, args):
+    """Sweep analysis windows to find the best EEG/fNIRS decoding window."""
+    from src.window_sweep import run_sweep
+
+    root = resolve_path(cfg, "paths.bids_root")
+    if not root.exists():
+        print(f"Dataset not found at {root} (see data/README.md).", file=sys.stderr)
+        return
+    run_sweep(cfg, args.modality, subjects=args.subjects, name=args.classifier)
+
+
+def cmd_fbcsp(cfg, args):
+    """Evaluate the FBCSP N1 front-end on EEG (subject-specific + LOSO)."""
+    from src.evaluate import evaluate_fbcsp
+
+    eeg, _ = _build_epochs(cfg, args.subjects, use_cache=not args.no_cache)
+    if eeg is None:
+        return
+    evaluate_fbcsp(eeg, cfg, name=args.classifier, loso=not args.no_loso)
+
+
 # ---------------------------------------------------------------------------
 # argument parsing
 # ---------------------------------------------------------------------------
@@ -175,10 +196,12 @@ def build_parser():
                         help="trials to replay in the demo")
 
     sp = sub.add_parser("inspect"); sp.add_argument("--max-runs", type=int, default=2)
-    for name in ("preprocess", "evaluate", "demo", "smoke", "all"):
+    for name in ("preprocess", "evaluate", "demo", "smoke", "all", "fbcsp"):
         common(sub.add_parser(name))
     tr = sub.add_parser("train"); common(tr)
     tr.add_argument("--modality", default="eeg", choices=["eeg", "fnirs"])
+    sw = sub.add_parser("sweep"); common(sw)
+    sw.add_argument("--modality", default="eeg", choices=["eeg", "fnirs", "both"])
     return p
 
 
@@ -188,7 +211,7 @@ def main(argv=None):
     dispatch = {
         "inspect": cmd_inspect, "preprocess": cmd_preprocess, "train": cmd_train,
         "evaluate": cmd_evaluate, "demo": cmd_demo, "smoke": cmd_smoke,
-        "all": cmd_all,
+        "all": cmd_all, "sweep": cmd_sweep, "fbcsp": cmd_fbcsp,
     }
     dispatch[args.command](cfg, args)
 

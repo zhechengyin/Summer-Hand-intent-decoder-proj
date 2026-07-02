@@ -25,6 +25,7 @@ def preprocess_raw_eeg(raw, cfg: dict):
     notch = cfg_get(cfg, "eeg.notch", None)
     resample = cfg_get(cfg, "eeg.resample", None)
     picks = cfg_get(cfg, "eeg.picks", None)
+    car = bool(cfg_get(cfg, "eeg.car", False))
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -45,21 +46,31 @@ def preprocess_raw_eeg(raw, cfg: dict):
                 raw.notch_filter(freqs=notch, verbose="ERROR")
         raw.filter(l_freq=l_freq, h_freq=h_freq, fir_design="firwin",
                    verbose="ERROR")
+        # Common Average Reference: re-reference to the mean of all EEG channels.
+        # (This dataset has no EOG channels, so there is nothing extra to drop.)
+        if car:
+            raw.set_eeg_reference("average", projection=False, verbose="ERROR")
         if resample:
             raw.resample(float(resample), verbose="ERROR")
     return raw
 
 
 def epoch_eeg_run(raw, onsets_sec: np.ndarray, labels: np.ndarray,
-                  cfg: dict, subject: str, run: int) -> TrialEpochs | None:
-    """Cut labelled epochs from one preprocessed run."""
+                  cfg: dict, subject: str, run: int,
+                  tmin: float | None = None,
+                  tmax: float | None = None) -> TrialEpochs | None:
+    """Cut labelled epochs from one preprocessed run.
+
+    ``tmin``/``tmax`` override the config window (used by the window sweep to
+    build one wide epoch that is later cropped).
+    """
     import mne
 
     if len(labels) == 0:
         return None
     classes = cfg_get(cfg, "dataset.classes")
-    tmin = float(cfg_get(cfg, "eeg.tmin", 0.0))
-    tmax = float(cfg_get(cfg, "eeg.tmax", 5.0))
+    tmin = float(cfg_get(cfg, "eeg.tmin", 0.0)) if tmin is None else float(tmin)
+    tmax = float(cfg_get(cfg, "eeg.tmax", 5.0)) if tmax is None else float(tmax)
     baseline = cfg_get(cfg, "eeg.baseline", None)
     baseline = tuple(baseline) if baseline else None
     reject_uv = cfg_get(cfg, "eeg.reject_uv", None)
@@ -90,15 +101,17 @@ def epoch_eeg_run(raw, onsets_sec: np.ndarray, labels: np.ndarray,
 
 def build_eeg_epochs(cfg: dict, index: BidsIndex | None = None,
                      subjects: list[str] | None = None,
-                     cache: bool = True) -> TrialEpochs:
+                     cache: bool = True, tmin: float | None = None,
+                     tmax: float | None = None) -> TrialEpochs:
     """Load + preprocess + epoch every (subject, run) into one TrialEpochs.
 
     Results are cached to ``data/cache/eeg_epochs.npz`` and reused unless
-    ``cache=False``.
+    ``cache=False``. ``tmin``/``tmax`` override the config epoch window (the
+    window sweep passes a wide superset window and never caches it).
     """
-    # Only cache full-dataset builds; a subject-filtered build must not read or
-    # write the shared cache (it would otherwise serve stale/partial epochs).
-    cache = cache and subjects is None
+    # Only cache full-dataset builds with the default window; a subject-filtered
+    # or custom-window build must not read/write the shared cache.
+    cache = cache and subjects is None and tmin is None and tmax is None
     cache_path = resolve_path(cfg, "paths.cache_dir") / "eeg_epochs.npz"
     if cache and cache_path.exists():
         print(f"[eeg] loading cached epochs from {cache_path}")
@@ -116,7 +129,8 @@ def build_eeg_epochs(cfg: dict, index: BidsIndex | None = None,
         raw = load_eeg_raw(rf.eeg)
         raw = preprocess_raw_eeg(raw, cfg)
         onsets, labels = eeg_trial_onsets(raw, cfg)
-        te = epoch_eeg_run(raw, onsets, labels, cfg, rf.subject, rf.run)
+        te = epoch_eeg_run(raw, onsets, labels, cfg, rf.subject, rf.run,
+                           tmin=tmin, tmax=tmax)
         if te is not None:
             parts.append(te)
             print(f"[eeg] {rf.subject} run-{rf.run}: {te.n_trials} epochs")

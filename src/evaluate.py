@@ -79,39 +79,38 @@ def _safe_folds(y: np.ndarray, requested: int) -> int:
     return int(max(2, min(requested, counts.min())))
 
 
-def evaluate_subject_specific(fs: FeatureSet, cfg: dict, name: str | None = None):
-    """Stratified K-fold within each subject; returns (summary, y_true, y_pred)."""
+# --- generic CV cores (shared by bandpower FeatureSets and FBCSP epochs) ---
+def cv_subject_specific(X, y, subjects, classes, cfg, estimator_factory,
+                        modality: str, clf_label: str):
+    """Stratified K-fold within each subject. ``estimator_factory`` returns a
+    fresh unfitted estimator so nothing leaks across folds. ``X`` may be a 2-D
+    feature matrix or a 3-D epoch array (n, ch, time)."""
     from sklearn.model_selection import StratifiedKFold, cross_val_predict
 
-    from .train_n1 import build_pipeline
-
+    y = np.asarray(y)
+    subjects = np.asarray(subjects)
     folds = int(cfg_get(cfg, "model.cv_folds", 5))
     seed = int(cfg_get(cfg, "seed", 42))
-    per_subject = {}
-    all_true, all_pred = [], []
+    per_subject, all_true, all_pred = {}, [], []
 
-    for subj in sorted(set(fs.subjects.tolist())):
-        m = fs.subjects == subj
-        Xs, ys = fs.X[m], fs.y[m]
+    for subj in sorted(set(subjects.tolist())):
+        m = subjects == subj
+        Xs, ys = X[m], y[m]
         if len(np.unique(ys)) < 2:
             continue
         k = _safe_folds(ys, folds)
         skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=seed)
-        pipe = build_pipeline(cfg, name)
-        yp = cross_val_predict(pipe, Xs, ys, cv=skf)
-        per_subject[subj] = compute_metrics(ys, yp, fs.classes)
+        yp = cross_val_predict(estimator_factory(), Xs, ys, cv=skf)
+        per_subject[subj] = compute_metrics(ys, yp, classes)
         all_true.extend(ys.tolist())
         all_pred.extend(yp.tolist())
 
-    pooled = compute_metrics(np.array(all_true), np.array(all_pred), fs.classes)
+    pooled = compute_metrics(np.array(all_true), np.array(all_pred), classes)
     accs = [v["accuracy"] for v in per_subject.values()]
     baccs = [v["balanced_accuracy"] for v in per_subject.values()]
     summary = {
-        "protocol": "subject_specific_kfold",
-        "modality": fs.modality,
-        "classifier": name or cfg_get(cfg, "model.classifier", "lda"),
-        "pooled": pooled,
-        "per_subject": per_subject,
+        "protocol": "subject_specific_kfold", "modality": modality,
+        "classifier": clf_label, "pooled": pooled, "per_subject": per_subject,
         "mean_accuracy": float(np.mean(accs)) if accs else 0.0,
         "std_accuracy": float(np.std(accs)) if accs else 0.0,
         "mean_balanced_accuracy": float(np.mean(baccs)) if baccs else 0.0,
@@ -119,35 +118,47 @@ def evaluate_subject_specific(fs: FeatureSet, cfg: dict, name: str | None = None
     return summary, np.array(all_true), np.array(all_pred)
 
 
-def evaluate_loso(fs: FeatureSet, cfg: dict, name: str | None = None):
-    """Leave-one-subject-out cross-subject evaluation."""
+def cv_loso(X, y, subjects, classes, cfg, estimator_factory,
+            modality: str, clf_label: str):
+    """Leave-one-subject-out cross-subject evaluation (generic)."""
     from sklearn.model_selection import LeaveOneGroupOut, cross_val_predict
 
-    from .train_n1 import build_pipeline
-
-    subjects = fs.subjects
+    y = np.asarray(y)
+    subjects = np.asarray(subjects)
     if len(set(subjects.tolist())) < 2:
         return None, None, None
-    logo = LeaveOneGroupOut()
-    pipe = build_pipeline(cfg, name)
-    yp = cross_val_predict(pipe, fs.X, fs.y, groups=subjects, cv=logo)
-
-    per_subject = {}
-    for subj in sorted(set(subjects.tolist())):
-        m = subjects == subj
-        per_subject[subj] = compute_metrics(fs.y[m], yp[m], fs.classes)
-    pooled = compute_metrics(fs.y, yp, fs.classes)
+    yp = cross_val_predict(estimator_factory(), X, y, groups=subjects,
+                           cv=LeaveOneGroupOut())
+    per_subject = {subj: compute_metrics(y[subjects == subj],
+                                         yp[subjects == subj], classes)
+                   for subj in sorted(set(subjects.tolist()))}
+    pooled = compute_metrics(y, yp, classes)
     accs = [v["accuracy"] for v in per_subject.values()]
     summary = {
-        "protocol": "leave_one_subject_out",
-        "modality": fs.modality,
-        "classifier": name or cfg_get(cfg, "model.classifier", "lda"),
-        "pooled": pooled,
-        "per_subject": per_subject,
+        "protocol": "leave_one_subject_out", "modality": modality,
+        "classifier": clf_label, "pooled": pooled, "per_subject": per_subject,
         "mean_accuracy": float(np.mean(accs)) if accs else 0.0,
         "std_accuracy": float(np.std(accs)) if accs else 0.0,
     }
-    return summary, fs.y.copy(), yp
+    return summary, y.copy(), yp
+
+
+def evaluate_subject_specific(fs: FeatureSet, cfg: dict, name: str | None = None):
+    """Bandpower-FeatureSet wrapper around :func:`cv_subject_specific`."""
+    from .train_n1 import build_pipeline
+
+    clf = name or cfg_get(cfg, "model.classifier", "lda")
+    return cv_subject_specific(fs.X, fs.y, fs.subjects, fs.classes, cfg,
+                               lambda: build_pipeline(cfg, name), fs.modality, clf)
+
+
+def evaluate_loso(fs: FeatureSet, cfg: dict, name: str | None = None):
+    """Bandpower-FeatureSet wrapper around :func:`cv_loso`."""
+    from .train_n1 import build_pipeline
+
+    clf = name or cfg_get(cfg, "model.classifier", "lda")
+    return cv_loso(fs.X, fs.y, fs.subjects, fs.classes, cfg,
+                   lambda: build_pipeline(cfg, name), fs.modality, clf)
 
 
 # ---------------------------------------------------------------------------
@@ -263,3 +274,55 @@ def _write_comparison_csv(rows, path: Path) -> None:
                     "macro_f1"])
         for r in rows:
             w.writerow([r[0], r[1], f"{r[2]:.4f}", f"{r[3]:.4f}", f"{r[4]:.4f}"])
+
+
+# ---------------------------------------------------------------------------
+# FBCSP evaluation (operates on raw EEG epochs, not bandpower features)
+# ---------------------------------------------------------------------------
+def evaluate_fbcsp(epochs, cfg: dict, name: str | None = None,
+                   loso: bool = True) -> dict:
+    """Evaluate the FBCSP N1 on raw EEG epochs (subject-specific + LOSO).
+
+    FBCSP is fit *inside* every CV fold (it is supervised and cross-trial), so
+    this uses the generic cv cores with an FBCSP-pipeline factory.
+    """
+    from .fbcsp import build_fbcsp_pipeline
+
+    if epochs.modality != "eeg":
+        raise ValueError("FBCSP is defined for EEG epochs only")
+    metrics_dir = resolve_path(cfg, "paths.metrics_dir")
+    figures_dir = resolve_path(cfg, "paths.figures_dir")
+    metrics_dir.mkdir(parents=True, exist_ok=True)
+    figures_dir.mkdir(parents=True, exist_ok=True)
+
+    clf = name or cfg_get(cfg, "model.classifier", "lda")
+    factory = lambda: build_fbcsp_pipeline(cfg, epochs.sfreq, name)  # noqa: E731
+    print(f"\n=== Evaluating EEG FBCSP ({epochs.n_trials} trials, "
+          f"{epochs.n_channels} ch x {epochs.n_times} samp, clf={clf}) ===")
+
+    summary, _, _ = cv_subject_specific(epochs.X, epochs.y, epochs.subjects,
+                                        epochs.classes, cfg, factory,
+                                        "eeg_fbcsp", clf)
+    print(f"  subject-specific: acc={summary['mean_accuracy']:.3f} "
+          f"bal_acc={summary['mean_balanced_accuracy']:.3f} "
+          f"(chance={summary['pooled']['chance_level']:.2f})")
+    save_confusion_matrix(summary["pooled"]["confusion_matrix"], epochs.classes,
+                          figures_dir / "confusion_eeg_fbcsp_subject.png",
+                          "EEG FBCSP - subject-specific")
+    report = {"eeg_fbcsp_subject_specific": summary}
+
+    if loso:
+        lsummary, _, _ = cv_loso(epochs.X, epochs.y, epochs.subjects,
+                                 epochs.classes, cfg, factory, "eeg_fbcsp", clf)
+        if lsummary:
+            print(f"  LOSO:             acc={lsummary['mean_accuracy']:.3f}")
+            save_confusion_matrix(lsummary["pooled"]["confusion_matrix"],
+                                  epochs.classes,
+                                  figures_dir / "confusion_eeg_fbcsp_loso.png",
+                                  "EEG FBCSP - LOSO")
+            report["eeg_fbcsp_loso"] = lsummary
+
+    with open(metrics_dir / "metrics_fbcsp.json", "w", encoding="utf-8") as fh:
+        json.dump(report, fh, indent=2)
+    print(f"Metrics -> {metrics_dir/'metrics_fbcsp.json'}")
+    return report

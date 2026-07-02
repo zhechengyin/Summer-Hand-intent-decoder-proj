@@ -130,6 +130,8 @@ neural_intent_decoder/
     ├── preprocess_eeg.py   # Stage 2: notch/band-pass/epoch EEG
     ├── preprocess_fnirs.py # Stage 2: OD -> Beer-Lambert HbO/HbR -> epoch
     ├── feature_extraction.py # Stage 3: bandpower (EEG) + hemodynamic (fNIRS)
+    ├── fbcsp.py           # Filter Bank CSP front-end for the EEG N1 (leak-safe)
+    ├── window_sweep.py    # sweep analysis windows per modality, pick the best
     ├── fusion.py          # Stage 4: trial-aligned feature-level fusion
     ├── train_n1.py        # Stage 5: N1 decoder (probability output)
     ├── evaluate.py        # Stage 7: subject-specific + LOSO, metrics, figures
@@ -174,6 +176,11 @@ python main.py train --modality eeg
 # 6) time-domain N1 -> N2 -> avatar demo (add --animate for a gif)
 python main.py demo --max-trials 8
 
+# accuracy tuning:
+python main.py sweep --modality eeg     # find the best EEG analysis window
+python main.py sweep --modality fnirs   # fNIRS windows (accounts for HRF lag)
+python main.py fbcsp                     # Filter Bank CSP N1 (subject + LOSO)
+
 # everything on the real data
 python main.py all
 ```
@@ -207,6 +214,42 @@ become available.
 Pipeline (fit on train folds only); LOSO groups by subject; fusion aligns trials
 by UID. Expect **subject-specific ≫ LOSO** and real 4-class accuracy in the modest
 range (well above 0.25 but far from perfect) — same-limb MI is genuinely hard.
+
+## 7b. Accuracy techniques (window sweep + FBCSP)
+
+Two standard MI-BCI accuracy levers are built in.
+
+**Window sweep** (`python main.py sweep --modality eeg|fnirs|both`). The best
+analysis window is not obvious and is *modality-specific*: EEG mu/beta
+(de)synchronisation is strongest **during** imagery (0–5 s / 0.5–4.5 s), while
+fNIRS is hemodynamic and **lags** neural activity (response starts ~2 s, peaks
+~5–6 s), so fNIRS windows are shifted/longer (2–7 s, 3–8 s, 4–10 s). The sweep
+epochs one wide window, crops each candidate, and scores it; results land in
+`results/metrics/window_sweep_<modality>.csv` + a bar chart. You can also enable
+common-average reference with `eeg.car: true` in `config.yaml` (the dataset has
+no EOG channels, so there is nothing extra to remove).
+
+**FBCSP** (`python main.py fbcsp`). Filter Bank Common Spatial Pattern: band-pass
+into 8–12/12–16/16–20/20–24/24–30 Hz, learn **one-vs-rest CSP** spatial filters
+per band, take log-variance features, select the most informative by mutual
+information, then classify. CSP is supervised and cross-trial, so it is fit
+**inside every CV fold** (no leakage). Knobs live under `fbcsp:` in the config.
+
+**Honest finding on a single subject (sub-01, 120 trials).** With only one
+participant, neither lever is a magic bullet — 4-class *same-limb* MI is near the
+hard edge of EEG BCI:
+
+| Method | subject-specific acc | note |
+|---|---|---|
+| Bandpower + LDA, 0–5 s | 0.300 | baseline |
+| **Window sweep** (best = 1–5 s) | **0.317** | small real gain |
+| FBCSP (default) | ~0.21–0.28 | CSP overfits with so few trials |
+
+FBCSP typically pays off with **more training data** — run it across all 7
+subjects and especially under LOSO (6×120 training trials), and try
+`fbcsp.n_components: 1` for small per-subject data. The methods are validated on
+synthetic data (both reach 1.0 where the classes are cleanly separable), so the
+low single-subject numbers reflect **data difficulty, not implementation bugs**.
 
 ## 8. Limitations
 

@@ -76,6 +76,24 @@ class TrialEpochs:
             classes=list(self.classes),
         )
 
+    def crop(self, tmin: float, tmax: float) -> "TrialEpochs":
+        """Return a copy keeping only samples with tmin <= time <= tmax.
+
+        Used by the window sweep to test different analysis windows without
+        re-loading or re-filtering the raw recording.
+        """
+        mask = (self.times >= tmin - 1e-9) & (self.times <= tmax + 1e-9)
+        if not mask.any():
+            raise ValueError(f"crop [{tmin},{tmax}] outside epoch "
+                             f"[{self.times[0]:.2f},{self.times[-1]:.2f}]")
+        return TrialEpochs(
+            X=self.X[:, :, mask], y=self.y.copy(), sfreq=self.sfreq,
+            ch_names=list(self.ch_names), times=self.times[mask],
+            subjects=self.subjects.copy(), runs=self.runs.copy(),
+            uids=self.uids.copy(), modality=self.modality,
+            classes=list(self.classes),
+        )
+
     @staticmethod
     def concatenate(parts: Sequence["TrialEpochs"]) -> "TrialEpochs":
         parts = [p for p in parts if p is not None and p.n_trials > 0]
