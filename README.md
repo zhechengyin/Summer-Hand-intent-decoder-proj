@@ -212,8 +212,9 @@ become available.
 
 **Leakage safeguards:** non-overlapping trial epochs; the scaler lives inside the
 Pipeline (fit on train folds only); LOSO groups by subject; fusion aligns trials
-by UID. Expect **subject-specific ≫ LOSO** and real 4-class accuracy in the modest
-range (well above 0.25 but far from perfect) — same-limb MI is genuinely hard.
+by UID. On this dataset real 4-class accuracy lands **near chance** (0.24–0.26;
+see §7b) — same-limb MI is genuinely hard. The pipeline is validated on synthetic
+data where it reaches 1.0, so the low real numbers reflect data difficulty.
 
 ## 7b. Accuracy techniques (window sweep + FBCSP)
 
@@ -235,21 +236,47 @@ per band, take log-variance features, select the most informative by mutual
 information, then classify. CSP is supervised and cross-trial, so it is fit
 **inside every CV fold** (no leakage). Knobs live under `fbcsp:` in the config.
 
-**Honest finding on a single subject (sub-01, 120 trials).** With only one
-participant, neither lever is a magic bullet — 4-class *same-limb* MI is near the
-hard edge of EEG BCI:
+**Honest finding across all 7 subjects.** With the full dataset and proper
+held-out testing, 4-class *same-limb* motor imagery is **at chance** with these
+EEG features — and that is a property of the task, not a bug:
 
-| Method | subject-specific acc | note |
-|---|---|---|
-| Bandpower + LDA, 0–5 s | 0.300 | baseline |
-| **Window sweep** (best = 1–5 s) | **0.317** | small real gain |
-| FBCSP (default) | ~0.21–0.28 | CSP overfits with so few trials |
+| Method (all 7 subjects) | subject-specific | leave-one-run-out | LOSO |
+|---|---|---|---|
+| Bandpower + LDA (0–5 s)         | 0.239 | 0.224 | 0.256 |
+| Bandpower + LDA (best win 1–5 s) | 0.257 | — | — |
+| FBCSP (n_components = 1)         | 0.242 | 0.262 | 0.263 |
 
-FBCSP typically pays off with **more training data** — run it across all 7
-subjects and especially under LOSO (6×120 training trials), and try
-`fbcsp.n_components: 1` for small per-subject data. The methods are validated on
-synthetic data (both reach 1.0 where the classes are cleanly separable), so the
-low single-subject numbers reflect **data difficulty, not implementation bugs**.
+Chance = 0.25; the best single subject (sub-01) reaches only 0.30. A **binary
+class-pair probe** (chance = 0.50) shows even the easiest 2-class contrast is
+barely separable:
+
+```
+reach/grasp 0.44   reach/lift 0.49   reach/twist 0.50
+grasp/lift  0.51   grasp/twist 0.52  lift/twist  0.53
+```
+
+So there is little linearly-separable same-limb MI signal in these bandpower/CSP
+features. Adding data and *reducing model capacity* (fewer CSP components) nudge
+LOSO a hair above chance but do not change the picture. This matches the dataset's
+own framing — four movements of the **same** limb are far harder than the
+spatially separated left-vs-right-hand MI most BCIs use — and these are patients
+with orthopedic impairment, whose imagery may be weak or variable.
+
+**What could actually move the needle (honest options, not guarantees):**
+- **fNIRS fusion** — the hemodynamic channel is complementary; convert it
+  (`tools/convert_fnirs_octave.m`) and fuse. Biggest untapped lever *in this
+  dataset*.
+- **Imagery-vs-rest** decoding using the `Rest Onset` markers — a 2-class
+  move/rest contrast is usually far more decodable and would confirm the pipeline
+  extracts real signal when a real contrast exists.
+- **Riemannian / tangent-space** covariance features (`pyriemann`) sometimes beat
+  bandpower/CSP (keep expectations modest given the binary probe).
+- Treat this specific 4-class same-limb decode as near the dataset's ceiling and
+  report it honestly.
+
+The pipeline itself is correct: on synthetic data with separable classes both
+bandpower and FBCSP reach 1.0, so the low real numbers reflect **data difficulty,
+not implementation bugs**.
 
 ## 8. Limitations
 

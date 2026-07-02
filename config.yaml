@@ -115,9 +115,11 @@ sweep:
 # -----------------------------------------------------------------------------
 fbcsp:
   bands: [[8, 12], [12, 16], [16, 20], [20, 24], [24, 30]]  # filter bank (Hz)
-  n_components: 2      # CSP pairs per one-vs-rest class (-> 2*n per band/class).
-                       #   Use 1 for very small per-subject data (less overfit).
-  n_select: 16         # top features kept by mutual-information selection
+  # Capacity knobs -- the classical-ML analog of "fewer layers". Lower = less
+  # overfitting on small per-subject data. With lots of data (e.g. LOSO across
+  # all subjects) you can raise n_components to 2 and n_select to ~20.
+  n_components: 1      # CSP pairs per one-vs-rest class (-> 2*n filters/band/class)
+  n_select: 12         # top features kept by mutual-information selection
   reg: 1.0e-5          # covariance regularisation (numerical stability)
   filter_order: 4      # Butterworth order per band
 

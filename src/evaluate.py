@@ -161,6 +161,53 @@ def evaluate_loso(fs: FeatureSet, cfg: dict, name: str | None = None):
                    lambda: build_pipeline(cfg, name), fs.modality, clf)
 
 
+def cv_leave_one_run_out(X, y, subjects, runs, classes, cfg, estimator_factory,
+                         modality: str, clf_label: str):
+    """Within each subject, hold out one whole RUN as test and train on the
+    others (rotating). This is the most intuitive "keep a session for testing"
+    protocol and, because train/test come from different runs, it is immune to
+    within-run/adjacent-window leakage."""
+    from sklearn.model_selection import LeaveOneGroupOut, cross_val_predict
+
+    y = np.asarray(y)
+    subjects = np.asarray(subjects)
+    runs = np.asarray(runs)
+    per_subject, all_true, all_pred = {}, [], []
+    for subj in sorted(set(subjects.tolist())):
+        m = subjects == subj
+        Xs, ys, rs = X[m], y[m], runs[m]
+        if len(set(rs.tolist())) < 2:      # need >=2 runs to hold one out
+            continue
+        yp = cross_val_predict(estimator_factory(), Xs, ys, groups=rs,
+                               cv=LeaveOneGroupOut())
+        per_subject[subj] = compute_metrics(ys, yp, classes)
+        all_true.extend(ys.tolist())
+        all_pred.extend(yp.tolist())
+
+    if not all_true:
+        return None, None, None
+    pooled = compute_metrics(np.array(all_true), np.array(all_pred), classes)
+    accs = [v["accuracy"] for v in per_subject.values()]
+    baccs = [v["balanced_accuracy"] for v in per_subject.values()]
+    summary = {
+        "protocol": "leave_one_run_out", "modality": modality,
+        "classifier": clf_label, "pooled": pooled, "per_subject": per_subject,
+        "mean_accuracy": float(np.mean(accs)) if accs else 0.0,
+        "std_accuracy": float(np.std(accs)) if accs else 0.0,
+        "mean_balanced_accuracy": float(np.mean(baccs)) if baccs else 0.0,
+    }
+    return summary, np.array(all_true), np.array(all_pred)
+
+
+def evaluate_loro(fs: FeatureSet, cfg: dict, name: str | None = None):
+    """Bandpower-FeatureSet wrapper around :func:`cv_leave_one_run_out`."""
+    from .train_n1 import build_pipeline
+
+    clf = name or cfg_get(cfg, "model.classifier", "lda")
+    return cv_leave_one_run_out(fs.X, fs.y, fs.subjects, fs.runs, fs.classes, cfg,
+                                lambda: build_pipeline(cfg, name), fs.modality, clf)
+
+
 # ---------------------------------------------------------------------------
 # N1-only vs N1+N2 behavioural comparison
 # ---------------------------------------------------------------------------
@@ -218,7 +265,8 @@ def compare_n1_vs_n2(fs: FeatureSet, cfg: dict, name: str | None = None) -> dict
 # Top-level driver
 # ---------------------------------------------------------------------------
 def evaluate_all(feature_sets: dict[str, FeatureSet], cfg: dict,
-                 name: str | None = None, loso: bool = True) -> dict:
+                 name: str | None = None, loso: bool = True,
+                 loro: bool = True) -> dict:
     """Evaluate every available modality and write metrics + figures."""
     metrics_dir = resolve_path(cfg, "paths.metrics_dir")
     figures_dir = resolve_path(cfg, "paths.figures_dir")
@@ -241,6 +289,20 @@ def evaluate_all(feature_sets: dict[str, FeatureSet], cfg: dict,
         comparison_rows.append((mode, "subject", summary["mean_accuracy"],
                                 summary["mean_balanced_accuracy"],
                                 summary["pooled"]["macro_f1"]))
+
+        if loro:
+            rsummary, _, _ = evaluate_loro(fs, cfg, name)
+            if rsummary:
+                print(f"  leave-one-run-out: acc={rsummary['mean_accuracy']:.3f} "
+                      f"bal_acc={rsummary['mean_balanced_accuracy']:.3f}")
+                save_confusion_matrix(rsummary["pooled"]["confusion_matrix"],
+                                      fs.classes,
+                                      figures_dir / f"confusion_{mode}_loro.png",
+                                      f"{mode} - leave-one-run-out")
+                report[f"{mode}_leave_one_run_out"] = rsummary
+                comparison_rows.append((mode, "loro", rsummary["mean_accuracy"],
+                                        rsummary["mean_balanced_accuracy"],
+                                        rsummary["pooled"]["macro_f1"]))
 
         if loso:
             lsummary, lyt, lyp = evaluate_loso(fs, cfg, name)
@@ -310,6 +372,17 @@ def evaluate_fbcsp(epochs, cfg: dict, name: str | None = None,
                           figures_dir / "confusion_eeg_fbcsp_subject.png",
                           "EEG FBCSP - subject-specific")
     report = {"eeg_fbcsp_subject_specific": summary}
+
+    rsummary, _, _ = cv_leave_one_run_out(epochs.X, epochs.y, epochs.subjects,
+                                          epochs.runs, epochs.classes, cfg,
+                                          factory, "eeg_fbcsp", clf)
+    if rsummary:
+        print(f"  leave-one-run-out: acc={rsummary['mean_accuracy']:.3f}")
+        save_confusion_matrix(rsummary["pooled"]["confusion_matrix"],
+                              epochs.classes,
+                              figures_dir / "confusion_eeg_fbcsp_loro.png",
+                              "EEG FBCSP - leave-one-run-out")
+        report["eeg_fbcsp_leave_one_run_out"] = rsummary
 
     if loso:
         lsummary, _, _ = cv_loso(epochs.X, epochs.y, epochs.subjects,

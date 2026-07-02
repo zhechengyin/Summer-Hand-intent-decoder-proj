@@ -104,7 +104,7 @@ def cmd_evaluate(cfg, args):
     if eeg is None and fnirs is None:
         return
     sets = build_feature_sets(cfg, eeg, fnirs)
-    evaluate_all(sets, cfg, loso=not args.no_loso)
+    evaluate_all(sets, cfg, loso=not args.no_loso, loro=not args.no_loro)
 
 
 def cmd_demo(cfg, args):
@@ -130,7 +130,7 @@ def cmd_smoke(cfg, args):
 
     print("\n>> Building features and evaluating (EEG / fNIRS / fused) ...")
     sets = build_feature_sets(cfg, eeg, fnirs)
-    evaluate_all(sets, cfg, loso=not args.no_loso)
+    evaluate_all(sets, cfg, loso=not args.no_loso, loro=not args.no_loro)
 
     print("\n>> Running the time-domain N1->N2->avatar replay ...")
     run_replay(cfg, eeg, animate=args.animate, max_trials=args.max_trials)
@@ -146,7 +146,7 @@ def cmd_all(cfg, args):
     if eeg is None and fnirs is None:
         return
     sets = build_feature_sets(cfg, eeg, fnirs)
-    evaluate_all(sets, cfg, loso=not args.no_loso)
+    evaluate_all(sets, cfg, loso=not args.no_loso, loro=not args.no_loro)
     if eeg is not None:
         run_replay(cfg, eeg, animate=args.animate, max_trials=args.max_trials)
 
@@ -190,6 +190,8 @@ def build_parser():
                         help="ignore cached epochs and rebuild")
         sp.add_argument("--no-loso", action="store_true",
                         help="skip leave-one-subject-out")
+        sp.add_argument("--no-loro", action="store_true",
+                        help="skip leave-one-run-out")
         sp.add_argument("--animate", action="store_true",
                         help="render the replay as a gif")
         sp.add_argument("--max-trials", type=int, default=8,
