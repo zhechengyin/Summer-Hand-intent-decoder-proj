@@ -493,6 +493,118 @@ Decision: keep mu+beta/all-metrics/PLS(8) as the connectivity model of record;
 keep Riemannian tangent as the go-to for lateralized MI. Deep nets parked until
 a transfer/pretraining path (MIRepNet/MIND) or a larger dataset is available.
 
+### LOG-014 - Cross-Domain Validation on Consumer EEG (Muse2, safetyai repo)
+
+Question: does our best pipeline generalise to a totally different device/task
+(4-channel Muse2 consumer EEG, eye/blink/idle states) in the local safetyai
+StreamAdapt repo?
+
+Method: new probes `tools/muse_probe.py` (root single-session recordings) and
+`tools/cursor_probe.py` (CursorSelectionData, 4 subjects x 4 classes
+background/blink/left/right x5 recordings -> proper leave-one-RECORDING-out).
+EOG is low-frequency so the tangent front end uses a broadband 1-40 Hz filter
+(not the 8-30 MI band). Chance 0.25.
+
+Artifacts: `tools/muse_probe.py`, `tools/cursor_probe.py`,
+`results/metrics/muse_probe_Alex.json`, `results/metrics/cursor_probe_all.json`.
+
+Results:
+- Root Alex 4-class (single session/class): tangent+logreg chrono 0.847;
+  tangent + connectivity[plv+imcoh+wpli] multiview chrono 0.889 (best). k-fold
+  optimistic ~0.90-0.93 but flagged as leaky (one recording/class).
+- CursorSelectionData ALL 4 subjects, leave-one-recording-out (leakage-free):
+  Riemannian tangent 0.767 LORO (0.807 subj) > tangent+connectivity 0.734 >
+  connectivity alone 0.550. Chance 0.25.
+
+Interpretation: pipeline transfers cleanly to 4-ch consumer EEG (~0.77
+leakage-free). Tangent geometry captures the EOG amplitude/spatial structure;
+connectivity is weak alone (phase coupling is not the EOG signal) and, under the
+rigorous protocol, dilutes tangent (mirrors the ds004022 early-concat finding).
+The single-session multiview gain was a small-sample effect.
+
+### LOG-015 - Two-Stage Identify-Then-Decode Router
+
+Question: exploit "Riemannian identifies the subject almost perfectly" -- use a
+Stage-1 subject-ID router, then Stage-2 that subject's own decoder. Does it beat
+a pooled model when identity is unknown at test time?
+
+Method: `tools/two_stage.py`. Cohort-level leave-one-run-out. Stage 1 = tangent
+-> logreg -> subject id; Stage 2 = predicted subject's LDA class decoder. Compare
+pooled (ignore id) / two-stage (predicted route) / oracle (true route = ceiling).
+
+Artifacts: `tools/two_stage.py`, `results/metrics/two_stage_{cursor,eegmmidb,ds004022}.json`.
+
+Results:
+
+| Dataset (chance) | Stage-1 subj-ID | pooled | two-stage | oracle |
+| --- | ---: | ---: | ---: | ---: |
+| cursor 4-class, 4 subj (0.25) | 0.786 | 0.637 | 0.695 | 0.769 |
+| eegmmidb L/R, 10 subj (0.50) | 1.000 | 0.569 | 0.609 | 0.609 |
+| ds004022 same-limb, 7 subj (0.25) | 1.000 | 0.266 | 0.260 | 0.260 |
+
+Interpretation: Stage-1 subject-ID is excellent (1.00 on both MI datasets, 0.79
+on the harder leave-one-recording-out Muse case). The router HELPS exactly when
+per-subject decoders beat a pooled one, bounded by (oracle - pooled) and scaled
+by ID accuracy: cursor +5.8, eegmmidb +4.0 (==oracle since ID perfect). On
+ds004022 routing is perfect but there is no per-subject class advantage to
+capture (class signal absent) -- pooled is marginally better. A genuinely useful
+technique for unknown-identity deployment on decodable tasks; validates turning
+the subject-separation finding into accuracy.
+
+### LOG-016 - WAY-EEG-GAL Grasp-and-Lift: Top-3 Techniques + Activation/Optimizer Study
+
+Question: how do our top-3 techniques do on a 3rd, richer dataset (WAY-EEG-GAL,
+32-ch EEG @ 500 Hz, grasp-and-lift), and which activation/optimizer is best for
+the neural technique?
+
+Method: downloaded participants P1-P3 from figshare collection 988376 (each an
+~800 MB zip: HS/WS mat files + AllLifts). Parser `tools/way_gal_probe.py` reads
+per-trial windowed EEG from WS_P*_S*.mat (ws.win(n).eeg, .eeg_t, .LEDon,
+.weight, .surf). Two tasks: move-vs-rest (peri-LED vs pre-LED baseline, chance
+0.50, positive control) and weight (165/330/660 g, chance 0.33, hard). Weight
+restricted to weight-VARYING series (surface-varying series hold weight constant
+-> would confound). Subject-specific K-fold + leave-one-SERIES-out. Techniques:
+(1) Riemannian tangent + LDA, (2) connectivity[plv+imcoh+wpli] -> PLS(8) -> LDA,
+(3) MLP on tangent features (AdamW) sweeping activation.
+
+Artifacts: `tools/way_gal_probe.py`, `results/metrics/way_gal_{move_rest,weight}.json`.
+
+Results (P1+P2+P3, per-subject averaged):
+
+move-vs-rest (chance 0.50, 1764 trials):
+| Technique | subj | LORO |
+| --- | ---: | ---: |
+| MLP tangent (relu/leaky_relu, AdamW) | 0.832 | 0.830 |
+| MLP tangent (gelu / silu / elu / tanh) | 0.820-0.829 | 0.820-0.829 |
+| Connectivity -> PLS -> LDA | 0.731 | 0.722 |
+| Riemannian tangent + LDA | 0.652 | 0.561 |
+
+weight (chance 0.33, 678 trials, weight-varying series):
+| Technique | subj | LORO (bal) |
+| --- | ---: | ---: |
+| Connectivity -> PLS -> LDA | 0.360 | 0.370 (0.358) |
+| MLP tangent (silu) | 0.355 | 0.351 (0.327) |
+| Riemannian tangent + LDA | 0.330 | 0.301 (0.292) |
+
+Interpretation:
+- Positive control is strongly decodable: MLP on tangent ~0.83 LORO, connectivity
+  0.72. Pipeline extracts real movement signal on a 3rd device/dataset.
+- Weight (fine intent parameter) is ~chance (0.33-0.37) across all techniques --
+  same lesson as same-limb MI: gross movement easy, subtle intent parameters
+  hard. Honest and consistent.
+- The MLP hugely out-generalises tangent+LDA on the strong task (LORO 0.830 vs
+  0.561): with abundant high-SNR signal the neural head wins -- opposite of the
+  tiny MI datasets where deep nets lost. Deep nets pay off only with enough signal.
+- Activation study (AdamW throughout): all within ~1% (relu/leaky_relu 0.832 ~
+  gelu 0.829 ~ silu 0.825 ~ elu/tanh 0.820). ReLU/LeakyReLU edge GELU by noise;
+  GELU is a fine default. Optimizer AdamW (decoupled weight decay) with lr 1e-3,
+  wd 1e-3, hidden [128,64], dropout 0.4, early stop -- solid defaults; activation
+  is not where the accuracy lives. Weight task is signal-limited, not
+  hyperparameter-limited.
+
+Note: a TCN+GRU sequence model was also added (`src/tcn_gru.py`,
+`tools/tcn_gru_bench.py`); results logged separately once complete.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
