@@ -433,6 +433,66 @@ classical/geometric pipeline is the right tool at this data scale; a transformer
 would only be justified with a much larger dataset or transfer/pretraining
 (e.g., the deferred MIRepNet / MIND directions).
 
+### LOG-013 - Connectivity Band/Metric Sweep + 10-Subject Benchmark
+
+Question: (a) can a band/metric sweep improve the connectivity -> PLS model of
+record? (b) does the architecture ranking hold with more subjects?
+
+Method:
+- `py tools/next_experiments.py --exp connsweep` : sweep frequency band sets and
+  metric subsets feeding conn -> PLS(k) -> LDA on ds004022 (fused).
+- `py tools/architecture_bench.py --dataset eegmmidb --subjects 10` : re-run the
+  classical-vs-deep benchmark with 10 subjects (450 trials) instead of 5. Added
+  robustness (skip subjects with bad runs) and a --subjects flag.
+
+Artifacts:
+- `results/metrics/next_connsweep.json`
+- `results/metrics/architecture_bench_eegmmidb.json` (now 10 subjects)
+
+Connectivity band/metric sweep, ds004022 (conn -> PLS(8) -> LDA, chance 0.25):
+
+| Band set / metrics | subj | LORO |
+| --- | ---: | ---: |
+| mu+beta [8-13,13-30] all 3 metrics | 0.272 | **0.295** |
+| fine [8-13,13-20,20-30] all 3 metrics | 0.251 | 0.279 |
+| beta [13-30] all 3 | 0.264 | 0.268 |
+| high-beta [20-30] all 3 | 0.264 | 0.261 |
+| low-beta [13-20] all 3 | 0.256 | 0.261 |
+| mu [8-13] all 3 | 0.222 | 0.257 |
+| fine [plv+wpli] | 0.254 | 0.290 |
+| fine [wpli] | 0.261 | 0.286 |
+| fine [plv] / [imcoh] | 0.245 / 0.230 | 0.264 / 0.262 |
+| fine all -> PLS(4/12/16) | ~0.23-0.25 | 0.278 / 0.270 / 0.278 |
+
+-> The existing config (mu+beta, all 3 metrics, PLS(8)) is confirmed OPTIMAL;
+nothing in the sweep beat LORO 0.2954. Two-band mu+beta beats the 3-band fine
+split (finer split adds dims PLS can't compress as cleanly). No change to the
+model of record.
+
+Architecture benchmark, ds004362 left/right MI, 10 subjects / 450 trials
+(EEG-only, chance 0.50):
+
+| Model | subject-CV | LORO |
+| --- | ---: | ---: |
+| Riemannian tangent + logreg | 0.629 | **0.642** |
+| EEGNet-style CNN | 0.533 | 0.569 |
+| Connectivity PLV+imcoh+wPLI | 0.576 | 0.558 |
+| EEG Conformer (transformer) | 0.516 | 0.556 |
+
+Interpretation: with 2x the subjects the ranking holds and is more trustworthy.
+Riemannian tangent remains clearly best (0.64 LORO). The deep nets improved
+slightly with more data (CNN LORO 0.569 now edges connectivity) and the
+transformer's LORO caught up to the CNN/connectivity cluster, but neither
+approaches Riemannian, and the transformer is still weakest on subject-CV
+(0.516). Confirms: at this data scale the classical/geometric pipeline wins;
+deep nets would need far more data (their BCI IV-2a SOTA uses ~10x trials).
+The earlier 5-subject Riemannian number (0.707) was optimistic; 0.64 on 10
+subjects is the more honest estimate.
+
+Decision: keep mu+beta/all-metrics/PLS(8) as the connectivity model of record;
+keep Riemannian tangent as the go-to for lateralized MI. Deep nets parked until
+a transfer/pretraining path (MIRepNet/MIND) or a larger dataset is available.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name

@@ -11,10 +11,10 @@ Last updated: 2026-07-06
 - Current state: real-data decoding is near chance. Best evidence so far is a
   small Riemannian benefit, not a solved decoder.
 - Positive-control dataset: OpenNeuro ds004362 (PhysioNet eegmmidb) left/right
-  hand MI (chance 0.50). Our Riemannian tangent front end hits 0.71 LORO there
-  (LOG-011), confirming the pipeline extracts real MI signal when a decodable
-  contrast exists -- ds004022 near-chance is task difficulty, not a bug. Probe:
-  `tools/eegmmidb_probe.py`.
+  hand MI (chance 0.50). Our Riemannian tangent front end hits 0.64 LORO there
+  on 10 subjects (LOG-011/013), confirming the pipeline extracts real MI signal
+  when a decodable contrast exists -- ds004022 near-chance is task difficulty,
+  not a bug. Probe: `tools/eegmmidb_probe.py`.
 
 ## Standing Modeling Policy
 
@@ -81,8 +81,8 @@ against our best front ends under the identical CV (LOG-012). On BOTH datasets
 the deep nets FAILED to beat the classical/geometric models, and the transformer
 was weakest:
 
-- ds004362 left/right MI (chance 0.50): Riemannian 0.707 > connectivity 0.573 >
-  CNN 0.551 > Transformer 0.507 (LORO).
+- ds004362 left/right MI (chance 0.50, 10 subjects): Riemannian 0.642 > CNN
+  0.569 > connectivity 0.558 > Transformer 0.556 (LORO).
 - ds004022 same-limb (chance 0.25): connectivity->PLS 0.295 > Riemannian 0.272 >
   CNN 0.258 > Transformer 0.232 (LORO).
 

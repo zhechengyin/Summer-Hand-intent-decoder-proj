@@ -617,6 +617,30 @@ def main():
             do(f"late-fusion conn({w:g})+tangent + fnirs",
                late_fusion_fold(sfreq, bands, mets, None, w_conn=w))
 
+    if "connsweep" in args.exp:
+        print("\n--- E7 connectivity band/metric sweep (conn -> PLS(8) -> LDA) ---")
+        band_sets = {
+            "mu[8-13]": [(8, 13)],
+            "lowbeta[13-20]": [(13, 20)],
+            "highbeta[20-30]": [(20, 30)],
+            "beta[13-30]": [(13, 30)],
+            "mu+beta[8-13,13-30]": [(8, 13), (13, 30)],
+            "fine[8-13,13-20,20-30]": [(8, 13), (13, 20), (20, 30)],
+        }
+        allm = ["plv", "imcoh", "wpli"]
+        for name, bands in band_sets.items():
+            do(f"conn {name} [plv+imcoh+wpli] -> PLS(8)",
+               conn_pls_fold(sfreq, bands, allm, None, 8, "lda"))
+        # metric-subset check on the richest band set
+        fine = band_sets["fine[8-13,13-20,20-30]"]
+        for mets in (["wpli"], ["plv"], ["imcoh"], ["plv", "wpli"]):
+            do(f"conn fine [{'+'.join(mets)}] -> PLS(8)",
+               conn_pls_fold(sfreq, fine, mets, None, 8, "lda"))
+        # component check on the richest band set (all metrics)
+        for k in (4, 12, 16):
+            do(f"conn fine [all] -> PLS({k})",
+               conn_pls_fold(sfreq, fine, allm, None, k, "lda"))
+
     if "adversarial" in args.exp:
         print("\n--- E5 subject-adversarial (LOSO diagnostic) ---")
         adv = run_adversarial(eeg, fnirs_X, cfg, lambda_adv=1.0, epochs=200,

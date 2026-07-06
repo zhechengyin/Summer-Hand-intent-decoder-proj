@@ -90,11 +90,18 @@ def build_epochs(subjects):
     Xs, ys, subs, runs, uids = [], [], [], [], []
     ref_ch = None
     for subj in subjects:
-        for run in IMAGERY_FIST_RUNS:
-            X, y, ch, sf, uid = _load_run(subj, run)
+        try:
+            loaded = [(_load_run(subj, run), run) for run in IMAGERY_FIST_RUNS]
+        except Exception as e:                       # skip subjects with bad runs
+            print(f"  [skip {subj}] {e}", flush=True)
+            continue
+        for (X, y, ch, sf, uid), run in loaded:
             if ref_ch is None:
                 ref_ch = ch
-            assert ch == ref_ch, "channel mismatch across runs"
+            if ch != ref_ch or abs(sf - SFREQ) > 1e-6:
+                print(f"  [skip {subj} run-{run}] channel/sfreq mismatch",
+                      flush=True)
+                continue
             Xs.append(X)
             ys.append(y)
             subs.extend([subj] * len(y))

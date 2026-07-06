@@ -54,10 +54,10 @@ def run(eeg, fnirs_X, cfg, models):
     return rows
 
 
-def bench_eegmmidb(cfg):
+def bench_eegmmidb(cfg, n_subjects=5):
     from tools.eegmmidb_probe import SFREQ, build_epochs
     nx.CLASSES = ["left", "right"]
-    subjects = [f"sub-{i:03d}" for i in range(1, 6)]
+    subjects = [f"sub-{i:03d}" for i in range(1, n_subjects + 1)]
     eeg = build_epochs(subjects)
     fn0 = np.zeros((eeg.n_trials, 0), dtype=np.float64)
     bands = [(8, 13), (13, 30)]
@@ -107,10 +107,12 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--dataset", choices=["eegmmidb", "ds004022"],
                     required=True)
+    ap.add_argument("--subjects", type=int, default=5,
+                    help="eegmmidb: number of subjects (sub-001..)")
     args = ap.parse_args()
     cfg = load_config(None)
     if args.dataset == "eegmmidb":
-        _, rows = bench_eegmmidb(cfg)
+        _, rows = bench_eegmmidb(cfg, n_subjects=args.subjects)
         chance = 0.5
     else:
         _, rows = bench_ds004022(cfg)
