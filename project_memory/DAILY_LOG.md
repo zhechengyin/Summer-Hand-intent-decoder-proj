@@ -602,8 +602,30 @@ Interpretation:
   is not where the accuracy lives. Weight task is signal-limited, not
   hyperparameter-limited.
 
-Note: a TCN+GRU sequence model was also added (`src/tcn_gru.py`,
-`tools/tcn_gru_bench.py`); results logged separately once complete.
+### LOG-017 - TCN+GRU Sequence Model on WAY-EEG-GAL
+
+Question: does a Temporal Convolutional Network + GRU (dilated causal conv ->
+GRU -> head) on raw EEG beat the feature-based techniques?
+
+Method: `src/tcn_gru.py` (spatial pointwise mix -> dilated causal TCN residual
+blocks, dilations 1/2/4/8 -> GRU -> linear head), same trainer recipe (decimate
+/5, AdamW, early stop). `tools/tcn_gru_bench.py`. Run on P1, both tasks.
+
+Artifacts: `src/tcn_gru.py`, `tools/tcn_gru_bench.py`,
+`results/metrics/way_gal_tcngru_P1.json`.
+
+Results (P1):
+- move-vs-rest: subj 0.944 / LORO 0.908  (~900 s/run)
+- weight:       subj 0.381 / LORO 0.319 (bal 0.285)  -- near chance
+- params: 65,378 (vs MLP-on-tangent 76,098)
+
+Interpretation: TCN+GRU is competitive (marginally higher subj-CV 0.944 vs the
+MLP's 0.940) but SLIGHTLY WORSE on the honest LORO (0.908 vs 0.935), at ~30x the
+compute (sequential conv+recurrence over 150 time steps vs an MLP on a 528-dim
+tangent vector). Fewer params yet far slower -- cost is sequential compute, not
+parameter count. Near chance on weight like everything else. The sophisticated
+sequence model does NOT beat the tiny tangent+MLP: feature-based geometry + a
+small head remains the right tool at this data scale.
 
 ## Entry Template
 
