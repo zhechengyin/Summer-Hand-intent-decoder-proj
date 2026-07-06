@@ -8,6 +8,7 @@ venv/
 
 # Dataset (large, downloaded separately from OpenNeuro) + caches
 data/ds004022/
+data/ds004362/
 data/cache/
 *.set
 *.fdt

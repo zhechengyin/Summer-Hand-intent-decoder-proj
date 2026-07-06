@@ -51,7 +51,7 @@ Patients with Orthopedic Impairment"* (Lee et al., CC0).
    `scipy`/`h5py` cannot deserialise. The loader recovers the channel columns
    **directly from the `.mat` subsystem in pure Python**
    (`extract_mcos_double_columns` in `src/load_bids.py`) — no MATLAB/Octave
-   needed — so the real fNIRS and fused branches work out of the box.
+   needed — so the real fused EEG+fNIRS branch works out of the box.
    (`tools/convert_fnirs_octave.m` remains as a fallback.)
 
 See [`data/README.md`](data/README.md) for the download options and the caveat.
@@ -74,10 +74,12 @@ Time-domain windows → **probability vector** over the four actions, plus a
 { "reach": 0.10, "grasp": 0.72, "lift": 0.08, "twist": 0.10 }
 ```
 Baselines (small dataset ⇒ classical first): LDA (default), Logistic Regression,
-SVM, Random Forest, Gradient Boosting (XGBoost optional). Each lives inside a
+SVM, Random Forest, Gradient Boosting (XGBoost optional), plus a simple optional
+PyTorch GELU MLP (`--classifier gelu_nn`). Each lives inside a
 `StandardScaler → classifier` **Pipeline** so scaling is fit on training folds
-only. An optional temporal-CNN is *proposed* (`build_torch_cnn`) but off by
-default.
+only. Small fused neural experiments are available explicitly:
+`python main.py temporal-cnn`, `python main.py snn`,
+`python main.py riemannian-snn`, and `python main.py windowed-riemannian-snn`.
 
 ### N2 — State-Injected Intent-to-Command Interpreter (`src/mini_ai_spine_n2.py`)
 Takes N1's probabilities **and the current avatar state** and returns a safe
@@ -131,11 +133,14 @@ neural_intent_decoder/
     ├── preprocess_eeg.py   # Stage 2: notch/band-pass/epoch EEG
     ├── preprocess_fnirs.py # Stage 2: OD -> Beer-Lambert HbO/HbR -> epoch
     ├── feature_extraction.py # Stage 3: bandpower (EEG) + hemodynamic (fNIRS)
-    ├── fbcsp.py           # Filter Bank CSP front-end for the EEG N1 (leak-safe)
+    ├── fbcsp.py           # EEG FBCSP front-end fused with fNIRS
+    ├── riemannian.py      # EEG tangent-space covariance front-end fused with fNIRS
+    ├── temporal_cnn.py    # raw EEG temporal CNN branch fused with fNIRS
+    ├── snn.py             # bare LIF SNN branch fused with fNIRS
     ├── window_sweep.py    # sweep analysis windows per modality, pick the best
     ├── fusion.py          # Stage 4: trial-aligned feature-level fusion
     ├── train_n1.py        # Stage 5: N1 decoder (probability output)
-    ├── evaluate.py        # Stage 7: subject-specific + LOSO, metrics, figures
+    ├── evaluate.py        # Stage 7: subject-specific + leave-one-run-out metrics
     ├── state.py           # Stage 6: ProstheticState
     ├── mini_ai_spine_n2.py # Stage 6: N2 state-injected interpreter
     ├── simulate_avatar.py  # Stage 9: render the arm (ASCII + matplotlib)
@@ -167,20 +172,27 @@ python main.py inspect
 # 3) preprocess + cache epochs
 python main.py preprocess
 
-# 4) evaluate every available modality (EEG / fNIRS / fused), subject-specific + LOSO
-python main.py evaluate                    # add --no-loso to skip cross-subject
+# 4) evaluate the fused EEG+fNIRS N1
+python main.py evaluate                    # add --no-loro to skip run-held-out CV
 python main.py evaluate --classifier svm   # try a different N1 baseline
+python main.py evaluate --classifier gelu_nn  # simple GELU neural network
 
 # 5) train and save a single N1 model
-python main.py train --modality eeg
+python main.py train
+python main.py train --classifier gelu_nn
 
-# 6) time-domain N1 -> N2 -> avatar demo (add --animate for a gif)
+# 6) fused time-domain N1 -> N2 -> avatar demo (add --animate for a gif)
 python main.py demo --max-trials 8
 
 # accuracy tuning:
 python main.py sweep --modality eeg     # find the best EEG analysis window
 python main.py sweep --modality fnirs   # fNIRS windows (accounts for HRF lag)
-python main.py fbcsp                     # Filter Bank CSP N1 (subject + LOSO)
+python main.py fbcsp                     # EEG FBCSP + fNIRS N1
+python main.py riemannian                # EEG tangent space + fNIRS N1
+python main.py temporal-cnn              # raw EEG temporal CNN + fNIRS N1
+python main.py snn                       # bare SNN + fNIRS N1
+python main.py riemannian-snn            # tangent-space features + SNN head
+python main.py windowed-riemannian-snn   # windowed tangent-space sequence + SNN
 
 # everything on the real data
 python main.py all
@@ -194,17 +206,17 @@ All knobs (bands, epoch windows, thresholds, classifier) live in
 octave --no-gui tools/convert_fnirs_octave.m data/ds004022   # or MATLAB
 ```
 This writes `*_nirs_converted.mat` (plain arrays) next to each fNIRS file, which
-`preprocess_fnirs.py` picks up automatically; the fNIRS and fused modes then
+`preprocess_fnirs.py` picks up automatically; the fused EEG+fNIRS models then
 become available.
 
 ## 7. Evaluation & how to read the results
 
 * **Subject-specific** — stratified *K*-fold **within** each participant, then
   aggregated (the realistic first milestone for 7 subjects).
-* **Leave-one-subject-out (LOSO)** — train on *n−1* subjects, test on the held-out
-  one (the harder cross-subject stretch goal).
+* **Leave-one-run-out** — within each participant, train on two runs and test on
+  the held-out run.
 * **Reported**: accuracy, **balanced accuracy**, **macro-F1**, per-class F1,
-  confusion matrices (`results/figures/`), and a EEG/fNIRS/fused comparison
+  confusion matrices (`results/figures/`), and fused-model comparison rows
   (`results/metrics/comparison.csv`).
 * **Chance level = 0.25** (4 balanced classes). Judge everything against it.
 * **N1-only vs N1+N2**: `metrics.json → *_n1_vs_n2` reports how often N2 defers
@@ -212,12 +224,13 @@ become available.
   accepted/deferred tally on a realistic continuous stream.
 
 **Leakage safeguards:** non-overlapping trial epochs; the scaler lives inside the
-Pipeline (fit on train folds only); LOSO groups by subject; fusion aligns trials
-by UID. On this dataset real 4-class accuracy lands **near chance** (0.24–0.26;
-see §7b) — same-limb MI is genuinely hard. The pipeline is validated on synthetic
-data where it reaches 1.0, so the low real numbers reflect data difficulty.
+Pipeline (fit on train folds only); leave-one-run-out groups by run within each
+subject; fusion aligns trials by UID. On this dataset real 4-class accuracy lands
+**near chance** (0.24–0.26; see §7b) — same-limb MI is genuinely hard.
+The pipeline is validated on synthetic data where it reaches 1.0, so the low real
+numbers reflect data difficulty.
 
-## 7b. Accuracy techniques (window sweep + FBCSP)
+## 7b. Accuracy techniques (window sweep + FBCSP + Riemannian + neural checks)
 
 Two standard MI-BCI accuracy levers are built in.
 
@@ -231,21 +244,54 @@ epochs one wide window, crops each candidate, and scores it; results land in
 common-average reference with `eeg.car: true` in `config.yaml` (the dataset has
 no EOG channels, so there is nothing extra to remove).
 
-**FBCSP** (`python main.py fbcsp`). Filter Bank Common Spatial Pattern: band-pass
-into 8–12/12–16/16–20/20–24/24–30 Hz, learn **one-vs-rest CSP** spatial filters
-per band, take log-variance features, select the most informative by mutual
-information, then classify. CSP is supervised and cross-trial, so it is fit
+**FBCSP + fNIRS** (`python main.py fbcsp`). The EEG branch band-passes into
+8–12/12–16/16–20/20–24/24–30 Hz, learns **one-vs-rest CSP** spatial filters per
+band, takes log-variance features, and selects the most informative by mutual
+information. Those EEG features are concatenated with aligned fNIRS features
+before scaling/classification. CSP is supervised and cross-trial, so it is fit
 **inside every CV fold** (no leakage). Knobs live under `fbcsp:` in the config.
 
-**Honest finding across all 7 subjects.** With the full dataset and proper
-held-out testing, 4-class *same-limb* motor imagery is **at chance** with these
-EEG features — and that is a property of the task, not a bug:
+**Riemannian + fNIRS** (`python main.py riemannian`). The EEG branch is filtered
+to the motor-imagery band, converted to regularised channel covariance matrices,
+and projected into tangent space at the training-fold covariance mean. Those EEG
+tangent-space features are concatenated with aligned fNIRS features before
+scaling/classification. The covariance mean and tangent projection are fit inside
+each CV fold, just like CSP, so test trials do not influence the geometry. Knobs
+live under `riemannian:` in the config.
 
-| Method (all 7 subjects) | subject-specific | leave-one-run-out | LOSO |
-|---|---|---|---|
-| Bandpower + LDA (0–5 s)         | 0.239 | 0.224 | 0.256 |
-| Bandpower + LDA (best win 1–5 s) | 0.257 | — | — |
-| FBCSP (n_components = 1)         | 0.242 | 0.262 | 0.263 |
+**Temporal CNN + fNIRS** (`python main.py temporal-cnn`). The EEG branch consumes
+the raw preprocessed EEG epoch with a small EEGNet-style temporal/spatial
+convolution stack. The fNIRS branch consumes aligned hemodynamic features through
+a small dense layer, then both embeddings are concatenated before classification.
+The CNN, EEG normalization, and fNIRS scaler are fit from scratch inside each CV
+fold. Knobs live under `temporal_cnn:` in the config.
+
+**Bare SNN + fNIRS** (`python main.py snn`). The EEG branch provides decimated
+time steps to a single leaky-integrate-and-fire hidden layer with surrogate
+gradients and a linear readout. The aligned fNIRS feature vector is repeated at
+each SNN time step. No convolutional front end is used. Knobs live under `snn:`
+in the config.
+
+**Riemannian-SNN + fNIRS** (`python main.py riemannian-snn` and
+`python main.py windowed-riemannian-snn`). The static variant feeds one
+tangent-space EEG vector plus fNIRS features to a repeated-current LIF SNN. The
+windowed variant feeds a sequence of tangent-space vectors from 1 s overlapping
+EEG windows, with fNIRS repeated across the sequence. Riemannian means are fit
+inside each CV fold.
+
+**Honest finding across all 7 subjects.** With the full dataset and proper
+held-out testing, 4-class *same-limb* motor imagery is **near chance** even after
+fusing EEG+fNIRS — and that is a property of the task, not a bug:
+
+| Fused EEG+fNIRS method (all 7 subjects) | subject-specific | leave-one-run-out |
+|---|---|---|
+| Bandpower/hemodynamic + LDA | 0.240 | 0.239 |
+| FBCSP EEG front end + fNIRS + LDA | 0.220 | 0.236 |
+| Riemannian EEG front end + fNIRS + Logistic Regression | 0.248 | 0.272 |
+| Raw EEG temporal CNN + fNIRS dense branch | 0.255 | 0.260 |
+| Bare SNN + fNIRS | 0.254 | 0.263 |
+| Static Riemannian-SNN + fNIRS | 0.251 | 0.244 |
+| Windowed Riemannian-SNN + fNIRS | 0.243 | 0.246 |
 
 Chance = 0.25; the best single subject (sub-01) reaches only 0.30. A **binary
 class-pair probe** (chance = 0.50) shows even the easiest 2-class contrast is
@@ -256,22 +302,21 @@ reach/grasp 0.44   reach/lift 0.49   reach/twist 0.50
 grasp/lift  0.51   grasp/twist 0.52  lift/twist  0.53
 ```
 
-So there is little linearly-separable same-limb MI signal in these bandpower/CSP
-features. Adding data and *reducing model capacity* (fewer CSP components) nudge
-LOSO a hair above chance but do not change the picture. This matches the dataset's
-own framing — four movements of the **same** limb are far harder than the
+So there is little linearly-separable same-limb MI signal in these fused features.
+This matches the dataset's own framing — four movements of the **same** limb are
+far harder than the
 spatially separated left-vs-right-hand MI most BCIs use — and these are patients
 with orthopedic impairment, whose imagery may be weak or variable.
 
 **What could actually move the needle (honest options, not guarantees):**
-- **fNIRS fusion** — the hemodynamic channel is complementary; convert it
-  (`tools/convert_fnirs_octave.m`) and fuse. Biggest untapped lever *in this
-  dataset*.
+- **Better fNIRS preprocessing** — the hemodynamic channel is complementary, but
+  simple baseline features may be too weak/noisy for this 4-class same-limb task.
 - **Imagery-vs-rest** decoding using the `Rest Onset` markers — a 2-class
   move/rest contrast is usually far more decodable and would confirm the pipeline
   extracts real signal when a real contrast exists.
-- **Riemannian / tangent-space** covariance features (`pyriemann`) sometimes beat
-  bandpower/CSP (keep expectations modest given the binary probe).
+- **Riemannian / tangent-space tuning** — try classifier choices, covariance
+  shrinkage, and subject-specific frequency windows (keep expectations modest
+  given the binary probe).
 - Treat this specific 4-class same-limb decode as near the dataset's ceiling and
   report it honestly.
 
@@ -279,33 +324,22 @@ The pipeline itself is correct: on synthetic data with separable classes both
 bandpower and FBCSP reach 1.0, so the low real numbers reflect **data difficulty,
 not implementation bugs**.
 
-## 7c. Multimodal fusion (EEG + fNIRS)
+## 7c. Multimodal policy (EEG + fNIRS)
 
-ds004022's unique asset is *simultaneous* EEG (fast electrical) + fNIRS (slow
-hemodynamic). The loader recovers the fNIRS signal straight from the MATLAB-table
-subsystem in pure Python, so all three N1 modes run on **real** data:
+All N1 models are now **EEG+fNIRS models**. The default path concatenates EEG
+bandpower features with fNIRS hemodynamic features. The FBCSP and Riemannian
+commands use EEG-specific front ends first, then concatenate those EEG-derived
+features with aligned fNIRS features before scaling and classification.
 
-| Modality (all 7 subjects) | subject-specific | leave-one-run-out | LOSO |
-|---|---|---|---|
-| EEG-only            | 0.239 | 0.224 | 0.256 |
-| fNIRS-only          | 0.251 | 0.227 | 0.251 |
-| **EEG + fNIRS fused** | 0.240 | 0.239 | 0.254 |
-
-Chance = 0.25. Fusion is **feature-level** (concatenate EEG + fNIRS features →
-one `StandardScaler` + classifier Pipeline), with trials aligned across the two
-devices by matching each run's label sequence (robust to the occasional spurious
-fNIRS marker). Consistent with the single-modality results, **fusion does not beat
-chance here** — there is little separable 4-class same-limb signal in *either*
-modality, so combining them cannot manufacture it (fused leave-one-run-out 0.239
-edges out either alone, but within noise). What this delivers is a *correct,
-real-data multimodal N1* and an honest three-way comparison — exactly the
-"don't assume fusion wins" check — not an inflated number.
+Fusion is feature-level, with trials aligned across the two devices by matching
+each run's label sequence (robust to occasional spurious fNIRS markers). The
+scaler and any supervised EEG front end are fit inside each training fold.
 
 ## 8. Limitations
 
 * High-level **motor-imagery classification**, not muscle/joint/torque decoding.
-* **Small dataset** (7 subjects) → limited generalisation; LOSO will lag
-  subject-specific.
+* **Small dataset** (7 subjects) → limited generalisation; subject-specific and
+  run-held-out results should be interpreted cautiously.
 * **fNIRS is slow** (hemodynamics), so it uses a longer epoch window than EEG and
   contributes differently to fusion.
 * The fNIRS Beer-Lambert conversion here is a **simplified baseline** (natural-log
@@ -319,16 +353,16 @@ real-data multimodal N1* and an honest three-way comparison — exactly the
 1. **fNIRS preprocessing depth** — the raw signal already loads in pure Python;
    add proper motion correction (TDDR / spline) + short-separation regression and
    verify the intensity/OD auto-detection against the acquisition metadata.
-2. **Better EEG features/models**: CSP / Riemannian tangent-space, FBCSP; then the
-   temporal-CNN branch once augmentation/more data support it.
+2. **Better EEG features/models**: tune FBCSP / Riemannian tangent-space and use
+   temporal CNN / SNN branches only as carefully reported capacity checks.
 3. **Late + learned fusion**: per-modality probabilities into a meta-classifier;
    attention over EEG/fNIRS.
 4. **Sliding-window online decoding** with calibrated probabilities (Platt /
    temperature scaling) so N2's confidence gate is well-founded.
 5. **Richer N2**: hysteresis, dwell-time, per-command cost/safety model, undo, and
    an explicit "rest" class.
-6. **Transfer learning** across subjects (Euclidean/Riemannian alignment) to lift
-   LOSO performance.
+6. **Transfer learning** across subjects (Euclidean/Riemannian alignment) if
+   cross-subject generalisation becomes a project goal again.
 7. **Real-time I/O** (LSL) to move from offline replay to a live loop; a proper 3-D
    arm/URDF avatar.
 

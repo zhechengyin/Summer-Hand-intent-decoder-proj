@@ -8,9 +8,10 @@ load_bids.py         discover BIDS files, load EEG (.set) and fNIRS (.mat)
 preprocess_eeg.py    filter / notch / epoch EEG around the imagery window
 preprocess_fnirs.py  optical density -> Beer-Lambert HbO/HbR -> epoch
 feature_extraction.py bandpower (EEG) and hemodynamic (fNIRS) features
-fusion.py            trial-aligned feature-level fusion + sklearn pipelines
+fusion.py            trial-aligned EEG+fNIRS feature-level fusion
 train_n1.py          N1 neural-evidence decoder (probability output)
-evaluate.py          subject-specific + leave-one-subject-out evaluation
+evaluate.py          subject-specific + leave-one-run-out evaluation
+riemannian.py        Riemannian EEG covariance features fused with fNIRS
 state.py             ProstheticState -- the avatar/prosthetic state
 mini_ai_spine_n2.py  N2 state-injected intent-to-command interpreter
 simulate_avatar.py   apply commands to state + render a simple arm

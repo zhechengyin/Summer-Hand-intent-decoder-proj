@@ -1,13 +1,8 @@
 """Stage 4 -- multimodal fusion layer.
 
-Provides three model *modes* by giving each classifier a different feature
-matrix:
-
-* EEG-only    -> FeatureSet from EEG epochs
-* fNIRS-only  -> FeatureSet from fNIRS epochs
-* EEG+fNIRS   -> feature_level_fusion(...) concatenates the two, trial-aligned by
-                 UID so a row is guaranteed to be the *same* trial in both
-                 modalities (robust to dropped/rejected epochs).
+Builds feature matrices for the fused EEG+fNIRS N1 path. Per-modality feature
+sets are still created internally so trials can be aligned, but public training
+and evaluation use the EEG+fNIRS FeatureSet produced by feature_level_fusion(...).
 
 Standardisation is deliberately NOT done here -- it lives inside the sklearn
 Pipeline (train_n1.build_pipeline) so it is fit on training folds only and never
@@ -60,6 +55,15 @@ def build_feature_set(epochs: TrialEpochs, cfg: dict) -> FeatureSet:
                       modality=epochs.modality, classes=list(epochs.classes))
 
 
+def metadata_feature_set(epochs: TrialEpochs) -> FeatureSet:
+    """FeatureSet shell carrying labels/UIDs when only alignment is needed."""
+    return FeatureSet(X=np.empty((epochs.n_trials, 0), dtype=np.float32),
+                      names=[], y=epochs.y.copy(),
+                      subjects=epochs.subjects.copy(), runs=epochs.runs.copy(),
+                      uids=epochs.uids.copy(), modality=epochs.modality,
+                      classes=list(epochs.classes))
+
+
 def _trial_number(uid: str) -> int:
     m = re.search(r"t(\d+)$", str(uid))
     return int(m.group(1)) if m else -1
@@ -97,6 +101,11 @@ def _align_trials(a: "FeatureSet", b: "FeatureSet"):
                 ia.append(idxa[blk.a + k])
                 ib.append(idxb[blk.b + k])
     return np.array(ia, dtype=int), np.array(ib, dtype=int)
+
+
+def align_trials(a: "FeatureSet", b: "FeatureSet"):
+    """Public wrapper for trial alignment by subject/run/label sequence."""
+    return _align_trials(a, b)
 
 
 def feature_level_fusion(a: FeatureSet, b: FeatureSet) -> FeatureSet:

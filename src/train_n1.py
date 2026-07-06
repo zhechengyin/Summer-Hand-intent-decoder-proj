@@ -17,15 +17,186 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+from sklearn.base import BaseEstimator, ClassifierMixin
 
 from .config import cfg_get
 from .fusion import FeatureSet
 
 
 # ---------------------------------------------------------------------------
+# Simple GELU neural network (sklearn-compatible PyTorch estimator)
+# ---------------------------------------------------------------------------
+class TorchGeluMLPClassifier(ClassifierMixin, BaseEstimator):
+    """Small PyTorch MLP with GELU activations and sklearn-style methods.
+
+    It deliberately consumes 2-D feature matrices, so it can drop into the same
+    StandardScaler -> classifier Pipeline as the classical baselines.
+    """
+
+    _estimator_type = "classifier"
+
+    def __init__(self, hidden_layers=(64, 32), dropout=0.10, lr=1e-3,
+                 weight_decay=1e-3, batch_size=32, epochs=80, patience=10,
+                 validation_fraction=0.15, random_state=42, verbose=False):
+        self.hidden_layers = hidden_layers
+        self.dropout = dropout
+        self.lr = lr
+        self.weight_decay = weight_decay
+        self.batch_size = batch_size
+        self.epochs = epochs
+        self.patience = patience
+        self.validation_fraction = validation_fraction
+        self.random_state = random_state
+        self.verbose = verbose
+
+    def get_params(self, deep=True):
+        return {
+            "hidden_layers": self.hidden_layers,
+            "dropout": self.dropout,
+            "lr": self.lr,
+            "weight_decay": self.weight_decay,
+            "batch_size": self.batch_size,
+            "epochs": self.epochs,
+            "patience": self.patience,
+            "validation_fraction": self.validation_fraction,
+            "random_state": self.random_state,
+            "verbose": self.verbose,
+        }
+
+    def set_params(self, **params):
+        for key, value in params.items():
+            setattr(self, key, value)
+        return self
+
+    def _build_model(self, n_features: int, n_classes: int):
+        import torch.nn as nn
+
+        layers = []
+        prev = n_features
+        for width in tuple(self.hidden_layers):
+            layers.append(nn.Linear(prev, int(width)))
+            layers.append(nn.GELU())
+            if float(self.dropout) > 0:
+                layers.append(nn.Dropout(float(self.dropout)))
+            prev = int(width)
+        layers.append(nn.Linear(prev, n_classes))
+        return nn.Sequential(*layers)
+
+    def _split_indices(self, y_encoded: np.ndarray):
+        n = len(y_encoded)
+        n_classes = len(np.unique(y_encoded))
+        frac = float(self.validation_fraction)
+        if frac <= 0 or n < 2 * n_classes:
+            return np.arange(n), np.array([], dtype=int)
+        _, counts = np.unique(y_encoded, return_counts=True)
+        if counts.min() < 2:
+            return np.arange(n), np.array([], dtype=int)
+
+        val_size = max(n_classes, int(round(n * frac)))
+        val_size = min(val_size, n - n_classes)
+        if val_size < n_classes:
+            return np.arange(n), np.array([], dtype=int)
+
+        from sklearn.model_selection import train_test_split
+
+        idx = np.arange(n)
+        train_idx, val_idx = train_test_split(
+            idx, test_size=val_size, stratify=y_encoded,
+            random_state=int(self.random_state))
+        return train_idx, val_idx
+
+    def fit(self, X, y):
+        import torch
+        import torch.nn as nn
+        from torch.utils.data import DataLoader, TensorDataset
+
+        X = np.asarray(X, dtype=np.float32)
+        y = np.asarray(y)
+        self.classes_ = np.unique(y)
+        y_encoded = np.searchsorted(self.classes_, y).astype(np.int64)
+        self.n_features_in_ = X.shape[1]
+
+        torch.manual_seed(int(self.random_state))
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model = self._build_model(self.n_features_in_, len(self.classes_)).to(device)
+        loss_fn = nn.CrossEntropyLoss()
+        opt = torch.optim.AdamW(model.parameters(), lr=float(self.lr),
+                                weight_decay=float(self.weight_decay))
+
+        train_idx, val_idx = self._split_indices(y_encoded)
+
+        def loader(indices, shuffle):
+            ds = TensorDataset(torch.from_numpy(X[indices]),
+                               torch.from_numpy(y_encoded[indices]))
+            gen = torch.Generator()
+            gen.manual_seed(int(self.random_state))
+            return DataLoader(ds, batch_size=min(int(self.batch_size), len(ds)),
+                              shuffle=shuffle, generator=gen if shuffle else None)
+
+        train_loader = loader(train_idx, True)
+        val_loader = loader(val_idx, False) if len(val_idx) else None
+        best_state, best_loss, stale = None, float("inf"), 0
+
+        for epoch in range(int(self.epochs)):
+            model.train()
+            running, seen = 0.0, 0
+            for xb, yb in train_loader:
+                xb, yb = xb.to(device), yb.to(device)
+                opt.zero_grad(set_to_none=True)
+                loss = loss_fn(model(xb), yb)
+                loss.backward()
+                opt.step()
+                running += float(loss.item()) * len(xb)
+                seen += len(xb)
+            score = running / max(1, seen)
+
+            if val_loader is not None:
+                model.eval()
+                total, count = 0.0, 0
+                with torch.no_grad():
+                    for xb, yb in val_loader:
+                        xb, yb = xb.to(device), yb.to(device)
+                        loss = loss_fn(model(xb), yb)
+                        total += float(loss.item()) * len(xb)
+                        count += len(xb)
+                score = total / max(1, count)
+
+            if score < best_loss - 1e-5:
+                best_loss = score
+                best_state = {k: v.detach().cpu().clone()
+                              for k, v in model.state_dict().items()}
+                stale = 0
+            else:
+                stale += 1
+                if int(self.patience) > 0 and stale >= int(self.patience):
+                    break
+
+        if best_state is not None:
+            model.load_state_dict(best_state)
+        self.model_ = model.cpu().eval()
+        self.n_iter_ = epoch + 1
+        self.loss_ = float(best_loss)
+        return self
+
+    def predict_proba(self, X):
+        import torch
+
+        X = np.asarray(X, dtype=np.float32)
+        if X.ndim == 1:
+            X = X.reshape(1, -1)
+        with torch.no_grad():
+            logits = self.model_(torch.from_numpy(X))
+            proba = torch.softmax(logits, dim=1).cpu().numpy()
+        return proba
+
+    def predict(self, X):
+        return self.classes_[np.argmax(self.predict_proba(X), axis=1)]
+
+
+# ---------------------------------------------------------------------------
 # Classifier factory + pipeline
 # ---------------------------------------------------------------------------
-def build_classifier(name: str, seed: int = 42):
+def build_classifier(name: str, seed: int = 42, cfg: dict | None = None):
     """Instantiate a probability-capable scikit-learn classifier by name."""
     from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
     from sklearn.ensemble import (GradientBoostingClassifier,
@@ -46,6 +217,22 @@ def build_classifier(name: str, seed: int = 42):
                                       n_jobs=-1)
     if name in ("gb", "gradientboosting"):
         return GradientBoostingClassifier(random_state=seed)
+    if name in ("gelu_nn", "gelu-mlp", "torch_mlp", "nn", "mlp"):
+        cfg = cfg or {}
+        return TorchGeluMLPClassifier(
+            hidden_layers=tuple(cfg_get(cfg, "neural_network.hidden_layers",
+                                        [64, 32])),
+            dropout=float(cfg_get(cfg, "neural_network.dropout", 0.10)),
+            lr=float(cfg_get(cfg, "neural_network.lr", 1e-3)),
+            weight_decay=float(cfg_get(cfg, "neural_network.weight_decay",
+                                       1e-3)),
+            batch_size=int(cfg_get(cfg, "neural_network.batch_size", 32)),
+            epochs=int(cfg_get(cfg, "neural_network.epochs", 80)),
+            patience=int(cfg_get(cfg, "neural_network.patience", 10)),
+            validation_fraction=float(cfg_get(
+                cfg, "neural_network.validation_fraction", 0.15)),
+            random_state=seed,
+        )
     if name == "xgb":  # optional, only if xgboost is installed
         from xgboost import XGBClassifier
 
@@ -63,7 +250,7 @@ def build_pipeline(cfg: dict, name: str | None = None):
     name = name or cfg_get(cfg, "model.classifier", "lda")
     seed = int(cfg_get(cfg, "seed", 42))
     return Pipeline([("scaler", StandardScaler()),
-                     ("clf", build_classifier(name, seed))])
+                     ("clf", build_classifier(name, seed, cfg))])
 
 
 # ---------------------------------------------------------------------------

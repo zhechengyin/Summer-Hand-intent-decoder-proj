@@ -27,7 +27,8 @@ import numpy as np
 from .config import cfg_get, resolve_path
 from .containers import TrialEpochs
 from .feature_extraction import _bandpower
-from .fusion import FeatureSet
+from .fusion import (FeatureSet, align_trials, build_feature_set,
+                     metadata_feature_set)
 from .mini_ai_spine_n2 import N2Interpreter
 from .simulate_avatar import AvatarSimulator
 from .state import ProstheticState
@@ -83,6 +84,32 @@ def window_features_per_trial(epochs: TrialEpochs, cfg: dict, n_windows: int):
     return streams, names
 
 
+def _fuse_streams_with_fnirs(eeg_epochs: TrialEpochs, fnirs_epochs: TrialEpochs,
+                             streams: list[TrialStream], names: list[str],
+                             cfg: dict):
+    eeg_meta = metadata_feature_set(eeg_epochs)
+    fnirs_fs = build_feature_set(fnirs_epochs, cfg)
+    ia, ib = align_trials(eeg_meta, fnirs_fs)
+    if ia.size == 0:
+        raise ValueError("no aligned EEG+fNIRS trials available for replay")
+
+    stream_by_uid = {s.uid: s for s in streams}
+    fused_streams: list[TrialStream] = []
+    for eeg_i, fnirs_i in zip(ia, ib):
+        uid = str(eeg_epochs.uids[eeg_i])
+        stream = stream_by_uid[uid]
+        fnirs_row = np.repeat(fnirs_fs.X[fnirs_i][None, :],
+                              stream.feats.shape[0], axis=0)
+        fused_streams.append(TrialStream(
+            uid=stream.uid, subject=stream.subject, run=stream.run,
+            label=stream.label, feats=np.hstack([stream.feats, fnirs_row]),
+            win_times=stream.win_times,
+        ))
+    fused_names = [f"eeg_window:{n}" for n in names] + [
+        f"fnirs:{n}" for n in fnirs_fs.names]
+    return fused_streams, fused_names
+
+
 def _streams_to_featureset(streams, names, classes) -> FeatureSet:
     X = np.vstack([s.feats for s in streams])
     y = np.concatenate([[s.label] * s.feats.shape[0] for s in streams])
@@ -91,7 +118,7 @@ def _streams_to_featureset(streams, names, classes) -> FeatureSet:
     uids = np.concatenate([[f"{s.uid}|w{w}" for w in range(s.feats.shape[0])]
                            for s in streams])
     return FeatureSet(X.astype(np.float32), list(names), y, subs, runs, uids,
-                      "eeg_windows", list(classes))
+                      "fused_windows", list(classes))
 
 
 def _fmt_proba(p: dict) -> str:
@@ -101,15 +128,21 @@ def _fmt_proba(p: dict) -> str:
 # ---------------------------------------------------------------------------
 # Replay driver
 # ---------------------------------------------------------------------------
-def run_replay(cfg: dict, eeg_epochs: TrialEpochs, animate: bool | None = None,
-               max_trials: int = 8, seed: int | None = None) -> list[dict]:
+def run_replay(cfg: dict, eeg_epochs: TrialEpochs, fnirs_epochs: TrialEpochs,
+               animate: bool | None = None, max_trials: int = 8,
+               seed: int | None = None) -> list[dict]:
     n_windows = int(cfg_get(cfg, "replay.windows_per_trial", 5))
     if animate is None:
         animate = bool(cfg_get(cfg, "replay.animate", False))
     seed = int(cfg_get(cfg, "seed", 42)) if seed is None else seed
     classes = eeg_epochs.classes
 
+    if fnirs_epochs is None:
+        raise ValueError("time-domain replay now requires EEG+fNIRS epochs")
+
     streams, names = window_features_per_trial(eeg_epochs, cfg, n_windows)
+    streams, names = _fuse_streams_with_fnirs(
+        eeg_epochs, fnirs_epochs, streams, names, cfg)
 
     # held-out split by trial so replayed trials are unseen by the streaming N1
     rng = np.random.default_rng(seed)
@@ -129,7 +162,8 @@ def run_replay(cfg: dict, eeg_epochs: TrialEpochs, animate: bool | None = None,
     frames: list[dict] = []
     step = 0
     print("\n" + "=" * 96)
-    print("TIME-DOMAIN REPLAY  (N1 -> N2 -> avatar).  true = ground-truth imagined action")
+    print("TIME-DOMAIN REPLAY  (fused EEG+fNIRS N1 -> N2 -> avatar).  "
+          "true = ground-truth imagined action")
     print("=" * 96)
     for tr in replay_trials:
         print(f"\n--- trial {tr.uid}  true={classes[tr.label].upper()} ---")

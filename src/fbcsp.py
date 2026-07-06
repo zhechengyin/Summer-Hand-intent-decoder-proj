@@ -68,11 +68,15 @@ class FBCSP(BaseEstimator, TransformerMixin):
         return filters
 
     def _bandpass(self, X, ba):
+        X = np.asarray(X, dtype=np.float32)
         b, a = ba
         padlen = 3 * max(len(a), len(b))
         if X.shape[2] <= padlen:
             return X
-        return filtfilt(b, a, X, axis=2)
+        out = np.empty_like(X, dtype=np.float32)
+        for i in range(X.shape[0]):
+            out[i] = filtfilt(b, a, X[i], axis=1).astype(np.float32)
+        return out
 
     def _features_for_band(self, Xb, filters_per_class):
         """log-variance CSP features for all trials in one band."""
@@ -129,16 +133,9 @@ class FBCSP(BaseEstimator, TransformerMixin):
         return F[:, self.selected_]
 
 
-def build_fbcsp_pipeline(cfg: dict, sfreq: float, name: str | None = None):
-    """FBCSP -> StandardScaler -> classifier Pipeline (fit per CV fold)."""
-    from sklearn.pipeline import Pipeline
-    from sklearn.preprocessing import StandardScaler
-
-    from .train_n1 import build_classifier
-
-    name = name or cfg_get(cfg, "model.classifier", "lda")
-    seed = int(cfg_get(cfg, "seed", 42))
-    fbcsp = FBCSP(
+def build_fbcsp_transformer(cfg: dict, sfreq: float) -> FBCSP:
+    """Build the FBCSP transformer from config."""
+    return FBCSP(
         sfreq=sfreq,
         bands=[tuple(b) for b in cfg_get(cfg, "fbcsp.bands",
                                          [[8, 12], [12, 16], [16, 20],
@@ -148,5 +145,17 @@ def build_fbcsp_pipeline(cfg: dict, sfreq: float, name: str | None = None):
         reg=float(cfg_get(cfg, "fbcsp.reg", 1e-5)),
         filter_order=int(cfg_get(cfg, "fbcsp.filter_order", 4)),
     )
+
+
+def build_fbcsp_pipeline(cfg: dict, sfreq: float, name: str | None = None):
+    """FBCSP -> StandardScaler -> classifier Pipeline (fit per CV fold)."""
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import StandardScaler
+
+    from .train_n1 import build_classifier
+
+    name = name or cfg_get(cfg, "model.classifier", "lda")
+    seed = int(cfg_get(cfg, "seed", 42))
+    fbcsp = build_fbcsp_transformer(cfg, sfreq)
     return Pipeline([("fbcsp", fbcsp), ("scaler", StandardScaler()),
-                     ("clf", build_classifier(name, seed))])
+                     ("clf", build_classifier(name, seed, cfg))])

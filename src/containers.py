@@ -126,8 +126,32 @@ class TrialEpochs:
             modality=self.modality, classes=np.array(self.classes, dtype=object),
         )
 
+    def save_array_cache(self, path: str | Path) -> None:
+        """Save a memmap-friendly cache directory next to the compressed cache."""
+        path = Path(path)
+        cache_dir = path.with_name(f"{path.stem}_arrays")
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        np.save(cache_dir / "X.npy", self.X)
+        np.savez(
+            cache_dir / "meta.npz", y=self.y, sfreq=self.sfreq,
+            ch_names=np.array(self.ch_names, dtype=object), times=self.times,
+            subjects=self.subjects, runs=self.runs, uids=self.uids,
+            modality=self.modality, classes=np.array(self.classes, dtype=object),
+        )
+
     @staticmethod
     def load(path: str | Path) -> "TrialEpochs":
+        path = Path(path)
+        cache_dir = path.with_name(f"{path.stem}_arrays")
+        if cache_dir.exists():
+            d = np.load(cache_dir / "meta.npz", allow_pickle=True)
+            return TrialEpochs(
+                X=np.load(cache_dir / "X.npy", mmap_mode="r"), y=d["y"],
+                sfreq=float(d["sfreq"]), ch_names=list(d["ch_names"]),
+                times=d["times"], subjects=d["subjects"], runs=d["runs"],
+                uids=d["uids"], modality=str(d["modality"]),
+                classes=list(d["classes"]),
+            )
         d = np.load(path, allow_pickle=True)
         return TrialEpochs(
             X=d["X"], y=d["y"], sfreq=float(d["sfreq"]),

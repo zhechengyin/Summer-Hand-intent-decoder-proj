@@ -13,8 +13,8 @@ mne>=1.5           # reads EEGLAB .set/.fdt, filtering, epoching, Beer-Lambert
 mne-bids>=0.13     # optional: BIDS-aware discovery (code also works without it)
 h5py>=3.8          # fallback reader for MATLAB v7.3 (.mat) files
 
-# Optional deep-learning branch (Stage 5, not required for the baselines)
-# torch>=2.0
+# Neural-network branches (GELU MLP and temporal CNN)
+torch>=2.0
 
 # Optional stronger baseline (Stage 5)
 # xgboost>=1.7
