@@ -234,7 +234,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--subject", default="P1")
     ap.add_argument("--stage", default="band",
-                    choices=["band", "arch", "ensemble", "pool", "quick"])
+                    choices=["band", "arch", "ensemble", "pool", "quick",
+                             "final"])
     args = ap.parse_args()
     subj = args.subject
 
@@ -243,15 +244,27 @@ def main():
         print(f"{tag:38s} r_mean={r.mean():.3f} (x={r[0]:.3f} y={r[1]:.3f} "
               f"z={r[2]:.3f}){extra}", flush=True)
 
+    BIG = {**BASE, "dils": [1, 2, 4, 8, 16], "H": 64, "L": 2, "F": 64,
+           "epochs": 100}
+
     print(f"=== velocity research | {subj} marker {MARK} | 3-fold ===\n")
-    if args.stage == "band":
+    if args.stage == "final":
+        rs = []
+        for s in ("P1", "P2", "P3"):
+            tr = load(s, 2.0, DEC)
+            t0 = time.time()
+            r = run_nn(tr, BIG)
+            rs.append(r.mean())
+            show(f"BIG {s}", r, t0)
+        print(f"\nBIG 3-subject MEAN r = {np.mean(rs):.3f}", flush=True)
+    elif args.stage == "band":
         for lp in (2.0, 4.0, 8.0, 12.0):
             tr = load(subj, lp, DEC)
             t0 = time.time()
             show(f"TCN+GRU lp={lp}Hz decim=50Hz", run_nn(tr, BASE), t0)
     elif args.stage == "arch":
-        tr = load(subj, 8.0, DEC)               # best band from stage 1 (set here)
-        show("baseline (lp8)", run_nn(tr, BASE))
+        tr = load(subj, 2.0, DEC)               # best band from stage 1
+        show("baseline (lp2 cropped)", run_nn(tr, BASE))
         for name, upd in [("+dil16 (context)", {"dils": [1, 2, 4, 8, 16]}),
                           ("+GRU H64 L2", {"H": 64, "L": 2}),
                           ("+F64", {"F": 64}),

@@ -772,6 +772,46 @@ within-subject; ~0.747 mean, pooling optional per subject.
 Still to try: architecture (dilation16 context, GRU H64/L2), ensemble, and the
 artifact-controlled motor-only version (honest cortical ceiling, expected lower).
 
+### LOG-022 - Velocity Decoding BEST: BIG TCN+GRU, mean r 0.843
+
+Question: does a larger temporal model on top of the cropping win push r higher?
+
+Method: `tools/way_gal_kin_research.py --stage arch/final`. On the cropped 25 Hz
+lp=2 config, sweep architecture then validate the best ("BIG") on P1-P3.
+BIG = TCN dilations 1/2/4/8/16 (larger receptive field) + bidirectional GRU
+hidden 64, 2 layers + F=64, 100 epochs, AdamW.
+
+Arch sweep (P1): baseline 0.830 -> +dil16 0.856 -> +GRU H64/L2 0.858 ->
++F64 0.836 -> BIG(all) 0.889.
+
+Final BIG, marker 4, r_mean (3-fold):
+| Subject | r_mean | r_x | r_y | r_z |
+| --- | ---: | ---: | ---: | ---: |
+| P1 | 0.889 | 0.926 | 0.925 | 0.815 |
+| P2 | 0.777 | 0.816 | 0.823 | 0.694 |
+| P3 | 0.864 | 0.900 | 0.925 | 0.767 |
+| MEAN | 0.843 | | | |
+
+Progression of the whole research loop:
+| Milestone | P1 | P2 | P3 | mean |
+| --- | ---: | ---: | ---: | ---: |
+| committed baseline (uncropped 50 Hz) | 0.788 | 0.625 | 0.580 | 0.664 |
+| + movement-window crop (25 Hz, lp2) | 0.830 | 0.655 | 0.757 | 0.747 |
+| + BIG arch | 0.889 | 0.777 | 0.864 | 0.843 |
+
+Interpretation: EEG->hand/finger velocity decoding reaches mean r 0.843 (per-axis
+up to 0.926) -- a strong result, well above typical published EEG kinematics
+numbers (0.3-0.5). Two levers drove +0.18 over baseline: (1) cropping to the
+movement window (removes rest-period dilution), (2) a bigger temporal model
+(larger dilated-conv context + 2-layer bi-GRU). The hard subject P2 gained the
+most from capacity (0.625 -> 0.777).
+
+Caveat (unchanged): all-channel; part of r is likely EOG/EMG movement artifact
+(the linear motor-only control was ~0.33 vs ~0.46 all-channel in LOG-019). A
+motor-only BIG TCN+GRU would be the honest cortical ceiling -- still to run.
+
+BEST config of record: cropped [1.5,7.0]s, 25 Hz, lp=2 Hz, BIG TCN+GRU.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
