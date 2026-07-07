@@ -739,6 +739,29 @@ Interpretation:
 Decision: TCN+GRU is the velocity decoder of choice; drop the tangent approach
 for regression. Run an artifact-controlled (motor-channel) TCN+GRU next.
 
+### LOG-021 - Velocity Research Loop (IN PROGRESS, paused)
+
+Goal: push EEG->velocity correlation above the TCN+GRU baseline (mean r 0.664
+across P1-P3; 0.788 on P1). Harness: `tools/way_gal_kin_research.py` (configurable
+TCN+GRU + linear + ensemble, consistent 3-fold-over-series, trials cached per
+band).
+
+Partial result (paused mid-sweep):
+- P1, TCN+GRU, low-pass 2 Hz (vs baseline 4 Hz): r_mean 0.794 (x=0.840 y=0.831
+  z=0.713) -- marginally beats lp=4Hz (0.788). NOTE: one config took ~1000 s on
+  CPU (F=32, 80 epochs) -- runs are slow; consider fewer epochs / smaller F while
+  exploring.
+
+Planned roadmap (not yet run):
+1. finish band sweep (lp 4/8/12 Hz on P1)
+2. architecture: +dilation16 (context), GRU H64/L2, F64
+3. ensemble linear + TCN+GRU
+4. cross-subject pooling (P1+P2+P3) -- likely biggest win (deep net, small data)
+5. artifact-controlled motor-channel version (honest cortical ceiling)
+Then validate best config on P1-P3 and commit.
+
+Status: paused for laptop relocation; harness committed, no processes running.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
