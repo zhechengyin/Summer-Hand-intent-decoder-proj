@@ -662,6 +662,41 @@ motor-cortical signal (known debate in the literature). r~0.58 is a real standar
 result but an artifact-controlled version (ICA cleaning, central-motor-channel
 restriction) is needed before claiming it is purely cortical.
 
+### LOG-019 - EEG->Velocity: Full-Capacity + Artifact-Controlled (P1-P3)
+
+Question: was r~0.58 the ceiling, and how much survives artifact control?
+
+Method: `tools/way_gal_kin_full.py`. Memory-safe high capacity via per-SERIES
+X^T X / X^T Y accumulation (never materialise the full design matrix -> no OOM);
+finer resolution (50 Hz, +/-240 ms lags); ridge alpha tuned per outer fold on an
+inner validation series. Two channel sets: ALL (ceiling) vs MOTOR-only (drop
+frontal EOG + temporal EMG -> artifact control). Leave-one-series-out, Pearson r.
+
+Artifacts: `tools/way_gal_kin_full.py`,
+`results/metrics/way_gal_kin_full_P1_P2_P3.json`.
+
+Results (best hand/finger marker, r_mean):
+| Subject | all-channel | motor-only |
+| --- | ---: | ---: |
+| P1 | 0.622 (axis up to 0.72) | 0.427 (up to 0.48) |
+| P2 | 0.351 | 0.271 |
+| P3 | 0.407 | 0.308 |
+| mean | ~0.46 | ~0.33 |
+
+Interpretation:
+- Tuned full-capacity BEAT the reduced first pass (P1 0.622 vs 0.583) -> r~0.58
+  was NOT the ceiling.
+- Strong subject variability: all-channel r 0.35-0.62 (P1 an unusually good
+  subject); ~0.46 mean.
+- Artifact control matters: motor-only drops ~0.10-0.20 (mean 0.46 -> 0.33), so a
+  real fraction of the all-channel number rides on non-motor (EOG/EMG-prone)
+  channels. BUT motor-only still decodes r~0.27-0.43 (mean 0.33) -- genuine
+  central-motor velocity signal survives, well above zero.
+- Honest headline: EEG->hand/finger velocity is real (motor-only r~0.33, best
+  subject 0.43), the naive all-channel number (~0.46, best 0.62) is partly
+  artifact-inflated, and further gains are still possible (more lags, per-subject
+  tuning, nonlinear/PLS regressors, ICA cleaning).
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
