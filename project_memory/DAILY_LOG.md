@@ -697,6 +697,48 @@ Interpretation:
   artifact-inflated, and further gains are still possible (more lags, per-subject
   tuning, nonlinear/PLS regressors, ICA cleaning).
 
+### LOG-020 - EEG->Velocity Decoder Benchmark: Linear vs Riemannian vs TCN+GRU
+
+Question: can a Riemannian tangent method or a TCN+GRU beat the lagged-linear
+Ridge for continuous velocity decoding?
+
+Method: `tools/way_gal_kin_models.py`. Target = 3D velocity of best hand/finger
+marker (sensor 4), EEG low-pass 4 Hz -> 50 Hz. Three decoders, all channels:
+(1) lagged-linear Ridge (+/-240 ms lags) [leave-one-series-out];
+(2) sliding-window Riemannian tangent (1 s windows, per-window covariance ->
+tangent -> Ridge to window-centre velocity) [LOSO];
+(3) seq2seq TCN+GRU (spatial conv -> dilated causal TCN dil 1/2/4/8 -> bi-GRU
+-> per-timestep 3D head, GELU/AdamW, F=32) [3-fold over series]. Params guided by
+light literature review (GRU-family strong for EEG kinematics; TCN task-dependent).
+
+Artifacts: `tools/way_gal_kin_models.py`,
+`results/metrics/way_gal_kin_models_P{1,2,3}.json`.
+
+Results (marker 4, r_mean; per-subject):
+| Subject | linear | tangent | TCN+GRU |
+| --- | ---: | ---: | ---: |
+| P1 | 0.603 | 0.471 | 0.788 |
+| P2 | 0.339 | 0.339 | 0.625 |
+| P3 | 0.384 | 0.267 | 0.580 |
+| mean | 0.442 | 0.359 | 0.664 |
+
+Interpretation:
+- TCN+GRU WINS clearly on all 3 subjects (mean r 0.664, +0.22 over linear),
+  best axes ~0.84 on P1. A recurrent seq2seq model captures temporal dynamics a
+  static covariance or fixed-lag linear map cannot. Notably it wins despite the
+  3-fold protocol giving it LESS training data (6 series) than the linear/tangent
+  LOSO (8 series) -- so the gain is real, not a protocol artifact.
+- Riemannian tangent (sliding window) UNDERperforms the linear baseline (0.359 vs
+  0.442). Confirms tangent/covariance geometry is a per-trial CLASSIFICATION
+  tool: for continuous regression it discards the instantaneous temporal detail
+  velocity needs. So the Riemannian technique does not transfer to velocity.
+- Caveat: all-channel; like the linear (which dropped ~0.62->0.43 motor-only in
+  LOG-019), the TCN+GRU 0.664 is likely partly EOG/EMG-inflated. A motor-only
+  TCN+GRU would be lower but the honest cortical number -- next step.
+
+Decision: TCN+GRU is the velocity decoder of choice; drop the tangent approach
+for regression. Run an artifact-controlled (motor-channel) TCN+GRU next.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
