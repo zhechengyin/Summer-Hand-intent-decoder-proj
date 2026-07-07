@@ -1,6 +1,6 @@
 # Project Summary
 
-Last updated: 2026-07-06
+Last updated: 2026-07-07
 
 ## Dataset And Task
 
@@ -15,6 +15,29 @@ Last updated: 2026-07-06
   on 10 subjects (LOG-011/013), confirming the pipeline extracts real MI signal
   when a decodable contrast exists -- ds004022 near-chance is task difficulty,
   not a bug. Probe: `tools/eegmmidb_probe.py`.
+
+## CURRENT BEST RESULT: EEG -> Finger/Hand Velocity (WAY-EEG-GAL)
+
+- Dataset: WAY-EEG-GAL grasp-and-lift (32-ch EEG @ 500 Hz, figshare 988376),
+  participants P1-P3. Task: continuous regression of 3D hand/finger marker
+  velocity from EEG (not classification). Metric: Pearson r (pred vs true).
+- BEST model: **BIG seq2seq TCN+GRU** -- **3-subject mean r = 0.843**
+  (P1 0.889, P2 0.777, P3 0.864; per-axis up to 0.926). Strong result, above
+  typical published EEG-kinematics numbers (0.3-0.5). See LOG-020/021/022.
+- Best config of record: EEG low-pass 2 Hz -> 25 Hz, crop to movement window
+  [1.5, 7.0] s, TCN dilations 1/2/4/8/16 + bidirectional GRU (hidden 64, 2
+  layers) + F=64, AdamW, 100 epochs, 3-fold over series. Marker 4 (best
+  hand/finger sensor). Code: `tools/way_gal_kin_research.py --stage final`.
+- Model size: **188,803 trainable params** (~0.76 MB fp32; 124k in the bi-GRU,
+  64k in the conv/TCN front end).
+- What drove it (+0.18 over the 0.664 baseline): (1) cropping to the movement
+  window removes rest-period dilution; (2) larger temporal context + bigger GRU.
+  lp=2 ~ lp=4 Hz; cross-subject pooling is a net wash. TCN+GRU beats lagged-
+  linear (0.442) and sliding-window Riemannian tangent (0.359) -- tangent
+  geometry is a classification tool, not for continuous regression.
+- Honest caveat: all-channel, so part of r is likely EOG/EMG movement artifact
+  (linear motor-only control ~0.33 vs ~0.46 all-channel, LOG-019). A motor-only
+  BIG TCN+GRU (the cortical ceiling) is the next step, not yet run.
 
 ## Standing Modeling Policy
 

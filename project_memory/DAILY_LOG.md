@@ -811,6 +811,8 @@ Caveat (unchanged): all-channel; part of r is likely EOG/EMG movement artifact
 motor-only BIG TCN+GRU would be the honest cortical ceiling -- still to run.
 
 BEST config of record: cropped [1.5,7.0]s, 25 Hz, lp=2 Hz, BIG TCN+GRU.
+Model size: 188,803 trainable params (~0.76 MB fp32): 64k conv/TCN front end +
+124k bidirectional GRU (H64, 2 layers) + 387 head. (Baseline small model: 26k.)
 
 ## Entry Template
 
