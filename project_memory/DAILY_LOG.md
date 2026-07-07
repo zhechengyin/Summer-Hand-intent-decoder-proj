@@ -739,28 +739,38 @@ Interpretation:
 Decision: TCN+GRU is the velocity decoder of choice; drop the tangent approach
 for regression. Run an artifact-controlled (motor-channel) TCN+GRU next.
 
-### LOG-021 - Velocity Research Loop (IN PROGRESS, paused)
+### LOG-021 - Velocity Research Loop: Movement-Window Cropping + Pooling
 
-Goal: push EEG->velocity correlation above the TCN+GRU baseline (mean r 0.664
-across P1-P3; 0.788 on P1). Harness: `tools/way_gal_kin_research.py` (configurable
-TCN+GRU + linear + ensemble, consistent 3-fold-over-series, trials cached per
-band).
+Goal: push EEG->velocity correlation above the committed TCN+GRU baseline
+(mean r 0.664 across P1-P3). Harness `tools/way_gal_kin_research.py`.
 
-Partial result (paused mid-sweep):
-- P1, TCN+GRU, low-pass 2 Hz (vs baseline 4 Hz): r_mean 0.794 (x=0.840 y=0.831
-  z=0.713) -- marginally beats lp=4Hz (0.788). NOTE: one config took ~1000 s on
-  CPU (F=32, 80 epochs) -- runs are slow; consider fewer epochs / smaller F while
-  exploring.
+Speed fix: the old runs (50 Hz, uncropped 9.4 s, 80 ep) took ~1000 s/config
+because the bidirectional GRU is sequential over long sequences. Switched to
+25 Hz + crop to the movement window [1.5, 7.0] s + 30 ep + 4 threads ->
+~120 s/config (~8x faster).
 
-Planned roadmap (not yet run):
-1. finish band sweep (lp 4/8/12 Hz on P1)
-2. architecture: +dilation16 (context), GRU H64/L2, F64
-3. ensemble linear + TCN+GRU
-4. cross-subject pooling (P1+P2+P3) -- likely biggest win (deep net, small data)
-5. artifact-controlled motor-channel version (honest cortical ceiling)
-Then validate best config on P1-P3 and commit.
+Results (marker 4, r_mean, 3-fold):
+| Config | P1 | P2 | P3 | mean |
+| --- | ---: | ---: | ---: | ---: |
+| uncropped 50 Hz (committed baseline) | 0.788 | 0.625 | 0.580 | 0.664 |
+| cropped 25 Hz within-subject (lp=2) | 0.830 | 0.655 | 0.757 | 0.747 |
+| cropped 25 Hz POOLED (lp=2) | 0.850 | 0.590 | 0.811 | 0.750 |
 
-Status: paused for laptop relocation; harness committed, no processes running.
+Findings:
+- CROPPING TO THE MOVEMENT WINDOW is the real lever: +0.083 mean (0.664 ->
+  0.747). Removing the pre-cue rest period (where true velocity ~ 0 and only
+  dilutes the correlation) sharply improves r AND speeds training. New best mean
+  ~0.75; P1 axis up to 0.90.
+- lp=2 Hz ~ lp=4 Hz (2 marginally better).
+- CROSS-SUBJECT POOLING is a NET WASH vs within-subject cropped (0.750 vs
+  0.747): it lifts weak subjects (P3 0.757->0.811) but hurts P2 (0.655->0.590).
+  Not a general win; useful only for subjects with little signal.
+
+Current best config: cropped 25 Hz, lp=2, TCN+GRU (F32, dil 1/2/4/8, bi-GRU H32),
+within-subject; ~0.747 mean, pooling optional per subject.
+
+Still to try: architecture (dilation16 context, GRU H64/L2), ensemble, and the
+artifact-controlled motor-only version (honest cortical ceiling, expected lower).
 
 ## Entry Template
 
