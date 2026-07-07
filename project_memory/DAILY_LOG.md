@@ -627,6 +627,41 @@ parameter count. Near chance on weight like everything else. The sophisticated
 sequence model does NOT beat the tiny tangent+MLP: feature-based geometry + a
 small head remains the right tool at this data scale.
 
+### LOG-018 - WAY-EEG-GAL EEG->Kinematics: Decode Hand/Finger Velocity
+
+Question: can we decode continuous hand/finger VELOCITY from EEG (the canonical
+"movement through brain signals" use of the kinematics block)?
+
+Method: `tools/way_gal_kinematics.py`. The kin block has 3D positions of 4
+markers (Px/Py/Pz sensors 1-4) on the same 500 Hz grid as EEG. Pipeline: EEG
+low-pass 4 Hz (movement-related slow potentials) -> decimate to 25 Hz -> +/-240 ms
+time-lagged design matrix -> Ridge regression -> per-axis velocity. Target =
+gradient of low-passed position. Scored by Pearson r (pred vs true velocity)
+under leave-one-series-out. (First attempt OOM'd on the RAM-tight box: fixed with
+decim 20 / 6 lags / float32 in-place standardisation.)
+
+Artifacts: `tools/way_gal_kinematics.py`, `results/metrics/way_gal_kin_P1.json`.
+
+Results (P1, leave-one-series-out):
+| Marker | r_mean | r_x | r_y | r_z |
+| --- | ---: | ---: | ---: | ---: |
+| sensor 1 (reference/object, ~static) | 0.289 | 0.286 | 0.171 | 0.409 |
+| sensor 2 (hand/finger) | 0.530 | 0.586 | 0.650 | 0.353 |
+| sensor 3 (hand/finger) | 0.569 | 0.670 | 0.677 | 0.360 |
+| sensor 4 (hand/finger) | 0.583 | 0.681 | 0.670 | 0.398 |
+
+Interpretation: continuous EEG->velocity decoding works well -- r ~ 0.53-0.58
+mean, up to 0.68 per axis for the moving hand/finger markers, at or above typical
+published EEG kinematics numbers (r ~ 0.3-0.5). A genuinely different capability
+from the classification tasks: this dataset supports regression of movement
+trajectory, not just event/parameter classification.
+
+Caveat (honest): low-frequency all-channel EEG->velocity decoding can be partly
+driven by movement/EOG/EMG artifacts correlated with the motion, not purely
+motor-cortical signal (known debate in the literature). r~0.58 is a real standard
+result but an artifact-controlled version (ICA cleaning, central-motor-channel
+restriction) is needed before claiming it is purely cortical.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
