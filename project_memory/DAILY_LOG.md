@@ -874,6 +874,38 @@ NEW BEST OF RECORD: BIGP, all-channel mean r 0.853 (P1 0.889, P2 0.813, P3 0.858
 0.80 MB. Config: cropped [1.5,7]s, 25 Hz, lp=2, TCN dil 1/2/4/8/16/32, bi-GRU H64
 L2, F64, noise 0.1 + chdrop 0.1, cosine, 150 ep.
 
+### LOG-025 - Best Model Transfers to Intracortical NHP Reaching (finger velocity)
+
+Question: does our best velocity decoder (TCN+GRU) transfer to a completely
+different modality -- intracortical primate spikes instead of scalp EEG?
+
+Dataset: O'Doherty et al. NHP reaching (Zenodo 3854034). Macaque M1/S1 Utah-array
+spikes + fingertip position @ 250 Hz. Session indy_20161005_06 (smallest, 80 MB;
+235 spiking units, 6.2 min). NOT EEG -- spiking units become the input channels.
+
+Method: `tools/indy_velocity.py`. Bin spikes to 50 ms firing rates (20 Hz),
+window into 2 s chunks (40 bins), decode 2D fingertip velocity (top-2 moving
+axes) with the SAME TCN+GRU (dils 1/2/4/8/16, bi-GRU H64 L2, F64, aug+cosine),
+leave-one-contiguous-block-out (5 blocks). Reuses build_net/run_nn.
+
+Results (Pearson r):
+| Model | r_mean | axis1 | axis2 | params |
+| --- | ---: | ---: | ---: | ---: |
+| TCN+GRU (our best) | 0.848 | 0.821 | 0.876 | 201,795 (0.81 MB) |
+| lagged-linear ref | 0.731 | 0.677 | 0.785 | - |
+
+Interpretation: the EEG-designed TCN+GRU transfers cleanly to intracortical
+spikes -- finger-velocity r 0.848 with the same <1 MB model, beating the linear
+decoder by +0.12. Confirms the architecture is modality-general (works on scalp
+EEG voltage AND binned cortical spike rates as long as the input is
+channels-x-time). Cross-modality demonstration.
+
+Caveats: single session / one animal (indy), untuned for spikes (50 ms bins, 2 s
+windows); intracortical SOTA is ~0.9+ with more data/tuning, so 0.848 is a strong
+zero-tuning transfer, not a ceiling. Different modality from the EEG work -- keep
+as a separate cross-modality result, not merged with the EEG velocity ledger.
+Also fixed run_linear to infer output dim (was hardcoded to 3; failed on 2D).
+
 ## Entry Template
 
 ### LOG-XXX - Short Name

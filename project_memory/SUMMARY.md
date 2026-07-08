@@ -36,6 +36,10 @@ Last updated: 2026-07-07
   lp=2 ~ lp=4 Hz; cross-subject pooling is a net wash. TCN+GRU beats lagged-
   linear (0.442) and sliding-window Riemannian tangent (0.359) -- tangent
   geometry is a classification tool, not for continuous regression.
+- Cross-modality transfer (LOG-025): the SAME TCN+GRU (0.81 MB) decodes finger
+  velocity from INTRACORTICAL primate spikes (Zenodo 3854034, indy session) at
+  r 0.848 vs linear 0.731 -- architecture is modality-general (EEG voltage or
+  binned spike rates, channels-x-time). Tool: `tools/indy_velocity.py`.
 - Artifact check (LOG-023): motor-channels-only BIG TCN+GRU still reaches mean
   r 0.823 (P1 0.851, P2 0.763, P3 0.855) -- only 0.02 below all-channel 0.843,
   vs the linear decoder which lost ~0.13. So the deep model decodes largely

@@ -10,6 +10,7 @@ venv/
 data/ds004022/
 data/ds004362/
 data/way_eeg_gal/
+data/indy_loco/
 data/cache/
 *.set
 *.fdt

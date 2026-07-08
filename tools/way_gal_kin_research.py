@@ -213,6 +213,7 @@ def run_nn(trials, cfg, ret_preds=False):
 def run_linear(trials, nlag=12, kfold=3, ret_preds=False):
     from numpy.linalg import solve
     n_ch = trials[0]["e"].shape[0]
+    n_out = trials[0]["vel"].shape[-1]
     d = n_ch * (2 * nlag + 1)
 
     def design(e):
@@ -224,7 +225,7 @@ def run_linear(trials, nlag=12, kfold=3, ret_preds=False):
         te = [t for t in trials if t["series"] in g]
         allc = np.concatenate([t["e"] for t in tr], axis=1)
         mu, sd = allc.mean(1, keepdims=True), allc.std(1, keepdims=True); sd[sd == 0] = 1
-        XtX = np.zeros((d, d)); XtY = np.zeros((d, 3))
+        XtX = np.zeros((d, d)); XtY = np.zeros((d, n_out))
         for t in tr:
             X = design((t["e"] - mu) / sd).astype(np.float64)
             XtX += X.T @ X; XtY += X.T @ t["vel"][nlag:t["e"].shape[1] - nlag]
