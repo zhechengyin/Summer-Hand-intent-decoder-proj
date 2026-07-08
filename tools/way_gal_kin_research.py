@@ -138,14 +138,25 @@ def run_nn(trials, cfg, ret_preds=False):
         Ytn = ((Ytr - ym) / ys).astype(np.float32)
         net = build_net(cfg, n_ch)
         opt = torch.optim.AdamW(net.parameters(), lr=cfg["lr"], weight_decay=cfg["wd"])
+        sched = (torch.optim.lr_scheduler.CosineAnnealingLR(opt, cfg["epochs"])
+                 if cfg.get("cosine") else None)
         mse = nn.MSELoss()
         Xt, Yt = torch.tensor(Xtr), torch.tensor(Ytn)
+        noise = float(cfg.get("noise", 0.0)); chdrop = float(cfg.get("chdrop", 0.0))
         idx = np.arange(len(Xt))
         for ep in range(cfg["epochs"]):
             net.train(); np.random.shuffle(idx)
             for b in range(0, len(idx), cfg["bs"]):
                 bi = idx[b:b + cfg["bs"]]
-                opt.zero_grad(); mse(net(Xt[bi]), Yt[bi]).backward(); opt.step()
+                xb = Xt[bi]
+                if noise > 0:                            # additive Gaussian aug
+                    xb = xb + noise * torch.randn_like(xb)
+                if chdrop > 0:                           # per-sample channel dropout
+                    m = (torch.rand(xb.shape[0], xb.shape[1], 1) > chdrop).float()
+                    xb = xb * m / (1 - chdrop)
+                opt.zero_grad(); mse(net(xb), Yt[bi]).backward(); opt.step()
+            if sched:
+                sched.step()
         net.eval()
         with torch.no_grad():
             pr = net(torch.tensor(Xte)).numpy() * ys + ym
@@ -247,7 +258,8 @@ def main():
     ap.add_argument("--subject", default="P1")
     ap.add_argument("--stage", default="band",
                     choices=["band", "arch", "ensemble", "pool", "quick",
-                             "final", "final_motor"])
+                             "final", "final_motor", "improve",
+                             "final_improved"])
     args = ap.parse_args()
     subj = args.subject
 
@@ -258,8 +270,26 @@ def main():
 
     BIG = {**BASE, "dils": [1, 2, 4, 8, 16], "H": 64, "L": 2, "F": 64,
            "epochs": 100}
+    # improved recipe: longer context + augmentation + cosine schedule (cheap on
+    # params -- only +1 conv block). Keeps model < 1 MB.
+    BIGP = {**BIG, "dils": [1, 2, 4, 8, 16, 32], "noise": 0.1, "chdrop": 0.1,
+            "cosine": True, "epochs": 150}
 
     print(f"=== velocity research | {subj} marker {MARK} | 3-fold ===\n")
+    if args.stage == "improve":
+        for name, cfg in [("BIG ref", BIG), ("BIG+aug+cos+dil32", BIGP)]:
+            import torch
+            net = build_net(cfg, load(subj, 2.0, DEC)[0]["e"].shape[0])
+            npar = sum(p.numel() for p in net.parameters())
+            t0 = time.time()
+            show(f"{name} ({npar/1e3:.0f}k par)", run_nn(load(subj, 2.0, DEC), cfg), t0)
+    elif args.stage == "final_improved":
+        rs = []
+        for s in ("P1", "P2", "P3"):
+            t0 = time.time()
+            r = run_nn(load(s, 2.0, DEC), BIGP)
+            rs.append(r.mean()); show(f"BIGP {s}", r, t0)
+        print(f"\nBIGP 3-subject MEAN r = {np.mean(rs):.3f}", flush=True)
     if args.stage in ("final", "final_motor"):
         global CH_IDX
         motor = args.stage == "final_motor"

@@ -844,6 +844,36 @@ computation is valid (P2/P3 ran in ~10-20 min).
 Best result of record UPDATED: EEG->finger/hand velocity, BIG TCN+GRU, all-channel
 mean r 0.843, motor-only (cortical) mean r 0.823.
 
+### LOG-024 - Improved recipe (aug + cosine + longer context): mean r 0.853
+
+Question: can cheap (param-light) levers push past BIG (mean r 0.843) while
+staying < 1 MB (target inference device)?
+
+Method: `--stage improve/final_improved`. BIGP = BIG + dilation 32 (longer
+context) + data augmentation (additive Gaussian noise 0.1 + per-sample channel
+dropout 0.1) + cosine LR schedule + 150 epochs. Param budget: 1 MB fp32 =
+262,144 params.
+
+Results (marker 4, r_mean, 3-fold):
+| Subject | BIG (LOG-022) | BIGP |
+| --- | ---: | ---: |
+| P1 | 0.889 | 0.889 (saturated) |
+| P2 | 0.777 | 0.813 (+0.036) |
+| P3 | 0.864 | 0.858 (-0.006) |
+| MEAN | 0.843 | 0.853 |
+
+Model size: BIGP = 201,155 params (0.80 MB fp32) -- within 1 MB budget.
+
+Interpretation: +0.010 mean, driven entirely by the hard subject P2 (+0.036) --
+augmentation improves generalization where there is headroom; P1 is already at
+ceiling (0.889) so it cannot gain, P3 unchanged. Modest but real, and free on the
+memory budget. Longer context (dil32) alone did nothing on saturated P1; the win
+is the augmentation.
+
+NEW BEST OF RECORD: BIGP, all-channel mean r 0.853 (P1 0.889, P2 0.813, P3 0.858),
+0.80 MB. Config: cropped [1.5,7]s, 25 Hz, lp=2, TCN dil 1/2/4/8/16/32, bi-GRU H64
+L2, F64, noise 0.1 + chdrop 0.1, cosine, 150 ep.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
