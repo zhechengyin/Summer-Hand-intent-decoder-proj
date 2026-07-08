@@ -80,6 +80,42 @@ def load(subj, lp, decim):
     return trials
 
 
+def load_mt(subj, lp, decim, markers=(2, 3, 4)):
+    """Multi-task loader: target = velocity of several markers stacked
+    (t, 3*len(markers)). Marker 4 (the eval target) is placed LAST."""
+    key = (subj, lp, decim, "mt", markers, tuple(CH_IDX) if CH_IDX else None)
+    if key in _CACHE:
+        return _CACHE[key]
+    sos = _sos(lp)
+    fsd = FS / decim
+    lo, hi = int(CROP[0] * fsd), int(CROP[1] * fsd)
+    trials = []
+    for series, f in enumerate(sorted(glob.glob(
+            str(DATA / "**" / f"WS_{subj}_S*.mat"), recursive=True)), 1):
+        ws = loadmat(f, struct_as_record=False, squeeze_me=True)["ws"]
+        for w in np.atleast_1d(ws.win):
+            eeg = np.asarray(w.eeg, dtype=np.float64).T
+            kin = np.asarray(w.kin, dtype=np.float64)
+            cols = []
+            for m in markers:
+                cols += [PX + m - 1, PY + m - 1, PZ + m - 1]
+            pos = kin[:, cols]
+            if np.isnan(pos).any():
+                continue
+            e = sosfiltfilt(sos, eeg, axis=1)[:, ::decim]
+            if CH_IDX is not None:
+                e = e[CH_IDX]
+            p = sosfiltfilt(sos, pos, axis=0)[::decim]
+            vel = np.gradient(p, decim / FS, axis=0)          # (t, 3*n_markers)
+            t = min(e.shape[1], vel.shape[0])
+            if t < hi:
+                continue
+            trials.append({"e": e[:, lo:hi].astype(np.float32),
+                           "vel": vel[lo:hi].astype(np.float32), "series": series})
+    _CACHE[key] = trials
+    return trials
+
+
 def corr(a, b):
     a, b = a - a.mean(0), b - b.mean(0)
     d = np.linalg.norm(a, axis=0) * np.linalg.norm(b, axis=0)
@@ -108,7 +144,8 @@ def build_net(cfg, n_ch):
             self.gru = nn.GRU(F, cfg["H"], cfg["L"], batch_first=True,
                               bidirectional=cfg["bidir"],
                               dropout=cfg["dropout"] if cfg["L"] > 1 else 0.0)
-            self.head = nn.Linear(cfg["H"] * (2 if cfg["bidir"] else 1), 3)
+            self.head = nn.Linear(cfg["H"] * (2 if cfg["bidir"] else 1),
+                                   cfg.get("n_out", 3))
 
         def forward(self, x):
             z = self.sp(x)
@@ -125,7 +162,10 @@ def run_nn(trials, cfg, ret_preds=False):
     import torch.nn as nn
     torch.set_num_threads(4); torch.manual_seed(42); np.random.seed(42)
     n_ch = trials[0]["e"].shape[0]
+    n_out = trials[0]["vel"].shape[-1]
+    cfg = {**cfg, "n_out": n_out}
     T = min(t["e"].shape[1] for t in trials)
+    esl = cfg.get("eval_slice")               # (start,end) columns to score, or None
     rs, preds = [], {}
     for g in series_groups(trials, cfg.get("kfold", 3)):
         tr = [t for t in trials if t["series"] not in g]
@@ -160,7 +200,10 @@ def run_nn(trials, cfg, ret_preds=False):
         net.eval()
         with torch.no_grad():
             pr = net(torch.tensor(Xte)).numpy() * ys + ym
-        rs.append(corr(Yte.reshape(-1, 3), pr.reshape(-1, 3)))
+        yt = Yte.reshape(-1, n_out); yp = pr.reshape(-1, n_out)
+        if esl:                                   # score only these columns
+            yt, yp = yt[:, esl[0]:esl[1]], yp[:, esl[0]:esl[1]]
+        rs.append(corr(yt, yp))
         for t, p in zip(te, pr):
             preds[id(t)] = p
     r = np.mean(rs, axis=0)
@@ -259,7 +302,7 @@ def main():
     ap.add_argument("--stage", default="band",
                     choices=["band", "arch", "ensemble", "pool", "quick",
                              "final", "final_motor", "improve",
-                             "final_improved"])
+                             "final_improved", "mt", "final_mt"])
     args = ap.parse_args()
     subj = args.subject
 
@@ -290,6 +333,18 @@ def main():
             r = run_nn(load(s, 2.0, DEC), BIGP)
             rs.append(r.mean()); show(f"BIGP {s}", r, t0)
         print(f"\nBIGP 3-subject MEAN r = {np.mean(rs):.3f}", flush=True)
+    elif args.stage in ("mt", "final_mt"):
+        # multi-task: predict markers (2,3,4); score marker 4 (last 3 cols)
+        mt = {**BIGP, "eval_slice": (6, 9)}
+        subs = ("P1", "P2", "P3") if args.stage == "final_mt" else (subj,)
+        rs = []
+        for s in subs:
+            t0 = time.time()
+            r = run_nn(load_mt(s, 2.0, DEC, markers=(2, 3, 4)), mt)
+            rs.append(r.mean()); show(f"BIGP-multitask {s}", r, t0)
+        if len(subs) > 1:
+            print(f"\nBIGP-multitask 3-subject MEAN r = {np.mean(rs):.3f}",
+                  flush=True)
     if args.stage in ("final", "final_motor"):
         global CH_IDX
         motor = args.stage == "final_motor"
