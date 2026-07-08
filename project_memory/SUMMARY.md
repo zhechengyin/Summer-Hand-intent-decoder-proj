@@ -35,9 +35,11 @@ Last updated: 2026-07-07
   lp=2 ~ lp=4 Hz; cross-subject pooling is a net wash. TCN+GRU beats lagged-
   linear (0.442) and sliding-window Riemannian tangent (0.359) -- tangent
   geometry is a classification tool, not for continuous regression.
-- Honest caveat: all-channel, so part of r is likely EOG/EMG movement artifact
-  (linear motor-only control ~0.33 vs ~0.46 all-channel, LOG-019). A motor-only
-  BIG TCN+GRU (the cortical ceiling) is the next step, not yet run.
+- Artifact check (LOG-023): motor-channels-only BIG TCN+GRU still reaches mean
+  r 0.823 (P1 0.851, P2 0.763, P3 0.855) -- only 0.02 below all-channel 0.843,
+  vs the linear decoder which lost ~0.13. So the deep model decodes largely
+  GENUINE motor-cortical velocity, not mostly artifact; the conservative cortical
+  estimate is r 0.823.
 
 ## Standing Modeling Policy
 

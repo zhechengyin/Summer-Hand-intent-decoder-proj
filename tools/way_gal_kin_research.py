@@ -37,10 +37,20 @@ def _sos(lp):
 
 
 CROP = (1.5, 7.0)      # movement window (s); LED onset ~2.0 s. Cuts GRU length.
+# central sensorimotor channels (drop frontal EOG Fp/F7/F8, temporal EMG T7/T8/TP)
+MOTOR = {"F3", "Fz", "F4", "FC5", "FC1", "FC2", "FC6", "C3", "Cz", "C4",
+         "CP5", "CP1", "CP2", "CP6", "P3", "Pz", "P4"}
+CH_IDX = None          # if set (list), restrict EEG to these channel indices
+
+
+def motor_idx():
+    f = sorted(glob.glob(str(DATA / "**" / "WS_P1_S*.mat"), recursive=True))[0]
+    names = list(loadmat(f, struct_as_record=False, squeeze_me=True)["ws"].names.eeg)
+    return [i for i, n in enumerate(names) if n in MOTOR]
 
 
 def load(subj, lp, decim):
-    key = (subj, lp, decim)
+    key = (subj, lp, decim, tuple(CH_IDX) if CH_IDX is not None else None)
     if key in _CACHE:
         return _CACHE[key]
     sos = _sos(lp)
@@ -57,6 +67,8 @@ def load(subj, lp, decim):
             if np.isnan(pos).any():
                 continue
             e = sosfiltfilt(sos, eeg, axis=1)[:, ::decim]
+            if CH_IDX is not None:
+                e = e[CH_IDX]
             p = sosfiltfilt(sos, pos, axis=0)[::decim]
             vel = np.gradient(p, decim / FS, axis=0)
             t = min(e.shape[1], vel.shape[0])
@@ -235,7 +247,7 @@ def main():
     ap.add_argument("--subject", default="P1")
     ap.add_argument("--stage", default="band",
                     choices=["band", "arch", "ensemble", "pool", "quick",
-                             "final"])
+                             "final", "final_motor"])
     args = ap.parse_args()
     subj = args.subject
 
@@ -248,15 +260,21 @@ def main():
            "epochs": 100}
 
     print(f"=== velocity research | {subj} marker {MARK} | 3-fold ===\n")
-    if args.stage == "final":
+    if args.stage in ("final", "final_motor"):
+        global CH_IDX
+        motor = args.stage == "final_motor"
+        if motor:
+            CH_IDX = motor_idx()
+            print(f"MOTOR-ONLY: {len(CH_IDX)} central sensorimotor channels\n")
         rs = []
         for s in ("P1", "P2", "P3"):
             tr = load(s, 2.0, DEC)
             t0 = time.time()
             r = run_nn(tr, BIG)
             rs.append(r.mean())
-            show(f"BIG {s}", r, t0)
-        print(f"\nBIG 3-subject MEAN r = {np.mean(rs):.3f}", flush=True)
+            show(f"BIG{'-motor' if motor else ''} {s}", r, t0)
+        print(f"\nBIG{'-motor' if motor else ''} 3-subject MEAN r = "
+              f"{np.mean(rs):.3f}", flush=True)
     elif args.stage == "band":
         for lp in (2.0, 4.0, 8.0, 12.0):
             tr = load(subj, lp, DEC)

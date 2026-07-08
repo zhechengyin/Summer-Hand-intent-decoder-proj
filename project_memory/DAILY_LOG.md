@@ -814,6 +814,36 @@ BEST config of record: cropped [1.5,7.0]s, 25 Hz, lp=2 Hz, BIG TCN+GRU.
 Model size: 188,803 trainable params (~0.76 MB fp32): 64k conv/TCN front end +
 124k bidirectional GRU (H64, 2 layers) + 387 head. (Baseline small model: 26k.)
 
+### LOG-023 - Artifact-Controlled BIG TCN+GRU (motor channels only)
+
+Question: how much of the BIG TCN+GRU velocity decoding (all-channel mean r
+0.843) is genuine cortical signal vs EOG/EMG movement artifact?
+
+Method: `tools/way_gal_kin_research.py --stage final_motor`. Same BIG config, but
+restrict EEG to 17 central sensorimotor channels (F3/Fz/F4, FC*, C*, CP*, P3/Pz/
+P4), dropping frontal EOG (Fp/F7/F8) and temporal EMG (T7/T8/TP9/TP10).
+
+Results (marker 4, r_mean, 3-fold):
+| Subject | all-channel | motor-only |
+| --- | ---: | ---: |
+| P1 | 0.889 | 0.851 |
+| P2 | 0.777 | 0.763 |
+| P3 | 0.864 | 0.855 |
+| MEAN | 0.843 | 0.823 |
+
+Interpretation (KEY): motor-only drops only 0.02 (0.843 -> 0.823), whereas the
+LINEAR decoder dropped ~0.13 (0.46 -> 0.33 all-channel -> motor, LOG-019). So the
+BIG TCN+GRU decodes largely GENUINE MOTOR-CORTICAL velocity signal, not mostly
+artifact -- the nonlinear temporal model isolates a real cortical code the linear
+map could not. This substantially strengthens the r=0.843 result: even the
+conservative cortical estimate is r=0.823 (per-axis up to 0.91).
+
+Note: P1's wall-timer read ~13 h because the laptop was suspended mid-run; the
+computation is valid (P2/P3 ran in ~10-20 min).
+
+Best result of record UPDATED: EEG->finger/hand velocity, BIG TCN+GRU, all-channel
+mean r 0.843, motor-only (cortical) mean r 0.823.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
