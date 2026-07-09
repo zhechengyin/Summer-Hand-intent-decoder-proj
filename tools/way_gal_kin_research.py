@@ -192,12 +192,39 @@ def series_groups(trials, k=3):
 
 
 def build_net(cfg, n_ch):
+    import torch
     import torch.nn as nn
+
+    class BandGate(nn.Module):
+        """Learned gate over frequency bands. 'static' = one weight per band
+        (which bands help overall). 'dynamic' = per-band, per-timestep gate from
+        a small conv over the input (which bands help WHEN). Stores last_gate for
+        inspection (reveals the learned 'law': when each band is up/down)."""
+        def __init__(self, n_ch, nbands, mode):
+            super().__init__()
+            self.nb, self.cpb, self.mode = nbands, n_ch // nbands, mode
+            if mode == "static":
+                self.g = nn.Parameter(torch.zeros(nbands))       # sigmoid(0)=.5
+            else:
+                self.net = nn.Conv1d(n_ch, nbands, 5, padding=2)
+            self.last_gate = None
+
+        def forward(self, x):
+            B, C, T = x.shape
+            xb = x.view(B, self.nb, self.cpb, T)
+            if self.mode == "static":
+                g = torch.sigmoid(self.g).view(1, self.nb, 1, 1)
+            else:
+                g = torch.sigmoid(self.net(x)).view(B, self.nb, 1, T)
+            self.last_gate = g.detach()
+            return (xb * g).reshape(B, C, T)
 
     class Seq(nn.Module):
         def __init__(self):
             super().__init__()
             F = cfg["F"]
+            bg = cfg.get("band_gate")
+            self.gate = BandGate(n_ch, cfg["nbands"], bg) if bg else None
             self.sp = nn.Sequential(nn.Conv1d(n_ch, F, 1), nn.BatchNorm1d(F),
                                     nn.GELU())
             self.convs = nn.ModuleList(
@@ -212,6 +239,8 @@ def build_net(cfg, n_ch):
                                    cfg.get("n_out", 3))
 
         def forward(self, x):
+            if self.gate is not None:
+                x = self.gate(x)
             z = self.sp(x)
             for c, p in zip(self.convs, self.pads):
                 z = self.act(c(z)[:, :, :-p] + z)
@@ -221,7 +250,7 @@ def build_net(cfg, n_ch):
     return Seq()
 
 
-def run_nn(trials, cfg, ret_preds=False):
+def run_nn(trials, cfg, ret_preds=False, ret_gate=False):
     import torch
     import torch.nn as nn
     torch.set_num_threads(4); torch.manual_seed(42); np.random.seed(42)
@@ -230,7 +259,7 @@ def run_nn(trials, cfg, ret_preds=False):
     cfg = {**cfg, "n_out": n_out}
     T = min(t["e"].shape[1] for t in trials)
     esl = cfg.get("eval_slice")               # (start,end) columns to score, or None
-    rs, preds = [], {}
+    rs, preds, gate_acc = [], {}, []
     for g in series_groups(trials, cfg.get("kfold", 3)):
         tr = [t for t in trials if t["series"] not in g]
         te = [t for t in trials if t["series"] in g]
@@ -264,6 +293,9 @@ def run_nn(trials, cfg, ret_preds=False):
         net.eval()
         with torch.no_grad():
             pr = net(torch.tensor(Xte)).numpy() * ys + ym
+            if ret_gate and net.gate is not None:      # (nb,1) static / (nb,T) dyn
+                gv = net.gate.last_gate.numpy()        # (B,nb,1,1) or (B,nb,1,T)
+                gate_acc.append(gv.mean(0).reshape(gv.shape[1], -1))
         yt = Yte.reshape(-1, n_out); yp = pr.reshape(-1, n_out)
         if esl:                                   # score only these columns
             yt, yp = yt[:, esl[0]:esl[1]], yp[:, esl[0]:esl[1]]
@@ -271,6 +303,9 @@ def run_nn(trials, cfg, ret_preds=False):
         for t, p in zip(te, pr):
             preds[id(t)] = p
     r = np.mean(rs, axis=0)
+    if ret_gate:
+        gate = np.mean(gate_acc, axis=0) if gate_acc else None   # (nb,) or (nb,T)
+        return r, gate
     return (r, preds) if ret_preds else r
 
 
@@ -368,7 +403,7 @@ def main():
                     choices=["band", "arch", "ensemble", "pool", "quick",
                              "final", "final_motor", "improve",
                              "final_improved", "mt", "final_mt",
-                             "mband", "final_mband"])
+                             "mband", "final_mband", "gate"])
     ap.add_argument("--bandset", default="lp2+mu+beta")
     args = ap.parse_args()
     subj = args.subject
@@ -427,6 +462,34 @@ def main():
         means = [np.mean(v) for v in res.values()]
         print(f"\nmband[{args.bandset}] 3-subject MEAN r = {np.mean(means):.3f}",
               flush=True)
+    elif args.stage == "gate":
+        # learned band-gating: does adaptively weighting bands beat concat, and
+        # what pattern does it learn (which band, when)?
+        bands = BANDSETS["lp2+mu+beta"]
+        bn = ["delta<2", "mu8-12", "beta13-30"]
+        tr = load_mb(subj, bands, DEC)
+        base = {**BIGP, "epochs": 60}
+        show("concat (no gate)", run_nn(tr, base))
+        for mode in ("static", "dynamic"):
+            cfg = {**base, "band_gate": mode, "nbands": len(bands)}
+            t0 = time.time()
+            r, gate = run_nn(tr, cfg, ret_gate=True)
+            show(f"band-gate [{mode}]", r, t0)
+            if mode == "static":
+                print("  learned band weights: " +
+                      ", ".join(f"{bn[i]}={float(gate[i, 0]):.3f}"
+                                for i in range(len(bands))), flush=True)
+            else:
+                fsd = FS / DEC
+                onset = int((2.0 - CROP[0]) * fsd)     # LED onset bin (~2.0 s)
+                for i in range(len(bands)):
+                    p = gate[i]
+                    print(f"  {bn[i]}: mean={p.mean():.3f} "
+                          f"pre-onset={p[:onset].mean():.3f} "
+                          f"post-onset={p[onset:].mean():.3f}", flush=True)
+                (ROOT / "results" / "metrics" / f"band_gate_profile_{subj}.json"
+                 ).write_text(json.dumps({bn[i]: gate[i].tolist()
+                                          for i in range(len(bands))}, indent=2))
     elif args.stage in ("mt", "final_mt"):
         # multi-task: predict markers (2,3,4); score marker 4 (last 3 cols)
         mt = {**BIGP, "eval_slice": (6, 9)}

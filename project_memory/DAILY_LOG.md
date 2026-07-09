@@ -971,6 +971,36 @@ velocity here).
 Summary of the generalisation ladder (finger velocity, TCN+GRU 0.77-0.81 MB):
 within-session ~0.85-0.89 | across-days same-subject 0.856 | across-subjects ~0.
 
+### LOG-028 - Multi-Band Filter-Bank Input (negative) + Band-Gating Setup
+
+Question: does feeding multiple frequency bands as extra channels (delta movement
+potential + mu/beta/low-gamma envelopes) beat the single low band for EEG->finger
+velocity? (Literature says mu/beta bandpower also encode kinematics.)
+
+Method: `tools/way_gal_kin_research.py` load_mb (raw low band + Hilbert amplitude
+envelopes of rhythm bands, stacked as channels) + BANDSETS presets. Sweep on P1
+(--stage mband), then validate best (lp4+mu+beta) on 3 subjects (--stage
+final_mband, resumable per subject).
+
+Results:
+- P1 band sweep (60 ep): lp2 single band 0.880 BEATS every multi-band variant
+  (lp2+mu 0.858, lp2+mu(8-10) 0.855, lp2+mu+beta 0.864, +lowgamma 0.866,
+  lp4+mu+beta 0.868).
+- 3-subject validation (lp4+mu+beta, 150 ep): P1 0.867, P2 0.778, P3 0.840,
+  MEAN 0.828 -- WORSE than single-band best (0.853) on ALL three subjects.
+
+Interpretation: naive multi-band CONCATENATION hurts (-0.025 mean). For real
+movement EXECUTION the <2 Hz movement-related potential dominates; adding mu/beta
+envelope channels dilutes it and adds trainable input dims that don't help. (mu/
+beta ERD matters more for IMAGERY than execution.) Honest negative for concat.
+
+Follow-up (user idea): instead of always concatenating, LEARN a gate that weights
+bands adaptively -- "use beta only when it helps." Added a BandGate module to
+build_net: 'static' (one weight per band) and 'dynamic' (per-band, per-timestep
+gate from a small conv). run_nn can return the learned gate profile (ret_gate) so
+we can read out the pattern (which band, when). Stage `--stage gate`. Results in
+LOG-029.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
