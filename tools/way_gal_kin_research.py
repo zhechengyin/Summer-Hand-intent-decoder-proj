@@ -116,6 +116,70 @@ def load_mt(subj, lp, decim, markers=(2, 3, 4)):
     return trials
 
 
+def _band_feature(eeg, lo, hi, mode, decim):
+    """One band -> (32, t) at the decimated rate. mode 'raw' = filtered signal
+    (slow movement potential); 'env' = band-pass -> Hilbert amplitude envelope
+    (band-power time series, e.g. mu/beta ERD-ERS), smoothed then decimated."""
+    from scipy.signal import hilbert
+    nyq = FS / 2
+    if mode == "raw":
+        if lo is None:
+            sos = butter(4, hi / nyq, btype="low", output="sos")
+        else:
+            sos = butter(4, [lo / nyq, hi / nyq], btype="band", output="sos")
+        return sosfiltfilt(sos, eeg, axis=1)[:, ::decim].astype(np.float32)
+    sos = butter(4, [lo / nyq, hi / nyq], btype="band", output="sos")
+    env = np.abs(hilbert(sosfiltfilt(sos, eeg, axis=1), axis=1))
+    slow = butter(4, 5.0 / nyq, btype="low", output="sos")     # smooth envelope
+    return sosfiltfilt(slow, env, axis=1)[:, ::decim].astype(np.float32)
+
+
+# band presets: list of (lo, hi, mode). 'raw' low band + 'env' rhythm bands.
+BANDSETS = {
+    "lp2": [(None, 2.0, "raw")],                                  # baseline
+    "lp2+mu": [(None, 2.0, "raw"), (8.0, 12.0, "env")],
+    "lp2+mu(8-10)": [(None, 2.0, "raw"), (8.0, 10.0, "env")],
+    "lp2+mu+beta": [(None, 2.0, "raw"), (8.0, 12.0, "env"), (13.0, 30.0, "env")],
+    "lp2+mu+beta+lowgamma": [(None, 2.0, "raw"), (8.0, 12.0, "env"),
+                             (13.0, 30.0, "env"), (30.0, 45.0, "env")],
+    "lp4+mu+beta": [(None, 4.0, "raw"), (8.0, 12.0, "env"), (13.0, 30.0, "env")],
+}
+
+
+def load_mb(subj, bands, decim):
+    """Multi-band loader: stack per-band 32-ch features -> (32*nbands, t)."""
+    key = (subj, "mb", tuple(bands), decim, tuple(CH_IDX) if CH_IDX else None)
+    if key in _CACHE:
+        return _CACHE[key]
+    fsd = FS / decim
+    lo_i, hi_i = int(CROP[0] * fsd), int(CROP[1] * fsd)
+    lp = _sos(2.0)                                     # for smoothing the target
+    trials = []
+    for series, f in enumerate(sorted(glob.glob(
+            str(DATA / "**" / f"WS_{subj}_S*.mat"), recursive=True)), 1):
+        ws = loadmat(f, struct_as_record=False, squeeze_me=True)["ws"]
+        for w in np.atleast_1d(ws.win):
+            eeg = np.asarray(w.eeg, dtype=np.float64).T
+            kin = np.asarray(w.kin, dtype=np.float64)
+            pos = kin[:, [PX + MARK - 1, PY + MARK - 1, PZ + MARK - 1]]
+            if np.isnan(pos).any():
+                continue
+            e = np.vstack([_band_feature(eeg, lo, hi, m, decim)
+                           for (lo, hi, m) in bands])
+            if CH_IDX is not None:                    # (not used for multi-band)
+                pass
+            p = sosfiltfilt(lp, pos, axis=0)[::decim]
+            vel = np.gradient(p, decim / FS, axis=0)
+            t = min(e.shape[1], vel.shape[0])
+            if t < hi_i:
+                continue
+            trials.append({"e": e[:, lo_i:hi_i].astype(np.float32),
+                           "vel": vel[lo_i:hi_i].astype(np.float32),
+                           "series": series})
+    _CACHE[key] = trials
+    return trials
+
+
 def corr(a, b):
     a, b = a - a.mean(0), b - b.mean(0)
     d = np.linalg.norm(a, axis=0) * np.linalg.norm(b, axis=0)
@@ -303,7 +367,9 @@ def main():
     ap.add_argument("--stage", default="band",
                     choices=["band", "arch", "ensemble", "pool", "quick",
                              "final", "final_motor", "improve",
-                             "final_improved", "mt", "final_mt"])
+                             "final_improved", "mt", "final_mt",
+                             "mband", "final_mband"])
+    ap.add_argument("--bandset", default="lp2+mu+beta")
     args = ap.parse_args()
     subj = args.subject
 
@@ -334,6 +400,33 @@ def main():
             r = run_nn(load(s, 2.0, DEC), BIGP)
             rs.append(r.mean()); show(f"BIGP {s}", r, t0)
         print(f"\nBIGP 3-subject MEAN r = {np.mean(rs):.3f}", flush=True)
+    elif args.stage == "mband":
+        # multi-band input sweep on one subject (filter-bank: raw low + rhythm
+        # envelopes). BIGP arch, fewer epochs for speed.
+        cfg = {**BIGP, "epochs": 60}
+        for name, bands in BANDSETS.items():
+            tr = load_mb(subj, bands, DEC)
+            nch = tr[0]["e"].shape[0]
+            t0 = time.time()
+            show(f"{name} ({nch}ch)", run_nn(tr, cfg), t0)
+    elif args.stage == "final_mband":
+        bands = BANDSETS[args.bandset]
+        pth = (ROOT / "results" / "metrics" /
+               f"mband_{args.bandset.replace('+', '_').replace('(', '').replace(')', '').replace('-', '')}.json")
+        res = json.loads(pth.read_text()) if pth.exists() else {}
+        for s in ("P1", "P2", "P3"):
+            if s in res:                                  # resume: skip done subj
+                show(f"mband[{args.bandset}] {s} (cached)", np.array(res[s]))
+                continue
+            t0 = time.time()
+            r = run_nn(load_mb(s, bands, DEC), BIGP)
+            res[s] = [float(x) for x in r]                # checkpoint per subject
+            pth.parent.mkdir(parents=True, exist_ok=True)
+            pth.write_text(json.dumps(res, indent=2))
+            show(f"mband[{args.bandset}] {s}", r, t0)
+        means = [np.mean(v) for v in res.values()]
+        print(f"\nmband[{args.bandset}] 3-subject MEAN r = {np.mean(means):.3f}",
+              flush=True)
     elif args.stage in ("mt", "final_mt"):
         # multi-task: predict markers (2,3,4); score marker 4 (last 3 cols)
         mt = {**BIGP, "eval_slice": (6, 9)}
