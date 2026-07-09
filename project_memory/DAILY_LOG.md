@@ -906,6 +906,37 @@ zero-tuning transfer, not a ceiling. Different modality from the EEG work -- kee
 as a separate cross-modality result, not merged with the EEG velocity ledger.
 Also fixed run_linear to infer output dim (was hardcoded to 3; failed on 2D).
 
+### LOG-026 - NHP Cross-Session HELD-OUT Test (train sessions != test sessions)
+
+Question: how well does the model generalise to data NOT in training? Correcting
+LOG-025's overstated "can't pool across sessions": that is only true for SORTED
+units (variable identity). PER-ELECTRODE multiunit counts give a consistent
+96-channel space across indy's sessions, so we can pool sessions to train and
+test on entirely HELD-OUT sessions.
+
+Method: `tools/indy_crosssession.py`. Per-electrode rates (96 ch, sum all units
+on each electrode), 50 ms bins, 2 s windows. Train on 6 indy sessions (pooled,
+per-session z-scored), TEST on 2 sessions never in training. Best TCN+GRU
+(0.77 MB). Target: 2D fingertip velocity (auto-selected movement axes 1,2).
+
+Results (Pearson r on HELD-OUT sessions):
+| Held-out session | r_mean | axis1 | axis2 |
+| --- | ---: | ---: | ---: |
+| 20161017_02 | 0.864 | 0.835 | 0.892 |
+| 20161024_03 | 0.849 | 0.824 | 0.875 |
+| mean | 0.856 | | |
+
+Interpretation (KEY): the model generalises to ENTIRELY UNSEEN SESSIONS at
+r 0.856 -- essentially the same as within-session (0.848-0.894). So it learns
+genuine, session-stable motor encoding, not per-session overfitting. This is a
+true held-out generalisation test (test sessions never in the training set), and
+it holds up. Model stays 0.77 MB (192,770 params, 96->F). Trained on 6 sessions;
+scaling to more training sessions should hold or improve.
+
+Correction to LOG-025: cross-session pooling IS valid with per-electrode
+features (not sorted units). Both are legitimate: LOG-025 = within-session
+sorted-unit decode; LOG-026 = cross-session per-electrode generalisation.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name

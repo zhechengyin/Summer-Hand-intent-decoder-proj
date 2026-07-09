@@ -40,6 +40,12 @@ Last updated: 2026-07-07
   velocity from INTRACORTICAL primate spikes (Zenodo 3854034, indy session) at
   r 0.848 vs linear 0.731 -- architecture is modality-general (EEG voltage or
   binned spike rates, channels-x-time). Tool: `tools/indy_velocity.py`.
+- Cross-SESSION held-out generalisation (LOG-026): with per-electrode features
+  (96 consistent channels), train on 6 indy sessions and TEST on 2 sessions
+  never in training -> held-out mean r 0.856 (0.864, 0.849), same as
+  within-session. Model generalises to unseen sessions, 0.77 MB. Tool:
+  `tools/indy_crosssession.py`. (Sorted units vary per session; per-electrode
+  does not -- that is why pooling works.)
 - Artifact check (LOG-023): motor-channels-only BIG TCN+GRU still reaches mean
   r 0.823 (P1 0.851, P2 0.763, P3 0.855) -- only 0.02 below all-channel 0.843,
   vs the linear decoder which lost ~0.13. So the deep model decodes largely
