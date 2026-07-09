@@ -937,6 +937,40 @@ Correction to LOG-025: cross-session pooling IS valid with per-electrode
 features (not sorted units). Both are legitimate: LOG-025 = within-session
 sorted-unit decode; LOG-026 = cross-session per-electrode generalisation.
 
+### LOG-027 - Cross-SUBJECT Test: Same-Day Works, Different-Monkey Collapses
+
+Question: does the model work ACROSS PEOPLE (subjects), or only across days for
+the same subject?
+
+Method: `tools/indy_crosssession.py` (TEST = one held-out indy session + one loco
+session). Train on 6 indy sessions (per-electrode 96 ch). Test on: (a) a held-out
+indy session (same monkey, unseen day), (b) a loco session (the OTHER monkey).
+Loco subset to first 96 electrodes to match input size.
+
+Results (Pearson r on held-out sessions):
+| Held-out test | r_mean | axis1 | axis2 |
+| --- | ---: | ---: | ---: |
+| indy 20161017_02 (same subject, unseen day) | 0.864 | 0.835 | 0.892 |
+| loco 20170215_02 (DIFFERENT subject) | -0.048 | 0.012 | -0.107 |
+
+Interpretation (KEY, answers "does it work across people"): NO. Same-subject
+across-days generalises (0.864); cross-subject collapses to ZERO (-0.048). An
+indy-trained model has no predictive power on loco because loco's 96 electrodes
+record different neurons in a different brain -- the input channels do not
+correspond across subjects. Cross-subject intracortical decoding needs per-person
+calibration or neural-alignment ("stitching") methods, not transfer of a trained
+model. This is expected and is the fundamental reason intracortical BCIs are
+calibrated per person.
+
+Caveat: loco was decoded on indy's fixed velocity axes; even with perfect axes,
+the neural input is non-corresponding, so collapse is driven by the electrode/
+neuron mismatch, not axis choice. Note: EEG differs -- shared 10-20 scalp
+positions make cross-subject at least geometrically possible (untested for
+velocity here).
+
+Summary of the generalisation ladder (finger velocity, TCN+GRU 0.77-0.81 MB):
+within-session ~0.85-0.89 | across-days same-subject 0.856 | across-subjects ~0.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name

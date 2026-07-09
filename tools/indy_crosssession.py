@@ -37,7 +37,10 @@ WIN = 2.0
 
 TRAIN = ["indy_20161005_06", "indy_20161006_02", "indy_20161007_02",
          "indy_20161011_03", "indy_20161013_03", "indy_20161014_04"]
-TEST = ["indy_20161017_02", "indy_20161024_03"]     # never in training
+# TEST: one held-out INDY session (same subject) + one LOCO session (other
+# monkey, different brain/array) -> same-subject vs cross-subject comparison.
+TEST = ["indy_20161017_02", "loco_20170215_02"]
+NCH = 96                                            # match indy M1 array size
 
 CFG = {**R.BASE, "dils": [1, 2, 4, 8, 16], "H": 64, "L": 2, "F": 64,
        "epochs": 60, "noise": 0.1, "chdrop": 0.1, "cosine": True}
@@ -70,6 +73,8 @@ def load_electrode(name):
                 allst.append(np.atleast_1d(st))
         if allst:
             rates[ch] = np.histogram(np.concatenate(allst), bins=edges)[0]
+    if rates.shape[0] > NCH:            # loco has M1+S1 (192): keep first NCH (M1)
+        rates = rates[:NCH]
     pos_b = np.stack([np.interp(centers, t, fp[a]) for a in range(fp.shape[0])], 1)
     vel = np.gradient(pos_b, BIN, axis=0)                 # (bins, 3)
     return rates, vel.astype(np.float32)

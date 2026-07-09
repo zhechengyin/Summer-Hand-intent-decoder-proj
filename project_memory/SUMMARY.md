@@ -46,6 +46,11 @@ Last updated: 2026-07-07
   within-session. Model generalises to unseen sessions, 0.77 MB. Tool:
   `tools/indy_crosssession.py`. (Sorted units vary per session; per-electrode
   does not -- that is why pooling works.)
+- Cross-SUBJECT limit (LOG-027): indy-trained model on a held-out indy day =
+  r 0.864, but on loco (the OTHER monkey) = r -0.048 (collapse). Does NOT
+  transfer across subjects -- different brains/electrodes have no channel
+  correspondence; needs per-person calibration/alignment. Generalisation ladder:
+  within-session ~0.85 | across-days same-subject 0.856 | across-subjects ~0.
 - Artifact check (LOG-023): motor-channels-only BIG TCN+GRU still reaches mean
   r 0.823 (P1 0.851, P2 0.763, P3 0.855) -- only 0.02 below all-channel 0.843,
   vs the linear decoder which lost ~0.13. So the deep model decodes largely
