@@ -1036,6 +1036,37 @@ literature). Model of record stays single-band BIGP (mean r 0.853).
 Possible (low-ROI) refinement not pursued: add a sparsity/entropy penalty to push
 gates toward 0/1 so they must commit -- but best case only ties single-band.
 
+### LOG-030 - Velocity-Target Low-Pass Sweep on Monkey Data (small real gain)
+
+Question (user): did we ever try a low-pass at 3 Hz? -> No: EEG swept 2/4/8/12
+(2 best); the MONKEY pipeline used NO low-pass (raw numerical gradient of finger
+position = noisy). Test low-passing the velocity target (arm velocity is
+band-limited ~<5 Hz, so this removes derivative/marker jitter).
+
+Method: `tools/indy_vellp.py`. indy_20161005_06, sorted-unit rates (50 ms bins),
+low-pass finger position before gradient, sweep cutoff. TCN+GRU, within-session
+5-block CV.
+
+Results (r_mean):
+| vel-LP cutoff | r |
+| --- | ---: |
+| none (raw) | 0.850 |
+| 8 Hz | 0.850 |
+| 6 Hz | 0.850 |
+| 4 Hz | 0.853 |
+| 3 Hz | 0.856 |
+| 2 Hz | 0.860 |
+
+Interpretation: low-passing the velocity target monotonically raises r as the
+cutoff drops; >=6 Hz has no effect (velocity has ~no energy there at 20 Hz
+sampling). 3 Hz -> +0.006, 2 Hz -> +0.010. Real but modest. CAVEAT: part of the
+gain is genuine (removing numerical-derivative/marker noise) and part is the
+easier-target effect (smoother signal is easier to predict); pushed too far it
+would remove real movement dynamics. Reach dynamics run ~3-5 Hz, so 3-4 Hz is the
+honest sweet spot; 2 Hz is borderline over-smoothing. Recommend adopting a 3 Hz
+velocity low-pass as the monkey pipeline default and re-checking the cross-session
+held-out headline (was 0.856 with no LP).
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
