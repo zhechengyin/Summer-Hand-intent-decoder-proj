@@ -23,6 +23,8 @@ from pathlib import Path
 
 import numpy as np
 import h5py
+from scipy.ndimage import gaussian_filter1d
+from scipy.signal import butter, sosfiltfilt
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -37,10 +39,11 @@ WIN = 2.0
 
 TRAIN = ["indy_20161005_06", "indy_20161006_02", "indy_20161007_02",
          "indy_20161011_03", "indy_20161013_03", "indy_20161014_04"]
-# TEST: one held-out INDY session (same subject) + one LOCO session (other
-# monkey, different brain/array) -> same-subject vs cross-subject comparison.
-TEST = ["indy_20161017_02", "loco_20170215_02"]
+# TEST: held-out INDY sessions (same subject, never in training).
+TEST = ["indy_20161017_02", "indy_20161024_03"]
 NCH = 96                                            # match indy M1 array size
+VEL_LP = 3.0                                        # velocity target low-pass (LOG-030)
+RATE_SIGMA = 1.0                                    # firing-rate smoothing (LOG-032)
 
 CFG = {**R.BASE, "dils": [1, 2, 4, 8, 16], "H": 64, "L": 2, "F": 64,
        "epochs": 60, "noise": 0.1, "chdrop": 0.1, "cosine": True}
@@ -75,7 +78,12 @@ def load_electrode(name):
             rates[ch] = np.histogram(np.concatenate(allst), bins=edges)[0]
     if rates.shape[0] > NCH:            # loco has M1+S1 (192): keep first NCH (M1)
         rates = rates[:NCH]
+    if RATE_SIGMA:                      # input firing-rate smoothing (raises SNR)
+        rates = gaussian_filter1d(rates, RATE_SIGMA, axis=1).astype(np.float32)
     pos_b = np.stack([np.interp(centers, t, fp[a]) for a in range(fp.shape[0])], 1)
+    if VEL_LP:                          # low-pass position before differentiating
+        sos = butter(4, VEL_LP / (0.5 / BIN), btype="low", output="sos")
+        pos_b = sosfiltfilt(sos, pos_b, axis=0)
     vel = np.gradient(pos_b, BIN, axis=0)                 # (bins, 3)
     return rates, vel.astype(np.float32)
 

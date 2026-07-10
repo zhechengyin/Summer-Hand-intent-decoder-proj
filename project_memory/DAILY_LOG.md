@@ -1122,6 +1122,28 @@ deployment is nearly free here. Best offline config of record for monkey:
 per-electrode rates + 3 Hz vel-LP + sigma1 rate-smooth, TCN+GRU; real-time =
 causal variant. Next: re-run cross-session held-out with this config.
 
+### LOG-033 - Cross-Session Held-Out Re-Run with Tuned Config: 0.856 -> 0.870
+
+Question: does the tuning (3 Hz vel-LP + sigma=1 rate-smoothing) improve the main
+held-out cross-session number (train sessions != test sessions)?
+
+Method: `tools/indy_crosssession.py` updated with VEL_LP=3.0 and RATE_SIGMA=1.0.
+Train on 6 indy sessions (per-electrode 96 ch), test on 2 held-out indy sessions.
+
+Results (Pearson r on HELD-OUT sessions):
+| Held-out session | no LP (LOG-026) | tuned (3 Hz LP + sigma1) |
+| --- | ---: | ---: |
+| 20161017_02 | 0.864 | 0.878 |
+| 20161024_03 | 0.849 | 0.863 |
+| mean | 0.856 | 0.870 |
+
+Interpretation: the untried low-pass (velocity target 3 Hz) + input firing-rate
+smoothing (sigma=1) lift the held-out cross-session headline +0.014 (both unseen
+sessions improve). Bigger gain on the held-out metric than within-session
+(+0.009) -- the smoothing helps generalisation. NEW monkey best (held-out,
+unseen-session): mean r 0.870 (0.77 MB TCN+GRU). Real-time causal variant ~0.865
+expected (within-session cost was -0.005).
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
