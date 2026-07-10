@@ -1001,6 +1001,41 @@ gate from a small conv). run_nn can return the learned gate profile (ret_gate) s
 we can read out the pattern (which band, when). Stage `--stage gate`. Results in
 LOG-029.
 
+### LOG-029 - Learned Band-Gating: No Gain, No Strong Pattern (honest negative)
+
+Question (user idea): instead of always concatenating bands, LEARN a gate that
+feeds each band only when it helps -- and see if an interpretable "law/pattern"
+emerges (which band, when).
+
+Method: `--stage gate` on P1. Input = lp2+mu+beta (delta + mu/beta envelopes,
+3 bands x 32 ch). BandGate module: 'static' (one learned weight per band) and
+'dynamic' (per-band, per-timestep gate from a small conv). Read out the learned
+gate via run_nn(ret_gate=True).
+
+Results (P1, 3-fold):
+- single band lp2 (reference): 0.880
+- concat (no gate): 0.864
+- band-gate static: 0.864 | learned weights delta 0.514, mu 0.483, beta 0.504
+- band-gate dynamic: 0.860 | gates ~0.5 all bands; only faint mu rise post-onset
+  (pre 0.491 -> post 0.531)
+
+Interpretation: gating did NOT help (0.86 ~ concat, both < single-band 0.88) and
+learned NO strong pattern -- the gate sat near uniform (~0.5), never suppressing
+mu/beta. The only directional hint (mu gate up slightly post-movement-onset) is
+consistent with mu ERD but negligible in effect. Root cause: mu/beta envelopes
+carry little COMPLEMENTARY velocity info beyond the <2 Hz movement potential for
+this EXECUTION task, so there is nothing useful for the gate to select -- gating
+cannot create signal that is not there. Even the best case (gate learns to drop
+mu/beta) would only recover single-band 0.88, not beat it.
+
+The interpretable "law" that emerged is the null one: for movement-EXECUTION
+velocity decoding, the delta (<2 Hz) movement-related potential is the workhorse;
+mu/beta rhythms add ~nothing (despite their role in motor IMAGERY in the
+literature). Model of record stays single-band BIGP (mean r 0.853).
+
+Possible (low-ROI) refinement not pursued: add a sparsity/entropy penalty to push
+gates toward 0/1 so they must commit -- but best case only ties single-band.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
