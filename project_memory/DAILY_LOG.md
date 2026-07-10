@@ -1144,6 +1144,38 @@ sessions improve). Bigger gain on the held-out metric than within-session
 unseen-session): mean r 0.870 (0.77 MB TCN+GRU). Real-time causal variant ~0.865
 expected (within-session cost was -0.005).
 
+### LOG-034 - Slow/Fast Velocity Decomposition Test (external spec, monkey)
+
+Question (from a provided test spec, monkey pipeline only): does splitting
+fingertip velocity into slow (3 Hz-lowpass-position velocity) + fast residual
+(raw - slow), decoding each separately, and adding them back beat a direct raw
+decoder?
+
+Method: `tools/indy_slow_fast.py`. indy_20161005_06, sorted-unit rates (50 ms
+bins, 235 units), 2 s windows, 5-block CV. Raw and slow built from the SAME
+position samples/axes so residual subtraction is exact. Three TCN+GRU decoders
+(raw, slow, fast); additive = pred_slow + alpha*pred_fast, alpha sweep.
+
+Results (mean r, 5-fold):
+- raw_direct (pred_raw vs raw): 0.845
+- slow_vs_slow (pred_slow vs slow): 0.851
+- slow_vs_raw (pred_slow vs raw): 0.841
+- fast_vs_fast (pred_fast vs fast): 0.428
+- additive vs raw: a0=0.841, 0.25=0.842, 0.5=0.843, 0.75=0.843, 1.0=0.842
+- best_alpha=0.75, best_additive_r=0.843
+
+Interpretation (per the spec's rules): the fast residual (3-10 Hz band) IS
+decodable from 50 ms-binned spikes -- fast_vs_fast=0.428 is clearly positive and
+best alpha != 0, so it is real neural-encoded movement, NOT just marker/derivative
+noise. HOWEVER the additive slow+fast decoder (0.843) does NOT beat the direct raw
+decoder (0.845) -- it only edges past slow-only (0.841). This is the spec's rule 3:
+the split works partially but the single direct model already learns the best
+slow+fast mixture internally. DO NOT claim the decomposition improves decoding
+(it does not). Honest read: fast residual carries genuine decodable movement, but
+explicit splitting adds complexity with no held-out gain. Model of record
+unchanged (single TCN+GRU; monkey held-out best 0.870, LOG-033).
+Artifact: `results/metrics/indy_slow_fast.json`.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
