@@ -1222,6 +1222,33 @@ a documented option. Lesson: trust the held-out generalisation metric, not a
 single within-session CV, for architecture decisions. Monkey held-out best stays
 0.870 (LOG-033).
 
+### LOG-037 - Activation Function Study (MI classification + monkey velocity)
+
+Question (user): which activation is best -- is GELU best for MI as commonly
+believed?
+
+Method: `tools/mi_activation.py` (eegmmidb left/right MI, 4 subjects, compact
+EEGNet-style CNN, subject-specific 4-fold, chance 0.50) and
+`tools/monkey_activation.py` (indy velocity, tuned preprocessing, TCN+GRU,
+within-session 5-block CV). build_net gains cfg["act"] to swap the conv/TCN
+activation. Sweep: gelu/relu/elu/silu/leaky_relu/tanh/mish/selu.
+
+Results:
+MI (acc, chance 0.50): elu 0.727, selu 0.722, relu 0.721, tanh 0.714, mish 0.712,
+gelu 0.711, leaky_relu 0.710, silu 0.701. Range 0.026; between-subject std
+~0.07-0.13 (>> range).
+Monkey (r_mean): relu 0.870, leaky_relu 0.870, elu 0.867, selu 0.864, mish 0.863,
+gelu 0.859, silu 0.854, tanh 0.850. Range 0.020; single run per activation.
+
+Interpretation: activation choice BARELY matters -- differences (~0.02) are within
+run-to-run/subject noise on both tasks. Weak but CONSISTENT pattern across both:
+ReLU-family (relu/leaky_relu/elu) at the top, GELU MID-PACK, tanh/silu lower. So
+GELU-is-best (the common belief) is NOT supported -- if anything ReLU/LeakyReLU/ELU
+edge it. Per the LOG-036 lesson (single-run gains can be noise), NOT changing the
+model of record on this; ReLU/LeakyReLU is a fine, simpler default. GELU remains
+fine. To make a firm claim would need multi-seed + held-out validation.
+Artifacts: results/metrics/mi_activation.json, monkey_activation.json.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name

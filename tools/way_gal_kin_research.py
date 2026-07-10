@@ -195,6 +195,11 @@ def build_net(cfg, n_ch):
     import torch
     import torch.nn as nn
 
+    _ACTS = {"gelu": nn.GELU, "relu": nn.ReLU, "elu": nn.ELU, "silu": nn.SiLU,
+             "leaky_relu": nn.LeakyReLU, "tanh": nn.Tanh, "mish": nn.Mish,
+             "selu": nn.SELU}
+    Act = _ACTS.get(cfg.get("act", "gelu"), nn.GELU)   # conv/TCN activation
+
     class BandGate(nn.Module):
         """Learned gate over frequency bands. 'static' = one weight per band
         (which bands help overall). 'dynamic' = per-band, per-timestep gate from
@@ -226,14 +231,14 @@ def build_net(cfg, n_ch):
             bg = cfg.get("band_gate")
             self.gate = BandGate(n_ch, cfg["nbands"], bg) if bg else None
             sp = [nn.Conv1d(n_ch, F, 1), nn.BatchNorm1d(F)]
-            if cfg.get("sp_act", True):        # GELU after spatial-mix BN (opt.)
-                sp.append(nn.GELU())
+            if cfg.get("sp_act", True):        # activation after spatial-mix BN
+                sp.append(Act())
             self.sp = nn.Sequential(*sp)
             self.convs = nn.ModuleList(
                 [nn.Conv1d(F, F, 3, padding=(3 - 1) * d, dilation=d)
                  for d in cfg["dils"]])
             self.pads = [(3 - 1) * d for d in cfg["dils"]]
-            self.act = nn.GELU(); self.drop = nn.Dropout(cfg["dropout"])
+            self.act = Act(); self.drop = nn.Dropout(cfg["dropout"])
             self.gru = nn.GRU(F, cfg["H"], cfg["L"], batch_first=True,
                               bidirectional=cfg["bidir"],
                               dropout=cfg["dropout"] if cfg["L"] > 1 else 0.0)
