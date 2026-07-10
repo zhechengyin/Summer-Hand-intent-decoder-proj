@@ -1362,6 +1362,42 @@ Decision: Proceed with Option 1 (peak detection + channel selection). Next:
 learned vs firing-rate vs random 8-channel selection (indy_chan_select.py), then
 an adaptive/switching gate for non-stationarity.
 
+### LOG-043 - Which 8 channels? Learned selection overfits; firing-rate wins. + repo reorg
+
+Question: Given the 8-channel hardware limit, does a smart choice of *which* 8
+electrodes beat naive selection, and how close to the 96-ch ceiling can 8 get?
+
+Method: Cross-session held-out. Three strategies, each ending in a clean 8-ch
+TCN+GRU trained on just those 8: (a) random-8, (b) top-8 by mean train firing
+rate, (c) top-8 by a learned L1 stochastic-gate over all 96 (Balin'19/Yamada'20
+style -- decoder learns which channels it wants, ranked by sigmoid-gate).
+
+Command: py frontier/chan_select.py  (results/metrics/indy_chan_select.json)
+
+Results (held-out mean r; ceiling 96ch=0.87):
+  random8  = 0.690
+  firing8  = 0.760   <- best
+  learned8 = 0.706
+  learned8 vs firing8 channel overlap: 2/8; learned8 higher variance across the
+  two test sessions (0.762 / 0.651).
+
+Interpretation: The learned selector OVERFITS to the 6 training sessions -- it
+latches onto in-sample-informative channels that don't generalise to held-out
+sessions. Firing rate is a robust, session-invariant criterion and wins. Lesson
+(again): trust the held-out metric; fancy end-to-end selection can lose to a
+simple robust heuristic when training sessions are few. For the 8-ch device:
+select the 8 highest-firing electrodes.
+
+Decision: Use firing-rate top-8 for the 8-ch front-end (0.76). Learned *static*
+selection is not worth it. This motivates the next idea -- an *adaptive/switching*
+gate for non-stationarity (electrode drift), but it must be regularised against
+the same overfitting.
+
+Repo: reorganised into frontier/ (active monkey decoding) + legacy/ (EEG+fNIRS
+work) + frontier/best_model/ (current-best spec + checkpoint script). Shared
+architecture extracted to frontier/core.py. Old tools/indy_*.py -> frontier/*.py;
+tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name

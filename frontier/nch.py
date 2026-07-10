@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import tools.indy_crosssession as X
+import frontier.crosssession as X
 
 NS = [8, 16, 32, 96]
 

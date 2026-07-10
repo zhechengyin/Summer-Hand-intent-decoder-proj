@@ -23,9 +23,9 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import tools.indy_velocity as IV
-import tools.indy_vellp as VL
-import tools.way_gal_kin_research as R
+import frontier.velocity as IV
+import frontier.vellp as VL
+import frontier.core as R
 
 BASE = {**R.BASE, "dils": [1, 2, 4, 8, 16], "H": 64, "L": 2, "F": 64,
         "act": "relu",                              # ReLU = monkey default (LOG-038)

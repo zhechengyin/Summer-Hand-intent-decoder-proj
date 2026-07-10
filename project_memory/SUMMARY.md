@@ -1,6 +1,6 @@
 # Project Summary
 
-Last updated: 2026-07-07
+Last updated: 2026-07-10
 
 ## Dataset And Task
 
@@ -14,7 +14,7 @@ Last updated: 2026-07-07
   hand MI (chance 0.50). Our Riemannian tangent front end hits 0.64 LORO there
   on 10 subjects (LOG-011/013), confirming the pipeline extracts real MI signal
   when a decodable contrast exists -- ds004022 near-chance is task difficulty,
-  not a bug. Probe: `tools/eegmmidb_probe.py`.
+  not a bug. Probe: `legacy/tools/eegmmidb_probe.py`.
 
 ## CURRENT BEST RESULT: EEG -> Finger/Hand Velocity (WAY-EEG-GAL)
 
@@ -28,7 +28,7 @@ Last updated: 2026-07-07
   [1.5, 7.0] s, TCN dilations 1/2/4/8/16/32 + bidirectional GRU (hidden 64, 2
   layers) + F=64, data augmentation (Gaussian noise 0.1 + channel dropout 0.1),
   cosine LR, AdamW, 150 epochs, 3-fold over series. Marker 4 (best hand/finger
-  sensor). Code: `tools/way_gal_kin_research.py --stage final_improved`.
+  sensor). Code: `legacy/tools/way_gal_kin_research.py --stage final_improved` (EEG, legacy).
 - Model size: **201,155 trainable params** (~0.80 MB fp32) -- fits a <1 MB
   inference device. (Prior BIG: 188,803 params, mean r 0.843.)
 - What drove it (+0.18 over the 0.664 baseline): (1) cropping to the movement
@@ -39,7 +39,7 @@ Last updated: 2026-07-07
 - Cross-modality transfer (LOG-025): the SAME TCN+GRU (0.81 MB) decodes finger
   velocity from INTRACORTICAL primate spikes (Zenodo 3854034, indy session) at
   r 0.848 vs linear 0.731 -- architecture is modality-general (EEG voltage or
-  binned spike rates, channels-x-time). Tool: `tools/indy_velocity.py`.
+  binned spike rates, channels-x-time). Tool: `frontier/velocity.py`.
 - Axis/bin config (LOG-040/041): tested 3D velocity (held-out 3D mean r 0.731 --
   the two movement axes ~0.84-0.88, depth axis ~0.47 as the reach is ~planar) then
   REVERTED to 2D per user (movement axes only, held-out ~0.87). Bins switched
@@ -51,7 +51,7 @@ Last updated: 2026-07-07
   smoothing, LOG-030/032) -> held-out mean r **0.870** (0.878, 0.863), up from
   0.856. 0.77 MB TCN+GRU. Real-time inference ~6 ms/pred bidirectional (9x margin
   @50 ms) or ~3.7 ms causal; causal real-time costs only ~0.005 (LOG-031/032).
-  Tool: `tools/indy_crosssession.py`. (Sorted units vary per session;
+  Tool: `frontier/crosssession.py`. (Sorted units vary per session;
   per-electrode does not -- that is why pooling works. Does NOT transfer across
   subjects, LOG-027.) Activation set to ReLU (LOG-037/038; within-noise nominal
   best, not held-out re-validated). EEG pipeline keeps GELU default.
@@ -61,7 +61,15 @@ Last updated: 2026-07-07
   slope means *which* 8 matters -> channel selection has leverage. NOTE: dataset
   has NO continuous broadband voltage (only spike times + 64-sample waveform
   snippets), so "raw voltage -> model" (Option 2) is not benchmarkable here; only
-  peak-detection (Option 1) is. Tools: `indy_nch.py`, `indy_chan_select.py`.
+  peak-detection (Option 1) is. Tools: `frontier/nch.py`, `frontier/chan_select.py`.
+- CHANNEL SELECTION -- which 8? (LOG-043): random8=0.690, firing8=0.760 (best),
+  learned8 (L1 stochastic-gate)=0.706. Learned selection OVERFITS to the 6 train
+  sessions (2/8 overlap with firing8, higher variance) and loses to the robust
+  firing-rate heuristic. Decision: 8-ch device = top-8 by firing rate. Next:
+  adaptive/switching gate for non-stationarity (must resist the same overfit).
+- REPO REORG (LOG-043): code split into `frontier/` (active monkey decoding;
+  shared arch in `frontier/core.py`; current best in `frontier/best_model/`) and
+  `legacy/` (EEG+fNIRS). Monkey scripts renamed tools/indy_X.py -> frontier/X.py.
 - Cross-SUBJECT limit (LOG-027): indy-trained model on a held-out indy day =
   r 0.864, but on loco (the OTHER monkey) = r -0.048 (collapse). Does NOT
   transfer across subjects -- different brains/electrodes have no channel
@@ -146,7 +154,7 @@ was weakest:
 Reason: transformer/CNN SOTA numbers (e.g. Conformer ~78% on BCI IV-2a) rely on
 ~10x more trials/subject + augmentation. At this data scale the compact
 classical/geometric pipeline is the correct tool. Bench code:
-`src/conformer.py`, `tools/architecture_bench.py`.
+`legacy/src/conformer.py`, `legacy/tools/architecture_bench.py`.
 
 ## Working Interpretation
 

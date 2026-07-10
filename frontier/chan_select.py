@@ -27,8 +27,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import tools.indy_crosssession as X
-import tools.way_gal_kin_research as R
+import frontier.crosssession as X
+import frontier.core as R
 
 K = 8
 
