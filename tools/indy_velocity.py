@@ -52,10 +52,11 @@ def load(path):
                 continue
             rates.append(np.histogram(st, bins=edges)[0])
     rates = np.asarray(rates, dtype=np.float32)          # (n_units, nb)
-    # full 3D finger velocity at bin centers
+    # 2D finger velocity (top-2 movement axes)
     pos_b = np.stack([np.interp(centers, t, fp[a]) for a in range(fp.shape[0])], 1)
     vel = np.gradient(pos_b, BIN, axis=0)                # (nb, 3)
-    return rates, vel.astype(np.float32), nb
+    axes = np.sort(np.argsort(vel.std(0))[-2:])          # top-2 moving axes
+    return rates, vel[:, axes].astype(np.float32), nb
 
 
 def make_trials(rates, vel, nb):

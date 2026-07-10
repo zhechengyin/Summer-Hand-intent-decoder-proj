@@ -55,7 +55,8 @@ def load_smoothed(path, lp):
         sos = butter(4, lp / (0.5 / IV.BIN), btype="low", output="sos")
         pos = sosfiltfilt(sos, pos, axis=0)
     vel = np.gradient(pos, IV.BIN, axis=0)
-    return rates, vel.astype(np.float32), len(edges) - 1   # 3D finger velocity
+    axes = np.sort(np.argsort(vel.std(0))[-2:])           # top-2 movement axes (2D)
+    return rates, vel[:, axes].astype(np.float32), len(edges) - 1
 
 
 def main():

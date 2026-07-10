@@ -1326,6 +1326,15 @@ mean r 0.731, OR the two movement axes ~0.86 (comparable to the prior 2D 0.870).
 Config of record: per-electrode, 40 ms bins, 3D velocity, ReLU, 3 Hz vel-LP,
 sigma1 rate-smooth.
 
+### LOG-041 - Revert to 2D Velocity (user; keep 40 ms bins)
+
+User: switch back to 2D. Reverted the axis selection in all monkey loaders
+(indy_crosssession/velocity/vellp/subbin/slow_fast) from all-3-axes back to the
+top-2 movement axes. Kept the 40 ms bins (LOG-040) -- not asked to revert those.
+Config of record: 2D finger velocity, 40 ms bins, per-electrode, ReLU, 3 Hz
+vel-LP, sigma1 rate-smooth. Held-out best ~0.87 (2D movement axes). No re-run
+(config-only revert).
+
 ## Entry Template
 
 ### LOG-XXX - Short Name

@@ -68,8 +68,9 @@ def load(path, K):
     centers = coarse[:-1] + BIN / 2
     pos = np.stack([np.interp(centers, t, fp[a]) for a in range(fp.shape[0])], 1)
     sos = butter(4, 3.0 / (0.5 / BIN), btype="low", output="sos")   # 3 Hz vel-LP
-    vel = np.gradient(sosfiltfilt(sos, pos, axis=0), BIN, axis=0)   # 3D velocity
-    return rates.astype(np.float32), vel.astype(np.float32), n_dec, U.shape[0]
+    vel = np.gradient(sosfiltfilt(sos, pos, axis=0), BIN, axis=0)
+    axes = np.sort(np.argsort(vel.std(0))[-2:])                     # top-2 (2D)
+    return rates.astype(np.float32), vel[:, axes].astype(np.float32), n_dec, U.shape[0]
 
 
 def main():

@@ -40,10 +40,11 @@ Last updated: 2026-07-07
   velocity from INTRACORTICAL primate spikes (Zenodo 3854034, indy session) at
   r 0.848 vs linear 0.731 -- architecture is modality-general (EEG voltage or
   binned spike rates, channels-x-time). Tool: `tools/indy_velocity.py`.
-- 3D + 40 ms update (LOG-040): monkey pipeline now decodes the full 3D finger
-  velocity at 40 ms bins. Held-out 3D mean r 0.731 -- the two real movement axes
-  still ~0.84-0.88 (~same as prior 2D 0.870); the depth axis is ~0.47 because the
-  reach is ~planar (var 0.56 vs ~7). 40 ms ~= 50 ms.
+- Axis/bin config (LOG-040/041): tested 3D velocity (held-out 3D mean r 0.731 --
+  the two movement axes ~0.84-0.88, depth axis ~0.47 as the reach is ~planar) then
+  REVERTED to 2D per user (movement axes only, held-out ~0.87). Bins switched
+  50 ms -> 40 ms (40 ms ~= 50 ms, within noise). Current config: 2D velocity,
+  40 ms bins.
 - Cross-SESSION held-out generalisation (LOG-026/033): per-electrode features
   (96 consistent channels), train on 6 indy sessions, TEST on 2 sessions never in
   training. Tuned config (3 Hz velocity-target low-pass + sigma=1 firing-rate

@@ -7,8 +7,8 @@ consistent across sessions). That lets us POOL several sessions to TRAIN one
 model and evaluate on ENTIRELY HELD-OUT SESSIONS the model never trained on --
 a true generalisation test (the standard, hard cross-session BCI setting).
 
-Model: our best TCN+GRU (0.8 MB). Target: full 3D fingertip velocity. Metric:
-Pearson r on held-out test sessions (per axis + mean).
+Model: our best TCN+GRU (0.8 MB). Target: 2D fingertip velocity (top-2 movement
+axes). Metric: Pearson r on held-out test sessions (per axis + mean).
 
 Usage: py tools/indy_crosssession.py
 """
@@ -156,10 +156,10 @@ def main():
         loaded[s] = load_electrode(s)
         print(f"  loaded {s[5:]}: {loaded[s][0].shape[0]} electrodes, "
               f"{loaded[s][0].shape[1]} bins", flush=True)
-    # decode the FULL 3D finger-velocity vector (all axes)
+    # fixed movement axes = top-2 velocity-variance axes averaged over TRAIN
     var = np.mean([loaded[s][1].std(0) for s in TRAIN], 0)
-    axes = np.arange(loaded[TRAIN[0]][1].shape[1])          # all 3 axes
-    print(f"\ndecoding 3D finger velocity, axes {axes.tolist()} "
+    axes = np.sort(np.argsort(var)[-2:])                    # top-2 (2D)
+    print(f"\ndecoding 2D finger velocity, axes {axes.tolist()} "
           f"(var {var.round(2).tolist()})", flush=True)
 
     train_trials = []
