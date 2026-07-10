@@ -1067,6 +1067,31 @@ honest sweet spot; 2 Hz is borderline over-smoothing. Recommend adopting a 3 Hz
 velocity low-pass as the monkey pipeline default and re-checking the cross-session
 held-out headline (was 0.856 with no LP).
 
+### LOG-031 - Real-Time Inference Latency (and the causality caveat)
+
+Question: is the velocity decoder fast enough for real-time, and does it work
+causally? Real-time control rate = one prediction per 50 ms bin (20 Hz).
+
+Method: time one forward pass on a 2 s window (96 ch x 40 bins) on 1 CPU core.
+
+Results (1 core):
+| Model | params | ms/pred | preds/s | margin vs 50 ms |
+| --- | ---: | ---: | ---: | ---: |
+| bidirectional (best) | 192,770 | 5.80 | 172 | 9x |
+| causal unidirectional | 118,146 | 3.71 | 270 | 13x |
+| causal small (H32,F32) | 31,426 | 3.06 | 326 | 16x |
+
+Deployment: sliding window [now-2s, now] every 50 ms -> read the last time-step as
+current velocity. ~6 ms latency << 50 ms budget -> real-time with big headroom,
+single core.
+
+CAVEAT (causality): the best model uses a BIDIRECTIONAL GRU. Over a past window it
+is deployable (window holds only past samples; use the last step). But offline CV
+scores ALL time-steps, and middle steps see within-window "future" -- at
+deployment only the last step (past-only) is available, which may be slightly
+less accurate. The causal UNIDIRECTIONAL model avoids this mismatch and is faster
+(3.7 ms); its accuracy cost vs bidirectional is measured in LOG-032.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
