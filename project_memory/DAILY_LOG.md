@@ -1267,6 +1267,39 @@ re-validated on the held-out test (no retrain, per the user's instruction). If a
 held-out number is needed, re-run `py tools/indy_crosssession.py`. Monkey best of
 record remains 0.870 held-out (config now ReLU).
 
+### LOG-039 - Within-Bin Spike Timing Test (rate coding suffices for velocity)
+
+Question (user, well-grounded in temporal-coding literature): does WHEN spikes
+fire within a 50 ms bin (bursts vs spread) carry velocity info beyond the count?
+
+Method: `tools/indy_subbin.py`. Controlled -- everything fixed (20 Hz output, 2 s
+window, 3 Hz vel-LP target, ReLU TCN+GRU, 5-block CV) except the input: split each
+50 ms bin into K sub-bins, stacked as channels. NO rate smoothing (would blur
+timing). indy_20161005_06. Plus a disentangling test: count + within-bin
+burstiness (std of sub-bin counts) as 2 channels/unit (no channel explosion).
+
+Results (r_mean):
+- K=1 (50 ms count, baseline): 0.864
+- K=2 (25 ms sub-bins, 470 ch): 0.831
+- K=5 (10 ms sub-bins, 1175 ch): 0.741
+- K=10 (5 ms sub-bins, 2350 ch): 0.478
+- count + burstiness (470 ch): 0.863
+
+Interpretation: finer sub-bins MONOTONICALLY HURT, and the clean burstiness
+feature (which avoids the channel explosion) is identical to count-only
+(0.863 vs 0.864). So within-bin spike TIMING adds nothing decodable for velocity
+-- the 50 ms spike COUNT is the sufficient statistic (rate coding). Both tests
+agree, so the drop is not merely overparameterisation; timing genuinely does not
+help for this target.
+
+Physiological read (do not overclaim): this does NOT refute temporal coding in
+general. The literature's timing-code results are for FAST, precise outputs
+(songbird syllable acoustics at 1 ms, precise muscle timing). Our target is SLOW,
+band-limited (<5 Hz, 3 Hz-lowpassed) reach velocity -- exactly the rate-coding
+regime. So the negative is target-specific: slow velocity is rate-coded; fine
+timing would only matter for a fast/precise output. Model of record unchanged
+(50 ms count, ReLU, held-out 0.870). Artifact: results/metrics/indy_subbin.json.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
