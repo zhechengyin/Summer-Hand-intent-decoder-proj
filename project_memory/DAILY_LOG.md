@@ -1092,6 +1092,36 @@ deployment only the last step (past-only) is available, which may be slightly
 less accurate. The causal UNIDIRECTIONAL model avoids this mismatch and is faster
 (3.7 ms); its accuracy cost vs bidirectional is measured in LOG-032.
 
+### LOG-032 - Monkey Tuning: Rate Smoothing + Causal (real-time) Cost
+
+Question: does input firing-rate smoothing add on top of the 3 Hz vel-LP, and
+how much accuracy does the honest real-time (causal) model cost?
+
+Method: `tools/indy_tune.py`. Session indy_20161005_06, vel-LP 3 Hz fixed. Sweep
+Gaussian firing-rate smoothing sigma (bins) with bidirectional GRU; then the best
+sigma with a CAUSAL unidirectional GRU. Within-session 5-block CV.
+
+Results (r_mean):
+| Config (vel-LP 3 Hz) | r |
+| --- | ---: |
+| rate-smooth sigma=0 | 0.856 |
+| rate-smooth sigma=1 (50 ms) | 0.859 (best) |
+| rate-smooth sigma=2 | 0.857 |
+| rate-smooth sigma=3 | 0.841 (over-smoothed) |
+| sigma=1 CAUSAL unidir (real-time) | 0.854 |
+
+Cumulative (within-session): raw 0.850 -> +3 Hz vel-LP 0.856 -> +sigma1
+rate-smooth 0.859 (offline bidirectional). Real-time causal = 0.854 (only -0.005
+vs bidirectional).
+
+Interpretation: input rate-smoothing (sigma=1) adds a small clean +0.003 without
+touching the target (no over-smoothing concern); sigma>=3 over-smooths the input.
+KEY: the causal unidirectional model (the honest real-time decoder, 3.7 ms/pred,
+past-only) is only 0.005 below the offline bidirectional best -- real-time
+deployment is nearly free here. Best offline config of record for monkey:
+per-electrode rates + 3 Hz vel-LP + sigma1 rate-smooth, TCN+GRU; real-time =
+causal variant. Next: re-run cross-session held-out with this config.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
