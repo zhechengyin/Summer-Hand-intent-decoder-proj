@@ -16,5 +16,5 @@ research decisions, but they are not the recommended model entry point.
 | `activation.py` | Activation-function sweep |
 | `multi.py` | Resumable per-session experiment runner |
 
-Shared model code and the held-out cross-session evaluation were promoted to
-`models/`; these trials import that package where needed.
+Shared model code was promoted to `models/`; these trials import that package
+where needed. The current evaluation uses fixed train/eval/test files.

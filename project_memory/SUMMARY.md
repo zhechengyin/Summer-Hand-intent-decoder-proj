@@ -51,7 +51,7 @@ Last updated: 2026-07-10
   smoothing, LOG-030/032) -> held-out mean r **0.870** (0.878, 0.863), up from
   0.856. 0.77 MB TCN+GRU. Real-time inference ~6 ms/pred bidirectional (9x margin
   @50 ms) or ~3.7 ms causal; causal real-time costs only ~0.005 (LOG-031/032).
-  Tool: `models/crosssession.py`. (Sorted units vary per session;
+  Historical result; current evaluation tool: `models/evaluate.py`. (Sorted units vary per session;
   per-electrode does not -- that is why pooling works. Does NOT transfer across
   subjects, LOG-027.) Activation set to ReLU (LOG-037/038; within-noise nominal
   best, not held-out re-validated). EEG pipeline keeps GELU default.
@@ -72,6 +72,10 @@ Last updated: 2026-07-10
   architecture in `best_model.py`,
   config, held-out evaluation, training entry point, and checkpoint). Old monkey
   sweeps moved to `legacy/monkey_trials/`; earlier EEG/fNIRS work remains legacy.
+- DATA SPLIT (LOG-045): replaced the 6-train/2-test cross-session script with
+  fixed `.mat` partitions named `train1`..`train6`, `eval1`, and `test1`.
+  Eight files make the closest whole-file approximation to 70/15/15 equal to
+  75/12.5/12.5. Validation selects the epoch; test is final-only.
 - Cross-SUBJECT limit (LOG-027): indy-trained model on a held-out indy day =
   r 0.864, but on loco (the OTHER monkey) = r -0.048 (collapse). Does NOT
   transfer across subjects -- different brains/electrodes have no channel

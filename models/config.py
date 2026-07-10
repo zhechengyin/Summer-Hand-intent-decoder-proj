@@ -3,7 +3,7 @@
 The decoder of record: per-electrode multiunit spike rates -> 2D fingertip
 velocity, via a dilated causal TCN + bidirectional GRU (models.best_model.build_net).
 This module is the single source of truth for the winning configuration; the
-research scripts (crosssession.py etc.) define the same values inline.
+evaluation and training scripts define the same values inline.
 """
 from models.best_model import BASE
 
@@ -22,7 +22,7 @@ MODEL = {**BASE, "dils": [1, 2, 4, 8, 16], "H": 64, "L": 2, "F": 64,
 
 # --- headline metrics (Pearson r, held-out sessions never seen in training) ---
 METRICS = {
-    "held_out_cross_session_96ch": 0.87,   # train 6 indy sessions, test 2 held-out (LOG-033)
+    "historical_cross_session_96ch": 0.87, # old 6/2 result; not the new split metric
     "held_out_8ch_firing_top8": 0.76,      # hardware constraint, top-8 by firing (LOG-042)
     "params": 192_000,
     "size_mb": 0.77,

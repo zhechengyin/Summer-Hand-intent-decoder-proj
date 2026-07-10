@@ -2,8 +2,7 @@
 """Train the current-best config on all training sessions and save a checkpoint.
 
 Produces models/checkpoint.pt = {state_dict, config, norm stats,
-metrics}. Reuses the exact preprocessing + config from the research pipeline
-(models.crosssession) so the saved model matches the reported 0.87 held-out.
+metrics}. Reuses the preprocessing and training partition from models.evaluate.
 
 Usage: py models/train_and_save.py
 """
@@ -15,11 +14,11 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import models.crosssession as X
+import models.evaluate as X
 import models.best_model as C
 
 
@@ -63,8 +62,10 @@ def main():
     out = Path(__file__).resolve().parent / "checkpoint.pt"
     torch.save({"state_dict": net.state_dict(), "config": cfg, "axes": axes.tolist(),
                 "y_mean": ym.tolist(), "y_std": ys.tolist(),
+                "split": {"train": X.TRAIN, "eval": X.EVAL, "test": X.TEST,
+                          "source_names": X.SOURCE_NAMES},
                 "note": "per-electrode 40ms rates, 3Hz vel-LP, sigma1 smooth, 2D; "
-                        "held-out cross-session r~0.87 (96ch)"}, out)
+                        "trained only on train1..train6"}, out)
     npar = sum(p.numel() for p in net.parameters())
     print(f"saved {out}  ({npar:,} params, {npar*4/1e6:.2f} MB) "
           f"[{time.time()-t0:.0f}s]", flush=True)

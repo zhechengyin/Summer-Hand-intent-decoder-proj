@@ -9,7 +9,8 @@ head.
 - [`best_model.py`](best_model.py): readable TCN+GRU architecture source and
   training primitives (`build_net` is the model constructor).
 - `config.py`: exact preprocessing, model configuration, and recorded metrics.
-- `crosssession.py`: held-out evaluation (train six indy sessions, test two).
+- `evaluate.py`: fixed file-level train/eval/test pipeline. Validation selects
+  the best epoch and test is read only for final scoring.
 - `train_and_save.py`: trains the recorded configuration and writes the checkpoint.
 - `checkpoint.pt`: learned weights plus config, axes, and target normalization;
   it is not the model source.
@@ -26,9 +27,11 @@ The full model is about 192k parameters / 0.77 MB fp32. The configuration uses
 rate smoothing, ReLU TCN blocks, and two output movement axes.
 
 ```bash
-py models/crosssession.py
+py models/evaluate.py
 py models/train_and_save.py
 ```
 
-The result is cross-session within one subject. Cross-subject transfer failed,
-so a new subject requires calibration or alignment.
+All split files are recordings from one subject. Cross-subject transfer failed,
+so a new subject requires calibration or alignment. The displayed 0.87/0.76
+figures are historical benchmarks and must not be relabeled as results from the
+new split until `evaluate.py` is run.

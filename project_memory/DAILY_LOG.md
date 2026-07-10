@@ -1400,6 +1400,21 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-045 - Explicit train/eval/test MAT-file split
+
+Request: remove the cross-session train/test arrangement and expose named data
+partitions targeting 70% train, 15% validation, and 15% test.
+
+Change: renamed the eight same-subject indy files to `train1.mat` through
+`train6.mat`, `eval1.mat`, and `test1.mat`, while recording their original names
+in `models/data_split.json`. Replaced `models/crosssession.py` with
+`models/evaluate.py`. Training uses only train files, validation chooses the best
+epoch, and test is evaluated after model selection. The other-subject loco file
+is excluded.
+
+Note: eight indivisible files cannot produce exact 70/15/15 percentages. The
+closest useful allocation is 6/1/1 = 75/12.5/12.5.
+
 ### LOG-044 - Isolate the model of record and archive trials
 
 Request: simplify the repository so the best Python model has one obvious home

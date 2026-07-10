@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-"""Cross-session held-out test on the NHP reaching dataset.
+"""Train/validation/test evaluation on session-level NHP reaching files.
 
 Unlike indy_velocity (sorted units, within-session CV), this uses PER-ELECTRODE
 multiunit spike counts (96 fixed electrodes on indy's array -> a channel space
-consistent across sessions). That lets us POOL several sessions to TRAIN one
-model and evaluate on ENTIRELY HELD-OUT SESSIONS the model never trained on --
-a true generalisation test (the standard, hard cross-session BCI setting).
+consistent across recordings). Files are assigned once to train, validation,
+or test sets. Validation selects the best epoch; test is evaluated only after
+model selection.
 
 Model: our best TCN+GRU (0.8 MB). Target: 2D fingertip velocity (top-2 movement
 axes). Metric: Pearson r on held-out test sessions (per axis + mean).
 
-Usage: py tools/indy_crosssession.py
+Usage: py models/evaluate.py
 """
 from __future__ import annotations
 
@@ -37,10 +37,17 @@ URL = "https://zenodo.org/records/3854034/files/{}?download=1"
 BIN = 0.04          # 40 ms bins -> 25 Hz
 WIN = 2.0
 
-TRAIN = ["indy_20161005_06", "indy_20161006_02", "indy_20161007_02",
-         "indy_20161011_03", "indy_20161013_03", "indy_20161014_04"]
-# TEST: held-out INDY sessions (same subject, never in training).
-TEST = ["indy_20161017_02", "indy_20161024_03"]
+# Eight same-subject recordings cannot be split at exactly 70/15/15 by file.
+# The nearest useful whole-file allocation is 6/1/1 = 75/12.5/12.5.
+TRAIN = [f"train{i}" for i in range(1, 7)]
+EVAL = ["eval1"]
+TEST = ["test1"]
+SOURCE_NAMES = {
+    "train1": "indy_20161005_06", "train2": "indy_20161006_02",
+    "train3": "indy_20161007_02", "train4": "indy_20161011_03",
+    "train5": "indy_20161013_03", "train6": "indy_20161014_04",
+    "eval1": "indy_20161017_02", "test1": "indy_20161024_03",
+}
 NCH = 96                                            # match indy M1 array size
 VEL_LP = 3.0                                        # velocity target low-pass (LOG-030)
 RATE_SIGMA = 1.0                                    # firing-rate smoothing (LOG-032)
@@ -56,8 +63,9 @@ def fetch(name):
     p = DATA / f"{name}.mat"
     if not p.exists():
         DATA.mkdir(parents=True, exist_ok=True)
-        print(f"  downloading {name} ...", flush=True)
-        urllib.request.urlretrieve(URL.format(f"{name}.mat"), p)
+        source = SOURCE_NAMES[name]
+        print(f"  downloading {source} as {name}.mat ...", flush=True)
+        urllib.request.urlretrieve(URL.format(f"{source}.mat"), p)
     return p
 
 
@@ -103,7 +111,7 @@ def windows(rates, vel, axes):
     return out
 
 
-def train_eval(train_trials, test_by_session, cfg):
+def train_eval(train_trials, eval_by_session, test_by_session, cfg):
     import torch
     import torch.nn as nn
     torch.set_num_threads(4); torch.manual_seed(42); np.random.seed(42)
@@ -120,6 +128,20 @@ def train_eval(train_trials, test_by_session, cfg):
     mse = nn.MSELoss()
     Xt, Yt = torch.tensor(Xtr), torch.tensor(Ytn)
     idx = np.arange(len(Xt)); noise = cfg["noise"]; chd = cfg["chdrop"]
+    def score(by_session):
+        net.eval()
+        res = {}
+        for name, tri in by_session.items():
+            Tt = min(t["e"].shape[1] for t in tri)
+            Xe = np.stack([t["e"][:, :Tt] for t in tri]).astype(np.float32)
+            Ye = np.stack([t["vel"][:Tt] for t in tri])
+            with torch.no_grad():
+                pr = net(torch.tensor(Xe)).numpy() * ys + ym
+            res[name] = R.corr(Ye.reshape(-1, Ye.shape[-1]),
+                               pr.reshape(-1, Ye.shape[-1]))
+        return res
+
+    best_eval, best_state = -np.inf, None
     for ep in range(cfg["epochs"]):
         net.train(); np.random.shuffle(idx)
         for b in range(0, len(idx), cfg["bs"]):
@@ -131,30 +153,30 @@ def train_eval(train_trials, test_by_session, cfg):
                 xb = xb * m / (1 - chd)
             opt.zero_grad(); mse(net(xb), Yt[idx[b:b + cfg["bs"]]]).backward(); opt.step()
         sched.step()
-    net.eval()
-    res = {}
-    for name, tri in test_by_session.items():
-        Tt = min(t["e"].shape[1] for t in tri)
-        Xe = np.stack([t["e"][:, :Tt] for t in tri]).astype(np.float32)
-        Ye = np.stack([t["vel"][:Tt] for t in tri])
-        with torch.no_grad():
-            pr = net(torch.tensor(Xe)).numpy() * ys + ym
-        res[name] = R.corr(Ye.reshape(-1, Ye.shape[-1]), pr.reshape(-1, Ye.shape[-1]))
-    return res
+        eval_res = score(eval_by_session)
+        eval_mean = float(np.mean([r.mean() for r in eval_res.values()]))
+        if eval_mean > best_eval:
+            best_eval = eval_mean
+            best_state = {k: v.detach().cpu().clone() for k, v in net.state_dict().items()}
+        net.train()
+    net.load_state_dict(best_state)
+    return score(eval_by_session), score(test_by_session)
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--keep", action="store_true")
+    ap.add_argument("--cleanup", action="store_true",
+                    help="delete the downloaded split MAT files after evaluation")
     args = ap.parse_args()
-    print("=== NHP cross-session held-out test (per-electrode, 96 ch) ===")
-    print(f"TRAIN sessions ({len(TRAIN)}): {[s[5:] for s in TRAIN]}")
-    print(f"TEST  sessions ({len(TEST)}, held out): {[s[5:] for s in TEST]}\n", flush=True)
+    print("=== NHP file-level train/eval/test split (per-electrode, 96 ch) ===")
+    print(f"TRAIN ({len(TRAIN)}): {TRAIN}")
+    print(f"EVAL  ({len(EVAL)}): {EVAL}")
+    print(f"TEST  ({len(TEST)}): {TEST}\n", flush=True)
 
     loaded = {}
-    for s in TRAIN + TEST:
+    for s in TRAIN + EVAL + TEST:
         loaded[s] = load_electrode(s)
-        print(f"  loaded {s[5:]}: {loaded[s][0].shape[0]} electrodes, "
+        print(f"  loaded {s}: {loaded[s][0].shape[0]} electrodes, "
               f"{loaded[s][0].shape[1]} bins", flush=True)
     # fixed movement axes = top-2 velocity-variance axes averaged over TRAIN
     var = np.mean([loaded[s][1].std(0) for s in TRAIN], 0)
@@ -165,6 +187,7 @@ def main():
     train_trials = []
     for s in TRAIN:
         train_trials += windows(*loaded[s], axes)
+    eval_by = {s: windows(*loaded[s], axes) for s in EVAL}
     test_by = {s: windows(*loaded[s], axes) for s in TEST}
     npar = sum(p.numel() for p in R.build_net({**CFG, "n_out": len(axes)},
                                               train_trials[0]["e"].shape[0]).parameters())
@@ -172,24 +195,29 @@ def main():
           f"({npar*4/1e6:.2f} MB)\n", flush=True)
 
     t0 = time.time()
-    res = train_eval(train_trials, test_by, CFG)
-    print(f"--- HELD-OUT TEST results ({time.time()-t0:.0f}s) ---", flush=True)
-    means = []
-    for s, r in res.items():
-        means.append(r.mean())
-        per_ax = " ".join(f"ax{i}={r[i]:.3f}" for i in range(len(r)))
-        print(f"  {s[5:]}: r_mean={r.mean():.3f} ({per_ax})", flush=True)
-    print(f"\nHELD-OUT-SESSION mean r (3D) = {np.mean(means):.3f}", flush=True)
+    eval_res, test_res = train_eval(train_trials, eval_by, test_by, CFG)
+    print(f"--- RESULTS ({time.time()-t0:.0f}s) ---", flush=True)
+    for label, res in (("EVAL", eval_res), ("TEST", test_res)):
+        means = []
+        for s, r in res.items():
+            means.append(r.mean())
+            per_ax = " ".join(f"ax{i}={r[i]:.3f}" for i in range(len(r)))
+            print(f"  {label} {s}: r_mean={r.mean():.3f} ({per_ax})", flush=True)
+        print(f"{label} mean r (2D) = {np.mean(means):.3f}", flush=True)
 
-    out = ROOT / "results" / "metrics" / "indy_crosssession.json"
-    out.write_text(json.dumps({"train": TRAIN, "test": TEST,
+    out = ROOT / "results" / "metrics" / "indy_split.json"
+    out.write_text(json.dumps({"train": TRAIN, "eval": EVAL, "test": TEST,
+                               "source_names": SOURCE_NAMES,
                                "axes": axes.tolist(), "params": int(npar),
-                               "held_out": {s: [float(x) for x in r]
-                                            for s, r in res.items()},
-                               "mean_r": float(np.mean(means))}, indent=2),
+                               "eval_results": {s: [float(x) for x in r]
+                                                for s, r in eval_res.items()},
+                               "test_results": {s: [float(x) for x in r]
+                                                for s, r in test_res.items()},
+                               "test_mean_r": float(np.mean(
+                                   [r.mean() for r in test_res.values()]))}, indent=2),
                    encoding="utf-8")
-    if not args.keep:
-        for s in TRAIN + TEST:
+    if args.cleanup:
+        for s in TRAIN + EVAL + TEST:
             p = DATA / f"{s}.mat"
             if p.exists():
                 p.unlink()

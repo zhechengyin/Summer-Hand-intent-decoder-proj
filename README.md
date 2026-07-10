@@ -8,21 +8,25 @@ spike rates with a compact TCN+GRU sequence model.
 The only active Python package is [`models/`](models/). The readable architecture
 is in [`models/best_model.py`](models/best_model.py); `checkpoint.pt` contains
 only its learned weights. The package also includes the exact configuration,
-held-out evaluation, and training entry point.
+file-level train/eval/test evaluation, and training entry point.
 
-| Input setting | Held-out cross-session Pearson r |
+| Historical benchmark | Pearson r |
 | --- | ---: |
 | 96 electrodes | **0.87** |
 | Top 8 electrodes by firing rate | 0.76 |
 
+These numbers predate the new fixed train/eval/test allocation. Run
+`models/evaluate.py` to produce metrics for the new split.
+
 ```bash
-py models/crosssession.py   # reproduce held-out evaluation
+py models/evaluate.py       # train/eval/test evaluation
 py models/train_and_save.py # retrain models/checkpoint.pt
 ```
 
-The model uses 40 ms bins, a 2 s window, per-electrode multiunit spike rates,
-and predicts the two dominant fingertip-velocity axes. It generalizes across
-sessions from the same subject, but not across subjects.
+The eight same-subject `.mat` sessions use the nearest possible whole-file split
+to 70/15/15: six training files, one validation file, and one test file
+(75/12.5/12.5), named `train1`…`train6`, `eval1`, and `test1`. The model uses
+40 ms bins, a 2 s window, and predicts the two dominant velocity axes.
 
 ## Repository map
 
