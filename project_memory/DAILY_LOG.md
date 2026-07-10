@@ -1335,6 +1335,33 @@ Config of record: 2D finger velocity, 40 ms bins, per-electrode, ReLU, 3 Hz
 vel-LP, sigma1 rate-smooth. Held-out best ~0.87 (2D movement axes). No re-run
 (config-only revert).
 
+### LOG-042 - Electrode-count sweep: how much does 8 channels cost? (hardware constraint)
+
+Question: Hardware update -- the device can only read 8 channels (peak/spike
+detection), not the full 96. How much decoding do we lose going 96 -> 8, and is
+8 even viable?
+
+Method: Cross-session held-out (train 6 indy sessions, test 2 held-out), same
+pipeline as indy_crosssession (per-electrode 40 ms rates, ReLU TCN+GRU, 3 Hz
+vel-LP, sigma1 smooth). Restrict to top-N electrodes selected by mean firing
+rate on TRAIN. Sweep N in {8,16,32,96}.
+
+Command: py tools/indy_nch.py  (artifacts: results/metrics/indy_nch.json)
+
+Results (held-out mean r, 2 test sessions):
+  8 ch: 0.760 | 16 ch: 0.804 | 32 ch: 0.841 | 96 ch: 0.869 (ceiling)
+  Going 96->8 costs ~0.11 r; curve is steep early (each halving ~-0.03..-0.04).
+
+Interpretation: 8 channels is VIABLE (0.76, well usable) but leaves ~0.11 on the
+table. The steep early slope means *which* 8 channels matters -- selection has
+real leverage. Confirmed no continuous broadband voltage in the dataset (only
+spike times + 64-sample waveform snippets), so "raw voltage -> model" (Option 2)
+cannot be benchmarked on this data; only peak-detection (Option 1) is testable.
+
+Decision: Proceed with Option 1 (peak detection + channel selection). Next:
+learned vs firing-rate vs random 8-channel selection (indy_chan_select.py), then
+an adaptive/switching gate for non-stationarity.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name

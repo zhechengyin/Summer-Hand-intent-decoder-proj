@@ -55,6 +55,13 @@ Last updated: 2026-07-07
   per-electrode does not -- that is why pooling works. Does NOT transfer across
   subjects, LOG-027.) Activation set to ReLU (LOG-037/038; within-noise nominal
   best, not held-out re-validated). EEG pipeline keeps GELU default.
+- HARDWARE CONSTRAINT -- 8 channels (LOG-042): device reads only 8 electrodes.
+  Electrode-count sweep (top-N by firing rate): 8ch=0.760, 16ch=0.804, 32ch=0.841,
+  96ch=0.869. 8 channels is viable (~0.76) but ~0.11 below full array; steep early
+  slope means *which* 8 matters -> channel selection has leverage. NOTE: dataset
+  has NO continuous broadband voltage (only spike times + 64-sample waveform
+  snippets), so "raw voltage -> model" (Option 2) is not benchmarkable here; only
+  peak-detection (Option 1) is. Tools: `indy_nch.py`, `indy_chan_select.py`.
 - Cross-SUBJECT limit (LOG-027): indy-trained model on a held-out indy day =
   r 0.864, but on loco (the OTHER monkey) = r -0.048 (collapse). Does NOT
   transfer across subjects -- different brains/electrodes have no channel
