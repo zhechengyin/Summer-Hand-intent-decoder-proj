@@ -1198,6 +1198,30 @@ monkey configs. Re-running cross-session held-out to update the main number
 (LOG-036). (Not yet changed for the EEG pipeline -- untested there; build_net
 default stays sp_act=True for backward compat.)
 
+### LOG-036 - GELU-Removal Did NOT Generalise (held-out wash); reverted
+
+Question: does the LOG-035 within-session gain from removing the spatial-mix GELU
+hold on the held-out cross-session test?
+
+Method: re-ran `tools/indy_crosssession.py` (train 6 indy sessions, test 2
+held-out) with sp_act=False (no GELU) vs the sp_act=True baseline (LOG-033).
+
+Results (held-out mean r):
+| Held-out session | with GELU (LOG-033) | no GELU |
+| --- | ---: | ---: |
+| 20161017_02 | 0.878 | 0.883 |
+| 20161024_03 | 0.863 | 0.853 |
+| mean | 0.870 | 0.868 |
+
+Interpretation: WASH. One session up, one down; mean 0.868 vs 0.870 = 0.002 =
+run-to-run noise. The within-session +0.007 (LOG-035) did NOT generalise -- it was
+single-session/single-run variance. Removing the GELU does not robustly help.
+DECISION: reverted the monkey config to keep the GELU (sp_act=True) -- do not
+change the model of record based on noise. The sp_act flag stays in build_net as
+a documented option. Lesson: trust the held-out generalisation metric, not a
+single within-session CV, for architecture decisions. Monkey held-out best stays
+0.870 (LOG-033).
+
 ## Entry Template
 
 ### LOG-XXX - Short Name
