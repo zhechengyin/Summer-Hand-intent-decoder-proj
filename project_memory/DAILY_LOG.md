@@ -1300,6 +1300,32 @@ regime. So the negative is target-specific: slow velocity is rate-coded; fine
 timing would only matter for a fast/precise output. Model of record unchanged
 (50 ms count, ReLU, held-out 0.870). Artifact: results/metrics/indy_subbin.json.
 
+### LOG-040 - Decode Full 3D Finger Velocity + 40 ms Bins (user changes)
+
+Changes (user): (1) decode the full 3D finger-velocity vector (was top-2 movement
+axes only); (2) switch 50 ms -> 40 ms bins (25 Hz). Applied across the monkey
+pipeline (indy_crosssession/velocity/vellp/subbin/slow_fast: axes = all 3,
+BIN = 0.04). Re-ran the cross-session held-out (train 6 indy, test 2 held-out).
+
+Results (per-electrode, ReLU, 3 Hz vel-LP + sigma1 rate-smooth, 40 ms bins):
+| Held-out | 3D mean | ax0 (depth) | ax1 | ax2 |
+| --- | ---: | ---: | ---: | ---: |
+| 20161017_02 | 0.774 | 0.559 | 0.865 | 0.897 |
+| 20161024_03 | 0.689 | 0.389 | 0.813 | 0.864 |
+| MEAN | 0.731 | ~0.47 | ~0.84 | ~0.88 |
+
+Interpretation: 3D vector decoding works; the two real MOVEMENT axes still decode
+at ~0.84-0.88 (~same as the old 2D 0.870). The 3D MEAN (0.731) is dragged down by
+the depth axis (ax0, r~0.47) because it barely moves (var 0.56 vs ~7) -- the reach
+is essentially planar, so there is little velocity signal on the 3rd axis (honest,
+not a model failure). 40 ms ~= 50 ms (movement-axis quality ~0.86 either way,
+within run noise -- no clear gain from finer bins for this slow target).
+
+Reporting note: two ways to state the monkey best now -- full 3D vector held-out
+mean r 0.731, OR the two movement axes ~0.86 (comparable to the prior 2D 0.870).
+Config of record: per-electrode, 40 ms bins, 3D velocity, ReLU, 3 Hz vel-LP,
+sigma1 rate-smooth.
+
 ## Entry Template
 
 ### LOG-XXX - Short Name

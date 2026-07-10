@@ -7,8 +7,8 @@ consistent across sessions). That lets us POOL several sessions to TRAIN one
 model and evaluate on ENTIRELY HELD-OUT SESSIONS the model never trained on --
 a true generalisation test (the standard, hard cross-session BCI setting).
 
-Model: our best TCN+GRU (0.8 MB). Target: 2D fingertip velocity (fixed movement
-axes). Metric: Pearson r on held-out test sessions.
+Model: our best TCN+GRU (0.8 MB). Target: full 3D fingertip velocity. Metric:
+Pearson r on held-out test sessions (per axis + mean).
 
 Usage: py tools/indy_crosssession.py
 """
@@ -34,7 +34,7 @@ import tools.way_gal_kin_research as R
 
 DATA = ROOT / "data" / "indy_loco"
 URL = "https://zenodo.org/records/3854034/files/{}?download=1"
-BIN = 0.05
+BIN = 0.04          # 40 ms bins -> 25 Hz
 WIN = 2.0
 
 TRAIN = ["indy_20161005_06", "indy_20161006_02", "indy_20161007_02",
@@ -156,17 +156,17 @@ def main():
         loaded[s] = load_electrode(s)
         print(f"  loaded {s[5:]}: {loaded[s][0].shape[0]} electrodes, "
               f"{loaded[s][0].shape[1]} bins", flush=True)
-    # fixed movement axes = top-2 velocity-variance axes averaged over TRAIN
+    # decode the FULL 3D finger-velocity vector (all axes)
     var = np.mean([loaded[s][1].std(0) for s in TRAIN], 0)
-    axes = np.sort(np.argsort(var)[-2:])
-    print(f"\ndecoding finger velocity axes {axes.tolist()} "
+    axes = np.arange(loaded[TRAIN[0]][1].shape[1])          # all 3 axes
+    print(f"\ndecoding 3D finger velocity, axes {axes.tolist()} "
           f"(var {var.round(2).tolist()})", flush=True)
 
     train_trials = []
     for s in TRAIN:
         train_trials += windows(*loaded[s], axes)
     test_by = {s: windows(*loaded[s], axes) for s in TEST}
-    npar = sum(p.numel() for p in R.build_net({**CFG, "n_out": 2},
+    npar = sum(p.numel() for p in R.build_net({**CFG, "n_out": len(axes)},
                                               train_trials[0]["e"].shape[0]).parameters())
     print(f"pooled train windows: {len(train_trials)} | model {npar:,} params "
           f"({npar*4/1e6:.2f} MB)\n", flush=True)
@@ -177,9 +177,9 @@ def main():
     means = []
     for s, r in res.items():
         means.append(r.mean())
-        print(f"  {s[5:]}: r_mean={r.mean():.3f} (axis1={r[0]:.3f} axis2={r[1]:.3f})",
-              flush=True)
-    print(f"\nHELD-OUT-SESSION mean r = {np.mean(means):.3f}", flush=True)
+        per_ax = " ".join(f"ax{i}={r[i]:.3f}" for i in range(len(r)))
+        print(f"  {s[5:]}: r_mean={r.mean():.3f} ({per_ax})", flush=True)
+    print(f"\nHELD-OUT-SESSION mean r (3D) = {np.mean(means):.3f}", flush=True)
 
     out = ROOT / "results" / "metrics" / "indy_crosssession.json"
     out.write_text(json.dumps({"train": TRAIN, "test": TEST,

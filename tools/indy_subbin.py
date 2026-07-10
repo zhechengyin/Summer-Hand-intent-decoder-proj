@@ -34,7 +34,7 @@ if str(ROOT) not in sys.path:
 import tools.indy_velocity as IV
 import tools.way_gal_kin_research as R
 
-BIN = 0.05
+BIN = 0.04          # 40 ms bins -> 25 Hz
 MIN_SPK = 10
 KS = [1, 2, 5, 10]
 CFG = {**R.BASE, "dils": [1, 2, 4, 8, 16], "H": 64, "L": 2, "F": 64,
@@ -68,9 +68,8 @@ def load(path, K):
     centers = coarse[:-1] + BIN / 2
     pos = np.stack([np.interp(centers, t, fp[a]) for a in range(fp.shape[0])], 1)
     sos = butter(4, 3.0 / (0.5 / BIN), btype="low", output="sos")   # 3 Hz vel-LP
-    vel = np.gradient(sosfiltfilt(sos, pos, axis=0), BIN, axis=0)
-    axes = np.sort(np.argsort(vel.std(0))[-2:])
-    return rates.astype(np.float32), vel[:, axes].astype(np.float32), n_dec, U.shape[0]
+    vel = np.gradient(sosfiltfilt(sos, pos, axis=0), BIN, axis=0)   # 3D velocity
+    return rates.astype(np.float32), vel.astype(np.float32), n_dec, U.shape[0]
 
 
 def main():

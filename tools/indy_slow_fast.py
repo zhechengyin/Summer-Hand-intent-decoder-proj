@@ -28,7 +28,7 @@ if str(ROOT) not in sys.path:
 
 import tools.way_gal_kin_research as R
 
-BIN = 0.05
+BIN = 0.04          # 40 ms bins -> 25 Hz
 WIN = 2.0
 KFOLD = 5
 MIN_SPK = 10
@@ -57,7 +57,7 @@ def load(path):
     raw3 = np.gradient(pos_b, BIN, axis=0)                       # raw velocity 3D
     sos = butter(4, 3.0 / (0.5 / BIN), btype="low", output="sos")
     slow3 = np.gradient(sosfiltfilt(sos, pos_b, axis=0), BIN, axis=0)
-    axes = np.sort(np.argsort(raw3.std(0))[-2:])                 # movement axes
+    axes = np.arange(raw3.shape[1])                              # all 3 axes (3D)
     raw = raw3[:, axes].astype(np.float32)
     slow = slow3[:, axes].astype(np.float32)
     fast = (raw - slow).astype(np.float32)

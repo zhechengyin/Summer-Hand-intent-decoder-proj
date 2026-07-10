@@ -29,7 +29,7 @@ if str(ROOT) not in sys.path:
 
 import tools.way_gal_kin_research as R
 
-BIN = 0.05          # 50 ms bins -> 20 Hz
+BIN = 0.04          # 40 ms bins -> 25 Hz
 WIN = 2.0           # 2 s windows (40 bins)
 KFOLD = 5           # contiguous time blocks
 MIN_SPK = 10        # drop near-empty units
@@ -52,11 +52,9 @@ def load(path):
                 continue
             rates.append(np.histogram(st, bins=edges)[0])
     rates = np.asarray(rates, dtype=np.float32)          # (n_units, nb)
-    # finger velocity at bin centers (2 highest-variance axes = movement plane)
+    # full 3D finger velocity at bin centers
     pos_b = np.stack([np.interp(centers, t, fp[a]) for a in range(fp.shape[0])], 1)
     vel = np.gradient(pos_b, BIN, axis=0)                # (nb, 3)
-    axes = np.argsort(vel.std(0))[-2:]                   # top-2 moving axes
-    vel = vel[:, np.sort(axes)]                          # (nb, 2)
     return rates, vel.astype(np.float32), nb
 
 
