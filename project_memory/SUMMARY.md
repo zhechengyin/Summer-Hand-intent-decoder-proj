@@ -39,7 +39,7 @@ Last updated: 2026-07-10
 - Cross-modality transfer (LOG-025): the SAME TCN+GRU (0.81 MB) decodes finger
   velocity from INTRACORTICAL primate spikes (Zenodo 3854034, indy session) at
   r 0.848 vs linear 0.731 -- architecture is modality-general (EEG voltage or
-  binned spike rates, channels-x-time). Tool: `frontier/velocity.py`.
+  binned spike rates, channels-x-time). Historical tool: `legacy/monkey_trials/velocity.py`.
 - Axis/bin config (LOG-040/041): tested 3D velocity (held-out 3D mean r 0.731 --
   the two movement axes ~0.84-0.88, depth axis ~0.47 as the reach is ~planar) then
   REVERTED to 2D per user (movement axes only, held-out ~0.87). Bins switched
@@ -51,7 +51,7 @@ Last updated: 2026-07-10
   smoothing, LOG-030/032) -> held-out mean r **0.870** (0.878, 0.863), up from
   0.856. 0.77 MB TCN+GRU. Real-time inference ~6 ms/pred bidirectional (9x margin
   @50 ms) or ~3.7 ms causal; causal real-time costs only ~0.005 (LOG-031/032).
-  Tool: `frontier/crosssession.py`. (Sorted units vary per session;
+  Tool: `models/crosssession.py`. (Sorted units vary per session;
   per-electrode does not -- that is why pooling works. Does NOT transfer across
   subjects, LOG-027.) Activation set to ReLU (LOG-037/038; within-noise nominal
   best, not held-out re-validated). EEG pipeline keeps GELU default.
@@ -61,15 +61,17 @@ Last updated: 2026-07-10
   slope means *which* 8 matters -> channel selection has leverage. NOTE: dataset
   has NO continuous broadband voltage (only spike times + 64-sample waveform
   snippets), so "raw voltage -> model" (Option 2) is not benchmarkable here; only
-  peak-detection (Option 1) is. Tools: `frontier/nch.py`, `frontier/chan_select.py`.
+  peak-detection (Option 1) is. Historical tools: `legacy/monkey_trials/nch.py`,
+  `legacy/monkey_trials/chan_select.py`.
 - CHANNEL SELECTION -- which 8? (LOG-043): random8=0.690, firing8=0.760 (best),
   learned8 (L1 stochastic-gate)=0.706. Learned selection OVERFITS to the 6 train
   sessions (2/8 overlap with firing8, higher variance) and loses to the robust
   firing-rate heuristic. Decision: 8-ch device = top-8 by firing rate. Next:
   adaptive/switching gate for non-stationarity (must resist the same overfit).
-- REPO REORG (LOG-043): code split into `frontier/` (active monkey decoding;
-  shared arch in `frontier/core.py`; current best in `frontier/best_model/`) and
-  `legacy/` (EEG+fNIRS). Monkey scripts renamed tools/indy_X.py -> frontier/X.py.
+- REPO CLEANUP (LOG-044): the current model is isolated in `models/` (readable
+  architecture in `best_model.py`,
+  config, held-out evaluation, training entry point, and checkpoint). Old monkey
+  sweeps moved to `legacy/monkey_trials/`; earlier EEG/fNIRS work remains legacy.
 - Cross-SUBJECT limit (LOG-027): indy-trained model on a held-out indy day =
   r 0.864, but on loco (the OTHER monkey) = r -0.048 (collapse). Does NOT
   transfer across subjects -- different brains/electrodes have no channel

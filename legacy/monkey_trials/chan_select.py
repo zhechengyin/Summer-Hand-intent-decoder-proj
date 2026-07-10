@@ -27,8 +27,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import frontier.crosssession as X
-import frontier.core as R
+import models.crosssession as X
+import models.best_model as R
 
 K = 8
 

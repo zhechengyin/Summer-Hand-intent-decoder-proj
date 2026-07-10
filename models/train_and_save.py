@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """Train the current-best config on all training sessions and save a checkpoint.
 
-Produces frontier/best_model/checkpoint.pt = {state_dict, config, norm stats,
+Produces models/checkpoint.pt = {state_dict, config, norm stats,
 metrics}. Reuses the exact preprocessing + config from the research pipeline
-(frontier.crosssession) so the saved model matches the reported 0.87 held-out.
+(models.crosssession) so the saved model matches the reported 0.87 held-out.
 
-Usage: py frontier/best_model/train_and_save.py
+Usage: py models/train_and_save.py
 """
 from __future__ import annotations
 
@@ -19,8 +19,8 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import frontier.crosssession as X
-import frontier.core as C
+import models.crosssession as X
+import models.best_model as C
 
 
 def main():

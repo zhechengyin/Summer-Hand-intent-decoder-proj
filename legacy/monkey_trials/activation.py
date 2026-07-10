@@ -22,9 +22,9 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import frontier.velocity as IV
-import frontier.vellp as VL
-import frontier.core as R
+import legacy.monkey_trials.velocity as IV
+import legacy.monkey_trials.vellp as VL
+import models.best_model as R
 
 ACTS = ["gelu", "relu", "elu", "silu", "leaky_relu", "tanh", "mish", "selu"]
 BASE = {**R.BASE, "dils": [1, 2, 4, 8, 16], "H": 64, "L": 2, "F": 64,

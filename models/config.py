@@ -1,11 +1,11 @@
 """Current best model — exact spec of record (importable).
 
-The frontier decoder: per-electrode multiunit spike rates -> 2D fingertip
-velocity, via a dilated causal TCN + bidirectional GRU (frontier.core.build_net).
+The decoder of record: per-electrode multiunit spike rates -> 2D fingertip
+velocity, via a dilated causal TCN + bidirectional GRU (models.best_model.build_net).
 This module is the single source of truth for the winning configuration; the
 research scripts (crosssession.py etc.) define the same values inline.
 """
-from frontier.core import BASE
+from models.best_model import BASE
 
 # --- preprocessing (per-electrode pipeline) ---
 BIN_S = 0.04                 # 40 ms bins -> 25 Hz

@@ -28,8 +28,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import frontier.velocity as V
-import frontier.core as R
+import legacy.monkey_trials.velocity as V
+import models.best_model as R
 
 DATA = ROOT / "data" / "indy_loco"
 OUT = ROOT / "results" / "metrics" / "indy_multi.json"

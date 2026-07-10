@@ -1400,6 +1400,22 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-044 - Isolate the model of record and archive trials
+
+Request: simplify the repository so the best Python model has one obvious home
+and old experiments are clearly legacy.
+
+Change: created `models/` containing the readable TCN+GRU source in
+`best_model.py`, exact configuration,
+cross-session reproduction script, checkpoint trainer, and existing checkpoint.
+Moved activation, channel-selection, electrode-count, timing, smoothing, and
+other intracortical sweeps to `legacy/monkey_trials/`. Updated imports and repo
+documentation. Earlier EEG/fNIRS and WAY-EEG-GAL work remains under `legacy/`.
+
+Decision: `models/` is now the only recommended Python entry point. The model of
+record remains the 96-electrode cross-session decoder (held-out r≈0.87), with
+top-8-by-firing-rate as the hardware-constrained variant (r≈0.76).
+
 ### LOG-XXX - Short Name
 
 Question:

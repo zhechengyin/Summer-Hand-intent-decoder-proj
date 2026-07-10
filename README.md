@@ -1,58 +1,42 @@
-# Neural Intent Decoder — hand/finger velocity from neural activity
+# Neural Intent Decoder
 
-Decoding **continuous hand/finger velocity** from neural signals with a compact,
-real-time-oriented **TCN+GRU** sequence decoder:
+This repository decodes continuous 2D hand/finger velocity from intracortical
+spike rates with a compact TCN+GRU sequence model.
 
-> Given neural activity over a short window, estimate the current fingertip
-> velocity vector.
+## Current model
 
-## Active frontier → [`frontier/`](frontier/)
+The only active Python package is [`models/`](models/). The readable architecture
+is in [`models/best_model.py`](models/best_model.py); `checkpoint.pt` contains
+only its learned weights. The package also includes the exact configuration,
+held-out evaluation, and training entry point.
 
-**Intracortical spike → fingertip velocity** (nonhuman-primate M1, indy+loco
-reaching data). This is the current work, now targeting an **8-channel hardware
-front-end**.
-
-| Setting | Held-out cross-session r |
+| Input setting | Held-out cross-session Pearson r |
 | --- | ---: |
-| Full 96 electrodes | **0.87** |
-| 8 electrodes (top-8 by firing rate) | 0.76 |
-
-The current best model — architecture, exact config, metrics, and a saveable
-checkpoint — lives in **[`frontier/best_model/`](frontier/best_model/)**.
+| 96 electrodes | **0.87** |
+| Top 8 electrodes by firing rate | 0.76 |
 
 ```bash
-py frontier/crosssession.py          # reproduce the 0.87 held-out result
-py frontier/nch.py                   # electrode-count cost curve (8→96)
-py frontier/chan_select.py           # which 8 channels? (firing-rate wins)
-py frontier/best_model/train_and_save.py   # -> frontier/best_model/checkpoint.pt
+py models/crosssession.py   # reproduce held-out evaluation
+py models/train_and_save.py # retrain models/checkpoint.pt
 ```
+
+The model uses 40 ms bins, a 2 s window, per-electrode multiunit spike rates,
+and predicts the two dominant fingertip-velocity axes. It generalizes across
+sessions from the same subject, but not across subjects.
 
 ## Repository map
 
-```
-frontier/          ACTIVE — monkey intracortical decoding (the 8-channel work)
-  core.py            shared architecture: build_net (TCN+GRU), run_nn, corr, BASE
-  crosssession.py    headline held-out cross-session result (0.87)
-  nch.py             electrode-count sweep       chan_select.py  channel selection
-  velocity.py tune.py vellp.py subbin.py slow_fast.py activation.py multi.py
-  best_model/        current best: config.py, README, train_and_save.py, checkpoint.pt
-
-legacy/            CONCLUDED — original EEG+fNIRS intent decoder (near-chance MI)
-  src/, main.py, config.yaml, tools/   (self-contained; see legacy/README.md)
-
-project_memory/    research record — SUMMARY.md (current state) + DAILY_LOG.md (LOG-NNN)
-data/              datasets (gitignored; auto-downloaded on demand)
-results/           metrics + figures (gitignored)
+```text
+models/                  readable best-model source plus learned checkpoint
+legacy/                  concluded pipelines and old experiment trials
+  monkey_trials/         intracortical sweeps and ablations
+  src/ and tools/        earlier EEG/fNIRS and WAY-EEG-GAL work
+project_memory/          current summary and chronological daily log
+data/                    local datasets (gitignored)
+results/                 generated metrics and figures
 ```
 
-Findings and rationale are logged in
-[`project_memory/DAILY_LOG.md`](project_memory/DAILY_LOG.md); the current state is
-summarised in [`project_memory/SUMMARY.md`](project_memory/SUMMARY.md).
-
-## Notes
-
-- The decoder generalises **across sessions** of the same subject but **not
-  across subjects** (indy→loco collapses) — per-subject calibration is required.
-- This dataset has spike times + waveform snippets only (no continuous broadband
-  voltage), so raw-voltage-in decoding cannot be benchmarked here.
-- `requirements.txt` covers both frontier and legacy.
+Start with [`project_memory/SUMMARY.md`](project_memory/SUMMARY.md) for the
+current research state and [`project_memory/DAILY_LOG.md`](project_memory/DAILY_LOG.md)
+for experiment provenance. Legacy code is retained for reproducibility, not as
+the recommended entry point.

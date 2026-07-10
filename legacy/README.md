@@ -1,9 +1,10 @@
 # Legacy — concluded work
 
-Earlier lines of work, kept for provenance. **Not the active frontier** (that's
-`../frontier/`). These are self-contained: scripts here compute their root as
+Earlier lines of work, kept for provenance. **Not the active model** (that's
+`../models/`). The EEG/fNIRS scripts are self-contained and compute their root as
 this `legacy/` folder, so `import tools.X` and `from src import Y` resolve within
-legacy without touching the frontier. Data paths point at `legacy/data/…`.
+legacy without touching the active model package. Data paths point at
+`legacy/data/…`.
 
 ## `eeg_fnirs_pipeline` — the original EEG+fNIRS intent decoder
 
@@ -30,12 +31,18 @@ Probes and benchmarks behind the EEG results:
 - `download_data`, `tcn_gru_bench`, `convert_fnirs_octave.m`.
 
 > **`way_gal_kin_research.py`** developed the TCN+GRU architecture now used by the
-> frontier. The shared pieces (`build_net`, `run_nn`, `run_linear`, `corr`,
-> `BASE`) were extracted to `frontier/core.py`; this file keeps its own full copy
+> current model. The shared pieces (`build_net`, `run_nn`, `run_linear`, `corr`,
+> `BASE`) were extracted to `models/best_model.py`; this file keeps its own full copy
 > and its EEG-velocity experiment code.
 
 ## Best EEG result of record
 
 EEG → hand/finger velocity (WAY-EEG-GAL), 3-subject mean **r = 0.853** (TCN+GRU).
-This validated the architecture; the intracortical work (frontier) is where it
+This validated the architecture; the intracortical model is where it
 reaches r ≈ 0.87 and became the active direction.
+
+## `monkey_trials/` — concluded intracortical experiments
+
+Architecture, activation, bin-width, smoothing, channel-count, and channel-
+selection sweeps. These support the decisions captured in `../models/` but are
+not active entry points.

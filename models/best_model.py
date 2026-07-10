@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-"""Shared model core for the active frontier (monkey intracortical decoding).
+"""Shared core for the current best monkey intracortical decoder.
 
-The architecture and training/eval primitives every frontier decoder imports:
+The architecture and training/evaluation primitives used by the model:
   build_net(cfg, n_ch) -- dilated causal TCN + (bi)GRU + per-timestep linear head
   run_nn / run_linear  -- series-grouped CV train/eval (used by the sweep tools)
   corr                 -- per-column Pearson r

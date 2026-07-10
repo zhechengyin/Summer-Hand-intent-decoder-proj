@@ -30,7 +30,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import frontier.core as R
+import models.best_model as R
 
 DATA = ROOT / "data" / "indy_loco"
 URL = "https://zenodo.org/records/3854034/files/{}?download=1"
