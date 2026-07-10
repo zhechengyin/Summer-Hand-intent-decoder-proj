@@ -225,8 +225,10 @@ def build_net(cfg, n_ch):
             F = cfg["F"]
             bg = cfg.get("band_gate")
             self.gate = BandGate(n_ch, cfg["nbands"], bg) if bg else None
-            self.sp = nn.Sequential(nn.Conv1d(n_ch, F, 1), nn.BatchNorm1d(F),
-                                    nn.GELU())
+            sp = [nn.Conv1d(n_ch, F, 1), nn.BatchNorm1d(F)]
+            if cfg.get("sp_act", True):        # GELU after spatial-mix BN (opt.)
+                sp.append(nn.GELU())
+            self.sp = nn.Sequential(*sp)
             self.convs = nn.ModuleList(
                 [nn.Conv1d(F, F, 3, padding=(3 - 1) * d, dilation=d)
                  for d in cfg["dils"]])

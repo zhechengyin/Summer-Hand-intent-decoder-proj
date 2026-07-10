@@ -1176,6 +1176,28 @@ explicit splitting adds complexity with no held-out gain. Model of record
 unchanged (single TCN+GRU; monkey held-out best 0.870, LOG-033).
 Artifact: `results/metrics/indy_slow_fast.json`.
 
+### LOG-035 - Remove GELU After Spatial-Mix BatchNorm (helps)
+
+Question (user): the GELU after the spatial-mix batchnorm seems out of place --
+does removing it help? (The 1x1 channel-mix conv is followed immediately by TCN
+blocks that have their own activations, so the extra nonlinearity may be
+redundant.)
+
+Method: `build_net` gains cfg["sp_act"] (default True = keep GELU). Compare on
+monkey indy_20161005_06 with tuned preprocessing (3 Hz vel-LP + sigma1 rate
+smoothing), TCN+GRU, 5-block CV.
+
+Results (r_mean):
+- with GELU (current): 0.859
+- no GELU (linear conv+BN spatial mix): 0.866
+
+Interpretation: removing the spatial-mix GELU improves r +0.007 (both axes up),
+and simplifies the model (fewer ops). The pointwise channel-mix is better left
+linear; the TCN blocks supply the nonlinearity. Adopted sp_act=False in the
+monkey configs. Re-running cross-session held-out to update the main number
+(LOG-036). (Not yet changed for the EEG pipeline -- untested there; build_net
+default stays sp_act=True for backward compat.)
+
 ## Entry Template
 
 ### LOG-XXX - Short Name

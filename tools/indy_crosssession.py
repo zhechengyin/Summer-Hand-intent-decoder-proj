@@ -46,7 +46,8 @@ VEL_LP = 3.0                                        # velocity target low-pass (
 RATE_SIGMA = 1.0                                    # firing-rate smoothing (LOG-032)
 
 CFG = {**R.BASE, "dils": [1, 2, 4, 8, 16], "H": 64, "L": 2, "F": 64,
-       "epochs": 60, "noise": 0.1, "chdrop": 0.1, "cosine": True}
+       "epochs": 60, "noise": 0.1, "chdrop": 0.1, "cosine": True,
+       "sp_act": False}                             # linear spatial mix (LOG-035)
 
 
 def fetch(name):
