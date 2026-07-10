@@ -28,6 +28,7 @@ import tools.indy_vellp as VL
 import tools.way_gal_kin_research as R
 
 BASE = {**R.BASE, "dils": [1, 2, 4, 8, 16], "H": 64, "L": 2, "F": 64,
+        "act": "relu",                              # ReLU = monkey default (LOG-038)
         "epochs": 60, "noise": 0.1, "chdrop": 0.1, "cosine": True,
         "kfold": IV.KFOLD}
 

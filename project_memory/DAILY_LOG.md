@@ -1249,6 +1249,24 @@ model of record on this; ReLU/LeakyReLU is a fine, simpler default. GELU remains
 fine. To make a firm claim would need multi-seed + held-out validation.
 Artifacts: results/metrics/mi_activation.json, monkey_activation.json.
 
+### LOG-038 - Adopt ReLU as Monkey Decoder Default (user decision)
+
+Decision (user): use ReLU as the monkey velocity decoder activation (nominal best
+in LOG-037 sweep: relu/leaky_relu 0.870 vs gelu 0.859 within-session). No retrain
+requested -- just set the config and log.
+
+Change: added "act": "relu" to all monkey config dicts -- indy_crosssession.py,
+indy_velocity.py, indy_tune.py, indy_vellp.py, indy_slow_fast.py, indy_multi.py.
+build_net's cfg["act"] switches the conv/TCN activation (LOG-037). EEG pipeline
+unchanged (build_net default act="gelu").
+
+Caveat: the LOG-037 activation differences were within run-to-run/subject noise,
+and the held-out cross-session headline (0.870, LOG-033) was measured with GELU.
+This config change adopts ReLU based on the within-session sweep; it was NOT
+re-validated on the held-out test (no retrain, per the user's instruction). If a
+held-out number is needed, re-run `py tools/indy_crosssession.py`. Monkey best of
+record remains 0.870 held-out (config now ReLU).
+
 ## Entry Template
 
 ### LOG-XXX - Short Name

@@ -48,7 +48,8 @@ Last updated: 2026-07-07
   @50 ms) or ~3.7 ms causal; causal real-time costs only ~0.005 (LOG-031/032).
   Tool: `tools/indy_crosssession.py`. (Sorted units vary per session;
   per-electrode does not -- that is why pooling works. Does NOT transfer across
-  subjects, LOG-027.)
+  subjects, LOG-027.) Activation set to ReLU (LOG-037/038; within-noise nominal
+  best, not held-out re-validated). EEG pipeline keeps GELU default.
 - Cross-SUBJECT limit (LOG-027): indy-trained model on a held-out indy day =
   r 0.864, but on loco (the OTHER monkey) = r -0.048 (collapse). Does NOT
   transfer across subjects -- different brains/electrodes have no channel

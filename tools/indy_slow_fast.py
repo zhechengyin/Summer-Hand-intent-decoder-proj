@@ -34,7 +34,8 @@ KFOLD = 5
 MIN_SPK = 10
 ALPHAS = [0.0, 0.25, 0.5, 0.75, 1.0]
 CFG = {**R.BASE, "dils": [1, 2, 4, 8, 16], "H": 64, "L": 2, "F": 64,
-       "epochs": 60, "noise": 0.1, "chdrop": 0.1, "cosine": True}
+       "epochs": 60, "noise": 0.1, "chdrop": 0.1, "cosine": True,
+       "act": "relu"}                               # ReLU = monkey default (LOG-038)
 
 
 def load(path):

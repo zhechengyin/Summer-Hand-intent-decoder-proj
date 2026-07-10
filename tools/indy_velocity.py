@@ -83,6 +83,7 @@ def main():
           f"{len(trials)} windows of {int(WIN/BIN)} bins, {KFOLD}-block CV\n")
 
     cfg = {**R.BASE, "dils": [1, 2, 4, 8, 16], "H": 64, "L": 2, "F": 64,
+           "act": "relu",                           # ReLU = monkey default (LOG-038)
            "epochs": 80, "noise": 0.1, "chdrop": 0.1, "cosine": True,
            "kfold": KFOLD}
     npar = sum(p.numel() for p in R.build_net(cfg, rates.shape[0]).parameters())

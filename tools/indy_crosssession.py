@@ -46,7 +46,8 @@ VEL_LP = 3.0                                        # velocity target low-pass (
 RATE_SIGMA = 1.0                                    # firing-rate smoothing (LOG-032)
 
 CFG = {**R.BASE, "dils": [1, 2, 4, 8, 16], "H": 64, "L": 2, "F": 64,
-       "epochs": 60, "noise": 0.1, "chdrop": 0.1, "cosine": True}
+       "epochs": 60, "noise": 0.1, "chdrop": 0.1, "cosine": True,
+       "act": "relu"}                               # ReLU = monkey default (LOG-037/038)
 # NOTE: sp_act=False (drop spatial-mix GELU) looked +0.007 within-session but was
 # a wash on the held-out test (0.868 vs 0.870), so kept the GELU. See LOG-035/036.
 
