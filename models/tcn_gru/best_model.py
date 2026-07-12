@@ -23,6 +23,17 @@ def corr(a, b):
     return (a * b).sum(0) / np.where(d == 0, 1e-9, d)
 
 
+def r2(y, yhat):
+    """Coefficient of determination (fraction of variance explained) per column.
+
+    y, yhat: (N, D) in real units. Unlike Pearson r, this penalises scale and
+    bias errors, so it is <= r**2 and is the stricter decoding metric (a.k.a.
+    FVAF in the motor-BCI literature)."""
+    ss_res = ((y - yhat) ** 2).sum(0)
+    ss_tot = ((y - y.mean(0)) ** 2).sum(0)
+    return 1.0 - ss_res / np.where(ss_tot == 0, 1e-9, ss_tot)
+
+
 def series_groups(trials, k=3):
     s = sorted({t["series"] for t in trials})
     return [s[i::k] for i in range(k)]

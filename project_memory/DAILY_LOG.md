@@ -1400,6 +1400,36 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-050 - STM32 pivot: tiny 8-ch decoder + Bessel filter (paper: Zhou/Sun/Basu 2023)
+
+Question: New constraints -- 8 channels (spike detection), must fit an STM32.
+Given the iBMI paper (arXiv:2312.15889), (a) how small can the decoder get, and
+(b) does its Bessel output-filter trick (+0.03-0.05 R2 for them) help us?
+
+Method: Added R2 (coeff. of determination) to best_model.py. New research/
+harness reusing the exact fixed split (train1-6/eval1/test1) but reporting r AND
+R2 with swappable hooks. Shrank the TCN+GRU across F/H/L/dilations at 8 ch, and
+applied forward + zero-phase Bessel low-pass on outputs (cutoff picked on EVAL,
+reported on TEST). Command: py research/iter2_tiny_bessel.py.
+
+Results (8 ch, TEST R2; baseline 0.75 MB = 0.548):
+  small  99.9 kB (25.6k) = 0.529 | tiny 56.9 kB = 0.521 | micro 22.9 kB = 0.453
+  nano   13.2 kB = 0.442 | small_causal (unidirectional) 74.9 kB = 0.451
+  Bessel filter: +0.000 on all (EVAL always picked "none").
+
+Interpretation:
+  1. SIZE ~SOLVED: 750->100 kB costs only -0.019 R2; int8 ~25 kB fits any STM32.
+     Accuracy, not size, is now the binding constraint.
+  2. BESSEL REDUNDANT for us: we low-pass the velocity TARGET at 3 Hz before
+     training, so predictions are already smooth -- no high-freq for the filter
+     to remove. The paper gains because it trains on raw 250 Hz velocity.
+  3. CAUSALITY COSTS -0.078 R2 (0.529 bidir -> 0.451 causal). Our bidirectional
+     GRU peeks ~2 s ahead; the honest real-time number is the causal one.
+
+Decision: adopt "small" (F32/H32/L1/dils[1,2,4,8], ~100 kB) as the shrink target.
+Drop the Bessel filter (redundant). Next: raise 8-ch R2 -- more training data
+(paper: +0.03-0.04) and close the causal gap with a bounded-lookahead model.
+
 ### LOG-049 - Self-contained model-family folders
 
 Request: mirror the preprocessing-method convention for models so multiple model
