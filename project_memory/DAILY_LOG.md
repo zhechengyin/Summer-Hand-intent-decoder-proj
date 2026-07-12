@@ -1400,6 +1400,27 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-051 - Cheap single-model boosters don't help the 8-ch model
+
+Question: Can cheap training tricks lift the 100 kB 'small' 8-ch model (R2=0.529)
+without more data or size?
+
+Method: research/iter3_boost.py -- correlation-aligned loss (MSE+lam(1-r)),
+stronger augmentation (noise0.2/chdrop0.15), heavier regularisation (wd1e-2/
+drop0.4), and a 3-seed ensemble (reference; 3x cost). Same fixed split.
+
+Results (TEST R2, base 0.529): corr_loss 0.528 (-0.001), more_aug 0.521 (-0.008),
+more_reg 0.528 (-0.001), ensemble3 0.551 (+0.022).
+
+Interpretation: single-model cheap tricks are a wash-or-worse -- the small model
+is already well-tuned for this cross-session setup, and MSE is already a good
+proxy for R2 here. Only ensembling helps (+0.022) but at 3x compute/size (still
+STM32-feasible at ~3x25 kB int8; keep as an option, not the main path). Real
+levers remain MORE DATA and ARCHITECTURE, not training tweaks.
+
+Decision: drop corr_loss/aug/reg. Pursue more data (iter4) next. Ensemble kept
+as a late-stage +0.02 option if size budget allows.
+
 ### LOG-050 - STM32 pivot: tiny 8-ch decoder + Bessel filter (paper: Zhou/Sun/Basu 2023)
 
 Question: New constraints -- 8 channels (spike detection), must fit an STM32.
