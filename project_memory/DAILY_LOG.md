@@ -1400,6 +1400,24 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-054 - int8 quantization is FREE: 100 kB -> 27 kB, R2 unchanged (STM32 fit)
+
+Question: Does the 100 kB 8-ch model survive int8 quantization to fit an STM32?
+
+Method: research/iter6_quant.py -- train the best config (18 sess, fixed 8 ch,
+'small' TCN+GRU), then post-training per-output-channel symmetric int8 on all
+weight matrices (conv/GRU/linear; biases+BN left fp). Re-score fp32 vs int8.
+
+Results: params 25,570 (24,960 quantized weights). Size fp32 100 kB -> int8 ~27 kB.
+TEST R2 0.628 -> 0.628 (-0.000). EVAL R2 0.650 -> 0.650 (+0.000).
+
+Interpretation: int8 is essentially LOSSLESS here and lands at ~27 kB -- fits any
+STM32 (even F1-class flash) with large margin. Size is fully solved; the model is
+deployable. R2 = 0.628 is the number to keep pushing on the accuracy side.
+
+Decision: int8 is the deployment format (27 kB, R2 0.628). Proceed to final
+ensemble check (iter7) and promote the 8-ch model of record.
+
 ### LOG-053 - Data scaling to 18 sessions = 0.628; channel re-selection hurts
 
 Question: Push the data-scaling curve to 15/18 sessions, and does re-selecting the
