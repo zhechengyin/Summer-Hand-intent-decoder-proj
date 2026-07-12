@@ -1400,6 +1400,25 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-052 - More training data is the big 8-ch R2 lever (+0.087 so far)
+
+Question: Does adding indy sessions raise 8-ch R2? (paper: +0.03-0.04 from more
+data; ours is cross-session so more sessions add generalisation diversity.)
+
+Method: Downloaded 6 nearby indy sessions; research/iter4_moredata.py trains the
+100 kB 'small' model on 6/9/12 sessions with channels+axes held FIXED to the
+original 6 (isolates the data effect). Fixed eval1/test1.
+
+Results (TEST R2): 6 sess=0.529, 9 sess=0.589 (+0.060), 12 sess=0.616 (+0.027).
+
+Interpretation: strong positive slope, diminishing but not saturated. The 100 kB
+model at 12 sessions (0.616) now BEATS the original 0.75 MB base (0.548) by
++0.068 while being 7.5x smaller. More data >> architecture/training tweaks here.
+Prefetched 6 more sessions (18-session pool) to push further.
+
+Decision: scale to 15/18 sessions (iter5) and test re-selecting the 8 channels on
+the full pool. This is now the primary path to higher R2.
+
 ### LOG-051 - Cheap single-model boosters don't help the 8-ch model
 
 Question: Can cheap training tricks lift the 100 kB 'small' 8-ch model (R2=0.529)
