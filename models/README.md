@@ -21,4 +21,14 @@ at the `models/` root, and do not share mutable configuration between model
 folders. This keeps comparisons reproducible and prevents one experiment from
 silently changing another model.
 
-The current model of record is [`tcn_gru/`](tcn_gru/).
+## Families
+
+- [`tcn_gru/`](tcn_gru/) — full 96-channel reference decoder (TCN+GRU, 0.77 MB).
+  Offline/high-channel ceiling.
+- [`tcn_gru_8ch/`](tcn_gru_8ch/) — **deployment model of record**: the same
+  architecture shrunk to **8 channels / STM32** (~25.6k params, **27 KB int8,
+  TEST R² 0.628**). This is the target for the current 8-channel spike-detection
+  hardware. Reuses `tcn_gru`'s `build_net`.
+
+Active R²-improvement experiments live in [`../research/`](../research); archived
+sweeps in [`../legacy/`](../legacy).
