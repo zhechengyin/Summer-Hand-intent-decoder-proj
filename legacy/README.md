@@ -32,7 +32,7 @@ Probes and benchmarks behind the EEG results:
 
 > **`way_gal_kin_research.py`** developed the TCN+GRU architecture now used by the
 > current model. The shared pieces (`build_net`, `run_nn`, `run_linear`, `corr`,
-> `BASE`) were extracted to `models/best_model.py`; this file keeps its own full copy
+> `BASE`) were extracted to `models/tcn_gru/best_model.py`; this file keeps its own full copy
 > and its EEG-velocity experiment code.
 
 ## Best EEG result of record

@@ -10,8 +10,12 @@ venv/
 data/ds004022/
 data/ds004362/
 data/way_eeg_gal/
-data/indy_loco/
+data/source_data/
 data/cache/
+# Generated preprocessing outputs stay beside their method, but method source,
+# documentation, and configs are versioned.
+data/processed/**/artifacts/*
+!data/processed/**/artifacts/.gitkeep
 *.set
 *.fdt
 *.mat

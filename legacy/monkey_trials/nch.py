@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import models.evaluate as X
+import models.tcn_gru.evaluate as X
 
 NS = [8, 16, 32, 96]
 

@@ -1,11 +1,12 @@
 """Current best model — exact spec of record (importable).
 
 The decoder of record: per-electrode multiunit spike rates -> 2D fingertip
-velocity, via a dilated causal TCN + bidirectional GRU (models.best_model.build_net).
+velocity, via a dilated causal TCN + bidirectional GRU
+(`models.tcn_gru.best_model.build_net`).
 This module is the single source of truth for the winning configuration; the
 evaluation and training scripts define the same values inline.
 """
-from models.best_model import BASE
+from models.tcn_gru.best_model import BASE
 
 # --- preprocessing (per-electrode pipeline) ---
 BIN_S = 0.04                 # 40 ms bins -> 25 Hz

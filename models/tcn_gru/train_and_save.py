@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 """Train the current-best config on all training sessions and save a checkpoint.
 
-Produces models/checkpoint.pt = {state_dict, config, norm stats,
-metrics}. Reuses the preprocessing and training partition from models.evaluate.
+Produces models/tcn_gru/checkpoint.pt = {state_dict, config, norm stats,
+metrics}. Reuses the preprocessing and training partition from
+models.tcn_gru.evaluate.
 
-Usage: py models/train_and_save.py
+Usage: py models/tcn_gru/train_and_save.py
 """
 from __future__ import annotations
 
@@ -14,12 +15,12 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import models.evaluate as X
-import models.best_model as C
+import models.tcn_gru.evaluate as X
+import models.tcn_gru.best_model as C
 
 
 def main():

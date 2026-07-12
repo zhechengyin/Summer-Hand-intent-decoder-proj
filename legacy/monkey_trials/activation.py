@@ -24,7 +24,7 @@ if str(ROOT) not in sys.path:
 
 import legacy.monkey_trials.velocity as IV
 import legacy.monkey_trials.vellp as VL
-import models.best_model as R
+import models.tcn_gru.best_model as R
 
 ACTS = ["gelu", "relu", "elu", "silu", "leaky_relu", "tanh", "mish", "selu"]
 BASE = {**R.BASE, "dils": [1, 2, 4, 8, 16], "H": 64, "L": 2, "F": 64,

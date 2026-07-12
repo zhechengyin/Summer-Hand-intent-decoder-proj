@@ -5,8 +5,9 @@ spike rates with a compact TCN+GRU sequence model.
 
 ## Current model
 
-The only active Python package is [`models/`](models/). The readable architecture
-is in [`models/best_model.py`](models/best_model.py); `checkpoint.pt` contains
+Model families live under [`models/`](models/). The current model of record is
+[`models/tcn_gru/`](models/tcn_gru/), with readable architecture source in
+[`models/tcn_gru/best_model.py`](models/tcn_gru/best_model.py); `checkpoint.pt` contains
 only its learned weights. The package also includes the exact configuration,
 file-level train/eval/test evaluation, and training entry point.
 
@@ -16,11 +17,11 @@ file-level train/eval/test evaluation, and training entry point.
 | Top 8 electrodes by firing rate | 0.76 |
 
 These numbers predate the new fixed train/eval/test allocation. Run
-`models/evaluate.py` to produce metrics for the new split.
+`models/tcn_gru/evaluate.py` to produce metrics for the new split.
 
 ```bash
-py models/evaluate.py       # train/eval/test evaluation
-py models/train_and_save.py # retrain models/checkpoint.pt
+py models/tcn_gru/evaluate.py       # train/eval/test evaluation
+py models/tcn_gru/train_and_save.py # retrain the TCN+GRU checkpoint
 ```
 
 The eight same-subject `.mat` sessions use the nearest possible whole-file split
@@ -31,12 +32,12 @@ to 70/15/15: six training files, one validation file, and one test file
 ## Repository map
 
 ```text
-models/                  readable best-model source plus learned checkpoint
+models/                  one self-contained folder per model family
 legacy/                  concluded pipelines and old experiment trials
   monkey_trials/         intracortical sweeps and ablations
   src/ and tools/        earlier EEG/fNIRS and WAY-EEG-GAL work
 project_memory/          current summary and chronological daily log
-data/                    local datasets (gitignored)
+data/                    immutable source data plus packaged preprocessing methods
 results/                 generated metrics and figures
 ```
 

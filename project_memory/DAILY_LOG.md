@@ -1400,6 +1400,74 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-049 - Self-contained model-family folders
+
+Request: mirror the preprocessing-method convention for models so multiple model
+families can coexist cleanly.
+
+Change: moved all current model-of-record files into `models/tcn_gru/`: readable
+architecture, configuration, data split, evaluator, trainer, checkpoint, and
+README. Added `models/README.md` as the model-family index and updated imports,
+commands, data preprocessing dependencies, and documentation. Future models use
+sibling snake-case folders and do not place architecture-specific files at the
+models root.
+
+### LOG-048 - Source/processed data method packages
+
+Request: make preprocessing experiments self-contained so binning and future
+event-based techniques do not overwrite or obscure one another.
+
+Change: moved immutable MAT recordings from `data/indy_loco/` to
+`data/source_data/indy_loco/`. Added `data/processed/bin_40ms/` and
+`data/processed/bin_50ms/`; each contains `preprocess.py`, method documentation,
+and a gitignored `artifacts/` directory. Generated per-recording compressed NPZ
+files plus manifests for both methods. Outputs retain train/eval/test names and
+session boundaries. `models/tcn_gru/evaluate.py` now reads the 40 ms processed artifacts
+when present and falls back to raw generation when absent.
+
+Convention: every new technique gets its own snake-case method directory with
+versioned transformation source and documentation. Large raw/processed data is
+not committed.
+
+### LOG-047 - Old Neural-ML selector baseline and live-selection research
+
+Source inspected: `Kriston-12/Neural-ML`. Its channel selection is static:
+training-only score_i = sqrt(corr(rate_i,vx)^2 + corr(rate_i,vy)^2), followed by
+a fixed global channel set. EWMA in that repository smooths decoder features; it
+does not switch electrodes. The checked-in ONNX is an EWMA+MLP decoder binary.
+
+Test: added `corr8` to `legacy/monkey_trials/chan_select.py` and trained a clean
+8-channel TCN+GRU with the fixed split. Selected [7,8,22,29,38,48,67,71]. Result:
+eval r=0.712, untouched test r=0.593. This loses to firing8 (0.776/0.746) and
+overfits even more strongly than the learned gate.
+
+Research conclusion: adaptive multiplexing is viable only if hardware can scan
+or cheaply detect activity beyond the eight currently routed electrodes. Use a
+slow scheduler with EWMA health, forced exploration, minimum dwell, and
+hysteresis. The decoder must retain electrode identity (96 sparse slots plus an
+observation mask, or channel embeddings); arbitrary live channels cannot be fed
+into fixed eight input positions.
+
+### LOG-046 - Gate channel selection on the fixed split
+
+Question: does the learned 8-of-96 channel gate generalize under the new fixed
+train/eval/test file split?
+
+Method: learn the L1 sigmoid gate using only `train1`..`train6`; rank its top
+eight channels; then train a fresh clean 8-channel TCN+GRU for each strategy.
+Use `eval1` to select the best epoch and score `test1` only afterward. Command:
+`py legacy/monkey_trials/chan_select.py`. Artifact:
+`results/metrics/indy_chan_select_split.json`.
+
+Results (eval r / untouched test r): random8 0.724 / 0.684; firing8 0.776 /
+0.746; learned8 0.775 / 0.653. The learned gate selected channels
+[7, 24, 26, 32, 38, 45, 72, 75], unchanged because its training files are the
+same six sessions as before.
+
+Interpretation: learned8 looks tied with firing8 on validation but loses 0.093
+on untouched test and even trails random8 by 0.031. This is stronger evidence
+of selector overfitting. Keep top-8 by training-set firing rate.
+
 ### LOG-045 - Explicit train/eval/test MAT-file split
 
 Request: remove the cross-session train/test arrangement and expose named data
@@ -1407,8 +1475,8 @@ partitions targeting 70% train, 15% validation, and 15% test.
 
 Change: renamed the eight same-subject indy files to `train1.mat` through
 `train6.mat`, `eval1.mat`, and `test1.mat`, while recording their original names
-in `models/data_split.json`. Replaced `models/crosssession.py` with
-`models/evaluate.py`. Training uses only train files, validation chooses the best
+in `models/tcn_gru/data_split.json`. Replaced the former cross-session evaluator
+with `models/tcn_gru/evaluate.py`. Training uses only train files, validation chooses the best
 epoch, and test is evaluated after model selection. The other-subject loco file
 is excluded.
 

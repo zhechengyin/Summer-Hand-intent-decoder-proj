@@ -29,7 +29,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 import legacy.monkey_trials.velocity as V
-import models.best_model as R
+import models.tcn_gru.best_model as R
 
 DATA = ROOT / "data" / "indy_loco"
 OUT = ROOT / "results" / "metrics" / "indy_multi.json"

@@ -10,7 +10,7 @@ model selection.
 Model: our best TCN+GRU (0.8 MB). Target: 2D fingertip velocity (top-2 movement
 axes). Metric: Pearson r on held-out test sessions (per axis + mean).
 
-Usage: py models/evaluate.py
+Usage: py models/tcn_gru/evaluate.py
 """
 from __future__ import annotations
 
@@ -26,13 +26,14 @@ import h5py
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import butter, sosfiltfilt
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import models.best_model as R
+import models.tcn_gru.best_model as R
 
-DATA = ROOT / "data" / "indy_loco"
+DATA = ROOT / "data" / "source_data" / "indy_loco"
+PROCESSED_DATA = ROOT / "data" / "processed" / "bin_40ms" / "artifacts"
 URL = "https://zenodo.org/records/3854034/files/{}?download=1"
 BIN = 0.04          # 40 ms bins -> 25 Hz
 WIN = 2.0
@@ -69,7 +70,7 @@ def fetch(name):
     return p
 
 
-def load_electrode(name):
+def load_source_electrode(name):
     """Per-electrode multiunit rates (96 x bins) + fingertip velocity (bins x 3)."""
     f = h5py.File(fetch(name), "r")
     t = np.array(f["t"]).squeeze()
@@ -97,6 +98,15 @@ def load_electrode(name):
         pos_b = sosfiltfilt(sos, pos_b, axis=0)
     vel = np.gradient(pos_b, BIN, axis=0)                 # (bins, 3)
     return rates, vel.astype(np.float32)
+
+
+def load_electrode(name):
+    """Load the named 40 ms processed artifact, falling back to raw generation."""
+    artifact = PROCESSED_DATA / f"{name}.npz"
+    if artifact.exists():
+        with np.load(artifact) as z:
+            return z["rates"].astype(np.float32), z["velocity"].astype(np.float32)
+    return load_source_electrode(name)
 
 
 def windows(rates, vel, axes):

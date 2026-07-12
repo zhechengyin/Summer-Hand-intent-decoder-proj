@@ -1,1 +1,1 @@
-"""Current best hand-intent decoder: spikes to 2D fingertip velocity."""
+"""Model-family packages for neural hand-intent decoding."""

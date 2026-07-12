@@ -26,7 +26,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 import legacy.monkey_trials.velocity as IV
-import models.best_model as R
+import models.tcn_gru.best_model as R
 
 CUTOFFS = [None, 8.0, 6.0, 4.0, 3.0, 2.0]
 CFG = {**R.BASE, "dils": [1, 2, 4, 8, 16], "H": 64, "L": 2, "F": 64,

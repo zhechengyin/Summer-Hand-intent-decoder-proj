@@ -32,7 +32,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 import legacy.monkey_trials.velocity as IV
-import models.best_model as R
+import models.tcn_gru.best_model as R
 
 BIN = 0.04          # 40 ms bins -> 25 Hz
 MIN_SPK = 10
