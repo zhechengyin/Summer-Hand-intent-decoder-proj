@@ -27,19 +27,23 @@ MODEL = {**BASE, "dils": [1, 2, 4, 8], "H": 32, "L": 1, "F": 32,
          "epochs": 60, "noise": 0.1, "chdrop": 0.1, "cosine": True,
          "act": "relu", "n_out": N_OUT}
 
-# --- training data: 18 indy sessions (6 base split + 12 nearby) ---
-# More data is the main R² lever (6->18 sess = 0.529->0.628, LOG-052/053).
+# --- training data: 24 indy sessions (6 base split + 18 nearby) ---
+# More data is the main R² lever and still climbing (6->18->24 sess =
+# 0.529->0.628->0.655, LOG-052/053/055). A 3-seed ensemble adds ~+0.02 (0.675).
 BASE_TRAIN = ["train1", "train2", "train3", "train4", "train5", "train6"]
 EXTRA_TRAIN = ["indy_20160927_06", "indy_20160930_02", "indy_20160930_05",
                "indy_20161025_04", "indy_20161026_03", "indy_20161027_03",
                "indy_20160915_01", "indy_20160916_01", "indy_20160921_01",
-               "indy_20160927_04", "indy_20161206_02", "indy_20161207_02"]
+               "indy_20160927_04", "indy_20161206_02", "indy_20161207_02",
+               "indy_20161212_02", "indy_20161220_02", "indy_20170123_02",
+               "indy_20170124_01", "indy_20170127_03", "indy_20170131_02"]
 
 # --- headline metrics (R², untouched test1 after eval1 model selection) ---
 METRICS = {
-    "test_r2_fp32": 0.628,       # 100 kB / ~25.6k params (LOG-053)
-    "test_r2_int8": 0.628,       # ~27 kB, lossless quantization (LOG-054)
-    "test_r": 0.793,
+    "test_r2_fp32": 0.655,       # 24-session single model, 100 kB (LOG-055)
+    "test_r2_int8": 0.655,       # ~27 kB, lossless quantization (LOG-054)
+    "test_r2_ensemble3": 0.675,  # 3-seed ensemble, 24 sessions (3x cost)
+    "test_r": 0.812,
     "params": 25_570,
     "size_kb_fp32": 100,
     "size_kb_int8": 27,

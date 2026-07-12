@@ -1400,6 +1400,26 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-055 - 24 sessions + ensemble: data still climbing, best R2=0.675
+
+Question: Does data scaling continue past 18 sessions, and does ensembling stack
+with more data?
+
+Method: research/iter7_final.py -- 24-session pool (18 extra), 8-ch 'small' model.
+Runs: 24 single, 18+ensemble3, 24+ensemble3. Fixed channels, fixed eval1/test1.
+
+Results (TEST R2; ref 18-single=0.628): 24_single=0.655 (+0.027), 18_ens3=0.653,
+24_ens3=0.675 (+0.047).
+
+Interpretation: data did NOT plateau -- 18->24 sessions adds +0.027 (the Dec-Jan
+sessions helped despite drift). Ensembling adds ~+0.02 independently, and the two
+STACK: 24+ens3 = 0.675. Single-model deployable is now 24 sess = 0.655 (27 kB
+int8). Ensemble 0.675 costs 3x (~81 kB int8, still STM32-feasible).
+
+Decision: promote 24-session single model (0.655) as models/tcn_gru_8ch of record;
+document ensemble as a +0.02 option. Since data still climbs, push further (iter8:
+remaining indy sessions).
+
 ### LOG-054 - int8 quantization is FREE: 100 kB -> 27 kB, R2 unchanged (STM32 fit)
 
 Question: Does the 100 kB 8-ch model survive int8 quantization to fit an STM32?
