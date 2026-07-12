@@ -1400,6 +1400,28 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-053 - Data scaling to 18 sessions = 0.628; channel re-selection hurts
+
+Question: Push the data-scaling curve to 15/18 sessions, and does re-selecting the
+8 channels on the bigger pool help?
+
+Method: research/iter5_scale.py, 18-session pool (6 base + 12 downloaded indy),
+100 kB 'small' model, fixed eval1/test1. Channels either fixed to train1-6 firing
+or re-selected on the full training pool.
+
+Results (TEST R2): 6=0.529, 9=0.589, 12=0.616, 15=0.615, 18_fixed=0.628,
+18_reselect=0.502.
+
+Interpretation: 18 fixed = 0.628 is the new best (+0.099 vs 6-session, +0.080 vs
+the original 0.75 MB base, at 100 kB). Big gains 6->12 (+0.087), slow 12->18
+(+0.012) -- near plateau, some added sessions are temporally distant (drift).
+Channel RE-SELECTION on the full pool COLLAPSES to 0.502 (-0.126): same overfit
+failure as learned/corr selection (LOG-043/046). Keep the train1-6 firing-rate 8.
+
+Decision: lock the recipe -- 18 sessions, FIXED train1-6 top-8 firing channels,
+100 kB TCN+GRU -> R2=0.628. Next: int8 quantization (STM32 fit) then ensemble for
+a final push; promote to model of record.
+
 ### LOG-052 - More training data is the big 8-ch R2 lever (+0.087 so far)
 
 Question: Does adding indy sessions raise 8-ch R2? (paper: +0.03-0.04 from more

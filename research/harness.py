@@ -53,7 +53,7 @@ def _stack(trials):
 
 
 def run(data, cfg, build=None, loss_fn=None, post=None, seeds=(42,), verbose=False,
-        ret_preds=False):
+        ret_preds=False, ret_net=False):
     """Train (early-stop on eval mean r) and score. Ensembled over `seeds`.
 
     Returns dict: eval_r, eval_r2, test_r, test_r2, per-axis arrays, n_params.
@@ -145,6 +145,10 @@ def run(data, cfg, build=None, loss_fn=None, post=None, seeds=(42,), verbose=Fal
     if ret_preds:                     # raw (pre-post) ensembled preds + targets
         out["eval_preds"] = {n: (ev_p[n][1], raw_ev[n]) for n in raw_ev}
         out["test_preds"] = {n: (te_p[n][1], raw_te[n]) for n in raw_te}
+    if ret_net:                       # last-seed trained net + norm + prepped arrays
+        out["net"] = net              # for quantization / export
+        out["norm"] = (ym, ys)
+        out["ev_p"], out["te_p"], out["n_out"] = ev_p, te_p, n_out
     return out
 
 
