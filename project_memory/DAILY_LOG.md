@@ -1400,6 +1400,28 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-057 - Within-session (calibrated) is WORSE than pooled: data quantity wins
+
+Question: A real implant is usually calibrated on the user's own data. Does a
+within-session (calibrated) 8-ch decoder beat our cross-session pooled 0.668?
+
+Method: research/iter9_within_session.py -- per session, temporal 70/15/15
+train/eval/test split (no leakage), 8 fixed channels, 'small' model. Sessions:
+test1, eval1, train1, train4.
+
+Results (TEST R2): test1 0.603, eval1 0.596, train1 0.511, train4 0.525;
+mean = 0.559 (vs cross-session pooled 0.668).
+
+Interpretation: counterintuitively, per-session calibration ALONE is worse
+(0.559 < 0.668) -- a single session gives only ~130-235 windows, far less than the
+24-session pool (~4600). At 8 channels, DATA QUANTITY dominates over the
+distribution-match advantage of calibration. This reinforces the pooled
+cross-session model of record. Best future direction: BOTH -- pool many sessions
+AND fine-tune on the user's own session (transfer + calibration).
+
+Decision: keep the 24-session pooled cross-session model. Note calibration is only
+worth it if combined with the pool, not as a replacement.
+
 ### LOG-056 - More data unlocks more capacity: 'wide' single model = 0.677
 
 Question: At 6 sessions the small F32/H32 model was best (bigger overfit). With
