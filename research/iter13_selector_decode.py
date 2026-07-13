@@ -43,7 +43,8 @@ def main():
     loaded = {s: E.load_electrode(s) for s in TRAIN + list(E.EVAL) + list(E.TEST)}
     axes = np.sort(np.argsort(np.mean([loaded[s][1].std(0) for s in E.TRAIN], 0))[-2:])
     per = {s: SC.scores(*loaded[s]) for s in TRAIN}
-    keys = ["firing", "lowfreq", "velcorr", "fftweighted"]
+    # LOG-059 partial done: firing 0.577, lowfreq 0.631, velcorr 0.582. Remaining:
+    keys = ["fftweighted"]
     glob = {k: np.mean([per[s][k] for s in TRAIN], 0) for k in keys}
     sels = {k: np.sort(np.argsort(glob[k])[-8:]) for k in keys}
 
@@ -56,7 +57,7 @@ def main():
         print(f"  {k:12s} ch={sels[k].tolist()}  TEST R2={res['test_r2']:.3f}  "
               f"EVAL R2={res['eval_r2']:.3f}  [{time.time()-t0:.0f}s]", flush=True)
 
-    ref = rows["firing"]["test_r2"]
+    ref = rows.get("firing", {}).get("test_r2", 0.577)   # firing from LOG-059 partial
     print(f"\n--- selector decode (TEST R2; firing ref = {ref:.3f}) ---")
     for k, r in rows.items():
         print(f"  {k:12s}: {r['test_r2']:.3f}  ({r['test_r2']-ref:+.3f})")

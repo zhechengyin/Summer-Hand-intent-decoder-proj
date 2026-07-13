@@ -110,8 +110,11 @@ def main():
     print("=== Iteration 11: binning sweep (8 ch, 24 sess, small model) ===")
     print("NOTE: R2 at different output rates is not perfectly comparable (finer =",
           "more, noisier samples); overlap rows share their stride's rate.\n", flush=True)
+    DONE = {"10ms_cont"}                       # completed in LOG-059 partial (0.642, slow)
     rows = {}
     for label, integ, stride in CONFIGS:
+        if label in DONE:
+            continue
         data = prep(integ, stride)
         t0 = time.time()
         res = H.run(data, cfg)

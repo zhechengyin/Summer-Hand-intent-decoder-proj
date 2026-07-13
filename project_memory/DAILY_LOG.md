@@ -1400,6 +1400,30 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-060 - Architecture comparison + selectors complete (resumed 1-2 at a time)
+
+Resumed the 4 cancelled experiments (skipping completed configs; 2 at a time --
+CPU permits, ~500 MB/job). iter13 (selectors) and iter14 (architecture) done.
+
+iter14 architecture (8 ch, 24 sess, F64/H64) -- Test R2 | int8 | latency | causal:
+  tcngru_bidir  0.677 | 98 KB | 8.2 ms | NON-causal (ref)
+  gru_bidir     0.647 | 50 KB | 4.4 ms | NON-causal
+  tcngru_causal 0.606 | 73 KB | 5.6 ms | causal  <- best real-time
+  causal_tcn    0.578 | 50 KB | 2.6 ms | causal
+  dws_tcn       0.577 | 19 KB | 1.2 ms | causal   <- ultra-light MCU option
+  gru_causal    0.573 | 25 KB | 2.6 ms | causal
+  => TCN+GRU wins in both regimes. TCN front-end adds only ~0.03 over GRU-only.
+  Causality costs ~0.07 (0.677->0.606). dws_tcn superb for size (19 KB/1.2 ms).
+  Follow-up (per ARCHITECTURE_EXPERIMENT.md): bounded-lookahead to close the gap.
+
+iter13 selectors (8-of-96, 24-sess selection, decode TEST R2):
+  firing 0.577, velcorr 0.582, lowfreq 0.631, fftweighted 0.645.
+  => lowfreq AND fftweighted beat firing-on-24sess; their channels land ~6/8 on
+  the deployed firing-6 set (0.655). None clearly beats the deployed 0.655. Real
+  test still pending: lowfreq/fftweighted selection ON BASE-6 vs firing-6.
+
+Still running: iter11 (binning 20/40/80/80-40/80-20), iter10 (xxwide_rf).
+
 ### LOG-059 - PARTIAL (stopped early, CPU overload): 4 experiments, resume 2026-07-13
 
 Ran 4 experiments concurrently (overloaded CPU); stopped cleanly with progress

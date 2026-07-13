@@ -37,8 +37,11 @@ def main():
     data = I5.prep_more(I7.EXTRA18[:18], reselect=False)          # 24 sessions
     print("=== Iteration 10: bigger models @ 24 sessions (budget ~400 KB int8) ===\n",
           flush=True)
+    DONE = {"wide", "xwide", "xxwide"}         # completed in LOG-059 (0.677/0.679/0.667)
     rows = {}
     for name, arch in ARCHS.items():
+        if name in DONE:
+            continue
         cfg = {**E.CFG, **arch}
         t0 = time.time()
         res = H.run(data, cfg)

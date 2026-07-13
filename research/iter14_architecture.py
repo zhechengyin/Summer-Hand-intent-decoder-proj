@@ -57,8 +57,11 @@ def main():
     data = I5.prep_more(I7.EXTRA18[:18], reselect=False)          # 24 sessions, fixed 8 ch
     print("=== Iteration 14: architecture comparison (8 ch, 24 sess, F64/H64) ===")
     print(f"  {'model':15s} {'R2':>6s} {'int8KB':>7s} {'lat_ms':>7s}  causal\n", flush=True)
+    DONE = {"tcngru_bidir", "tcngru_causal", "causal_tcn"}   # completed in LOG-059 partial
     rows = {}
     for name, build_fn, ov, causal in MODELS:
+        if name in DONE:
+            continue
         cfg = {**BASE, **ov}
         t0 = time.time()
         res = H.run(data, cfg, build=build_fn)
