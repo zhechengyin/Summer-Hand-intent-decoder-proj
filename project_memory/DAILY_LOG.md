@@ -1400,6 +1400,28 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-056 - More data unlocks more capacity: 'wide' single model = 0.677
+
+Question: At 6 sessions the small F32/H32 model was best (bigger overfit). With
+24 sessions, does more capacity now help?
+
+Method: research/iter8_capacity.py -- fixed 24-session 8-ch data, sweep model
+size. small(F32/H32/L1), medium(F48/H48/L1), wide(F64/H64/L1), deep(F48/H48/L2/
+dils+16). Fixed eval1/test1.
+
+Results (TEST R2 / int8 size): small 0.655/25 kB, medium 0.662/55 kB,
+wide 0.677/98 kB, deep 0.673/103 kB.
+
+Interpretation: yes -- with 4x the data, capacity helps (0.655->0.677). 'wide'
+(F64/H64/L1, 100k params, 98 kB int8) is best and, notably, a SINGLE 'wide' model
+(0.677) matches the 3-seed ensemble of small (0.675) -- simpler to deploy, still
+STM32-friendly. wide eval 0.659 / test 0.677 => not overfitting. 'deep' (2 layers)
+doesn't beat 'wide'.
+
+Decision: promote 'wide' at 24 sessions as models/tcn_gru_8ch of record
+(R2=0.677, 98 kB int8). The small 25 kB / 0.655 variant remains the option for the
+tightest flash budgets.
+
 ### LOG-055 - 24 sessions + ensemble: data still climbing, best R2=0.675
 
 Question: Does data scaling continue past 18 sessions, and does ensembling stack

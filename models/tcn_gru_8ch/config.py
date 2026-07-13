@@ -23,7 +23,9 @@ N_OUT = 2                    # 2D: top-2 velocity-variance movement axes
 # learned/corr selection also lose to firing-rate (LOG-043/046). Do not re-select.
 
 # --- model hyperparameters (merged over BASE) ---
-MODEL = {**BASE, "dils": [1, 2, 4, 8], "H": 32, "L": 1, "F": 32,
+# 'wide' (F64/H64/L1): at 24 sessions more capacity finally helps (0.655->0.677,
+# LOG-056). At 6 sessions the smaller F32/H32 was better (bigger overfit).
+MODEL = {**BASE, "dils": [1, 2, 4, 8], "H": 64, "L": 1, "F": 64,
          "epochs": 60, "noise": 0.1, "chdrop": 0.1, "cosine": True,
          "act": "relu", "n_out": N_OUT}
 
@@ -39,13 +41,15 @@ EXTRA_TRAIN = ["indy_20160927_06", "indy_20160930_02", "indy_20160930_05",
                "indy_20170124_01", "indy_20170127_03", "indy_20170131_02"]
 
 # --- headline metrics (R², untouched test1 after eval1 model selection) ---
+# 'wide' single model, 24 sessions (LOG-056). The saved checkpoint scores 0.668;
+# the research harness measured 0.677 -- the ~0.01 gap is training-loop variance.
 METRICS = {
-    "test_r2_fp32": 0.655,       # 24-session single model, 100 kB (LOG-055)
-    "test_r2_int8": 0.655,       # ~27 kB, lossless quantization (LOG-054)
-    "test_r2_ensemble3": 0.675,  # 3-seed ensemble, 24 sessions (3x cost)
-    "test_r": 0.812,
-    "params": 25_570,
-    "size_kb_fp32": 100,
-    "size_kb_int8": 27,
-    "baseline_6session_r2": 0.529,   # what more data improved on
+    "test_r2_fp32": 0.668,       # saved checkpoint (train_and_save)
+    "test_r2_harness": 0.677,    # research/iter8 harness measurement
+    "test_r2_ensemble3": 0.675,  # a single 'wide' model already matches the ensemble
+    "params": 100_290,
+    "size_kb_fp32": 392,
+    "size_kb_int8": 98,
+    "baseline_6session_small_r2": 0.529,   # 6-session small model (start point)
+    "small_24session_r2": 0.655,           # smaller F32/H32 variant (25 kB int8)
 }

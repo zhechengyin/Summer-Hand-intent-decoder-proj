@@ -9,13 +9,15 @@ detection) on an **STM32-class MCU**; metric is **R²**. Reference/SOTA: Zhou, S
 Basu, arXiv:2312.15889 (NeuroBench). Data: indy sessions, fixed file split
 (train.../eval1/test1), per-electrode 40 ms multiunit rates, 3 Hz vel-LP target.
 
-- **Best deployable model: 100 kB TCN+GRU** (`F32/H32/L1/dils[1,2,4,8]`, ~25.6k
-  params), 8 channels = top-8 by firing rate on train1-6, trained on **18
-  sessions** → **TEST R² = 0.628** (r=0.793). Tools: `research/`.
-- **int8 quantization is lossless** (LOG-054): 100 kB → **27 kB, R² 0.628
-  unchanged** → fits any STM32 with margin. Size is fully solved.
-- **What moved R² (from 0.529 at 6 sessions):** MORE TRAINING DATA is the lever
-  (6→9→12→18 sess = 0.529→0.589→0.616→0.628; big early, slow tail) (LOG-052/053).
+- **Best deployable model: `wide` TCN+GRU** (`F64/H64/L1/dils[1,2,4,8]`, ~100k
+  params), 8 channels = top-8 by firing rate on train1-6, trained on **24
+  sessions** → **TEST R² ≈ 0.67** (0.668 saved checkpoint / 0.677 harness). ~98 kB
+  int8. `models/tcn_gru_8ch/`. A smaller F32/H32 variant is ~25 kB int8 at R² 0.655.
+- **int8 quantization is lossless** (LOG-054): no R² loss; fits STM32 F4/H7 flash.
+- **What moved R² (from 0.529 at 6 sessions):** (1) MORE TRAINING DATA is the main
+  lever (6→9→12→18→24 sess = 0.529→…→0.655, LOG-052/053/055); (2) with 24 sessions
+  a BIGGER model finally helps (wide 0.677 vs small 0.655, LOG-056) — it overfit at
+  6 sessions. A single wide model matches a 3-seed ensemble (0.675).
 - **What did NOT help:** the paper's Bessel output filter (redundant — we low-pass
   the velocity target at 3 Hz already, LOG-050); correlation loss / stronger aug /
   more reg (wash, LOG-051); Bessel/causal caveat below. Only seed-ensembling gave
