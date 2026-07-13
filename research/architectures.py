@@ -113,3 +113,106 @@ def build_lookahead_tcngru(lookahead_steps):
                 return y[:, self.k:, :]                         # pred[t] saw inputs..t+k
         return Lookahead()
     return build
+
+
+def build_tcn_lstm(cfg, n_ch):
+    """TCN front-end + LSTM (vs GRU). Causal when bidir=False."""
+    import torch.nn as nn
+    Act = _act(cfg)
+
+    class TCNLSTM(nn.Module):
+        def __init__(self):
+            super().__init__()
+            F = cfg["F"]
+            self.sp = nn.Sequential(nn.Conv1d(n_ch, F, 1), nn.BatchNorm1d(F), Act())
+            self.convs = nn.ModuleList([nn.Conv1d(F, F, 3, padding=(3 - 1) * d, dilation=d)
+                                        for d in cfg["dils"]])
+            self.pads = [(3 - 1) * d for d in cfg["dils"]]
+            self.act = Act(); self.drop = nn.Dropout(cfg["dropout"])
+            self.lstm = nn.LSTM(F, cfg["H"], cfg["L"], batch_first=True,
+                                bidirectional=cfg["bidir"],
+                                dropout=cfg["dropout"] if cfg["L"] > 1 else 0.0)
+            self.head = nn.Linear(cfg["H"] * (2 if cfg["bidir"] else 1), cfg.get("n_out", 2))
+
+        def forward(self, x):
+            z = self.sp(x)
+            for c, p in zip(self.convs, self.pads):
+                z = self.act(c(z)[:, :, :-p] + z)
+            z, _ = self.lstm(self.drop(z).transpose(1, 2))
+            return self.head(z)
+    return TCNLSTM()
+
+
+def build_lstm_only(cfg, n_ch):
+    """Channel embed + LSTM + head (no CNN). Causal when bidir=False."""
+    import torch.nn as nn
+    Act = _act(cfg)
+
+    class LSTMOnly(nn.Module):
+        def __init__(self):
+            super().__init__()
+            F = cfg["F"]
+            self.emb = nn.Sequential(nn.Conv1d(n_ch, F, 1), nn.BatchNorm1d(F), Act())
+            self.lstm = nn.LSTM(F, cfg["H"], cfg["L"], batch_first=True,
+                                bidirectional=cfg["bidir"],
+                                dropout=cfg["dropout"] if cfg["L"] > 1 else 0.0)
+            self.head = nn.Linear(cfg["H"] * (2 if cfg["bidir"] else 1), cfg.get("n_out", 2))
+
+        def forward(self, x):
+            z, _ = self.lstm(self.emb(x).transpose(1, 2))
+            return self.head(z)
+    return LSTMOnly()
+
+
+def build_plain_cnn_gru(cfg, n_ch):
+    """Plain (NON-dilated) causal Conv1d stack + GRU + head. Shorter receptive field
+    than the dilated TCN -- tests whether the dilations matter."""
+    import torch.nn as nn
+    Act = _act(cfg)
+
+    class PlainCNNGRU(nn.Module):
+        def __init__(self):
+            super().__init__()
+            F = cfg["F"]
+            self.sp = nn.Sequential(nn.Conv1d(n_ch, F, 1), nn.BatchNorm1d(F), Act())
+            self.convs = nn.ModuleList([nn.Conv1d(F, F, 3, padding=2)   # kernel 3, causal
+                                        for _ in cfg["dils"]])           # same depth as TCN
+            self.act = Act(); self.drop = nn.Dropout(cfg["dropout"])
+            self.gru = nn.GRU(F, cfg["H"], cfg["L"], batch_first=True,
+                              bidirectional=cfg["bidir"],
+                              dropout=cfg["dropout"] if cfg["L"] > 1 else 0.0)
+            self.head = nn.Linear(cfg["H"] * (2 if cfg["bidir"] else 1), cfg.get("n_out", 2))
+
+        def forward(self, x):
+            z = self.sp(x)
+            for c in self.convs:
+                z = self.act(c(z)[:, :, :-2] + z)                        # causal (drop last 2)
+            z, _ = self.gru(self.drop(z).transpose(1, 2))
+            return self.head(z)
+    return PlainCNNGRU()
+
+
+def build_transformer(cfg, n_ch):
+    """Causal Transformer encoder (attention) + head. Causal via subsequent mask."""
+    import torch
+    import torch.nn as nn
+
+    class TF(nn.Module):
+        def __init__(self):
+            super().__init__()
+            d = cfg["F"]
+            self.emb = nn.Conv1d(n_ch, d, 1)
+            self.pos = nn.Parameter(torch.randn(1, 512, d) * 0.02)
+            layer = nn.TransformerEncoderLayer(d, nhead=4, dim_feedforward=2 * d,
+                                               dropout=cfg["dropout"], batch_first=True,
+                                               activation="relu")
+            self.enc = nn.TransformerEncoder(layer, max(cfg["L"], 2))
+            self.head = nn.Linear(d, cfg.get("n_out", 2))
+
+        def forward(self, x):
+            z = self.emb(x).transpose(1, 2)                              # (B,T,d)
+            T = z.shape[1]
+            z = z + self.pos[:, :T]
+            mask = nn.Transformer.generate_square_subsequent_mask(T).to(z.device)  # causal
+            return self.head(self.enc(z, mask=mask))
+    return TF()
