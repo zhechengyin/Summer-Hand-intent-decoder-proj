@@ -1400,6 +1400,23 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-066 - More architectures: none beat TCN+GRU (LSTM ties, Transformer worse)
+
+Question: do untested architectures beat the causal TCN+GRU (0.606)?
+
+Method: research/iter19_more_arch.py + new builders in architectures.py. All
+strictly causal, 8 ch, 24 sess, same recipe.
+
+Results (TEST R2): tcn_lstm 0.609, tcn_gru 0.606 (ref), plain_cnn_gru 0.580,
+lstm_only 0.578, transformer 0.566, wiener(linear ridge) 0.213.
+
+Interpretation: TCN+LSTM ties TCN+GRU (0.609 vs 0.606, noise) -- LSTM vs GRU
+doesn't matter. Transformer underperforms (attention needs more data/tuning than
+24 sessions). Dilations help (+0.026 vs plain CNN); CNN front-end helps (+0.03 vs
+LSTM-only). Linear Wiener 0.213 << NN 0.606 => nonlinearity is essential (~3x).
+Architecture is confirmed NOT the lever; TCN+GRU stays. Untested still: LFADS-lite
+(latent dynamics) and SNN -- larger builds, likely also near the ceiling.
+
 ### LOG-065 - Causal ceiling = 0.606 (more/distant data doesn't help). Deployable model settled.
 
 Question: does more data lift the strictly-causal decoder (0.606)?
