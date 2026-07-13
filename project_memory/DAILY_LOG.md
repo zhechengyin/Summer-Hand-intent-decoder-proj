@@ -1400,6 +1400,37 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-058 - Channel-selection scoring analysis: drift is real, activity != relevance
+
+Question (user design review of live/adaptive selection): is the firing-rate top-8
+stable over time, does it pick velocity-relevant channels, and do alt scores help?
+
+Method: research/iter12_channel_scores.py -- per-channel scores on 96 electrodes
+across 24 sessions (25 Hz rates): firing (mean rate), lowfreq (0.2-3 Hz welch
+power), velcorr (sqrt(corr(rate,vx)^2+corr(rate,vy)^2)), fftweighted (sum f*P).
+Measure cross-session top-8 stability and inter-score agreement. No training.
+
+Results:
+  Stability (mean pairwise top-8 overlap across sessions): firing 0.41, lowfreq
+  0.41, velcorr 0.36, fftweighted 0.44. Global-top8 present in ~0.52-0.62 of
+  sessions. => the best-8 DRIFTS; the fixed set is a robust compromise not a
+  stable optimum.
+  Relevance: firing-top8 vs velcorr-top8 overlap = 0.12 (nearly disjoint) => firing
+  picks RELIABLE (high-spike) channels, NOT velocity-correlated ones.
+  Agreement vs firing: lowfreq 0.62, fftweighted 0.75, velcorr 0.12.
+
+Interpretation: confirms the user's critique (activity != task relevance) AND
+explains why firing still wins historically (LOG-047): velcorr is even less
+stable (0.36) so it overfits; high firing = low-variance rate estimate that
+generalizes, and the decoder extracts velocity anyway (reliability > in-sample
+relevance). FFT-weighted ~= firing (0.75, high-firing dominates total power) --
+not a noise-magnet, just redundant. lowfreq (0.2-3 Hz) is the one plausible
+sweet spot (velocity-band + firing-like stability) -> decode-tested in iter13.
+
+Decision: keep fixed firing-rate top-8 as the base set (evidence-backed). Adaptation
+is justified ONLY as slow drift-tracking with hysteresis/exploration (user design),
+not per-bin reordering. Observability (88 unread electrodes) is a hardware limit.
+
 ### LOG-057 - Within-session (calibrated) is WORSE than pooled: data quantity wins
 
 Question: A real implant is usually calibrated on the user's own data. Does a
