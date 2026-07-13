@@ -1400,6 +1400,24 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-063 - Firing-rate is the best channel selector (base-6); low-freq lead was an artifact
+
+Question: iter13 found low-freq (0.2-3 Hz) power beat firing on 24-session
+selection (0.631 vs 0.577). Does it beat firing on the deployment's BASE-6
+selection (firing-6 = 0.655)?
+
+Method: research/iter16_base6_selectors.py -- select top-8 on base-6 by each
+score, decode on 24 sessions, small model, test1.
+
+Results (TEST R2): firing 0.655, lowfreq 0.612 (-0.043), fftweighted 0.651 (-0.004).
+
+Interpretation: firing-rate WINS on base-6. The iter13 low-freq "lead" was an
+artifact: the 24-session firing average happened to pick a poor set [1,24,32,...]
+(0.577), so low-freq looked better there -- but on base-6 firing picks the good
+set [26,51,53,66,71,73,75,94] (0.655) and neither alternative beats it. Channel
+selection is settled: firing-rate top-8 on the base sessions. Deployed channels
+unchanged.
+
 ### LOG-062 - Causal is the deployable target: lookahead R2-vs-latency (bidir NOT deployable)
 
 User correction: a fully BIDIRECTIONAL GRU can't run at inference (needs the whole
