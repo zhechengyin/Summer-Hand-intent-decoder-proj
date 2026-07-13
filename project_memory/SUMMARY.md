@@ -2,18 +2,21 @@
 
 Last updated: 2026-07-12
 
-## CURRENT FOCUS: 8-channel STM32 monkey velocity decoder (LOG-042..054)
+## CURRENT FOCUS: 8-channel STM32 monkey velocity decoder (LOG-042..065)
 
 Hardware pivot (LOG-050): decode NHP finger velocity from **8 channels** (spike
-detection) on an **STM32-class MCU**; metric is **R²**. Reference/SOTA: Zhou, Sun,
-Basu, arXiv:2312.15889 (NeuroBench). Data: indy sessions, fixed file split
-(train.../eval1/test1), per-electrode 40 ms multiunit rates, 3 Hz vel-LP target.
+detection) on an **STM32-class MCU**, in **real time**; metric is **R²**. Data:
+indy sessions, fixed file split (train.../eval1/test1), per-electrode 40 ms
+multiunit rates, 3 Hz vel-LP target. Reference: Zhou/Sun/Basu arXiv:2312.15889.
 
-- **Best deployable model: `wide` TCN+GRU** (`F64/H64/L1/dils[1,2,4,8]`, ~100k
-  params), 8 channels = top-8 by firing rate on train1-6, trained on **24
-  sessions** → **TEST R² ≈ 0.67** (0.668 saved checkpoint / 0.677 harness). ~98 kB
-  int8. `models/tcn_gru_8ch/`. A smaller F32/H32 variant is ~25 kB int8 at R² 0.655.
-- **int8 quantization is lossless** (LOG-054): no R² loss; fits STM32 F4/H7 flash.
+- **Deployable model of record: STRICTLY-CAUSAL wide TCN+GRU** (`F64/H64/L1/
+  dils[1,2,4,8]`, `bidir=False`), 8 channels = firing top-8 on train1-6, 24
+  sessions → **TEST R² = 0.606**, 0 ms lookahead, ~73 kB int8, ~5.6 ms/pred.
+  `models/tcn_gru_8ch/`. (Checkpoint retrain-as-causal is pending; see HANDOFF.)
+- **Bidirectional is NOT deployable** (needs the whole future). Bidir 0.677 and
+  bounded-lookahead (0.619 @80ms, 0.623 @200ms) are OFFLINE references only —
+  at 40 ms/bin that latency is too high for closed-loop (LOG-062/065).
+- **int8 quantization is lossless**: no R² loss; fits STM32 F1/F4/H7 flash.
 - **What moved R² (from 0.529 at 6 sessions):** (1) MORE TRAINING DATA is the main
   lever (6→9→12→18→24 sess = 0.529→…→0.655, LOG-052/053/055); (2) with 24 sessions
   a BIGGER model finally helps (wide 0.677 vs small 0.655, LOG-056) — it overfit at
@@ -23,9 +26,10 @@ Basu, arXiv:2312.15889 (NeuroBench). Data: indy sessions, fixed file split
   more reg (wash, LOG-051); Bessel/causal caveat below. Only seed-ensembling gave
   +0.022 (3× cost).
 - **Pitfalls confirmed:** re-selecting the 8 channels on more data OVERFITS
-  (0.628→0.502); learned/corr channel selection also lose to firing-rate top-8
-  (LOG-043/046/053). Causality costs ~0.078 R² (bidirectional GRU peeks ahead;
-  causal is the honest real-time number) (LOG-050).
+  (0.628→0.502); learned/corr/low-freq/fft selection all lose or tie firing-rate
+  top-8 on base-6 (LOG-043/046/053/063). Causal architecture/capacity/smoothing/
+  distant-data tweaks don't beat causal 0.606 either (LOG-064/065) — the decoder is
+  near its ceiling for this 8-channel input; more R² needs data/hardware, not model.
 
 Older EEG/fNIRS and WAY-EEG-GAL work below is now legacy (see `legacy/`).
 

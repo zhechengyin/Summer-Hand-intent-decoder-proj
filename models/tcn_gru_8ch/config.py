@@ -1,9 +1,10 @@
 """8-channel STM32 decoder — exact spec of record (importable).
 
-The deployable decoder: 8 spike-detection channels -> 2D fingertip velocity via
-the same dilated-TCN + bidirectional-GRU architecture as `models.tcn_gru`
-(`build_net`), but shrunk to STM32 size and trained on more sessions. int8 form
-is ~27 kB with no R² loss (LOG-054).
+The deployable decoder: 8 spike-detection channels -> 2D fingertip velocity via a
+dilated-TCN + STRICTLY-CAUSAL (unidirectional) GRU (`models.tcn_gru.build_net`
+with bidir=False), shrunk to STM32 size and trained on 24 sessions. Causal because
+real-time inference has no future; int8 is lossless. Deployable TEST R2 = 0.606
+(the bidirectional 0.677 is an OFFLINE reference only). See LOG-062/065.
 
 Hardware: 8 channels (threshold-crossing spike detection), STM32-class MCU.
 Metric: R² (coefficient of determination, avg of X,Y velocity).
@@ -23,9 +24,11 @@ N_OUT = 2                    # 2D: top-2 velocity-variance movement axes
 # learned/corr selection also lose to firing-rate (LOG-043/046). Do not re-select.
 
 # --- model hyperparameters (merged over BASE) ---
-# 'wide' (F64/H64/L1): at 24 sessions more capacity finally helps (0.655->0.677,
-# LOG-056). At 6 sessions the smaller F32/H32 was better (bigger overfit).
-MODEL = {**BASE, "dils": [1, 2, 4, 8], "H": 64, "L": 1, "F": 64,
+# STRICTLY CAUSAL (bidir=False): bidirectional is NOT deployable at inference (it
+# needs the whole future); at 40 ms/bin even a 2-frame lookahead is 80 ms, too slow
+# (LOG-062). 'wide' (F64/H64/L1) is the best causal config -- architecture,
+# capacity, smoothing and more/distant data don't beat it (LOG-064/065).
+MODEL = {**BASE, "dils": [1, 2, 4, 8], "H": 64, "L": 1, "F": 64, "bidir": False,
          "epochs": 60, "noise": 0.1, "chdrop": 0.1, "cosine": True,
          "act": "relu", "n_out": N_OUT}
 
@@ -41,15 +44,16 @@ EXTRA_TRAIN = ["indy_20160927_06", "indy_20160930_02", "indy_20160930_05",
                "indy_20170124_01", "indy_20170127_03", "indy_20170131_02"]
 
 # --- headline metrics (R², untouched test1 after eval1 model selection) ---
-# 'wide' single model, 24 sessions (LOG-056). The saved checkpoint scores 0.668;
-# the research harness measured 0.677 -- the ~0.01 gap is training-loop variance.
+# DEPLOYABLE = strictly causal. The bidir numbers are OFFLINE references only.
 METRICS = {
-    "test_r2_fp32": 0.668,       # saved checkpoint (train_and_save)
-    "test_r2_harness": 0.677,    # research/iter8 harness measurement
-    "test_r2_ensemble3": 0.675,  # a single 'wide' model already matches the ensemble
+    "test_r2_causal": 0.606,     # DEPLOYABLE: strictly causal, 0 ms lookahead (LOG-062/065)
+    "latency_ms_lookahead_80": 0.619,   # offline ref: +80 ms bounded lookahead
+    "latency_ms_lookahead_200": 0.623,  # offline ref: +200 ms bounded lookahead
+    "test_r2_bidir_offline": 0.677,     # offline upper bound (bidirectional, NOT deployable)
     "params": 100_290,
-    "size_kb_fp32": 392,
-    "size_kb_int8": 98,
-    "baseline_6session_small_r2": 0.529,   # 6-session small model (start point)
-    "small_24session_r2": 0.655,           # smaller F32/H32 variant (25 kB int8)
+    "size_kb_int8": 98,          # ~73 KB for the causal variant (no bidir GRU dir)
+    "compute_ms_per_pred": 5.6,  # causal, 1 CPU core
+    "baseline_6session_small_r2": 0.529,   # start point (bidir)
+    # NOTE: checkpoint.pt is still the BIDIR model (offline ref, 0.668). Retrain
+    # causal (set already done in MODEL) for the deployable checkpoint -- see HANDOFF.
 }

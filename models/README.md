@@ -25,11 +25,11 @@ silently changing another model.
 
 - [`tcn_gru/`](tcn_gru/) — full 96-channel reference decoder (TCN+GRU, 0.77 MB).
   Offline/high-channel ceiling.
-- [`tcn_gru_8ch/`](tcn_gru_8ch/) — **deployment model of record**: the same
-  architecture at **8 channels / STM32**, trained on 24 sessions (**~98 KB int8,
-  TEST R² 0.677**; a 25 KB int8 / R² 0.655 variant exists for tight flash). This
-  is the target for the current 8-channel spike-detection hardware. Reuses
-  `tcn_gru`'s `build_net`.
+- [`tcn_gru_8ch/`](tcn_gru_8ch/) — **deployment model of record**: **8 channels /
+  STM32**, **strictly causal** (real-time), 24 sessions → **TEST R² 0.606, ~73 KB
+  int8, 0 ms lookahead**. (Bidirectional 0.677 is an offline reference only —
+  not deployable.) The target for the current 8-channel spike-detection hardware.
+  Reuses `tcn_gru`'s `build_net` with `bidir=False`.
 
 Active R²-improvement experiments live in [`../research/`](../research); archived
 sweeps in [`../legacy/`](../legacy).

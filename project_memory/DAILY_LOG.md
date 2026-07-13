@@ -1400,6 +1400,32 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-065 - Causal ceiling = 0.606 (more/distant data doesn't help). Deployable model settled.
+
+Question: does more data lift the strictly-causal decoder (0.606)?
+
+Method: research/iter18_causal_data.py -- causal wide TCN+GRU, 24 vs 28 sessions
+(the 4 extra are early-2016, temporally distant from the Oct test1).
+
+Results (TEST R2): 24 sess 0.606, 28 sess 0.600 (-0.006).
+
+Interpretation: distant sessions add drift, not signal -- 24 (nearby) sessions is
+the effective data limit for test1. Combined with iter16 (firing-6 channels best),
+iter17 (no arch/smoothing/capacity gain), iter11 (40 ms best): the strictly-causal
+decoder is CAPPED at ~0.606.
+
+DEPLOYABLE MODEL OF RECORD (strictly causal, real-time, 0 lookahead):
+  wide causal TCN+GRU (F64/H64/L1/dils[1,2,4,8], bidir=False), 24 sessions,
+  firing-6 channels [26,51,53,66,71,73,75,94], 40 ms bins, 3 Hz vel-LP.
+  TEST R2 = 0.606, ~73 KB int8 (lossless expected), ~5.6 ms compute, 0 ms lookahead.
+  Bidirectional (0.677) and bounded-lookahead (0.619 @80ms/0.623 @200ms) are
+  OFFLINE references only -- not deployable at 40 ms/bin latency.
+
+PENDING (next session, not run per "last experiments"): retrain models/tcn_gru_8ch
+checkpoint as causal (currently bidir/offline). Further R2 would need more channels
+(hardware), closer sessions, or richer signal (broadband) -- all data/hardware, not
+model.
+
 ### LOG-064 - Causal architecture/smoothing/capacity tweaks don't help (0.606 stands)
 
 Question: can we lift the strictly-causal decoder (0.606) with causal-specific

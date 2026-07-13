@@ -1,58 +1,61 @@
 # tcn_gru_8ch — 8-channel STM32 decoder (deployment model of record)
 
 The **deployable** decoder for the current hardware: **8 spike-detection channels**
-→ 2D fingertip velocity, on an **STM32-class MCU**. Same dilated-TCN + bidirectional
--GRU architecture as [`../tcn_gru`](../tcn_gru) (`build_net`), shrunk to STM32 size
-and trained on more sessions.
+→ 2D fingertip velocity, on an **STM32-class MCU**, in **real time**. Dilated-TCN +
+**strictly-causal (unidirectional) GRU** ([`../tcn_gru`](../tcn_gru) `build_net`
+with `bidir=False`), shrunk to STM32 size, trained on 24 sessions.
 
-## Headline
+## Headline (deployable = strictly causal)
 
 | | value |
 | --- | ---: |
-| **TEST R²** (untouched test1) | **≈0.67** (0.668 checkpoint / 0.677 harness) |
-| fp32 size | 392 KB (~100k params) |
-| **int8 size** | **~98 KB — lossless** (R² unchanged) |
+| **TEST R²** (untouched test1, causal) | **0.606** |
+| latency | **0 ms lookahead** (real-time) |
+| compute | ~5.6 ms/pred, 1 CPU core |
+| int8 size | **~73 KB — lossless** |
 | channels | 8 (top-8 firing electrodes of train1-6, **fixed**) |
-| training | 24 indy sessions |
-| metric | R² (coefficient of determination, avg of X,Y) |
+| training | 24 indy sessions, 40 ms bins |
 
-Fits STM32 F4/H7-class flash comfortably. For the tightest flash budgets, the
-smaller **F32/H32 'small' variant is ~25 KB int8 at R² 0.655** (set `MODEL` in
-`config.py` back to `F=32, H=32`). A single 'wide' model (0.677) already matches a
-3-seed ensemble (0.675), so no ensemble is needed.
+**Offline references only (NOT deployable):** a *bidirectional* GRU scores 0.677 but
+needs the whole future; *bounded lookahead* gives 0.619 @ 80 ms / 0.623 @ 200 ms, but
+at 40 ms/bin that latency is too high for closed-loop (LOG-062). So the honest
+real-time number is **0.606**.
+
+⚠️ `checkpoint.pt` currently holds the **bidirectional** weights (offline, 0.668).
+`config.py` `MODEL` is now `bidir=False`; **re-run `train_and_save.py` to produce the
+causal deployable checkpoint** (see HANDOFF — pending next-session step).
 
 ## Contents
 
-- `config.py` — the exact recipe (preprocessing, architecture, 18 training sessions, channels).
-- `evaluate.py` — reproduce the R² (fp32 + int8) on the fixed split.
-- `train_and_save.py` — train and write `checkpoint.pt` (weights + channels + axes + norm).
-- `checkpoint.pt` — trained weights and everything needed to run/quantize.
+- `config.py` — the exact recipe (preprocessing, causal architecture, 24 sessions, channels).
+- `evaluate.py` — reproduce R² (fp32 + int8) on the fixed split.
+- `train_and_save.py` — train and write `checkpoint.pt`.
+- `export_int8.py` — quantize the saved checkpoint and report R² kept.
 
 ```bash
 py models/tcn_gru_8ch/evaluate.py        # reproduce R²
-py models/tcn_gru_8ch/train_and_save.py  # (re)train and save the checkpoint
+py models/tcn_gru_8ch/train_and_save.py  # (re)train + save the (now causal) checkpoint
 ```
 
-## How this R² was reached (DAILY_LOG LOG-050..056)
+## What we learned (LOG-050..065)
 
-- **More training data is the main lever**: 6→9→12→18→24 sessions =
-  0.529→0.589→0.616→0.628→0.655 (fixed small model). Cheap training tricks
-  (correlation loss, augmentation, regularization) were a wash.
-- **More data then unlocks more capacity**: at 24 sessions the larger 'wide'
-  model (F64/H64) reaches **0.677**, where at 6 sessions it overfit. This single
-  model matches a 3-seed ensemble (0.675).
-- **int8 quantization is free** (no R² loss; 'small' 100→27 KB, 'wide' 392→98 KB).
-- **Do NOT re-select channels** on more data — it overfits (0.628 → 0.502). Keep the
-  top-8 firing electrodes chosen on the original 6 sessions. Learned/correlation
-  channel selection also lose to firing-rate.
-- The paper's **Bessel output filter is redundant here** — we low-pass the velocity
-  *target* at 3 Hz before training, so predictions are already smooth.
+- **More training data is the one lever that worked**: 6→24 sessions lifted R²
+  substantially. Beyond ~24 nearby sessions it plateaus; *distant* sessions add
+  drift and slightly hurt (0.606→0.600, LOG-065).
+- **Everything else is a dead end** (for both causal and bidir): architecture,
+  depth, width/capacity (plateaus ~220 KB), correlation loss, augmentation,
+  regularization, output smoothing (Bessel/EMA — redundant, our target is 3 Hz
+  low-passed), and overlapping-window binning (40 ms boxcar is best).
+- **Channels**: firing-rate top-8 on the base-6 sessions is best (0.655 in the
+  bidir frame). Learned / low-freq / fft / re-selection all lose or tie (LOG-063).
+- **int8 quantization is free** (no R² loss).
+- **Causality costs ~0.07 R²** (0.677 bidir → 0.606 causal); lookahead buys back
+  little and plateaus fast, so strictly causal is the right deployable choice.
 
-## Caveats
+## Where more R² could come from (not model-side)
 
-- **Cross-session, zero-calibration** number (train on other sessions, test on a
-  held-out day). A per-user calibrated (within-session) decoder would score higher.
-- R² 0.628 uses a **bidirectional** GRU (peeks ahead within the 2 s window). A strict
-  real-time **causal** model costs ~0.078 R². Decide based on the latency budget.
+More channels (hardware), sessions closer in time to the user, per-user
+calibration on top of the pool, or richer signal (broadband). All are data/hardware
+levers — the decoder itself is well-tuned and near its ceiling for this input.
 
 Reference/SOTA: Zhou, Sun, Basu, "Motor decoding for iBMI" (arXiv:2312.15889, NeuroBench).
