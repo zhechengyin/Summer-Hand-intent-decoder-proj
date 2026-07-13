@@ -1400,6 +1400,23 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-067 - Multi-timescale causal input: marginal +0.006 (first non-negative lever)
+
+Question: does feeding each channel at several causal timescales (raw + EWMA
+alpha 0.5/0.25/0.1 -> 8->32 features) beat single-scale input for the causal model?
+
+Method: research/iter20_multiscale.py, strictly-causal TCN+GRU, 8 ch, 24 sess,
+A/B single-scale vs 32-feature multiscale.
+
+Results (TEST R2): single_8ch 0.606, multiscale_32ch 0.611 (+0.006 test; EVAL
+0.601->0.616, +0.015). Size 73->75 KB int8 (only first conv grows).
+
+Interpretation: marginal positive -- the +0.006 test gain is within run noise
+(~+-0.01), but the bigger eval improvement hints at a small real generalization
+benefit, and it's nearly free. First model-side lever that didn't hurt. Not a
+ceiling-breaker. Would need multi-seed replication to confirm it's signal not
+noise before adopting into the model of record.
+
 ### LOG-066 - More architectures: none beat TCN+GRU (LSTM ties, Transformer worse)
 
 Question: do untested architectures beat the causal TCN+GRU (0.606)?
