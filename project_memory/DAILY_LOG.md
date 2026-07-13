@@ -1400,6 +1400,26 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-064 - Causal architecture/smoothing/capacity tweaks don't help (0.606 stands)
+
+Question: can we lift the strictly-causal decoder (0.606) with causal-specific
+levers -- more past context, deeper GRU, more width, forward-EMA output smoothing?
+
+Method: research/iter17_causal_improve.py, all strictly causal (bidir=False),
+8 ch, 24 sess.
+
+Results (TEST R2, ref causal 0.606): more_rf(dils+16,32) 0.589, two_layer 0.602,
+bigger_F96 0.588; causal forward-EMA post a=0.4/0.6/0.8 = 0.498/0.562/0.591.
+
+Interpretation: NONE beat the causal_ref 0.606. EMA smoothing HURTS (our velocity
+target is already 3 Hz low-passed, so forward-EMA only adds lag / removes signal).
+More receptive field, depth, and width don't help -- same as the bidir case:
+architecture/capacity/smoothing are dead ends; the model is well-tuned. The only
+lever that ever moved R2 is DATA (iter18 tests it for causal).
+
+Decision: keep causal wide TCN+GRU (F64/H64/L1/dils[1,2,4,8], bidir=False) = 0.606
+as the deployable config. No causal architecture change warranted.
+
 ### LOG-063 - Firing-rate is the best channel selector (base-6); low-freq lead was an artifact
 
 Question: iter13 found low-freq (0.2-3 Hz) power beat firing on 24-session
