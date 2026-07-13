@@ -1400,6 +1400,28 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-062 - Causal is the deployable target: lookahead R2-vs-latency (bidir NOT deployable)
+
+User correction: a fully BIDIRECTIONAL GRU can't run at inference (needs the whole
+future), so all prior headline R2 (0.677/0.655/0.628) were OFFLINE upper bounds.
+The honest deployable number is CAUSAL. iter15 sweeps how much future context helps.
+
+Method: research/iter15_lookahead.py -- wide TCN+GRU, 8 ch, 24 sess. Bounded
+lookahead = causal core fed K future frames (K*40 ms latency, buffered).
+
+Results (TEST R2): 0 ms (strictly causal) 0.606, 80 ms 0.619, 200 ms 0.623,
+  bidir (non-deployable) 0.677.
+
+Interpretation: lookahead helps only a little and plateaus fast -- 80 ms = +0.013,
+200 ms adds only +0.004 more. The remaining 0.054 gap to bidir comes from
+long-range future context, impractical for real-time closed-loop. Per the decision
+rule (lookahead only if gain justifies delay), STRICTLY CAUSAL (0.606) is the
+deployable pick -- 0 latency, simplest, just 0.013 below 80 ms.
+
+Decision: deployable model of record = CAUSAL wide TCN+GRU (bidir=False), R2~0.606,
+0 ms latency. The bidir 0.677 is an offline reference only. NEXT: rebuild
+models/tcn_gru_8ch as causal (+ keep bidir number as reference in the README).
+
 ### LOG-061 - Capacity + binning complete: 40ms best, ~220KB capacity ceiling
 
 iter10 capacity (8 ch, 24 sess, TEST R2 | int8): wide 0.677|98KB, xwide 0.679|219KB,
