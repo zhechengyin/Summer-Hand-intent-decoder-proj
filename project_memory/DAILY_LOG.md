@@ -1400,6 +1400,34 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-059 - PARTIAL (stopped early, CPU overload): 4 experiments, resume 2026-07-13
+
+Ran 4 experiments concurrently (overloaded CPU); stopped cleanly with progress
+saved. Completed sub-results below; remaining configs listed in
+research/RESUME_TOMORROW.md.
+
+iter10 capacity (3/4): wide(98KB)=0.677, xwide(219KB)=0.679, xxwide(388KB)=0.667.
+  => capacity plateaus ~0.679 then OVERFITS at 400 KB. Sweet spot ~xwide (220 KB).
+  xxwide_rf not run. (One big model does NOT use the 400 KB budget well.)
+
+iter11 binning (1/6): 10ms_cont(100Hz)=0.642. 20/40/80/80-40/80-20 NOT run.
+  Incomplete -- cannot conclude on bins yet.
+
+iter13 selector-decode (3/4): firing(24-sess ch)=0.577, LOWFREQ(0.2-3Hz)=0.631,
+  velcorr=0.582 (eval 0.412, overfit). fftweighted not run.
+  => NEW LEAD: low-freq (0.2-3 Hz) power selection BEATS firing (+0.054) on the
+  24-session selection. Follow up: lowfreq selection on the base-6 vs firing-6
+  (0.655) -- could improve the model of record's channels.
+
+iter14 architecture (3/6): tcngru_bidir=0.677 (98KB, 8.2ms, NON-causal),
+  tcngru_causal=0.606 (73KB, 5.6ms, causal), causal_tcn=0.578 (50KB, 2.6ms, causal).
+  dws_tcn / gru_bidir / gru_causal NOT run.
+  => Causality costs ~0.071 (0.677->0.606); TCN-only (no GRU) worse; causal is
+  faster (2.6-5.6 vs 8.2 ms). Per plan, bounded-lookahead (model 6) is the
+  recommended follow-up since causal loses ~0.07.
+
+NOTE for resume: run only 1-2 experiments at a time (this box overloaded at 4).
+
 ### LOG-058 - Channel-selection scoring analysis: drift is real, activity != relevance
 
 Question (user design review of live/adaptive selection): is the firing-rate top-8
