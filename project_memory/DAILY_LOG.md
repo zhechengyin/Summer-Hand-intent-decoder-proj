@@ -1400,6 +1400,26 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-069 - Multiscale saturates at 2 scales = 0.646 (partial; stopped for clean break)
+
+Scale-count sweep (research/iter22_scale_sweep.py, 3-seed, causal, 24 sess).
+Known from iter21: 1 scale 0.618, 4 scales 0.646.
+This run (stopped early): 2 scales (raw + EWMA a=0.2, 16 feat) = 0.646. ms6 (6
+scales) was still running when stopped.
+
+=> The multi-timescale benefit SATURATES at just 2 scales (raw + one slow EWMA):
+1sc 0.618 -> 2sc 0.646 (+0.028) -> 4sc 0.646 (no further gain). Best-and-cheapest
+config so far: raw + one EWMA (16 features, ~75 KB int8), 3-seed 0.646.
+
+RESUME PLAN (multiscale is the live lever -- LOG-068):
+  1. (optional) confirm ms6 doesn't beat 0.646 (likely not, given 2==4).
+  2. tune the single EWMA alpha (which slow timescale is best; a=0.2 used here).
+  3. ADOPT 2-scale multiscale input into models/tcn_gru_8ch (model of record) and
+     retrain the causal checkpoint -- this is the concrete deliverable. Note single
+     multiscale model ~0.61; the 0.646 uses a 3-seed ensemble.
+  4. Still-untested archs: LFADS-lite, SNN.
+Run only 1-2 experiments at a time (box OOMs ~2 GB free on 24-session loads).
+
 ### LOG-068 - CONFIRMED: multi-timescale input is a REAL causal lever (+0.028), breaks 0.606
 
 Question: is the iter20 multiscale +0.006 real or noise?

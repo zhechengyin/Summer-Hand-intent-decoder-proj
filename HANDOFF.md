@@ -19,10 +19,24 @@ Hardware dictates the target: **8 channels** (spike detection), **STM32-class MC
 - Bidirectional (0.677) and bounded-lookahead (0.619 @80 ms, 0.623 @200 ms) are
   **offline references only** — not deployable at 40 ms/bin latency.
 
-### ⚠️ One pending build step (deferred — was "last experiments")
-`config.py` `MODEL` is now `bidir=False`, but `checkpoint.pt` still holds the old
-**bidirectional** weights. **First task: `py models/tcn_gru_8ch/train_and_save.py`**
-to write the causal checkpoint (~6 min), then `py .../export_int8.py` to confirm int8.
+### 🔥 LIVE LEVER — multi-timescale input (LOG-068/069)
+The one model-side thing that **works**: feed each channel at multiple causal
+timescales (raw + slow EWMA) instead of one 40 ms rate. 3-seed causal: single-scale
+0.618 → **multiscale 0.646 (+0.028, confirmed real)**. Benefit **saturates at 2
+scales** (raw + one EWMA α≈0.2, 16 features, ~75 KB int8). Code: `research/
+iter20_multiscale.py` (`ewma_feats`), `iter21`/`iter22`.
+
+**Next steps (in order):**
+1. Tune the single EWMA α (which slow timescale is best; 0.2 used so far).
+2. **Adopt the 2-scale multiscale input into `models/tcn_gru_8ch`** (add the EWMA
+   feature step to `config.py`/`evaluate.py`; input channels 8→16), then
+   `train_and_save.py` to write the **causal + multiscale** checkpoint, `export_int8.py`
+   to confirm. (Note: `config.py MODEL` is already `bidir=False`; the current
+   `checkpoint.pt` is still the old bidirectional one.)
+3. Single multiscale model ≈0.61; the 0.646 headline uses a 3-seed ensemble — decide
+   if the ensemble (3× size, still STM32-OK) is worth it vs a single model.
+
+Still-untested archs: LFADS-lite, SNN (larger builds).
 
 ## What we learned (LOG-050..065) — the decoder is near its ceiling
 
