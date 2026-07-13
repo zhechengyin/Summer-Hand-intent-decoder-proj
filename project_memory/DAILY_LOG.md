@@ -1400,6 +1400,28 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-068 - CONFIRMED: multi-timescale input is a REAL causal lever (+0.028), breaks 0.606
+
+Question: is the iter20 multiscale +0.006 real or noise?
+
+Method: research/iter21_multiscale_confirm.py -- single-scale vs multiscale (raw +
+EWMA 0.5/0.25/0.1 = 32 features), each a 3-SEED ensemble (variance-reduced),
+strictly causal, 8 ch, 24 sess.
+
+Results (3-seed TEST R2): single_8ch 0.618, multiscale_32ch 0.646 -> +0.028.
+(Single-seed was noisy: single 0.606, multiscale 0.611. Ensembling reveals the
+real effect. Multiscale gains MORE from ensembling: +0.035 vs single-scale +0.012.)
+
+Interpretation: FIRST genuine causal R2 improvement after ~15 dead-end levers.
+Multi-timescale EWMA input (explicit fast+slow history) helps the causal model,
+which can't see the future -- gives it richer past context than the single 40 ms
+rate. Nearly free (32 vs 8 features only grows the first conv, ~75 KB int8). Best
+deployable causal so far: 0.646 (3-seed multiscale) / ~0.61 single multiscale.
+
+Decision: pursue -- (1) nail the SINGLE-model multiscale gain (a few seeds),
+(2) which/how-many scales matter, (3) then adopt multiscale input into
+models/tcn_gru_8ch. This is the lever to push.
+
 ### LOG-067 - Multi-timescale causal input: marginal +0.006 (first non-negative lever)
 
 Question: does feeding each channel at several causal timescales (raw + EWMA
