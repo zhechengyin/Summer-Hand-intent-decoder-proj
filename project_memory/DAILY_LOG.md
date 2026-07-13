@@ -1411,6 +1411,16 @@ scales) was still running when stopped.
 1sc 0.618 -> 2sc 0.646 (+0.028) -> 4sc 0.646 (no further gain). Best-and-cheapest
 config so far: raw + one EWMA (16 features, ~75 KB int8), 3-seed 0.646.
 
+Files:
+  - research/iter22_scale_sweep.py -- this experiment (scale-count sweep, 3-seed A/B)
+  - research/iter20_multiscale.py -- provides ewma_feats(), CHANNELS, CAUSAL cfg, TRAIN list
+  - research/harness.py -- training/eval rig: H.run(data,cfg,seeds) trains + scores r/R2
+  - research/iter7_final.py -- EXTRA18 (the 18 extra session names for the 24-session pool)
+  - models/tcn_gru/evaluate.py -- load_electrode() (per-electrode 40ms rates), E.TRAIN/EVAL/TEST
+  - models/tcn_gru/best_model.py -- build_net (TCN+GRU), r2/corr metrics
+  - data/source_data/indy_loco/*.mat -- raw sessions (gitignored) loaded per session
+  - results/metrics/iter22_scale_sweep.json -- output (not written; stopped early)
+
 RESUME PLAN (multiscale is the live lever -- LOG-068):
   1. (optional) confirm ms6 doesn't beat 0.646 (likely not, given 2==4).
   2. tune the single EWMA alpha (which slow timescale is best; a=0.2 used here).
@@ -1943,7 +1953,12 @@ Method:
 
 Command:
 
-Artifacts:
+Files: (every entry lists the key files it used + a one-line purpose each, so a new
+reader/user can find and understand them without prior context. Include: the script
+run, the helpers/modules it imports, the model/data it touches, and the output.)
+  - path/to/file.py — what it is / what it does here
+
+Artifacts: (output files written, e.g. results/metrics/*.json)
 
 Results:
 
