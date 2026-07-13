@@ -1400,6 +1400,23 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-061 - Capacity + binning complete: 40ms best, ~220KB capacity ceiling
+
+iter10 capacity (8 ch, 24 sess, TEST R2 | int8): wide 0.677|98KB, xwide 0.679|219KB,
+  xxwide 0.667|388KB, xxwide_rf 0.675|436KB.
+  => single-model capacity plateaus at ~xwide (220 KB) then flat/overfits. The
+  ~400 KB budget is NOT for one big model -- use ensemble or more data.
+
+iter11 binning (8 ch, 24 sess, small, causal re-bin from raw; TEST R2):
+  10ms 0.642, 20ms 0.666, 40ms 0.673, 80ms 0.648, 80/40_ovl 0.666, 80/20_ovl 0.669.
+  => 40 ms boxcar is the sweet spot. Finer (10/20 ms) slightly worse, coarser
+  (80 ms) worse. OVERLAPPING windows (paper-style decoupling of integration vs
+  stride) do NOT beat plain 40 ms -- redundant because our velocity target is
+  already 3 Hz low-passed. Keep 40 ms.
+
+Both experiments used bidir (offline upper bound). Relative conclusions transfer
+to causal. NOTE (user): bidirectional is not deployable -- see iter15 lookahead.
+
 ### LOG-060 - Architecture comparison + selectors complete (resumed 1-2 at a time)
 
 Resumed the 4 cancelled experiments (skipping completed configs; 2 at a time --
