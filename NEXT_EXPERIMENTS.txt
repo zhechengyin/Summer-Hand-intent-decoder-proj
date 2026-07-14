@@ -1,0 +1,81 @@
+========================================================================
+NEXT EXPERIMENTS — pickup notes for a fresh chat (TEMPORARY; delete later)
+updated 2026-07-13
+========================================================================
+
+Durable record: project_memory/DAILY_LOG.md (LOG-NNN) + SUMMARY.md + HANDOFF.md.
+This txt = quick "what to try next" so a clean-context chat can start immediately.
+
+------------------------------------------------------------------------
+30-SECOND CATCH-UP
+------------------------------------------------------------------------
+Task: decode monkey 2D finger VELOCITY from 8 spike-detection channels, on an
+STM32, in REAL TIME -> the decoder must be STRICTLY CAUSAL (no future frames).
+Metric = R^2 on the untouched test1 session. Only the indy/loco monkey data.
+
+Model of record: models/tcn_gru_8ch/ — strictly-causal wide TCN+GRU (bidir=False),
+8 firing-selected channels [26,51,53,66,71,73,75,94], 24 sessions, 40 ms bins.
+
+BREAKTHROUGH (yesterday, LOG-068/070): multi-timescale INPUT — feed each channel
+as raw + causal EWMA(alpha=0.2) = 16 features. 3-seed causal R^2: single-scale
+0.618 -> multiscale 0.646 (+0.028, confirmed). Saturates at 2 scales; alpha=0.2 best.
+
+STATUS RIGHT NOW: multiscale is being ADOPTED into models/tcn_gru_8ch (config/
+evaluate/train_and_save/export_int8 already updated; the causal+multiscale
+checkpoint was retraining when this was written). Single multiscale model ~0.61;
+the 0.646 headline uses a 3-seed ensemble.
+
+------------------------------------------------------------------------
+FIRST THINGS TO DO
+------------------------------------------------------------------------
+1. Confirm the adoption finished: `py models/tcn_gru_8ch/evaluate.py` (should show
+   causal multiscale R^2 ~0.61 single) and `py models/tcn_gru_8ch/export_int8.py`
+   (int8 lossless, ~75 KB). If checkpoint.pt is stale, `py .../train_and_save.py`.
+2. Decide shipped config: single model (~0.61) vs 3-seed ensemble (0.646, 3x size,
+   still STM32-OK).
+
+------------------------------------------------------------------------
+POSSIBLE EXPERIMENTS STILL UNTRIED (roughly by expected value)
+------------------------------------------------------------------------
+A. LFADS-lite / latent dynamics — add an auxiliary head that reconstructs the
+   smoothed firing rates so the GRU latent captures population dynamics; decode
+   velocity from the latent. Biggest theoretical upside for reaching tasks.
+   Must stay CAUSAL and small. Heaviest build. (rig: research/harness.py build= hook)
+B. Multi-task targets — predict velocity + position (its integral) and/or speed
+   jointly, combined loss, to regularize. Cheap-ish (second head).
+C. Proper Kalman / state-space post-filter (learned, causal) — we only tried a
+   plain forward-EMA (hurt); a real velocity-dynamics state-space is untested.
+D. SNN (spiking) — the paper's low-power option; untested here.
+E. Combine multiscale + LFADS-lite / multi-task if either A or B helps.
+F. DATA/HARDWARE levers (the real ceiling, out of pure-model scope): more channels,
+   sessions closer in time to test1, per-user calibration on top of the 24-sess
+   pool, richer signal (broadband — not in this dataset).
+
+------------------------------------------------------------------------
+DEAD ENDS — DO NOT RE-RUN (already ruled out; see DAILY_LOG)
+------------------------------------------------------------------------
+- Architecture: LSTM (ties GRU), Transformer (worse), plain-CNN+GRU (worse),
+  TCN-only / GRU-only (worse). TCN+GRU wins.                      (LOG-060/066)
+- Capacity: plateaus ~220 KB, overfits at 400 KB.                 (LOG-061)
+- More data: 24 nearby sessions is the limit; distant sessions hurt. (LOG-065)
+- Channel selection: firing-8 on base-6 best; learned/low-freq/fft/
+  re-selection lose or tie.                                       (LOG-063)
+- Binning: 40 ms boxcar best; finer/coarser worse; overlapping windows no help. (LOG-061)
+- Output smoothing (Bessel/EMA): redundant/hurts (target already 3 Hz LP). (LOG-050/064)
+- Causal arch tweaks (more RF/depth/width): no gain.             (LOG-064)
+- Cheap training tricks (correlation loss, stronger aug, more reg): wash. (LOG-051)
+- Bidirectional / bounded-lookahead: NOT deployable (40 ms/bin => latency too high). (LOG-062)
+
+------------------------------------------------------------------------
+HOW TO RUN
+------------------------------------------------------------------------
+- Rig: research/harness.py — prep_more(...) / H.run(data, cfg, seeds=(...), build=...)
+  returns r & R^2. models/tcn_gru/best_model.py = build_net + r2/corr.
+  models/tcn_gru/evaluate.py = load_electrode, E.TRAIN/EVAL/TEST. 24-session pool
+  = E.TRAIN + research/iter7_final.py::EXTRA18. Multiscale: iter20.ewma_feats.
+- MEMORY: run only 1-2 experiments at a time — box OOMs ~2 GB free during
+  24-session loads; stagger launches. Kill strays: taskkill /F /IM python.exe /T.
+- LOGGING (standing rule): every result -> DAILY_LOG entry (LOG-NNN) WITH a
+  "Files:" section (files used + one-line purpose each) -> update SUMMARY if best
+  changes -> git commit (+push). Commit msgs end with the Co-Authored-By line.
+========================================================================
