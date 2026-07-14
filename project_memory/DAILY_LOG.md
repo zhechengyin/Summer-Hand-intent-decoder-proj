@@ -1400,6 +1400,52 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-077 - Deep Blue velocity > position; why indy 0.63 vs Deep Blue 0.41
+
+Question: (user) Deep Blue TEST R² ~0.41 is much lower than indy ~0.63 -- why? And is
+"velocity" even the right target, or is it decoding finger flexion (position)?
+
+Method: verified the MC `y` columns empirically (0:2 = flexion POSITION, normalized
+0..1; 2:4 = VELOCITY -- col2 correlates 0.91 with d(col0)/dt). Confirmed the model of
+record already targets VELOCITY (y[:,2:4]). Then research/deepblue_pos_vs_vel.py -- A/B
+of position vs velocity under the identical pipeline (plain causal TCN+GRU, 3-seed).
+
+Command: py research/deepblue_pos_vs_vel.py
+
+Files:
+  - research/deepblue_pos_vs_vel.py -- this A/B (load_xy selects y cols; position vs velocity)
+  - research/deepblue_tcn_gru.py -- reused split/window/CFG/FILES
+  - data/external/umich_deepblue_finger/original/Data/Monkey{N,W}_MC.mat (gitignored)
+  - results/deepblue_pos_vs_vel_run.log, results/metrics/deepblue_pos_vs_vel.json -- outputs
+
+Results (3-seed, mean over monkeys):
+  | target   | EVAL R2 | TEST R2 | TEST r |
+  |----------|--------:|--------:|-------:|
+  | position | 0.363   | 0.319   | ~0.60  |
+  | velocity | 0.405   | 0.408   | ~0.64  |
+  Velocity BEATS position by ~0.09 R² (opposite of the usual "position is smoother/
+  easier" heuristic).
+
+Interpretation:
+  - We are already decoding VELOCITY; it is the correct/better target here. Position
+    decodes WORSE because the chronological split penalizes its slow drift/offset,
+    while velocity is zero-mean and drift-invariant.
+  - Why 0.41 (Deep Blue) << 0.63 (indy) -- NOT a fair head-to-head; the honest drivers:
+    (1) DATA: indy pools 24 sessions (its main lever, 6->24 = 0.53->0.66); Deep Blue is
+        ONE recording/monkey (~300-480 windows ~= one session). Indy at one session ~0.53.
+    (2) TASK: indy = smooth continuous 2D reaching; Deep Blue = finger flexion with lots
+        of hold/rest (velocity ~=0 most of the time) -> rest-heavy velocity scores lower R².
+    (3) SPLIT: Deep Blue holds out LATER trials chronologically (tests drift, harder AND
+        cleaner); indy test1 is a separate session the model resembles -- and indy test1
+        is BURNED (LOG-073), Deep Blue's number is clean.
+    (4) UNTUNED: Deep Blue used indy hyperparameters out-of-the-box.
+  - Correlation is closer than R²: Deep Blue r~0.64 vs indy ~0.80 -- the model tracks the
+    movement; R² just punishes the rest-heavy target harder. Ruled out as causes: wrong
+    target (velocity>position) and the EWMA input lever (indy-specific, LOG-076).
+
+Decision: Deep Blue honest baseline = velocity ~0.41 (clean). To close the gap, add
+Deep Blue training data + light per-dataset tuning; indy-specific tricks won't help.
+
 ### LOG-076 - Full architecture (multiscale EWMA) on Deep Blue: EWMA does NOT transfer; ~0.408 stands
 
 Question: LOG-075 fed raw SBP straight in. Does adding our full model's causal EWMA
