@@ -48,9 +48,24 @@ def movement_axes():
     return np.sort(np.argsort(var)[-C.N_OUT:])
 
 
+def ewma_feats(rates, alphas):
+    """Expand (n_ch, T) -> (n_ch*len(alphas), T): raw + causal EWMA at each alpha.
+    Multi-timescale input gives the causal model explicit long+short history
+    (+0.028 R2, LOG-068/070). Causal (each output uses only past)."""
+    feats = []
+    for a in alphas:
+        if a >= 1.0:
+            feats.append(rates); continue
+        o = rates.copy()
+        for t in range(1, rates.shape[1]):
+            o[:, t] = a * rates[:, t] + (1 - a) * o[:, t - 1]
+        feats.append(o)
+    return np.concatenate(feats, 0)
+
+
 def wins(s, sel, axes):
     r, v = E96.load_electrode(s)
-    return E96.windows(r[sel], v, axes)
+    return E96.windows(ewma_feats(r[sel], C.MULTISCALE), v, axes)    # multiscale input
 
 
 def _pack(tri):

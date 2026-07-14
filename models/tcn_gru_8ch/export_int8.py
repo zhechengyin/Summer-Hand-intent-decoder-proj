@@ -25,7 +25,8 @@ def main():
     ck = torch.load(ROOT / "models" / "tcn_gru_8ch" / "checkpoint.pt", weights_only=False)
     sel = np.array(ck["channels"]); axes = np.array(ck["axes"])
     ym, ys = np.array(ck["target_mean"]), np.array(ck["target_std"])
-    net = M.build_net(ck["config"], len(sel))
+    n_ch = len(sel) * len(ck.get("multiscale", [1.0]))    # multiscale expands features
+    net = M.build_net(ck["config"], n_ch)
     net.load_state_dict(ck["state_dict"]); net.eval()
     te = {s: EV._pack(EV.wins(s, sel, axes)) for s in E96.TEST}
 

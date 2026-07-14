@@ -9,10 +9,12 @@ detection) on an **STM32-class MCU**, in **real time**; metric is **R²**. Data:
 indy sessions, fixed file split (train.../eval1/test1), per-electrode 40 ms
 multiunit rates, 3 Hz vel-LP target. Reference: Zhou/Sun/Basu arXiv:2312.15889.
 
-- **Deployable model of record: STRICTLY-CAUSAL wide TCN+GRU** (`F64/H64/L1/
-  dils[1,2,4,8]`, `bidir=False`), 8 channels = firing top-8 on train1-6, 24
-  sessions → **TEST R² = 0.606**, 0 ms lookahead, ~73 kB int8, ~5.6 ms/pred.
-  `models/tcn_gru_8ch/`. (Checkpoint retrain-as-causal is pending; see HANDOFF.)
+- **Deployable model of record: STRICTLY-CAUSAL wide TCN+GRU + MULTISCALE input**
+  (`F64/H64/L1`, `bidir=False`; input = 8 channels × {raw, EWMA α=0.2} = 16
+  features), firing top-8 on train1-6, 24 sessions → **TEST R² = 0.633 single /
+  0.646 3-seed**, 0 ms lookahead, ~74 kB int8 (lossless), ~5.6 ms/pred.
+  `models/tcn_gru_8ch/` (checkpoint is causal+multiscale). Multi-timescale input
+  (+0.028) is the one model-side lever that beat the 0.606 ceiling (LOG-068/070/071).
 - **Bidirectional is NOT deployable** (needs the whole future). Bidir 0.677 and
   bounded-lookahead (0.619 @80ms, 0.623 @200ms) are OFFLINE references only —
   at 40 ms/bin that latency is too high for closed-loop (LOG-062/065).

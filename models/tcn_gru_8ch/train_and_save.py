@@ -37,6 +37,7 @@ def main():
     ckpt = ROOT / "models" / "tcn_gru_8ch" / "checkpoint.pt"
     torch.save({"state_dict": net.state_dict(), "config": C.MODEL,
                 "channels": sel.tolist(), "axes": axes.tolist(),
+                "multiscale": C.MULTISCALE,          # raw+EWMA scales -> 16 input features
                 "target_mean": ym.tolist(), "target_std": ys.tolist(),
                 "n_channels": C.N_CHANNELS, "test_r2": test_r2,
                 "params": int(n)}, ckpt)

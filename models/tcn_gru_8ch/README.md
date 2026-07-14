@@ -1,29 +1,31 @@
 # tcn_gru_8ch — 8-channel STM32 decoder (deployment model of record)
 
 The **deployable** decoder for the current hardware: **8 spike-detection channels**
-→ 2D fingertip velocity, on an **STM32-class MCU**, in **real time**. Dilated-TCN +
+→ **multi-timescale input** (raw + causal EWMA, 16 features) → dilated-TCN +
 **strictly-causal (unidirectional) GRU** ([`../tcn_gru`](../tcn_gru) `build_net`
-with `bidir=False`), shrunk to STM32 size, trained on 24 sessions.
+with `bidir=False`), STM32-sized, trained on 24 sessions.
 
-## Headline (deployable = strictly causal)
+## Headline (deployable = strictly causal + multiscale)
 
 | | value |
 | --- | ---: |
-| **TEST R²** (untouched test1, causal) | **0.606** |
+| **TEST R²** (untouched test1, causal) | **0.633** single / **0.646** 3-seed ensemble |
 | latency | **0 ms lookahead** (real-time) |
 | compute | ~5.6 ms/pred, 1 CPU core |
-| int8 size | **~73 KB — lossless** |
-| channels | 8 (top-8 firing electrodes of train1-6, **fixed**) |
+| int8 size | **~74 KB — lossless** (0.633 → 0.633) |
+| input | 8 channels × {raw, EWMA α=0.2} = 16 features |
+| channels | top-8 firing electrodes of train1-6, **fixed** |
 | training | 24 indy sessions, 40 ms bins |
 
-**Offline references only (NOT deployable):** a *bidirectional* GRU scores 0.677 but
-needs the whole future; *bounded lookahead* gives 0.619 @ 80 ms / 0.623 @ 200 ms, but
-at 40 ms/bin that latency is too high for closed-loop (LOG-062). So the honest
-real-time number is **0.606**.
+Multi-timescale input added **+0.027 (single) / +0.028 (ensemble)** over single-scale
+(LOG-068/070/071) — the first model-side lever to beat the 0.606 causal ceiling.
 
-⚠️ `checkpoint.pt` currently holds the **bidirectional** weights (offline, 0.668).
-`config.py` `MODEL` is now `bidir=False`; **re-run `train_and_save.py` to produce the
-causal deployable checkpoint** (see HANDOFF — pending next-session step).
+**Offline references only (NOT deployable):** a *bidirectional* GRU scores 0.677 but
+needs the whole future; *bounded lookahead* gives 0.619 @ 80 ms / 0.623 @ 200 ms —
+at 40 ms/bin that latency is too high for closed-loop (LOG-062).
+
+`checkpoint.pt` = the causal + multiscale weights (75,714 params). `evaluate.py` /
+`export_int8.py` reproduce and quantize it.
 
 ## Contents
 

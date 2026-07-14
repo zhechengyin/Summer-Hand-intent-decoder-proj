@@ -1400,6 +1400,39 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-071 - ADOPTED multiscale into model of record: causal 0.633 single / 0.646 ensemble
+
+Question: fold the confirmed 2-scale multiscale input (LOG-068/070) into the
+deployable model of record and retrain the causal checkpoint.
+
+Method: added raw+EWMA(0.2) feature expansion (8->16 features) to the tcn_gru_8ch
+pipeline; retrained the strictly-causal checkpoint; confirmed int8.
+
+Command: py models/tcn_gru_8ch/train_and_save.py ; py models/tcn_gru_8ch/export_int8.py
+
+Files:
+  - models/tcn_gru_8ch/config.py -- added MULTISCALE=[1.0,0.2]; metrics/docstring updated
+  - models/tcn_gru_8ch/evaluate.py -- added ewma_feats(); wins() now expands to 16 features
+  - models/tcn_gru_8ch/train_and_save.py -- saves checkpoint (+ "multiscale" field)
+  - models/tcn_gru_8ch/export_int8.py -- builds net at 16 input dim; int8 check
+  - models/tcn_gru_8ch/checkpoint.pt -- NEW: causal + multiscale weights (deployable)
+  - models/tcn_gru/best_model.py -- build_net (reused), r2/corr
+  - models/tcn_gru/evaluate.py -- load_electrode, windows, E.TRAIN/EVAL/TEST
+  - results/metrics/tcn_gru_8ch_eval.json -- (from evaluate.py if run)
+
+Results: single causal+multiscale checkpoint TEST R2 = 0.633 (fp32), int8 0.633
+(lossless), 75,714 params, ~74 kB int8. 3-seed ensemble = 0.646. Up from 0.606
+(causal single-scale). (Single-model number varies 0.61-0.633 by seed/loop; 3-seed
+0.646 is the stable estimate.)
+
+Interpretation: multiscale is now the deployable model of record. Best real-time
+result achieved: 0.633 single / 0.646 ensemble, strictly causal, ~74 kB int8,
+0 ms lookahead. checkpoint.pt is now causal+multiscale (was bidir).
+
+Decision: shipped config = causal wide TCN+GRU + raw+EWMA(0.2) 2-scale input.
+Ensemble (0.646, 3x) optional if size budget allows. Next levers: LFADS-lite,
+multi-task, Kalman post-filter (see NEXT_EXPERIMENTS.txt).
+
 ### LOG-070 - EWMA alpha tuned: 0.2 is best (0.646); 2-scale multiscale config settled
 
 Question: for the 2-scale causal input (raw + one slow EWMA), which EWMA alpha is best?
