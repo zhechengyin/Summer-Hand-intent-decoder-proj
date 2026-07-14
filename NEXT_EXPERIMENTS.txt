@@ -20,19 +20,16 @@ BREAKTHROUGH (yesterday, LOG-068/070): multi-timescale INPUT — feed each chann
 as raw + causal EWMA(alpha=0.2) = 16 features. 3-seed causal R^2: single-scale
 0.618 -> multiscale 0.646 (+0.028, confirmed). Saturates at 2 scales; alpha=0.2 best.
 
-STATUS RIGHT NOW: multiscale is being ADOPTED into models/tcn_gru_8ch (config/
-evaluate/train_and_save/export_int8 already updated; the causal+multiscale
-checkpoint was retraining when this was written). Single multiscale model ~0.61;
-the 0.646 headline uses a 3-seed ensemble.
+STATUS: multiscale ADOPTED (DONE, LOG-071). Deployable model of record =
+models/tcn_gru_8ch/ causal + multiscale (16 features). Checkpoint TEST R^2 = 0.633
+single / 0.646 3-seed, ~74 kB int8 (lossless), 75,714 params. Up from 0.606.
 
 ------------------------------------------------------------------------
 FIRST THINGS TO DO
 ------------------------------------------------------------------------
-1. Confirm the adoption finished: `py models/tcn_gru_8ch/evaluate.py` (should show
-   causal multiscale R^2 ~0.61 single) and `py models/tcn_gru_8ch/export_int8.py`
-   (int8 lossless, ~75 KB). If checkpoint.pt is stale, `py .../train_and_save.py`.
-2. Decide shipped config: single model (~0.61) vs 3-seed ensemble (0.646, 3x size,
-   still STM32-OK).
+1. (optional sanity) `py models/tcn_gru_8ch/export_int8.py` -> int8 lossless ~74 KB.
+2. Decide shipped config: single model (0.633) vs 3-seed ensemble (0.646, 3x size,
+   still STM32-OK). Then move to the untried experiments below.
 
 ------------------------------------------------------------------------
 POSSIBLE EXPERIMENTS STILL UNTRIED (roughly by expected value)
