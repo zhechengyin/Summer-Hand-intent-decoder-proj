@@ -1400,6 +1400,48 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-076 - Full architecture (multiscale EWMA) on Deep Blue: EWMA does NOT transfer; ~0.408 stands
+
+Question: LOG-075 fed raw SBP straight in. Does adding our full model's causal EWMA
+multiscale input (the lever that gave +0.037 on indy, LOG-068/074) improve Deep Blue?
+
+Method: research/deepblue_multiscale.py -- A/B of single-scale vs 2-scale (raw+EWMA0.1)
+vs 4-scale (raw+3EWMA) on all 96 SBP channels. Per-trial causal EWMA (resets at trial
+boundaries -> no cross-trial/cross-split leakage). Otherwise identical to LOG-075 (MC
+files, chronological trial-disjoint split, TRAIN-only norm, EVAL selection, 3-seed,
+strictly-causal TCN+GRU, per monkey). Baseline `raw96` reproduced LOG-075 exactly
+(0.405 EVAL / 0.408 TEST), validating the rig.
+
+Command: py research/deepblue_multiscale.py
+
+Files:
+  - research/deepblue_multiscale.py -- this experiment (per-trial ewma_causal, build_feats, A/B)
+  - research/deepblue_tcn_gru.py -- reused load_mc/chronological_split/window_trials/CFG/FILES
+  - research/harness.py -- H.run; models/tcn_gru/best_model.py -- build_net, r2
+  - data/external/umich_deepblue_finger/original/Data/Monkey{N,W}_MC.mat -- inputs (gitignored)
+  - results/deepblue_multiscale_run.log, results/metrics/deepblue_multiscale.json -- outputs
+
+Results (3-seed, mean over monkeys; select on EVAL):
+  | input                 | mean EVAL | mean TEST |
+  |-----------------------|----------:|----------:|
+  | raw SBP (single-scale)| 0.405     | 0.408     |
+  | raw + EWMA(0.1)       | 0.405     | 0.386     |
+  | raw + 3 EWMA          | 0.409     | 0.395     |
+  Best-by-EVAL = raw+3EWMA: +0.004 EVAL / -0.012 TEST vs baseline (i.e. no gain; the
+  EWMA configs are noisier and lose on test).
+
+Interpretation: the causal EWMA multiscale input does NOT transfer to Deep Blue.
+On indy it gave +0.037 EVAL because the input is 8 SPARSE, noisy threshold-crossing
+channels where explicit slow history is valuable. Deep Blue is 96 DENSE spiking-band-
+power channels -- SBP is already a smoothed amplitude measure, and with 12x more
+channels the TCN dilations already capture history, so the extra EWMA features are
+redundant (and add params/noise). Confirms the EWMA lever is dataset-specific: it
+helps when channels are few and the per-channel signal is sparse. Deep Blue's honest
+result is the single-scale ~0.408 (LOG-075).
+
+Decision: keep Deep Blue at single-scale (~0.408). Do not adopt EWMA there. The
+architecture transfers; the indy-specific INPUT lever does not.
+
 ### LOG-075 - Deep Blue finger SBP: causal TCN+GRU transfers at TEST R² ~0.41 per monkey (new dataset)
 
 Question: does our strictly-causal TCN+GRU architecture transfer to a DIFFERENT
