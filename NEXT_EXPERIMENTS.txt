@@ -1,6 +1,6 @@
 ========================================================================
 NEXT EXPERIMENTS — pickup notes for a fresh chat (TEMPORARY; delete later)
-updated 2026-07-13
+updated 2026-07-14
 ========================================================================
 
 Durable record: project_memory/DAILY_LOG.md (LOG-NNN) + SUMMARY.md + HANDOFF.md.
@@ -11,75 +11,66 @@ This txt = quick "what to try next" so a clean-context chat can start immediatel
 ------------------------------------------------------------------------
 Task: decode monkey 2D finger VELOCITY from 8 spike-detection channels, on an
 STM32, in REAL TIME -> the decoder must be STRICTLY CAUSAL (no future frames).
-Metric = R^2 on the untouched test1 session. Only the indy/loco monkey data.
+Metric = R^2. Only the indy/loco monkey data.
 
-Model of record: models/tcn_gru_8ch/ — strictly-causal wide TCN+GRU (bidir=False),
-8 firing-selected channels [26,51,53,66,71,73,75,94], 24 sessions, 40 ms bins.
+Model of record: models/tcn_gru_8ch/ — strictly-causal wide TCN+GRU (bidir=False,
+F64/H64/L1), 8 firing channels [26,51,53,66,71,73,75,94], 24 sessions, 40 ms bins,
++ multiscale input (raw + EWMA = 16 features). ~74 kB int8 (lossless), 75,714 params.
+Honest TEST R^2 ~= 0.63 (eval-valid). Multiscale (LOG-068) is the only model-side
+lever that beat the 0.606 single-scale causal ceiling; it helped on eval AND test.
 
-BREAKTHROUGH (LOG-068): multi-timescale INPUT — feed each channel as raw + causal
-EWMA = 16 features. Multiscale beat single-scale on BOTH eval and test (EVAL
-0.601->0.616, TEST 0.618->0.646). Saturates at 2 scales. REAL lever, ADOPTED.
-
-*** CORRECTION (LOG-073) — READ THIS: the 0.646 headline was TEST-SELECTED. ***
-iter23 picked the EWMA alpha by test1 R^2 (leakage). Eval-valid alpha=0.1 -> TEST
-0.630; alpha barely matters (within noise). Honest deployable causal-multiscale
-= ~0.63, NOT 0.646. Also test1 is now BURNED (~25 experiments have read it).
-RULE NOW: select on EVAL, read TEST once; never promote a config by its TEST score.
-
-STATUS: multiscale ADOPTED (LOG-071). Deployable model of record =
-models/tcn_gru_8ch/ causal + multiscale (16 features, alpha=0.2 checkpoint), ~74 kB
-int8 (lossless), 75,714 params. Honest TEST R^2 ~= 0.63 (eval-valid). Up from 0.606.
+*** METHODOLOGY (LOG-073) — the rule that governs everything now: ***
+SELECT ON EVAL, READ TEST ONCE. Never promote a config because its TEST is higher.
+The old 0.646 headline was test-selected (iter23 tuned EWMA alpha on test1 = leakage;
+eval-valid alpha=0.1 -> 0.630; alpha is within noise). And test1 is now BURNED
+(~25 experiments have read it), so it's no longer a clean test set.
 
 ------------------------------------------------------------------------
-FIRST THINGS TO DO
+TOP PRIORITY — do this before any new "best" claim
 ------------------------------------------------------------------------
-1. *** TOP PRIORITY (LOG-073): unbiased final eval. *** test1 is burned. Reserve a
-   genuinely unused indy session (or group) NOT used in train/eval/test so far,
-   freeze the ENTIRE pipeline (arch, alpha, channels, seeds), and evaluate ONCE.
-   That single number is the honest headline. Do this before any new "best" claim.
-2. (optional sanity) `py models/tcn_gru_8ch/export_int8.py` -> int8 lossless ~74 KB.
+Unbiased final eval. Reserve a genuinely unused indy session (or group) NOT used in
+train/eval/test so far, freeze the ENTIRE pipeline (arch, alpha, channels, seeds),
+and evaluate ONCE. That single number is the honest headline.
+  (sanity: `py models/tcn_gru_8ch/export_int8.py` -> int8 lossless ~74 KB.)
 
 ------------------------------------------------------------------------
-POSSIBLE EXPERIMENTS STILL UNTRIED (roughly by expected value)
+REMAINING UNTRIED IDEAS (low expected value — decoder is near its ceiling)
 ------------------------------------------------------------------------
-A. [DONE - DEAD END, LOG-072] LFADS-lite (reconstruct rates from GRU latent): no
-   help (EVAL +0.001, TEST -0.017). See DEAD ENDS.
-B. [DONE - DEAD END, LOG-072] Multi-task (velocity + integrated position): no help
-   (EVAL -0.002). See DEAD ENDS.
-C. Proper Kalman / state-space post-filter (learned, causal) — we only tried a
-   plain forward-EMA (hurt); a real velocity-dynamics state-space is untested. Low EV.
-D. SNN (spiking) — the paper's low-power option; untested here. Low EV.
-F. DATA/HARDWARE levers (the real ceiling, out of pure-model scope): more channels,
-   sessions closer in time to test1, per-user calibration on top of the 24-sess
-   pool, richer signal (broadband — not in this dataset).
+- Kalman / learned causal state-space post-filter — only a plain forward-EMA was
+  tried (hurt); a real velocity-dynamics state-space is untested.
+- SNN (spiking) — the paper's low-power option; untested here.
+- DATA/HARDWARE levers (the real ceiling, outside pure-model scope): more channels,
+  sessions closer in time to test, per-user calibration on top of the 24-sess pool,
+  richer signal (broadband — not in this dataset). Per-user calibration is the best
+  data-side lead.
 
 ------------------------------------------------------------------------
 DEAD ENDS — DO NOT RE-RUN (already ruled out; see DAILY_LOG)
 ------------------------------------------------------------------------
-- Architecture: LSTM (ties GRU), Transformer (worse), plain-CNN+GRU (worse),
-  TCN-only / GRU-only (worse). TCN+GRU wins.                      (LOG-060/066)
+- Architecture: LSTM (ties GRU), Transformer/plain-CNN+GRU/TCN-only/GRU-only (worse).
+  TCN+GRU wins.                                                   (LOG-060/066)
 - Capacity: plateaus ~220 KB, overfits at 400 KB.                 (LOG-061)
 - More data: 24 nearby sessions is the limit; distant sessions hurt. (LOG-065)
-- Channel selection: firing-8 on base-6 best; learned/low-freq/fft/
-  re-selection lose or tie.                                       (LOG-063)
+- Channel selection: firing-8 on base-6 best; learned/low-freq/fft/re-select lose/tie. (LOG-063)
 - Binning: 40 ms boxcar best; finer/coarser worse; overlapping windows no help. (LOG-061)
 - Output smoothing (Bessel/EMA): redundant/hurts (target already 3 Hz LP). (LOG-050/064)
 - Causal arch tweaks (more RF/depth/width): no gain.             (LOG-064)
 - Cheap training tricks (correlation loss, stronger aug, more reg): wash. (LOG-051)
-- Auxiliary heads: multi-task (velocity+position) and LFADS-lite (rate recon)
-  both tie/lose on EVAL. Second head adds no generalization signal. (LOG-072)
+- Auxiliary heads: multi-task (velocity+position) and LFADS-lite (rate recon) both
+  tie/lose on EVAL — a second head adds no generalization signal. (LOG-072)
 - Bidirectional / bounded-lookahead: NOT deployable (40 ms/bin => latency too high). (LOG-062)
 
 ------------------------------------------------------------------------
 HOW TO RUN
 ------------------------------------------------------------------------
-- Rig: research/harness.py — prep_more(...) / H.run(data, cfg, seeds=(...), build=...)
-  returns r & R^2. models/tcn_gru/best_model.py = build_net + r2/corr.
-  models/tcn_gru/evaluate.py = load_electrode, E.TRAIN/EVAL/TEST. 24-session pool
-  = E.TRAIN + research/iter7_final.py::EXTRA18. Multiscale: iter20.ewma_feats.
-- MEMORY: run only 1-2 experiments at a time — box OOMs ~2 GB free during
-  24-session loads; stagger launches. Kill strays: taskkill /F /IM python.exe /T.
-- LOGGING (standing rule): every result -> DAILY_LOG entry (LOG-NNN) WITH a
-  "Files:" section (files used + one-line purpose each) -> update SUMMARY if best
-  changes -> git commit (+push). Commit msgs end with the Co-Authored-By line.
+- Rig: research/harness.py — H.prep(nch) loads the split; H.run(data, cfg, seeds=(...),
+  build=..., loss_fn=..., post=...) trains (early-stop on eval r) + scores r & R^2.
+  models/tcn_gru/best_model.py = build_net + r2/corr. models/tcn_gru/evaluate.py =
+  load_electrode, E.TRAIN/EVAL/TEST. 24-session pool = E.TRAIN + iter7_final.EXTRA18.
+  Multiscale features: iter20_multiscale.ewma_feats. New rig with aux heads: iter24.
+- MEMORY: run only 1-2 experiments at a time — box OOMs ~2 GB free during 24-session
+  loads; stagger launches. Kill strays: taskkill /F /IM python.exe /T. Use `py`, not `python`.
+- LOGGING (standing rule): every result -> DAILY_LOG entry (LOG-NNN) WITH a "Files:"
+  section -> update SUMMARY/HANDOFF if best changes -> git commit. Select on EVAL,
+  never on test_r2. Commit msgs end with the Co-Authored-By line.
 ========================================================================
