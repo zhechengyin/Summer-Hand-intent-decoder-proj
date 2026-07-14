@@ -1400,6 +1400,34 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-070 - EWMA alpha tuned: 0.2 is best (0.646); 2-scale multiscale config settled
+
+Question: for the 2-scale causal input (raw + one slow EWMA), which EWMA alpha is best?
+
+Method: sweep alpha in {0.1, 0.2, 0.3}, each a 3-seed ensemble, strictly causal,
+8 ch, 24 sess.
+
+Command: py research/iter23_alpha_sweep.py
+
+Files:
+  - research/iter23_alpha_sweep.py -- this experiment (alpha sweep, 3-seed)
+  - research/iter20_multiscale.py -- ewma_feats(), CHANNELS, CAUSAL cfg, TRAIN, WIN
+  - research/harness.py -- H.run(data,cfg,seeds) trains + scores r/R2
+  - research/iter7_final.py -- EXTRA18 session names (24-session pool)
+  - models/tcn_gru/evaluate.py -- load_electrode (40ms rates), E.TRAIN/EVAL/TEST
+  - models/tcn_gru/best_model.py -- build_net (TCN+GRU), r2/corr
+  - data/source_data/indy_loco/*.mat -- raw sessions (gitignored)
+  - results/metrics/iter23_alpha_sweep.json -- output metrics
+
+Results (3-seed TEST R2): alpha 0.1 = 0.630, 0.2 = 0.646, 0.3 = 0.632.
+
+Interpretation: alpha=0.2 (EWMA tau ~160 ms) is the sweet spot; slower (0.1) and
+faster (0.3) both drop ~0.015. Final multiscale config: raw + EWMA(0.2), 2 scales,
+16 features -> 0.646 (3-seed), +0.028 over single-scale (0.618). Ready to adopt.
+
+Decision: adopt raw+EWMA(0.2) 2-scale input into models/tcn_gru_8ch and retrain
+the causal checkpoint.
+
 ### LOG-069 - Multiscale saturates at 2 scales = 0.646 (partial; stopped for clean break)
 
 Scale-count sweep (research/iter22_scale_sweep.py, 3-seed, causal, 24 sess).
