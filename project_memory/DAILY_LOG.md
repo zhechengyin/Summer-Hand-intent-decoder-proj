@@ -1400,6 +1400,50 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-075 - Deep Blue finger SBP: causal TCN+GRU transfers at TEST R² ~0.41 per monkey (new dataset)
+
+Question: does our strictly-causal TCN+GRU architecture transfer to a DIFFERENT
+intracortical finger dataset -- the U-M Deep Blue set (arXiv/DOI 10.7302/jnkz-az17)?
+(Cross-dataset generalization check; runs on a genuinely fresh, non-burned test.)
+
+Method: research/deepblue_tcn_gru.py. Manipulandum-control (MC) files only (their
+labels are PHYSICAL finger measurements; KC/RC labels are decoder-feedback, not
+ground truth). Input = 96-ch current-bin spiking-band power (SBP), history removed
+`X[:,0::4]` (official trick); target = index & MRS finger-group VELOCITY `y[:,2:4]`.
+Chronological, trial-disjoint 70/15/15 split; input norm fit on TRAIN only; model/
+epoch selection on EVAL; 3-seed. Strictly-causal TCN+GRU (F64/H64/L1, dils[1,2,4,8],
+bidir=False), 32 ms bins, 1.024 s windows. Separate model per monkey (channels don't
+correspond across implants). Owned/launched by this session (Claude) after iter25.
+
+Command: py research/deepblue_tcn_gru.py
+
+Files:
+  - research/deepblue_tcn_gru.py -- this experiment (MC loader, chronological split, run)
+  - data/external/umich_deepblue_finger/original/Data/Monkey{N,W}_MC.mat -- inputs (gitignored, large)
+  - research/harness.py -- H.run (train/score, 3-seed); models/tcn_gru/best_model.py -- build_net, r2
+  - models/tcn_gru/evaluate.py -- E.CFG base config (reused); results/deepblue_tcn_gru_run.log,
+    results/metrics/deepblue_tcn_gru.json -- outputs
+
+Results (3-seed, per monkey; select on EVAL):
+  | monkey | windows tr/ev/te | EVAL R2 | TEST R2 | per-axis TEST R2 |
+  |--------|------------------|--------:|--------:|------------------|
+  | N      | 318/79/67        | 0.402   | 0.408   | 0.407 / 0.410    |
+  | W      | 484/113/126      | 0.408   | 0.407   | 0.432 / 0.382    |
+  | mean   |                  | 0.405   | 0.408   |                  |
+  Per-seed Pearson eval_r ~0.61-0.63 (so R2 ~= r^2; ensemble).
+
+Interpretation: the causal architecture transfers to a genuinely different signal
+(SBP, not threshold-crossing rates) and kinematic target, giving a modest but
+CONSISTENT TEST R2 ~0.41 on both monkeys. EVAL ~= TEST for both -> honest split, not
+overfit. This is a fresh, non-burned test set (unlike indy test1). Lower than indy
+8-ch ~0.63, but NOT comparable: different signal, different kinematics (finger-group
+vel), full 96-ch but current-bin only, 32 ms bins, and NO feature engineering yet
+(no causal EWMA/multiscale, indy hyperparams reused untuned).
+
+Decision: baseline established for Deep Blue. Obvious next levers if pursued: add the
+causal EWMA / multiscale input (the one indy lever that worked, LOG-068/074) and tune
+per-dataset. Kept separate from the indy model of record.
+
 ### LOG-074 - The "causal" pipeline was NOT causal (leaky Gaussian); a truly-causal input matches it at ~0.63
 
 Question: the input firing rates are smoothed with scipy `gaussian_filter1d(sigma=1)`,

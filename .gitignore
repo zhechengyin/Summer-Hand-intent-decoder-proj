@@ -12,6 +12,7 @@ data/ds004362/
 data/way_eeg_gal/
 data/source_data/
 data/cache/
+data/external/
 # Generated preprocessing outputs stay beside their method, but method source,
 # documentation, and configs are versioned.
 data/processed/**/artifacts/*
