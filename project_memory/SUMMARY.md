@@ -28,6 +28,14 @@ multiunit rates, 3 Hz vel-LP target. Reference: Zhou/Sun/Basu arXiv:2312.15889.
   is the whole lever; the Gaussian (and its leak) adds ~nothing. **Adoption pending**:
   swap the centered Gaussian for a causal smoother in `models/tcn_gru/evaluate.py`,
   regenerate the 40 ms cache, retrain — then "0 ms lookahead" becomes true at ~0.63.
+- 🔥 **BIGGEST LEVER — CHANNEL COUNT (LOG-078).** Training the SAME pipeline with
+  **32** firing channels (vs 8) → **TEST R² = 0.755 / EVAL 0.752**, i.e. **+0.12 R²**,
+  still **~77 KB int8** (+3k params — 32ch only widens the first conv). EVAL and TEST
+  move together, so it's robust. This dwarfs every model-side lever (multiscale, the
+  only one that worked, was +0.03). Requires hardware running 32 *simultaneous* peak
+  detectors (the "8" is a detection budget; all 96 are observable). 16ch untested
+  (LOG-042 bidir suggests ~0.70). Caveat: 0.755 is on the burned test1 — trustworthy as
+  a relative gain (eval agrees), but the absolute headline still needs a fresh session.
 - **Bidirectional is NOT deployable** (needs the whole future). Bidir 0.677 and
   bounded-lookahead (0.619 @80ms, 0.623 @200ms) are OFFLINE references only —
   at 40 ms/bin that latency is too high for closed-loop (LOG-062/065).

@@ -1400,6 +1400,51 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-078 - 32 channels = TEST R² 0.755 (+0.12 over 8ch), still ~77 KB — the biggest lever
+
+Question: (user) train OUR CURRENT BEST pipeline with 32 peak-detection channels
+instead of 8 -- what does it buy in the current causal + multiscale + R² frame?
+(The old count sweep, LOG-042, was bidirectional / 6-session / Pearson r.)
+
+Method: research/iter26_channel_count.py -- identical pipeline to the 8ch model of
+record (strictly-causal wide TCN+GRU, multiscale raw+EWMA(0.2), 24 sessions, 40 ms
+bins, select on EVAL, 3-seed) but channels = top-32 by firing rate on the base-6
+sessions (vs top-8). Input 32*2 = 64 features. Verified top-8 reproduces the deployed
+set exactly, so 8ch (~0.63) is the apples-to-apples baseline.
+
+Command: py research/iter26_channel_count.py   (COUNTS=[32])
+
+Files:
+  - research/iter26_channel_count.py -- this experiment (topN_channels, multiscale prep)
+  - research/iter20_multiscale.py -- ewma_feats, CAUSAL cfg, TRAIN (24 sess), WIN
+  - research/harness.py -- H.run (3-seed train/score); models/tcn_gru/best_model.py -- build_net, r2
+  - models/tcn_gru/evaluate.py -- load_electrode, E.TRAIN/EVAL/TEST
+  - results/iter26_run.log -- output (metrics json not written: cosmetic KeyError after the
+    result, since 8ch wasn't in this run; bug fixed in-script)
+
+Results (3-seed): 32 ch (64 feat) EVAL R2 = 0.752, TEST R2 = 0.755, 78,786 params
+(~77 KB int8), 1709 s. Baseline 8ch model of record ~0.63 (EVAL) / ~0.63 (TEST).
+  => +0.12 EVAL / +0.12 TEST going 8 -> 32 channels.
+
+Interpretation: MORE SIMULTANEOUS DETECTION CHANNELS is by far the biggest lever we
+have -- +0.12 R² dwarfs every model-side result (multiscale, the only model lever that
+worked, was +0.03). EVAL and TEST move together (+0.12 on both), so it is robust, not a
+test-set fluke (contrast the test-selected 0.646, LOG-073). And it stays STM32-sized:
+32 channels only widen the first conv (16->64 becomes 64->64 features), +3k params,
+~77 KB int8. Confirms the old bidirectional sweep (LOG-042, ~+0.13 R²) holds in the
+honest causal frame. This depends on the hardware running 32 simultaneous peak
+detectors (user: the 8 is a simultaneous-detection budget, all 96 are observable).
+
+Caveats: 0.755 is on the BURNED test1 (LOG-073) -- but eval agrees, so it is trustworthy
+as a relative gain; an unbiased absolute headline still needs a fresh session. The 32
+channels were firing-rate-selected on the base-6 (same robust rule as the 8; not
+re-selected on the 24-session pool, which overfit before, LOG-053).
+
+Decision: 32-channel detection is the top hardware recommendation -- ~0.63 -> ~0.755 at
+the same MCU footprint. If hardware can do 16 detectors, run 16ch too (LOG-042 suggests
+~0.70). Next: confirm on a fresh session; consider saving a 32ch checkpoint if the
+hardware path is real.
+
 ### LOG-077 - Deep Blue velocity > position; why indy 0.63 vs Deep Blue 0.41
 
 Question: (user) Deep Blue TEST R² ~0.41 is much lower than indy ~0.63 -- why? And is
