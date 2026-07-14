@@ -1,4 +1,4 @@
-# HANDOFF — start here (updated 2026-07-13)
+# HANDOFF — start here (updated 2026-07-14)
 
 Self-contained pickup notes for a fresh session. Full trail: `project_memory/
 DAILY_LOG.md` (LOG-NNN) + `project_memory/SUMMARY.md`.
@@ -14,29 +14,36 @@ Hardware dictates the target: **8 channels** (spike detection), **STM32-class MC
 
 - **Strictly-causal** wide TCN+GRU (`build_net` with `bidir=False`), `F64/H64/L1/
   dils[1,2,4,8]`, 8 fixed channels `[26,51,53,66,71,73,75,94]` (firing top-8 on the
-  base-6), 24 sessions, 40 ms bins.
-- **TEST R² = 0.606**, **0 ms lookahead**, ~5.6 ms/pred, **~73 KB int8 (lossless)**.
+  base-6), 24 sessions, 40 ms bins, **+ multiscale input** (raw + EWMA, 16 features).
+- **TEST R² ≈ 0.63** (eval-valid causal multiscale; single-scale causal was 0.606),
+  **0 ms lookahead**, ~5.6 ms/pred, **~74 KB int8 (lossless)**. ⚠️ Earlier 0.646 was
+  test-selected — see the correction below (LOG-073).
 - Bidirectional (0.677) and bounded-lookahead (0.619 @80 ms, 0.623 @200 ms) are
   **offline references only** — not deployable at 40 ms/bin latency.
 
-### 🔥 LIVE LEVER — multi-timescale input (LOG-068/069)
+### 🔥 LIVE LEVER — multi-timescale input (LOG-068/071) — ADOPTED
 The one model-side thing that **works**: feed each channel at multiple causal
-timescales (raw + slow EWMA) instead of one 40 ms rate. 3-seed causal: single-scale
-0.618 → **multiscale 0.646 (+0.028, confirmed real)**. Benefit **saturates at 2
-scales** (raw + one EWMA α≈0.2, 16 features, ~75 KB int8). Code: `research/
-iter20_multiscale.py` (`ewma_feats`), `iter21`/`iter22`.
+timescales (raw + slow EWMA) instead of one 40 ms rate. Multiscale beat single-scale
+on **both eval and test** (EVAL 0.601→0.616, TEST 0.618→0.646). Benefit **saturates
+at 2 scales** (raw + one EWMA, 16 features, ~74 KB int8). ADOPTED into
+`models/tcn_gru_8ch` (checkpoint is causal+multiscale, α=0.2). Code: `research/
+iter20_multiscale.py` (`ewma_feats`), `iter21`/`iter22`/`iter23`.
+
+⚠️ **CORRECTION (LOG-073): the 0.646 headline was TEST-SELECTED** — `iter23`
+picked α by test1 R² (leakage). Eval-valid α=0.1 → test **0.630**; α barely matters
+(within noise). Honest deployable causal-multiscale = **~0.63**. And **test1 is now
+burned** (~25 experiments have read it) — an unbiased final number needs a freshly
+reserved session, pipeline frozen, scored once. Rule now: **select on EVAL, read
+TEST once; never promote a config because its TEST is higher.**
 
 **Next steps (in order):**
-1. Tune the single EWMA α (which slow timescale is best; 0.2 used so far).
-2. **Adopt the 2-scale multiscale input into `models/tcn_gru_8ch`** (add the EWMA
-   feature step to `config.py`/`evaluate.py`; input channels 8→16), then
-   `train_and_save.py` to write the **causal + multiscale** checkpoint, `export_int8.py`
-   to confirm. (Note: `config.py MODEL` is already `bidir=False`; the current
-   `checkpoint.pt` is still the old bidirectional one.)
-3. Single multiscale model ≈0.61; the 0.646 headline uses a 3-seed ensemble — decide
-   if the ensemble (3× size, still STM32-OK) is worth it vs a single model.
+1. **TOP PRIORITY — unbiased final eval:** reserve a genuinely unused indy session
+   (or group), freeze the whole pipeline, and report ONE test R². Everything else is
+   secondary until we have an honest headline.
+2. Auxiliary heads are ruled out: multi-task (position) and LFADS-lite (rate
+   reconstruction) both fail to beat baseline on eval (LOG-072).
 
-Still-untested archs: LFADS-lite, SNN (larger builds).
+Still-untested archs (low-EV): Kalman/state-space post-filter, SNN.
 
 ## What we learned (LOG-050..065) — the decoder is near its ceiling
 

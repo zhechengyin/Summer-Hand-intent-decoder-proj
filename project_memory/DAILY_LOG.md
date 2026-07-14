@@ -1400,6 +1400,91 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-073 - TEST-SET LEAKAGE in alpha selection: eval-valid causal multiscale is ~0.630, not 0.646
+
+Question: was the adopted EWMA alpha (and the 0.646 headline) chosen validly?
+
+Method: audit of `research/iter23_alpha_sweep.py`. It selected the winning alpha
+with `best = max(rows, key=lambda r: r["test_r2"])` -- i.e. it tuned a
+hyperparameter (alpha) directly on the untouched TEST session. That is leakage:
+the reported 0.646 is the max over 3 alphas scored on test, so it is biased high.
+
+Command: (audit only) `grep -rn test_r2 research/*.py | grep -E "max|sort|key="`
+
+Files:
+  - research/iter23_alpha_sweep.py -- FIXED: `best` now selected by `eval_r2`; prints EVAL+TEST.
+  - research/iter17_causal_improve.py -- FIXED: `best` selected by `eval_r2` (was test_r2).
+  - research/iter14_architecture.py -- FIXED: `best_causal` selected by `eval_r2` (was test_r2).
+  - research/iter19_more_arch.py -- FIXED: ranking sorted by `eval_r2` (was test_r2).
+  - project_memory/SUMMARY.md, HANDOFF.md, NEXT_EXPERIMENTS.txt, models/tcn_gru_8ch/{config.py,README.md}
+    -- updated to state the eval-valid number and the burned-test caveat.
+
+Results (iter23 alpha sweep, 3-seed; recorded numbers preserved):
+  | alpha | EVAL R2 | TEST R2 |
+  |------:|--------:|--------:|
+  | 0.1   | **0.638** | 0.630 |
+  | 0.2   | 0.634   | **0.646** |
+  | 0.3   | 0.631   | 0.632 |
+  Valid rule (select on EVAL) -> alpha=0.1 -> TEST R2 ~= **0.630**. The 0.646 came
+  from picking alpha=0.2 *because* its TEST was highest.
+
+Interpretation: the multiscale LEVER itself is still real -- multiscale beat
+single-scale on BOTH eval and test (EVAL 0.601->0.616, TEST 0.618->0.646,
+LOG-067/068), so adopting raw+EWMA input is valid. What was NOT valid was reading
+0.646 as an unbiased alpha-tuned score. The honest deployable causal-multiscale
+number is ~0.63 (eval-selected alpha=0.1, 3-seed). Alpha 0.1/0.2/0.3 differ within
+noise on eval (0.638/0.634/0.631), so the alpha choice barely matters; the adopted
+checkpoint (alpha=0.2) is fine as-is but its 0.646 is a historical, test-selected
+observation. IMPORTANT: test1 has now been inspected across ~25 experiments, so it
+is no longer a truly untouched test set. For an unbiased final headline, freeze the
+whole pipeline and evaluate ONCE on a genuinely unused session/group.
+
+Decision: (1) never select/promote a config by test_r2 -- select on eval, read test
+once; (2) restate the deployable causal-multiscale result as ~0.63 (eval-valid),
+0.646 = test-selected historical; (3) NEW TOP PRIORITY next step -- reserve a fresh
+held-out session set, freeze the pipeline, and report one unbiased final R2.
+
+### LOG-072 - Auxiliary-head regularization (multi-task + LFADS-lite): both dead ends
+
+Question: on top of the causal multiscale model, does a second training-time head
+help -- (B) multi-task kinematics (predict velocity + integrated position) or
+(A) LFADS-lite (reconstruct the z-scored firing rates from the GRU latent)?
+
+Method: research/iter24_aux_heads.py -- custom train loop mirroring harness.run
+(same recipe/aug/early-stop), net head widened to 2 + aux dims, loss = MSE(vel) +
+0.3*MSE(aux). Only the velocity head is scored; the aux head is dropped at
+inference (deployable size unchanged). Strictly causal, 8 ch, 24 sess, 3-seed.
+2-scale input (raw + EWMA 0.2). Baseline "none" reproduced the multiscale model
+exactly (0.646 test / 75,714 params), validating the custom loop.
+
+Command: py research/iter24_aux_heads.py
+
+Files:
+  - research/iter24_aux_heads.py -- this experiment (aux-head rig + custom loop)
+  - research/iter20_multiscale.py -- ewma_feats(), CHANNELS, CAUSAL cfg, TRAIN, WIN
+  - models/tcn_gru/best_model.py -- build_net (head widened via n_out), r2/corr
+  - models/tcn_gru/evaluate.py -- load_electrode, E.TRAIN/EVAL/TEST
+  - research/iter7_final.py -- EXTRA18 (24-session pool)
+  - results/metrics/iter24_aux_heads.json, results/iter24_run.log -- outputs
+
+Results (3-seed; EVAL is the valid selector -- see LOG-073):
+  | aux            | EVAL R2 | TEST R2 | vs base (EVAL) |
+  |----------------|--------:|--------:|---------------:|
+  | none (base)    | 0.634   | 0.646   |  -             |
+  | pos (multitask)| 0.632   | 0.642   | -0.002         |
+  | recon (LFADS)  | 0.635   | 0.629   | +0.001         |
+  All three tie on EVAL (0.632-0.635). recon had the best EVAL but the worst TEST
+  -- a clean illustration of why one must not select on test.
+
+Interpretation: neither auxiliary head helps. On the valid (eval) metric the three
+are indistinguishable; the aux losses add no generalization signal for this
+8-channel, 3 Hz-lowpassed velocity target. Consistent with the decoder being near
+its model-side ceiling -- multiscale input remains the only lever that moved eval.
+
+Decision: drop multi-task and LFADS-lite auxiliary heads. Remaining model-side
+ideas (Kalman post-filter, SNN) are low-EV; the real lever is data/hardware and an
+unbiased held-out evaluation (LOG-073).
+
 ### LOG-071 - ADOPTED multiscale into model of record: causal 0.633 single / 0.646 ensemble
 
 Question: fold the confirmed 2-scale multiscale input (LOG-068/070) into the

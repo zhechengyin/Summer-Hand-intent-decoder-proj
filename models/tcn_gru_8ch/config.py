@@ -4,8 +4,9 @@ The deployable decoder: 8 spike-detection channels -> multi-timescale input
 (raw + causal EWMA, 16 features) -> dilated-TCN + STRICTLY-CAUSAL (unidirectional)
 GRU (`models.tcn_gru.build_net`, bidir=False), STM32-sized, trained on 24 sessions.
 Causal because real-time inference has no future; int8 is lossless. Deployable
-TEST R2 = 0.646 (3-seed) / ~0.61 single model; bidirectional 0.677 is OFFLINE only.
-See LOG-062/068/070.
+TEST R2 ~= 0.63 (eval-valid, 3-seed); bidirectional 0.677 is OFFLINE only.
+NOTE (LOG-073): the earlier 0.646 headline was test-selected (alpha tuned on test1);
+the eval-valid number is ~0.63, and test1 is now burned. See LOG-062/068/073.
 
 Hardware: 8 channels (threshold-crossing spike detection), STM32-class MCU.
 Metric: R² (coefficient of determination, avg of X,Y velocity).
@@ -20,9 +21,10 @@ RATE_SMOOTH_SIGMA_BINS = 1.0 # Gaussian smoothing of firing rates (LOG-032)
 N_CHANNELS = 8               # hardware limit; top-8 electrodes by firing rate on train1-6
 N_OUT = 2                    # 2D: top-2 velocity-variance movement axes
 
-# Multi-timescale input (LOG-068/070): expand each of the 8 channels into raw +
-# causal EWMA(alpha=0.2) = 2 scales -> 16 features. +0.028 R2 over single-scale;
-# saturates at 2 scales; alpha=0.2 (tau ~160 ms) is best. Model input dim = 16.
+# Multi-timescale input (LOG-068): expand each of the 8 channels into raw +
+# causal EWMA = 2 scales -> 16 features. Beat single-scale on BOTH eval and test
+# (real lever). Saturates at 2 scales. alpha 0.1/0.2/0.3 differ within noise on
+# EVAL (LOG-073); checkpoint uses 0.2. Model input dim = 16.
 MULTISCALE = [1.0, 0.2]
 
 # Channel selection is FIXED to the top-8 firing electrodes of the original 6
@@ -49,14 +51,18 @@ EXTRA_TRAIN = ["indy_20160927_06", "indy_20160930_02", "indy_20160930_05",
                "indy_20161212_02", "indy_20161220_02", "indy_20170123_02",
                "indy_20170124_01", "indy_20170127_03", "indy_20170131_02"]
 
-# --- headline metrics (R², untouched test1 after eval1 model selection) ---
+# --- headline metrics (R² on test1 after eval1 model selection) ---
 # DEPLOYABLE = strictly causal + multiscale input. Bidir numbers are OFFLINE only.
+# ⚠️ test1 has been read across ~25 experiments -> it is NO LONGER a truly untouched
+# test set. For an unbiased final headline, reserve a fresh session, freeze the
+# pipeline, and score once (LOG-073). Select configs on EVAL, never on test_r2.
 METRICS = {
-    "test_r2_causal_multiscale_3seed": 0.646,  # DEPLOYABLE best: causal, 2-scale input, 3-seed (LOG-070)
+    "test_r2_causal_multiscale_evalvalid": 0.630,  # DEPLOYABLE, eval-valid alpha=0.1, 3-seed (LOG-073)
+    "test_r2_causal_multiscale_3seed_TESTSELECTED": 0.646,  # HISTORICAL: alpha=0.2 was tuned on test -> biased high (LOG-073)
     "test_r2_causal_single_scale": 0.606,      # causal, single-scale input (pre-multiscale)
     "test_r2_bidir_offline": 0.677,            # offline upper bound (bidirectional, NOT deployable)
-    "size_kb_int8": 75,          # ~75 KB (16-feat input only grows the first conv)
+    "size_kb_int8": 74,          # ~74 KB (16-feat input only grows the first conv)
     "compute_ms_per_pred": 5.6,  # causal, 1 CPU core
     "baseline_6session_small_r2": 0.529,       # start point
-    # Single multiscale model ~0.61; the 0.646 uses a 3-seed ensemble.
+    # alpha 0.1/0.2/0.3 differ within noise on EVAL; the checkpoint is alpha=0.2.
 }

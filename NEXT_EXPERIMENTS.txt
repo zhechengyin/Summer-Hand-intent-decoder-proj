@@ -16,34 +16,39 @@ Metric = R^2 on the untouched test1 session. Only the indy/loco monkey data.
 Model of record: models/tcn_gru_8ch/ — strictly-causal wide TCN+GRU (bidir=False),
 8 firing-selected channels [26,51,53,66,71,73,75,94], 24 sessions, 40 ms bins.
 
-BREAKTHROUGH (yesterday, LOG-068/070): multi-timescale INPUT — feed each channel
-as raw + causal EWMA(alpha=0.2) = 16 features. 3-seed causal R^2: single-scale
-0.618 -> multiscale 0.646 (+0.028, confirmed). Saturates at 2 scales; alpha=0.2 best.
+BREAKTHROUGH (LOG-068): multi-timescale INPUT — feed each channel as raw + causal
+EWMA = 16 features. Multiscale beat single-scale on BOTH eval and test (EVAL
+0.601->0.616, TEST 0.618->0.646). Saturates at 2 scales. REAL lever, ADOPTED.
 
-STATUS: multiscale ADOPTED (DONE, LOG-071). Deployable model of record =
-models/tcn_gru_8ch/ causal + multiscale (16 features). Checkpoint TEST R^2 = 0.633
-single / 0.646 3-seed, ~74 kB int8 (lossless), 75,714 params. Up from 0.606.
+*** CORRECTION (LOG-073) — READ THIS: the 0.646 headline was TEST-SELECTED. ***
+iter23 picked the EWMA alpha by test1 R^2 (leakage). Eval-valid alpha=0.1 -> TEST
+0.630; alpha barely matters (within noise). Honest deployable causal-multiscale
+= ~0.63, NOT 0.646. Also test1 is now BURNED (~25 experiments have read it).
+RULE NOW: select on EVAL, read TEST once; never promote a config by its TEST score.
+
+STATUS: multiscale ADOPTED (LOG-071). Deployable model of record =
+models/tcn_gru_8ch/ causal + multiscale (16 features, alpha=0.2 checkpoint), ~74 kB
+int8 (lossless), 75,714 params. Honest TEST R^2 ~= 0.63 (eval-valid). Up from 0.606.
 
 ------------------------------------------------------------------------
 FIRST THINGS TO DO
 ------------------------------------------------------------------------
-1. (optional sanity) `py models/tcn_gru_8ch/export_int8.py` -> int8 lossless ~74 KB.
-2. Decide shipped config: single model (0.633) vs 3-seed ensemble (0.646, 3x size,
-   still STM32-OK). Then move to the untried experiments below.
+1. *** TOP PRIORITY (LOG-073): unbiased final eval. *** test1 is burned. Reserve a
+   genuinely unused indy session (or group) NOT used in train/eval/test so far,
+   freeze the ENTIRE pipeline (arch, alpha, channels, seeds), and evaluate ONCE.
+   That single number is the honest headline. Do this before any new "best" claim.
+2. (optional sanity) `py models/tcn_gru_8ch/export_int8.py` -> int8 lossless ~74 KB.
 
 ------------------------------------------------------------------------
 POSSIBLE EXPERIMENTS STILL UNTRIED (roughly by expected value)
 ------------------------------------------------------------------------
-A. LFADS-lite / latent dynamics — add an auxiliary head that reconstructs the
-   smoothed firing rates so the GRU latent captures population dynamics; decode
-   velocity from the latent. Biggest theoretical upside for reaching tasks.
-   Must stay CAUSAL and small. Heaviest build. (rig: research/harness.py build= hook)
-B. Multi-task targets — predict velocity + position (its integral) and/or speed
-   jointly, combined loss, to regularize. Cheap-ish (second head).
+A. [DONE - DEAD END, LOG-072] LFADS-lite (reconstruct rates from GRU latent): no
+   help (EVAL +0.001, TEST -0.017). See DEAD ENDS.
+B. [DONE - DEAD END, LOG-072] Multi-task (velocity + integrated position): no help
+   (EVAL -0.002). See DEAD ENDS.
 C. Proper Kalman / state-space post-filter (learned, causal) — we only tried a
-   plain forward-EMA (hurt); a real velocity-dynamics state-space is untested.
-D. SNN (spiking) — the paper's low-power option; untested here.
-E. Combine multiscale + LFADS-lite / multi-task if either A or B helps.
+   plain forward-EMA (hurt); a real velocity-dynamics state-space is untested. Low EV.
+D. SNN (spiking) — the paper's low-power option; untested here. Low EV.
 F. DATA/HARDWARE levers (the real ceiling, out of pure-model scope): more channels,
    sessions closer in time to test1, per-user calibration on top of the 24-sess
    pool, richer signal (broadband — not in this dataset).
@@ -61,6 +66,8 @@ DEAD ENDS — DO NOT RE-RUN (already ruled out; see DAILY_LOG)
 - Output smoothing (Bessel/EMA): redundant/hurts (target already 3 Hz LP). (LOG-050/064)
 - Causal arch tweaks (more RF/depth/width): no gain.             (LOG-064)
 - Cheap training tricks (correlation loss, stronger aug, more reg): wash. (LOG-051)
+- Auxiliary heads: multi-task (velocity+position) and LFADS-lite (rate recon)
+  both tie/lose on EVAL. Second head adds no generalization signal. (LOG-072)
 - Bidirectional / bounded-lookahead: NOT deployable (40 ms/bin => latency too high). (LOG-062)
 
 ------------------------------------------------------------------------

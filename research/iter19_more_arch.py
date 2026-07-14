@@ -77,9 +77,9 @@ def main():
         print(f"  {name:13s} TEST R2={res['test_r2']:.3f}  EVAL R2={res['eval_r2']:.3f}  "
               f"(~{res['n_params']/1024:.0f} KB int8)  [{time.time()-t0:.0f}s]", flush=True)
 
-    print("\n--- strictly-causal architectures (TEST R2; TCN+GRU ref = 0.606) ---")
-    for name, r in sorted(rows.items(), key=lambda kv: -kv[1]["test_r2"]):
-        print(f"  {name:13s}: {r['test_r2']:.3f}  (~{r['int8_kb']:.0f} KB)")
+    print("\n--- strictly-causal architectures (ranked by EVAL; TCN+GRU ref = 0.606) ---")
+    for name, r in sorted(rows.items(), key=lambda kv: -kv[1]["eval_r2"]):   # rank on EVAL, not TEST
+        print(f"  {name:13s}: EVAL {r['eval_r2']:.3f}  TEST {r['test_r2']:.3f}  (~{r['int8_kb']:.0f} KB)")
     out = ROOT / "results" / "metrics" / "iter19_more_arch.json"
     out.write_text(json.dumps(rows, indent=2), encoding="utf-8")
     print(f"\nWrote {out}")

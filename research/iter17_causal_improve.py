@@ -74,10 +74,11 @@ def main():
                 rows[f"ref_ema{a}"] = {"test_r2": te, "eval_r2": ev}
                 print(f"    + causal EMA(a={a}): TEST R2={te:.3f}  EVAL R2={ev:.3f}", flush=True)
 
-    best = max(rows.values(), key=lambda r: r["test_r2"])
-    print(f"\n--- causal improvements (ref 0.606); best TEST R2 = {best['test_r2']:.3f} ---")
+    best = max(rows.values(), key=lambda r: r["eval_r2"])   # select on EVAL, not TEST (no leakage)
+    print(f"\n--- causal improvements (ref 0.606); best-by-EVAL: "
+          f"EVAL R2={best['eval_r2']:.3f}, TEST R2={best['test_r2']:.3f} ---")
     for name, r in rows.items():
-        print(f"  {name:12s}: {r['test_r2']:.3f}")
+        print(f"  {name:12s}: EVAL {r['eval_r2']:.3f}  TEST {r['test_r2']:.3f}")
     out = ROOT / "results" / "metrics" / "iter17_causal_improve.json"
     out.write_text(json.dumps(rows, indent=2), encoding="utf-8")
     print(f"\nWrote {out}")

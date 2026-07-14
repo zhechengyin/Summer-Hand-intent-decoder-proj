@@ -54,9 +54,12 @@ def main():
         print(f"  alpha={a} (raw+EWMA) TEST R2={res['test_r2']:.3f}  "
               f"EVAL R2={res['eval_r2']:.3f}  [{time.time()-t0:.0f}s]", flush=True)
 
-    best = max(rows.values(), key=lambda r: r["test_r2"])
-    print(f"\n  best: alpha={best['alpha']} -> TEST R2={best['test_r2']:.3f} "
-          f"(single-scale ref 0.618; 4-scale 0.646)")
+    # Select the alpha on EVAL only, then read its TEST score once. Selecting on
+    # test_r2 is leakage (tuning on the test set) -- it inflates the headline
+    # (test-selected alpha=0.2 -> 0.646, but eval-valid alpha=0.1 -> ~0.630).
+    best = max(rows.values(), key=lambda r: r["eval_r2"])
+    print(f"\n  best-by-EVAL: alpha={best['alpha']} -> EVAL R2={best['eval_r2']:.3f}, "
+          f"TEST R2={best['test_r2']:.3f} (single-scale ref 0.618)")
     out = ROOT / "results" / "metrics" / "iter23_alpha_sweep.json"
     out.write_text(json.dumps(rows, indent=2), encoding="utf-8")
     print(f"Wrote {out}")

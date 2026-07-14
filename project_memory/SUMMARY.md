@@ -1,8 +1,8 @@
 # Project Summary
 
-Last updated: 2026-07-12
+Last updated: 2026-07-14
 
-## CURRENT FOCUS: 8-channel STM32 monkey velocity decoder (LOG-042..065)
+## CURRENT FOCUS: 8-channel STM32 monkey velocity decoder (LOG-042..073)
 
 Hardware pivot (LOG-050): decode NHP finger velocity from **8 channels** (spike
 detection) on an **STM32-class MCU**, in **real time**; metric is **R²**. Data:
@@ -10,11 +10,16 @@ indy sessions, fixed file split (train.../eval1/test1), per-electrode 40 ms
 multiunit rates, 3 Hz vel-LP target. Reference: Zhou/Sun/Basu arXiv:2312.15889.
 
 - **Deployable model of record: STRICTLY-CAUSAL wide TCN+GRU + MULTISCALE input**
-  (`F64/H64/L1`, `bidir=False`; input = 8 channels × {raw, EWMA α=0.2} = 16
-  features), firing top-8 on train1-6, 24 sessions → **TEST R² = 0.633 single /
-  0.646 3-seed**, 0 ms lookahead, ~74 kB int8 (lossless), ~5.6 ms/pred.
-  `models/tcn_gru_8ch/` (checkpoint is causal+multiscale). Multi-timescale input
-  (+0.028) is the one model-side lever that beat the 0.606 ceiling (LOG-068/070/071).
+  (`F64/H64/L1`, `bidir=False`; input = 8 channels × {raw, EWMA α} = 16
+  features), firing top-8 on train1-6, 24 sessions → **TEST R² ≈ 0.63**
+  (eval-valid), 0 ms lookahead, ~74 kB int8 (lossless), ~5.6 ms/pred.
+  `models/tcn_gru_8ch/` (checkpoint is causal+multiscale, α=0.2). Multi-timescale
+  input is the one model-side lever that beat the 0.606 ceiling (real on BOTH eval
+  and test, LOG-068). ⚠️ **The earlier 0.646 headline was TEST-SELECTED** (α tuned
+  on test1 — leakage; eval-valid α=0.1 → test 0.630; LOG-073). Alpha barely matters
+  (within noise). ⚠️ **test1 is no longer untouched** (~25 experiments have read it);
+  an unbiased final headline needs a freshly reserved session, pipeline frozen,
+  scored once. Auxiliary heads (multi-task, LFADS-lite) don't help (LOG-072).
 - **Bidirectional is NOT deployable** (needs the whole future). Bidir 0.677 and
   bounded-lookahead (0.619 @80ms, 0.623 @200ms) are OFFLINE references only —
   at 40 ms/bin that latency is too high for closed-loop (LOG-062/065).

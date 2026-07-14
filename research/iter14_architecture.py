@@ -74,7 +74,7 @@ def main():
               f"{'yes' if causal else 'NO (2s ahead)'}  [{time.time()-t0:.0f}s]", flush=True)
 
     print("\n--- summary (Test R2 | int8 KB | latency ms | causal) ---")
-    best_causal = max((r for r in rows.values() if r["causal"]), key=lambda r: r["test_r2"])
+    best_causal = max((r for r in rows.values() if r["causal"]), key=lambda r: r["eval_r2"])  # EVAL-select
     for name, r in rows.items():
         tag = "  <- best causal" if r is best_causal else ""
         print(f"  {name:15s}: {r['test_r2']:.3f} | {r['int8_kb']:.0f} KB | "

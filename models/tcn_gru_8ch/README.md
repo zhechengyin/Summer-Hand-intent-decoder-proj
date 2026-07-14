@@ -9,16 +9,25 @@ with `bidir=False`), STM32-sized, trained on 24 sessions.
 
 | | value |
 | --- | ---: |
-| **TEST R²** (untouched test1, causal) | **0.633** single / **0.646** 3-seed ensemble |
+| **TEST R²** (test1, causal, eval-valid) | **≈ 0.63** (3-seed) |
 | latency | **0 ms lookahead** (real-time) |
 | compute | ~5.6 ms/pred, 1 CPU core |
-| int8 size | **~74 KB — lossless** (0.633 → 0.633) |
-| input | 8 channels × {raw, EWMA α=0.2} = 16 features |
+| int8 size | **~74 KB — lossless** |
+| input | 8 channels × {raw, EWMA} = 16 features |
 | channels | top-8 firing electrodes of train1-6, **fixed** |
 | training | 24 indy sessions, 40 ms bins |
 
-Multi-timescale input added **+0.027 (single) / +0.028 (ensemble)** over single-scale
-(LOG-068/070/071) — the first model-side lever to beat the 0.606 causal ceiling.
+Multi-timescale input beat single-scale on **both eval and test** (LOG-068) — the
+first model-side lever to beat the 0.606 causal ceiling; it is adopted.
+
+> ⚠️ **Methodology caveat (LOG-073).** The earlier **0.646** headline was
+> **test-selected**: the EWMA α was tuned on `test1` R² (leakage). The eval-valid
+> pick (α=0.1) scores **0.630** on test; α barely matters (within noise). The honest
+> deployable number is **≈ 0.63**. Also, `test1` has now been read across ~25
+> experiments, so it is **no longer a truly untouched test set** — an unbiased final
+> headline needs a freshly reserved session, pipeline frozen, scored once.
+> Rule: select configs on **eval**, read test **once**; never promote a config
+> because its test score is higher.
 
 **Offline references only (NOT deployable):** a *bidirectional* GRU scores 0.677 but
 needs the whole future; *bounded lookahead* gives 0.619 @ 80 ms / 0.623 @ 200 ms —
