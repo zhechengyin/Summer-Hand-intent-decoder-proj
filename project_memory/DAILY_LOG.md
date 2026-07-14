@@ -1400,6 +1400,67 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-074 - The "causal" pipeline was NOT causal (leaky Gaussian); a truly-causal input matches it at ~0.63
+
+Question: the input firing rates are smoothed with scipy `gaussian_filter1d(sigma=1)`,
+which is CENTERED/symmetric -- does the "strictly causal, 0 ms lookahead" claim hold,
+and what is the honest fully-causal R²? (User caught this.)
+
+Method: quantified the kernel, then research/iter25_causal_smoothing.py -- rebuild
+every feature from UNSMOOTHED binned counts (RATE_SIGMA=0, read from .mat, bypassing
+the smoothed cache) and compare 7 input variants, 3-seed, strictly-causal TCN+GRU,
+8 ch, 24 sess. Select on EVAL (alpha=0.1). Validated: the one-sided causal Gaussian
+has exactly zero future response (impulse test); my centered Gaussian reproduces the
+cached rates bit-for-bit (max|Δ|=0), so causal/non-causal arms are directly comparable.
+
+Command: py research/iter25_causal_smoothing.py
+
+Files:
+  - research/iter25_causal_smoothing.py -- this experiment (causal/non-causal input sweep,
+    causal_gauss/ewma builders, load_counts bypassing the smoothed cache)
+  - models/tcn_gru/evaluate.py -- load_source_electrode (line 94: the centered gaussian_filter1d),
+    E.TRAIN/EVAL/TEST; research/harness.py -- H.run (train/score); iter20.CHANNELS/CAUSAL/WIN;
+    iter7_final.EXTRA18 (24-session pool)
+  - results/iter25_run.log, results/metrics/iter25_causal_smoothing.json -- outputs
+
+Kernel fact: at sigma=1, 40 ms bins, scipy's centered Gaussian (truncate=4) has radius
+4 bins = 160 ms of FUTURE, with 30% of its weight on future bins (24% on t+1 alone).
+This leak is baked into the cached .npz and into load_electrode, so EVERY prior
+"0 ms lookahead" number (0.606/0.618/0.646) silently used ~160 ms of future input.
+
+Results (3-seed; EVAL = valid selector):
+  | input features                | causal? | EVAL  | TEST  |
+  |-------------------------------|:-------:|------:|------:|
+  | counts (unsmoothed)           |  yes    | 0.599 | 0.579 |
+  | counts + causal EWMA(0.1)     |  yes    | 0.636 | 0.630 |  <- best truly-causal (EVAL)
+  | causal one-sided Gaussian     |  yes    | 0.602 | 0.603 |
+  | causal Gaussian + EWMA(0.1)   |  yes    | 0.635 | 0.620 |
+  | counts + 3 causal EWMAs       |  yes    | 0.634 | 0.633 |
+  | centered Gaussian (leaky)     |  NO     | 0.611 | 0.618 |
+  | centered Gaussian + EWMA (current pipeline) | NO | 0.638 | 0.626 |
+
+Interpretation:
+  1. CAUSALITY IS ~FREE HERE. Best truly-causal (counts+EWMA, 0.636 EVAL) vs the
+     current non-causal pipeline (0.638 EVAL) = +0.002 EVAL / -0.004 TEST. The 160 ms
+     Gaussian leak was buying essentially nothing. The honest strictly-causal number
+     is ~0.63 -- the same as the headline.
+  2. THE CAUSAL EWMA IS THE WHOLE LEVER. counts 0.599 -> counts+EWMA 0.636 (+0.037 EVAL).
+     Gaussian (centered or causal) contributes little: causal_gauss 0.602 vs centered
+     0.611 (the future leak is worth only ~+0.009), and once EWMA is present, adding any
+     Gaussian is within noise (0.635-0.638). So "raw Gaussian + EWMA" is redundant --
+     EWMA on unsmoothed counts is as good and is strictly causal.
+  3. This also reframes the old "causality costs 0.07" claim: that gap was bidir-vs-causal
+     GRU, NOT the smoothing. On the input side, going honestly causal is free.
+
+Decision: the deployable model should DROP the centered Gaussian and use a strictly-
+causal input (counts + causal EWMA, or a one-sided causal Gaussian + EWMA). Then the
+"0 ms lookahead" claim becomes true with no R² loss (~0.63). ADOPTION (deferred to a
+single-owner moment -- changes shared models/tcn_gru/evaluate.py preprocessing + the
+40 ms cache + the tcn_gru_8ch checkpoint; DeepBlue job imports the same module, so do
+not change it mid-run): swap load_source_electrode's `gaussian_filter1d` for a causal
+smoother, regenerate the bin_40ms cache, retrain. Until then, all "strictly causal"
+claims must be qualified: the CURRENT cached pipeline has ~160 ms input lookahead.
+
 ### LOG-073 - TEST-SET LEAKAGE in alpha selection: eval-valid causal multiscale is ~0.630, not 0.646
 
 Question: was the adopted EWMA alpha (and the 0.646 headline) chosen validly?

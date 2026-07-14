@@ -12,7 +12,7 @@ multiunit rates, 3 Hz vel-LP target. Reference: Zhou/Sun/Basu arXiv:2312.15889.
 - **Deployable model of record: STRICTLY-CAUSAL wide TCN+GRU + MULTISCALE input**
   (`F64/H64/L1`, `bidir=False`; input = 8 channels × {raw, EWMA α} = 16
   features), firing top-8 on train1-6, 24 sessions → **TEST R² ≈ 0.63**
-  (eval-valid), 0 ms lookahead, ~74 kB int8 (lossless), ~5.6 ms/pred.
+  (eval-valid), ~74 kB int8 (lossless), ~5.6 ms/pred.
   `models/tcn_gru_8ch/` (checkpoint is causal+multiscale, α=0.2). Multi-timescale
   input is the one model-side lever that beat the 0.606 ceiling (real on BOTH eval
   and test, LOG-068). ⚠️ **The earlier 0.646 headline was TEST-SELECTED** (α tuned
@@ -20,6 +20,14 @@ multiunit rates, 3 Hz vel-LP target. Reference: Zhou/Sun/Basu arXiv:2312.15889.
   (within noise). ⚠️ **test1 is no longer untouched** (~25 experiments have read it);
   an unbiased final headline needs a freshly reserved session, pipeline frozen,
   scored once. Auxiliary heads (multi-task, LFADS-lite) don't help (LOG-072).
+- ⚠️ **NOT ACTUALLY ZERO-LOOKAHEAD YET (LOG-074).** The cached input uses scipy
+  `gaussian_filter1d(σ=1)`, which is CENTERED — it pulls ~30% of its weight from the
+  future (~160 ms). So every "0 ms lookahead" number above silently used future input.
+  Good news: it's ~free to fix — a strictly-causal input (**counts + causal EWMA** =
+  0.636 EVAL / 0.630 TEST) MATCHES the leaky pipeline (0.638/0.626). The causal EWMA
+  is the whole lever; the Gaussian (and its leak) adds ~nothing. **Adoption pending**:
+  swap the centered Gaussian for a causal smoother in `models/tcn_gru/evaluate.py`,
+  regenerate the 40 ms cache, retrain — then "0 ms lookahead" becomes true at ~0.63.
 - **Bidirectional is NOT deployable** (needs the whole future). Bidir 0.677 and
   bounded-lookahead (0.619 @80ms, 0.623 @200ms) are OFFLINE references only —
   at 40 ms/bin that latency is too high for closed-loop (LOG-062/065).
