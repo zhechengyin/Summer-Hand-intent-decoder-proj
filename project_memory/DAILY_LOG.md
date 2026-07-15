@@ -1400,6 +1400,68 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-080 - Per-session CALIBRATION rescues the drift collapse (8ch 0.02→0.39, 32ch 0.25→0.58)
+
+Question: LOG-079 showed the decoder collapses on never-seen sessions. Is that a broken
+REPRESENTATION, or just a wrong output SCALE (R² punishes scale; Pearson r does not)? And
+does per-session calibration -- the long-flagged "per-user calibration on top of the pool"
+lead (HANDOFF: "untested combo — likely the best lead") -- fix it?
+
+Method: research/iter28_calibration.py. Per fresh session, chronological 50/50 split:
+calibrate on the 1st half, score the 2nd. Four conditions, reporting BOTH R² and r:
+  zero_shot = pool model + pool output scaling (the LOG-079 condition)
+  affine    = + per-axis gain/offset fit on the calibration half (2 scalars/axis; network
+              untouched -- the minimal, MCU-deployable recalibration)
+  finetune  = pool weights fine-tuned on the calibration half (25 ep, lr 3e-4)
+  scratch   = trained ONLY on the calibration half (no pool) -- is the pool helping at all?
+Pool model single-seed (cost): 8ch EVAL/test1 0.604/0.605; 32ch 0.722/0.723.
+
+Command: py research/iter28_calibration.py
+
+Files:
+  - research/iter28_calibration.py -- this experiment (affine fit, finetune, scratch)
+  - research/iter27_fresh_session.py -- load_counts_full, topN_channels, feats, build, FRESH/POOL
+  - research/iter20_multiscale.py -- CAUSAL cfg; research/harness.py -- H.run(ret_net=True)
+  - models/tcn_gru/best_model.py -- build_net, r2/corr
+  - results/iter28_run.log, results/metrics/iter28_calibration.json -- outputs
+
+Results (MEAN over the 4 fresh sessions, R² / r):
+  | condition | 8 ch          | 32 ch         |
+  |-----------|---------------|---------------|
+  | zero_shot | +0.020 / 0.355| +0.253 / 0.516|
+  | affine    | +0.182 / 0.374| +0.345 / 0.513|
+  | finetune  | **+0.389 / 0.628** | **+0.584 / 0.767** |
+  | scratch   | +0.318 / 0.600| +0.576 / 0.774|
+  Per-session zero_shot is wild: indy_20160630_01 has r=-0.030 (8ch) / 0.029 (32ch) --
+  literally no correlation -- yet calibrates back to +0.220 / +0.468.
+
+Interpretation:
+  1. **CALIBRATION FIXES DRIFT.** 8ch 0.020 -> 0.389; 32ch 0.253 -> 0.584. The decoder is
+     not broken on new sessions, it is STALE. This is the deployment answer and validates
+     the per-user-calibration lead.
+  2. **Scale is PART of it, not all.** Affine (2 scalars/axis, no retraining) buys +0.16
+     (8ch) / +0.09 (32ch) and leaves r unchanged BY CONSTRUCTION -- it fixes scale but
+     cannot improve tracking. Fine-tuning lifts r a lot (0.355->0.628; 0.516->0.767), so
+     the representation genuinely adapts too.
+  3. **THE 24-SESSION POOL IS NEARLY WORTHLESS FOR A NEW SESSION AT 32ch**: scratch 0.576
+     vs finetune 0.584 (+0.008). At 8ch the pool still helps (+0.07: 0.318 -> 0.389).
+     This QUALIFIES the standing "more training data is the main lever" claim (LOG-052/055):
+     that held for NEAR sessions; for a NEW session what matters is data FROM that session.
+     More channels reduces the need for a pool.
+  4. 32ch beats 8ch in every condition; calibrated 32ch (0.584) approaches the near-session
+     number (0.72).
+
+CAVEAT: "calibration" here used HALF a session (hundreds of windows, several minutes) --
+generous. Real deployment wants ~1-2 min. The open question is how LITTLE calibration data
+suffices (calibration-size sweep). Also needs LABELED calibration data (known intended
+movement) -- the user was unsure such a window exists; this says it is worth a lot
+(+0.33..+0.37 R²), so it is worth engineering one.
+
+Decision: deployment must include a per-session/periodic CALIBRATION step; zero-shot
+cross-time is not viable. Ship order: (1) 32 channels, (2) a calibration block, (3) affine
+as the zero-cost fallback if no labels are available. Next: sweep calibration SIZE (how few
+minutes suffice) and test unsupervised/self-calibration.
+
 ### LOG-079 - UNBIASED EVAL: the decoder does NOT generalize to unseen distant sessions (8ch → 0.054)
 
 Question: test1 is burned (LOG-073) and sits near the training pool in time. What is our

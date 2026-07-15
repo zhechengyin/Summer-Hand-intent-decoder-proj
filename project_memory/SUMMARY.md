@@ -39,6 +39,17 @@ multiunit rates, 3 Hz vel-LP target. Reference: Zhou/Sun/Basu arXiv:2312.15889.
   deployment number (you'd calibrate near in time). Drift is non-uniform (one fresh
   session scores 0.484 even at 8ch). ⇒ **Drift/recalibration is now the #1 problem**,
   ahead of any model tweak.
+- ✅ **…AND CALIBRATION FIXES IT (LOG-080).** Per-session calibration (chronological 50/50:
+  calibrate on the 1st half, score the 2nd) rescues the collapse — **8ch 0.020 → 0.389**,
+  **32ch 0.253 → 0.584**. The decoder isn't broken on new sessions, it's **stale**. A
+  zero-cost **affine** fix (2 scalars/axis, network untouched) recovers part of it
+  (+0.16 / +0.09) — it fixes *scale* but can't improve tracking (r unchanged by
+  construction); fine-tuning also lifts r (0.36→0.63 / 0.52→0.77), so the representation
+  adapts too. 🚨 **At 32ch the 24-session pool is nearly worthless for a NEW session**
+  (scratch 0.576 ≈ finetune 0.584) — so "more training data is the main lever" holds for
+  *near* sessions only; for a new session what matters is data *from that session*.
+  ⇒ **Ship order: (1) 32 channels, (2) a calibration block, (3) affine as the zero-cost
+  fallback.** Open: how *little* calibration data suffices (this used half a session).
 - 🔥 **BIGGEST LEVER — CHANNEL COUNT (LOG-078/079).** Also the best drift defense: the
   32ch advantage **grows** on unseen data (**+0.251 fresh** vs +0.112 near) — 8 firing-
   selected channels can be dead/different months later, 32 keep redundancy. Training the SAME pipeline with
