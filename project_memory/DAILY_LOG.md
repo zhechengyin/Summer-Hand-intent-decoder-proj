@@ -1400,6 +1400,65 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-084 - FORWARD in time is FINE: 32ch zero-shot 0.585 @1 month. LOG-079's collapse was a backward artifact
+
+Question: LOG-079's "collapse" (8ch 0.054) used the only never-used sessions -- Apr-Jun 2016,
+which are 3-6 months BEFORE all training data = BACKWARD extrapolation, something no deployment
+would ever do. What happens in the REAL scenario: train on the past, decode the future?
+
+KEY REALISATION (from the split dates): train1-6 = Oct 5-14 2016, eval1 = Oct 17, **test1 =
+Oct 24**, pool also Sep 15-30, Oct 25-27, Dec 6-20, Jan 23-31 2017. So **test1 sits INSIDE the
+pool's date range, surrounded by Oct 5-27 sessions -> it is INTERPOLATION, not generalization.**
+That single fact explains why test1 reads 0.63/0.755 while unseen sessions looked catastrophic.
+Both prior evals were skewed, in opposite directions: test1 too easy, LOG-079 too harsh.
+
+Method: research/iter32_forward_split.py. Train on the 20 sessions Sep 15 - Dec 20 2016 (the
+24-pool minus Jan 2017); select epoch on eval1 (Oct 17); FORWARD test = the 4 held-out Jan 2017
+sessions (~1 month after the newest training data). Honest causal input (counts + causal EWMA).
+Per forward session, chronological 50/50: calibrate on 1st half, score 2nd. Single seed.
+
+Command: py research/iter32_forward_split.py
+
+Files:
+  - research/iter32_forward_split.py -- this experiment (forward split)
+  - research/iter27_fresh_session.py -- load_counts_full/topN_channels/feats/build
+  - research/iter28_calibration.py -- stack/score; research/iter30 -- fit_affine; iter31 -- train()
+  - research/iter20_multiscale.py -- CAUSAL cfg; research/harness.py -- H.run(ret_net=True)
+  - results/iter32_run.log, results/metrics/iter32_forward_split.json -- outputs
+
+Results (MEAN over the 4 forward Jan-2017 sessions, R²):
+  | condition | 8 ch          | 32 ch         |
+  |-----------|--------------:|--------------:|
+  | zero_shot | +0.410 (r .62)| **+0.585 (r .76)** |
+  | affine    | +0.429        | +0.594        |
+  | finetune  | +0.499 (r .70)| **+0.695 (r .84)** |
+  Pool model EVAL: 8ch 0.609, 32ch 0.731.
+  Per-session zero_shot (32ch): 0.764 / **0.201** / 0.721 / 0.653  <- indy_20170124_01 is the outlier
+  vs BACKWARD (LOG-079/080): zero_shot 8ch +0.020 / 32ch +0.253; finetune 8ch +0.389 / 32ch +0.584.
+
+Interpretation:
+  1. **THE COLLAPSE WAS A BACKWARD-EXTRAPOLATION ARTIFACT.** Forward zero-shot is far healthier:
+     8ch 0.020 -> **0.410**; 32ch 0.253 -> **0.585**. Deployment decodes the FUTURE, not the past.
+  2. **32ch zero-shot = 0.585 (r 0.757) with NO calibration**, one month out -- genuinely usable
+     out of the box. With calibration, **0.695**, closing on the interpolation ceiling (0.731).
+     Honest cost of forward generalization vs interpolation: only ~0.14.
+  3. **CALIBRATION IS INSURANCE, NOT A REQUIREMENT** -- worth +0.11 (32ch) forward vs +0.33
+     backward. This WALKS BACK LOG-082's "labelled calibration is required, not optional":
+     that conclusion was drawn on the pathological backward set. Forward, most sessions are fine
+     without it.
+  4. **BUT ~1 in 4 sessions drifts badly**: indy_20170124_01 zero-shot 0.201 (32ch) -> 0.589 with
+     calibration (+0.39). The other three run 0.65-0.76 zero-shot. So calibration earns its keep
+     on the BAD sessions -- it is the tail-risk mitigation, not a routine cost.
+  5. **Affine adds ~nothing forward** (0.585 -> 0.594): the output scale is already about right,
+     confirming the scale problem was specific to the odd backward sessions (LOG-080).
+  6. 32ch > 8ch forward by +0.175 zero-shot -- more channels remain the biggest lever.
+
+Decision: **the honest deployable claim = 32ch, strictly causal, ~1 month forward: R² ~0.585
+zero-shot / ~0.695 with a short calibration.** Retire the 0.63/0.755 "headline" (interpolation)
+AND the 0.054 "collapse" (backward). Calibration = optional insurance for the ~25% of sessions
+that drift badly; a cheap drift DETECTOR (flag low-confidence sessions and calibrate only those)
+is now the interesting lead.
+
 ### LOG-083 - Per-session channel RE-SELECTION works (+0.08/+0.04); only 2.5/8 pool channels survive drift
 
 Question: LOG-079 showed the fixed 8 channels collapse on a drifted session. The hardware can

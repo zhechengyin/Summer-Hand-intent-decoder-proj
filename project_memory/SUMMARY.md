@@ -28,8 +28,24 @@ multiunit rates, 3 Hz vel-LP target. Reference: Zhou/Sun/Basu arXiv:2312.15889.
   is the whole lever; the Gaussian (and its leak) adds ~nothing. **Adoption pending**:
   swap the centered Gaussian for a causal smoother in `models/tcn_gru/evaluate.py`,
   regenerate the 40 ms cache, retrain — then "0 ms lookahead" becomes true at ~0.63.
-- 🚨 **UNBIASED EVAL — THE HEADLINES ARE *NEAR-SESSION* NUMBERS, NOT GENERALIZATION
-  (LOG-079).** Frozen pipeline scored ONCE on 4 indy sessions never used for anything:
+- ✅ **THE HONEST DEPLOYABLE NUMBER (LOG-084) — train on the past, decode the future.**
+  Split dates expose the whole confusion: **`test1` (Oct 24 2016) sits INSIDE the training
+  pool's range** (Oct 5–27) ⇒ it was **interpolation**, not generalization — which is why it
+  reads 0.63/0.755. And LOG-079's "collapse" used the only never-used sessions (Apr–Jun 2016),
+  which are 3–6 months **before** all training data = **backward** extrapolation, something no
+  deployment does. Both were skewed, in opposite directions. Doing it properly (train Sep–Dec
+  2016 → decode Jan 2017, ~1 month forward):
+  | | 8ch | 32ch |
+  |---|---:|---:|
+  | zero-shot | 0.410 | **0.585** (r .76) |
+  | + calibration | 0.499 | **0.695** (r .84) |
+  ⇒ **32ch, strictly causal, ~1 month forward: R² ≈ 0.585 zero-shot / ≈0.695 calibrated.**
+  Forward generalization costs only ~0.14 vs interpolation. **Retire both the 0.63/0.755
+  "headline" and the 0.054 "collapse".** Calibration is **insurance, not a requirement**
+  (+0.11 forward vs +0.33 backward) — but ~**1 in 4 sessions drifts badly** (one Jan session:
+  0.201 zero-shot → 0.589 calibrated), so a cheap **drift detector** (calibrate only flagged
+  sessions) is the interesting lead.
+- 🚨 **(superseded framing, kept for context) LOG-079 backward-extrapolation result.** Frozen pipeline scored ONCE on 4 indy sessions never used for anything:
   **8ch → FRESH mean R² = 0.054** (negative on 3 of 4 — worse than predicting the mean!)
   vs its 0.630 on the near, burned test1. **32ch → FRESH 0.305** vs 0.741 near. So the
   deployable 8-ch decoder **does not survive months of electrode drift**; 0.63/0.755 only
