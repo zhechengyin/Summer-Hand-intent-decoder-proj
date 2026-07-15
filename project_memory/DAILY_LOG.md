@@ -1400,6 +1400,73 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-087 - Manifold alignment / neural stitching FAILS (label-free): doing nothing beats every method
+
+Question (speculative "long shot" idea): LOG-082 showed label-free calibration (BatchNorm-stat
+adaptation) gives only +0.02, but BN only re-fits activation MEANS/VARIANCES. Electrode drift
+changes WHICH NEURONS each channel samples = a ROTATION of the input space, which BN cannot undo
+but a subspace alignment can. Population activity is claimed to live on a low-D manifold preserved
+across days/years (Gallego 2020, Nat Neurosci); Degenhart 2020 (Nat Biomed Eng) stabilized a BCI
+for MONTHS with no recalibration by aligning that space. Does it rescue our ~12% bad sessions?
+
+Method: research/iter35_manifold_align.py. Frozen 32ch pool model (Sep-Dec 2016, EVAL 0.740).
+Per target session, fit a LABEL-FREE NxN channel map on the FIRST half, score the SECOND half:
+  coral         : M = C_pool^(1/2) @ C_new^(-1/2)                   (Sun & Saenko 2016)
+  procrustes_k  : W = top-k PCs; R = argmin||W_new R - W_pool||; M = W_pool R^T W_new^T
+  sobi_k        : whiten + diagonalise the TIME-LAGGED covariance (Belouchrani 1997); order
+                  latents by autocorrelation (a property of the DYNAMICS, so drift-invariant);
+                  sign-match via channel loadings; M = Mix_pool diag(sgn) Unmix_new
+Targets: 8 out-of-pool sessions (4 backward Apr-Jun 2016 + 4 forward Jan 2017).
+
+Command: py research/iter35_manifold_align.py
+
+Files:
+  - research/iter35_manifold_align.py -- this experiment (sobi(), top_pcs(), sqrtm/invsqrtm)
+  - research/iter27_fresh_session.py -- load_counts_full/build; iter32 -- POOL/FORWARD
+  - research/iter25_causal_smoothing.py -- ewma(); harness.py -- H.run(ret_net=True)
+  - results/iter35_run.log, results/metrics/iter35_manifold_align.json -- outputs
+
+SYNTHETIC PRE-CHECK (cheap, done first -- it killed the naive version in 30 s):
+  On ideal data (identical latents, drifted linear mixing): PCA-Procrustes gave ZERO gain
+  (0.378 -> 0.378) and CORAL HURT (0.128). Reason: cov(X)=B cov(Z) B^T, so with a non-orthogonal
+  mixing the channel-space PCs of two sessions encode DIFFERENT latent mixes -- instantaneous
+  second-order statistics cannot break the rotation ambiguity. Adding TIME (SOBI) fixed it
+  perfectly: |corr| 0.31 -> **1.00**, with autocorr spectra matching to 3 decimals.
+
+Results (MEAN R2; the 4 BAD = zero-shot < 0.4):
+  | method         | all 8  | BAD (4) |
+  |----------------|-------:|--------:|
+  | **zero_shot**  | **+0.399** | **+0.087** |
+  | coral          | +0.373 | +0.042  |
+  | procrustes_k4  | +0.032 | -0.288  |
+  | procrustes_k24 | +0.338 | +0.008  |
+  | sobi_k4        | -0.118 | -0.355  |
+  | sobi_k16       | -0.022 | -0.424  |
+  DOING NOTHING BEATS EVERY METHOD. Worst case indy_20170124_01: zero_shot R2 +0.156 (r~.48) ->
+  sobi_k16 R2 **-0.977, r = -0.421** (the signal is INVERTED, not merely lost).
+
+Interpretation -- why it failed, and why the synthetic success was a mirage:
+  1. **The autocorr spectrum is CROWDED on real data**: pool spectra k=8 [0.777 0.430 0.319 0.277
+     0.251 0.129 0.123 0.074] -- only the top ~2 are separated; 0.129 vs 0.123 is a tie. SOBI's
+     whole trick is matching latents BY that eigenvalue, so near-degeneracy => unstable ordering
+     => wrong correspondence. The synthetic test had timescales evenly spaced BY CONSTRUCTION.
+  2. **The sign-matching is CIRCULAR.** Across sessions there is no temporal correspondence, so
+     signs had to come from the CHANNEL LOADINGS -- but drift is precisely what corrupts the
+     loadings. To align drifted channels you must know which latent is which; the only unsupervised
+     clue is the thing that drifted. (The synthetic test dodged this by correlating latents across
+     sessions -- i.e. it assumed the answer.)
+  3. **Procrustes "improving" with k is a tell, not a win**: k4 0.032 -> k24 0.338 approaches but
+     never beats zero_shot, because at k=24 of 32, W W^T -> identity. The map's best achievable
+     behaviour is to DO NOTHING.
+  4. Negative r (-0.42) proves the failure is scrambled correspondence, not mere information loss.
+
+Decision: **DEAD END -- do not revisit label-free linear realignment.** This substantially
+STRENGTHENS LOG-082: "labels are required" now rests not just on BatchNorm failing (+0.02) but on
+the state-of-the-art label-free stabilization approach failing catastrophically. Either the stable-
+manifold assumption does not hold for these 32 channels, or the correspondence problem is simply
+unsolvable without labels at this channel count. Keep the labelled calibration block (LOG-080/081)
+and the label-free DETECTOR (LOG-085/086, which works) -- detection is easy, correction is not.
+
 ### LOG-086 - VALIDATED (25 sessions): typical zero-shot ~0.75, 12% bad, detector separates them perfectly
 
 Question: LOG-085's drift detector rested on 8 sessions with eyeballed thresholds. Validate it
