@@ -1400,6 +1400,61 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-081 - How much calibration? Affine saturates at ~60s (ceiling ~0.34); finetune keeps climbing
+
+Question: LOG-080 rescued the drift collapse but used HALF a session (~7-12 min). How LITTLE
+labelled calibration is enough -- i.e. what should the device's calibration block be?
+
+Method: research/iter29_calibration_size.py. Per fresh session the LAST half is the FIXED
+scored set (identical across all sizes -> sizes directly comparable); calibration = the
+FIRST N windows of the first half (realistic: calibrate at session start). Window = 2.0 s.
+Sizes 30/60/120/240 s + the full first half. Conditions: affine (2 scalars/axis, network
+untouched) and finetune (pool weights adapted, 25 ep, lr 3e-4). Pool model single-seed:
+8ch EVAL/test1 0.604/0.605; 32ch 0.722/0.723.
+
+Command: py research/iter29_calibration_size.py
+
+Files:
+  - research/iter29_calibration_size.py -- this experiment (size sweep; reporting bug fixed, below)
+  - research/iter28_calibration.py -- stack(), score(); research/iter27_fresh_session.py -- data build
+  - research/iter20_multiscale.py -- CAUSAL cfg; research/harness.py -- H.run(ret_net=True)
+  - results/iter29_run.log, results/metrics/iter29_calibration_size.json -- outputs
+
+REPORTING BUG FOUND + FIXED (numbers below are the corrected read): the largest requested
+size (240 win = 480 s) was silently CAPPED to each session's available calibration data,
+producing per-session keys (408s/260s/248s/480s). The printed "480s" mean therefore averaged
+only 1 of 4 sessions -- and it was indy_20160630_01 (the pathological r~=0 one), which is why
+it looked like a regression (affine -0.004). Not a real effect. The script now SKIPS sizes a
+session cannot supply (never caps) and prints n_sessions per row; only 4/4 rows are comparable.
+
+Results (MEAN over all 4 fresh sessions, R²; comparable rows only):
+  | calib   | 8ch affine | 8ch finetune | 32ch affine | 32ch finetune |
+  |---------|-----------:|-------------:|------------:|--------------:|
+  | 0 s     | 0.020      | 0.020        | 0.253       | 0.253         |
+  | 30 s    | 0.037      | 0.123        | 0.214       | 0.255         |
+  | 60 s    | 0.174      | 0.258        | 0.328       | 0.344         |
+  | 120 s   | 0.181      | 0.271        | 0.340       | 0.386         |
+  | 240 s   | 0.182      | 0.348        | 0.342       | 0.513         |
+  | full*   | 0.182      | 0.390        | 0.345       | 0.580         |
+  *full = each session's whole first half (variable, ~248-730 s) -- 4/4 sessions but not a
+  single fixed duration.
+
+Interpretation:
+  1. **AFFINE SATURATES AT ~60 s AND FLATLINES** (8ch 0.174 -> 0.182; 32ch 0.328 -> 0.345).
+     2 scalars need almost no data but have a HARD CEILING -- they fix scale, never tracking
+     (r is unchanged by construction, LOG-080). Cheap, MCU-trivial, capped ~0.34 (32ch).
+  2. **FINETUNE KEEPS CLIMBING -- no knee in range** (32ch 0.344 @60s -> 0.386 @120s -> 0.513
+     @240s -> 0.580 full). More labelled calibration keeps paying; there is no free lunch.
+  3. **TOO LITTLE CALIBRATION HURTS**: at 30 s affine is WORSE than zero-shot for 32ch (0.214
+     vs 0.253) -- fitting even 2 scalars on 30 s of a rest-heavy velocity signal is noisy.
+  4. Practical: ~60 s is the cheap sweet spot (32ch 0.253 -> 0.344; affine alone 0.328 with NO
+     retraining). Approaching 0.58 costs several minutes + fine-tuning.
+
+Decision: calibration block spec -- **>= 60 s** minimum (never ~30 s); use **affine** if no
+on-device training (free, ~0.33 at 32ch); use **fine-tune with >= 4 min** if you want ~0.5+.
+Next: unsupervised/self-calibration (no labels), and whether affine's ceiling lifts if the
+gain/offset is fit per-channel rather than per-output-axis.
+
 ### LOG-080 - Per-session CALIBRATION rescues the drift collapse (8ch 0.02→0.39, 32ch 0.25→0.58)
 
 Question: LOG-079 showed the decoder collapses on never-seen sessions. Is that a broken
