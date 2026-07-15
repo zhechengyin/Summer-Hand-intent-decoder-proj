@@ -49,7 +49,15 @@ multiunit rates, 3 Hz vel-LP target. Reference: Zhou/Sun/Basu arXiv:2312.15889.
   (scratch 0.576 ≈ finetune 0.584) — so "more training data is the main lever" holds for
   *near* sessions only; for a new session what matters is data *from that session*.
   ⇒ **Ship order: (1) 32 channels, (2) a calibration block, (3) affine as the zero-cost
-  fallback.** Open: how *little* calibration data suffices (this used half a session).
+  fallback.**
+- 📏 **CALIBRATION SPEC (LOG-081/082).** How much, and does it need labels?
+  **Affine saturates at ~60 s** then flatlines (ceiling ~0.18 / 0.34) — it fixes scale, never
+  tracking. **Fine-tuning keeps climbing** (32ch: 0.344@60s → 0.513@240s → 0.580 full). **<30 s
+  HURTS** (32ch affine 0.214 < 0.253 zero-shot). **Label-free calibration is NOT enough**:
+  BatchNorm-stat adaptation (free, no labels) gives only +0.06/+0.02, doesn't improve with more
+  data, and doesn't stack with affine — because inputs are already per-session z-scored, so the
+  residual error is *scale + tracking*, both label-dependent. ⇒ **A LABELLED calibration window
+  is REQUIRED** (worth ~+0.25 R²): **≥60 s** minimum, **≥4 min** for ~0.5+.
 - 🔥 **BIGGEST LEVER — CHANNEL COUNT (LOG-078/079).** Also the best drift defense: the
   32ch advantage **grows** on unseen data (**+0.251 fresh** vs +0.112 near) — 8 firing-
   selected channels can be dead/different months later, 32 keep redundancy. Training the SAME pipeline with

@@ -1400,6 +1400,58 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-082 - Unsupervised (label-free) calibration is NOT enough: labels are worth ~+0.25 R²
+
+Question: everything that fixes drift so far (affine, finetune) needs LABELLED calibration.
+The user is unsure a labelled calibration window exists at deployment. How much can we
+recover using ONLY the new session's neural data (no labels)?
+
+Method: research/iter30_unsup_calibration.py. BatchNorm-statistic adaptation (AdaBN /
+test-time adaptation): the net's BatchNorm1d (after the spatial 1x1 conv) has running
+mean/var estimated on the 24-session pool; on a drifted session they are stale. Recompute
+them from the new session's calibration INPUTS -- forward passes only, no labels, no
+gradients (dropout kept OFF; only BN modules put in train mode, momentum=None for a
+cumulative average). Compared against the labelled references. Fixed scored set = last half
+of each fresh session; calibration = first N windows.
+
+Command: py research/iter30_unsup_calibration.py
+
+Files:
+  - research/iter30_unsup_calibration.py -- this experiment (bn_adapt(), fit_affine())
+  - research/iter28_calibration.py -- stack(), score(); iter27_fresh_session.py -- data build
+  - research/iter20_multiscale.py -- CAUSAL cfg; research/harness.py -- H.run(ret_net=True)
+  - results/iter30_run.log, results/metrics/iter30_unsup_calibration.json -- outputs
+
+Results (MEAN over 4 fresh sessions, R²):
+  | condition            | needs labels | 8 ch   | 32 ch  |
+  |----------------------|:------------:|-------:|-------:|
+  | zero_shot            | no           | +0.020 | +0.253 |
+  | bn_adapt @60s        | **NO**       | +0.081 | +0.274 |
+  | bn_adapt @240s       | **NO**       | +0.062 | +0.267 |
+  | affine @60s          | yes          | +0.174 | +0.328 |
+  | bn+affine @60s       | yes          | +0.169 | +0.320 |
+  | finetune @240s       | yes          | +0.350 | +0.512 |
+
+Interpretation:
+  1. **UNSUPERVISED BN ADAPTATION HELPS ONLY MARGINALLY**: +0.06 (8ch) / +0.02 (32ch). It is
+     free (forward passes only, no gradients/labels -- deployable on-device), so take it when
+     nothing else is available, but it recovers a small fraction of the drift loss.
+  2. **It does not improve with more data** (8ch 0.081@60s -> 0.062@240s; 32ch 0.274 -> 0.267):
+     BN statistics converge almost instantly; extra data adds nothing and slightly hurts.
+  3. **It does not stack with affine** (bn+affine ~= affine everywhere) -- both correct
+     overlapping distributional/scale effects, not complementary ones.
+  4. **LABELS DOMINATE**: finetune 0.512 vs bn_adapt 0.274 at 32ch -> labels are worth ~+0.24
+     (32ch) / +0.27 (8ch) R².
+  Mechanism (consistent with the design): inputs are ALREADY per-session z-scored, so the
+  first-order shift is corrected before the net sees it -- BN adaptation has little left to
+  fix. And BN cannot touch the OUTPUT scale (affine's job) or TRACKING (finetune's job).
+
+Decision: **a labelled calibration window is REQUIRED, not optional** -- worth ~+0.25 R² over
+the best label-free option. This is a concrete hardware/UX requirement: the device needs a
+short block of known intended movements (>=60 s; >=4 min for ~0.5, LOG-081). Ship label-free
+BN adaptation only as a fallback. Do NOT pursue further label-free tricks in this direction
+(input is already z-scored; the remaining error is scale+tracking, both label-dependent).
+
 ### LOG-081 - How much calibration? Affine saturates at ~60s (ceiling ~0.34); finetune keeps climbing
 
 Question: LOG-080 rescued the drift collapse but used HALF a session (~7-12 min). How LITTLE
