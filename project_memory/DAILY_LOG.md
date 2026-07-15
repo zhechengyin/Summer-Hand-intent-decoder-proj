@@ -1400,6 +1400,64 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-088 - Reptile meta-init FAILS -- and disproves its own premise: the pool IS worth +0.09 at 60s
+
+Question (speculative "long shot" #2): LOG-080 found that at 32ch, training from SCRATCH on half a
+session with NO pool (0.576) matched fine-tuning the 24-session pretrained model (0.584) -- the pool
+contributing +0.008. Diagnosis at the time: standard pretraining optimizes "be a good POOL decoder",
+the WRONG objective for an initialization you intend to ADAPT. Fix: Reptile (Nichol 2018, first-order
+MAML) -- treat each session as a task, inner-loop adapt, outer-loop move the init toward the adapted
+weights, i.e. explicitly optimize "how good am I AFTER a short calibration".
+
+Method: research/iter36_reptile.py. 32ch, 20 meta-training sessions (Sep-Dec 2016), 8 held-out
+(4 backward + 4 forward). META_ITERS=400, INNER_STEPS=8, INNER_LR=1e-3 (SGD+momentum), META_EPS=0.1.
+Compared at 60s / 240s calibration: standard-init+finetune, reptile-init+finetune, scratch.
+
+Command: py research/iter36_reptile.py
+
+Files:
+  - research/iter36_reptile.py -- this experiment (reptile_train(), _load())
+  - research/iter31_channel_reselect.py -- train() (finetune/scratch); iter28 -- stack/score
+  - research/iter27_fresh_session.py -- data build; iter32 -- POOL/FORWARD; harness.py -- H.run
+  - results/iter36_run.log, results/metrics/iter36_reptile.json -- outputs
+
+Results (MEAN R2 over 8 held-out sessions):
+  | condition        | R2     |
+  |------------------|-------:|
+  | zero_shot_std    | +0.399 |
+  | zero_shot_rep    | +0.138 |
+  | **ft_std_60s**   | **+0.510** |
+  | ft_rep_60s       | +0.299 |
+  | **scratch_60s**  | **+0.419** |
+  | ft_std_240s      | +0.597 |
+  | ft_rep_240s      | +0.542 |
+  | scratch_240s     | +0.591 |
+  => reptile vs standard: **-0.211 @60s, -0.055 @240s**. Worse everywhere.
+
+Interpretation:
+  1. **REPTILE FAILS.** Its init is both a worse decoder (zero-shot 0.138 vs 0.399, expected) AND
+     worse after calibration (0.299 vs 0.510 @60s) -- so it bought no adaptability either.
+  2. **THE BIG FINDING -- IDEA 2's PREMISE WAS WRONG.** At a REALISTIC 60 s calibration budget the
+     pool is worth **+0.09** (ft_std 0.510 vs scratch 0.419), not +0.008. At 240 s it shrinks to
+     +0.006, reproducing LOG-080. **The pool is a PRIOR: it matters exactly when calibration data is
+     SCARCE** -- which is the real deployment regime. LOG-080 measured at the data-RICH end (half a
+     session, ~7-12 min) and concluded pretraining was worthless; that was an artifact of the
+     operating point, not a property of pretraining. So Idea 2 was fixing a non-problem.
+  3. => CORRECTION TO LOG-080: do NOT say "the 24-session pool is nearly worthless for a new
+     session". Say: "the pool's value DECAYS with calibration data -- +0.09 at 60 s, +0.006 at 240 s,
+     +0.008 at half a session." Pretraining earns its keep precisely where it counts.
+
+CAVEAT (weakens the negative): the comparison is NOT compute-matched -- the reptile init took 86 s
+vs 245 s for standard training (400x8 = 3.2k updates, far fewer than standard's 60 epochs). So this
+is "Reptile as configured, undertrained, loses", NOT "meta-learning cannot work". Given the -0.211
+gap more iterations likely would not close it, but that is untested. 20 tasks is also few for
+meta-learning, and the hyperparameters are untuned.
+
+Decision: drop Reptile (low priority to revisit; would need a compute-matched rerun to be a strong
+negative). KEEP the corrected pool-value claim (item 2) -- it is the durable result here and it
+matters for the deployment story: standard pretraining + a SHORT (60 s) calibration is the right
+recipe, and the pool is doing real work in it.
+
 ### LOG-087 - Manifold alignment / neural stitching FAILS (label-free): doing nothing beats every method
 
 Question (speculative "long shot" idea): LOG-082 showed label-free calibration (BatchNorm-stat

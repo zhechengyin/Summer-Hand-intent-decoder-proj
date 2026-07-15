@@ -88,9 +88,11 @@ multiunit rates, 3 Hz vel-LP target. Reference: Zhou/Sun/Basu arXiv:2312.15889.
   zero-cost **affine** fix (2 scalars/axis, network untouched) recovers part of it
   (+0.16 / +0.09) — it fixes *scale* but can't improve tracking (r unchanged by
   construction); fine-tuning also lifts r (0.36→0.63 / 0.52→0.77), so the representation
-  adapts too. 🚨 **At 32ch the 24-session pool is nearly worthless for a NEW session**
-  (scratch 0.576 ≈ finetune 0.584) — so "more training data is the main lever" holds for
-  *near* sessions only; for a new session what matters is data *from that session*.
+  adapts too. ⚠️ **CORRECTED (LOG-088): the pool's value DECAYS with calibration data** —
+  it is worth **+0.09 at 60 s** (ft 0.510 vs scratch 0.419), but only +0.006 at 240 s and
+  +0.008 at half a session (the old "the pool is nearly worthless" line came from that
+  data-RICH end and was an artifact of the operating point). **The pool is a prior: it earns
+  its keep exactly where deployment lives — a short calibration.**
   ⇒ **Ship order: (1) 32 channels, (2) a calibration block, (3) affine as the zero-cost
   fallback.**
 - 📏 **CALIBRATION SPEC (LOG-081/082).** How much, and does it need labels?
