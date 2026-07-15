@@ -1400,6 +1400,62 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-083 - Per-session channel RE-SELECTION works (+0.08/+0.04); only 2.5/8 pool channels survive drift
+
+Question: LOG-079 showed the fixed 8 channels collapse on a drifted session. The hardware can
+observe all 96 and re-route which N are peak-detected (user), and LOG-080/082 established a
+labelled calibration block is REQUIRED anyway. So: does re-selecting the channels per session
+(during that calibration) beat the stale pool-selected set?
+
+This dissolves the old LOG-047 objection ("arbitrary electrodes cannot be fed into fixed input
+slots"): if we adapt the model on calibration data regardless, we can re-select channels at the
+same time and let the model learn the new set.
+
+Method: research/iter31_channel_reselect.py. Per fresh session, chronological 50/50 (calibrate
+on 1st half, score 2nd). Channels re-selected by firing rate on the CALIBRATION HALF only
+(label-free). Honest causal input. Single-seed pool model (8ch EVAL/test1 0.604/0.605; 32ch
+0.722/0.723).
+
+Command: py research/iter31_channel_reselect.py
+
+Files:
+  - research/iter31_channel_reselect.py -- this experiment (build_one, train(); re-selection)
+  - research/iter27_fresh_session.py -- load_counts_full/topN_channels/feats; iter28 -- stack/score
+  - research/iter20_multiscale.py -- CAUSAL cfg; research/harness.py -- H.run(ret_net=True)
+  - results/iter31_run.log, results/metrics/iter31_channel_reselect.json -- outputs
+
+Results (MEAN over 4 fresh sessions, R²):
+  | condition      | 8 ch   | 32 ch  |
+  |----------------|-------:|-------:|
+  | fixed_ft       | +0.389 | +0.584 |
+  | fixed_scratch  | +0.306 | +0.590 |
+  | **resel_scratch** | **+0.390** | **+0.634** |
+  | resel_ft       | +0.341 | +0.507 |
+  | channel overlap with pool set | **2.5/8** | 15.0/32 |
+
+Interpretation:
+  1. **RE-SELECTION WORKS**: same training, only the channel set differs -> +0.084 (8ch) /
+     +0.044 (32ch). A real, essentially free win from the hardware's rescan capability.
+  2. **MECHANISM CONFIRMED**: only **2.5 of 8** pool-selected channels are still among the best
+     on a fresh session -- ~70% of the "best 8" CHANGED over months. That is exactly why the
+     fixed-8 collapsed (LOG-079). At 32ch the overlap is 15/32 (~47%).
+  3. **NEW BEST ON UNSEEN SESSIONS: 32ch + re-selection + scratch = 0.634** (vs 0.584 previous
+     best, vs 0.253 zero-shot).
+  4. **resel_ft is WORSE than resel_scratch** (0.341 vs 0.390; 0.507 vs 0.634) -- empirically
+     CONFIRMS LOG-047: re-routed electrodes must not be fed into a model whose input slots were
+     trained to mean specific OLD electrodes. When channels change, RETRAIN, do not fine-tune.
+  5. **Reconciles an old dead end**: LOG-053 found re-selecting channels ON THE TRAINING POOL
+     overfits (0.628->0.502). Re-selecting PER DEPLOYMENT SESSION on its own calibration data is
+     a different operation, and it helps. Do not conflate the two.
+  6. Re-selection itself is by firing rate = LABEL-FREE; only the subsequent training needs labels.
+
+CAVEAT: resel_scratch trains from scratch on the calibration half (several minutes of labelled
+data); "scratch" is heavier than fine-tuning, though it can run off-device during calibration.
+
+Decision: recommended deployment = **re-select channels per session at calibration time
+(label-free, by firing rate), then TRAIN on the calibration data (not fine-tune)**. Combined
+with 32 channels this gives the best unseen-session result to date (0.634).
+
 ### LOG-082 - Unsupervised (label-free) calibration is NOT enough: labels are worth ~+0.25 R²
 
 Question: everything that fixes drift so far (affine, finetune) needs LABELLED calibration.
