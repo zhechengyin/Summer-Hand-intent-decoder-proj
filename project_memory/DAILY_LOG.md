@@ -1400,6 +1400,78 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-089 - ReFIT WORKS on drifted sessions (+0.18, NO labels) -- gate it with the drift detector
+
+Question (speculative idea #3, the one that HIT): we proved drift correction needs labels (BN adapt
++0.02 LOG-082; manifold alignment catastrophic LOG-087), so the ~12% of drifted sessions need a
+LABELLED calibration block (LOG-081) -- a real user cost. But "labels" meant ground-truth
+KINEMATICS. A deployed system always knows the CURSOR (it renders it) and the TARGET (it shows it);
+it only lacks the intended velocity. Can task geometry replace kinematic labels?
+
+ReFIT (Gilja et al. 2012, Nat Neurosci -- roughly doubled closed-loop BCI performance):
+    intended direction = unit(target - cursor);  intended velocity = ||decoded speed|| * direction
+NO ground-truth velocity is ever used. Scoring is against true velocity on a held-out half.
+
+ENABLERS VERIFIED IN THE DATA FIRST (indy .mat has them): target_pos (2,T) on an 8x8 grid,
+cursor_pos (2,T), 342 trials/session. cursor axes correlate **-0.9998** with finger axes [1,2] --
+the dataset is documented (z,-x,-y), i.e. NEGATED. An abs(corr) check hid that sign; the ReFIT
+assumption check caught it instantly (pseudo-labels scored -0.857 instead of +0.857). After the fix:
+cos(true velocity, direction-to-target) while moving = median 0.765, 74% positive; pseudo-labels
+correlate **+0.857** with true velocity (oracle speed). The ReFIT assumption HOLDS on this data.
+
+Method: research/iter37_refit.py. Frozen 32ch pool model (Sep-Dec 2016). Per target session,
+calibrate on the 1st half, score the 2nd against TRUE velocity. refit_ft = finetune on ReFIT
+pseudo-labels; true_ft = finetune on true velocity (upper reference).
+
+Command: py research/iter37_refit.py
+
+Files:
+  - research/iter37_refit.py -- this experiment (load_task(), refit_labels())
+  - research/iter31_channel_reselect.py -- train(); iter28 -- stack/score; iter27 -- data build
+  - research/iter32_forward_split.py -- POOL/FORWARD; harness.py -- H.run(ret_net=True)
+  - data/source_data/indy_loco/*.mat -- cursor_pos/target_pos (gitignored)
+  - results/iter37_run.log, results/metrics/iter37_refit.json -- outputs
+
+Results (MEAN R2 over 8 out-of-pool sessions):
+  | condition     | all    |
+  |---------------|-------:|
+  | zero_shot     | +0.399 |
+  | refit_ft_60s  | +0.433 |
+  | true_ft_60s   | +0.509 |
+  | refit_ft_240s | +0.458 |
+  | true_ft_240s  | +0.600 |
+  Ungated, ReFIT recovers only ~30% of the labelled gain. **But the split is perfectly clean (8/8):**
+  | group (n=4)      | zero_shot | refit_60s        | refit_240s       | true_ft_240s |
+  |------------------|----------:|-----------------:|-----------------:|-------------:|
+  | **BAD** (zs<0.4) | +0.087    | **+0.212 (+0.124)** | **+0.264 (+0.177)** | +0.460 |
+  | GOOD (zs>=0.4)   | +0.710    | +0.654 (-0.056)  | +0.651 (-0.059)  | +0.740 |
+  EVERY bad session improves; EVERY good session degrades.
+
+Interpretation:
+  1. **ReFIT IS A RESCUE TOOL, NOT A GENERAL ONE.** On a GOOD session the decoder (0.71) is BETTER
+     than the pseudo-labels (~0.72 agreement), so training on them drags it DOWN. On a BAD session
+     the pseudo-labels (0.62-0.67) are far better than the decoder (0.087), so they pull it UP.
+  2. **=> GATE IT WITH THE LABEL-FREE DETECTOR** (pred_std_ratio < 0.65, perfect separation on 25
+     sessions, LOG-085/086). Gated: bad 0.087 -> 0.264, good untouched at 0.710 => mean 0.399 ->
+     ~0.487, recovering **~44% of the labelled-calibration gain with ZERO labels and ZERO user
+     burden**. Detector (label-free) + ReFIT (label-free) = a fully label-free adaptive pipeline.
+  3. **Why not more**: pseudo-labels degrade from 0.857 (oracle speed) to **0.657** using the
+     DECODER's own speed -- because a drifted decoder HEDGES (LOG-085), so ReFIT inherits the very
+     error it is fixing. Mildly circular. A better speed prior (or an iterated ReFIT) is the obvious
+     follow-up.
+  4. This is the FIRST of the speculative ideas to produce a positive result (cf. LOG-087 manifold
+     alignment: dead; LOG-088 Reptile: worse).
+
+CAVEATS: ReFIT does not fully rescue the worst session (indy_20160630_01: -0.282 -> -0.042, still
+negative). n=4 bad sessions. In this dataset the cursor is HAND-driven, so cursor_pos reflects true
+position (not velocity) -- in a real closed-loop BCI the cursor is DECODER-driven and equally known,
+so the method transfers, but the position signal here is cleaner than closed-loop would be.
+
+Decision: **ADOPT gated ReFIT** as the label-free fallback for flagged sessions. Recipe: observe
+~1 min -> pred_std_ratio < 0.65 -> run ReFIT (free) -> else decode zero-shot at ~0.75. A labelled
+block remains the best option when available (true_ft 0.460 vs refit 0.264 on bad sessions), but is
+no longer mandatory. Follow-up: iterate ReFIT (re-estimate speed after each round).
+
 ### LOG-088 - Reptile meta-init FAILS -- and disproves its own premise: the pool IS worth +0.09 at 60s
 
 Question (speculative "long shot" #2): LOG-080 found that at 32ch, training from SCRATCH on half a

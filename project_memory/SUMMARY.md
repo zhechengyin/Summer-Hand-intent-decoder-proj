@@ -66,7 +66,15 @@ multiunit rates, 3 Hz vel-LP target. Reference: Zhou/Sun/Basu arXiv:2312.15889.
      needed*, r≈0.75–0.84 with decode quality) and/or `pred_std_ratio` (std of the model's own
      predictions ÷ training velocity std, **r=+0.92** at 32ch). Mechanism: a drifted model
      **hedges** — predictions collapse toward the mean, so output variance drops.
-  3. **If the gate is low** (~1 in 4 sessions): run a **labelled calibration block** (≥60 s;
+  2b. 🆕 **If flagged, try ReFIT FIRST — it needs NO labels (LOG-089).** The data has `target_pos`
+     (8×8 grid) + `cursor_pos`, and a deployed system always knows both. ReFIT (Gilja 2012) infers
+     intention from geometry: `direction = unit(target − cursor)`, keep the decoded speed. Verified
+     on this data: pseudo-labels correlate **+0.857** with true velocity. **Gate it** — on flagged
+     sessions it gives **+0.18** (0.087→0.264), but on healthy sessions it **HURTS** (−0.06), because
+     there the decoder is already better than the pseudo-labels (8/8 sessions follow this rule).
+     Gated ⇒ mean 0.399→~0.487 = **~44% of the labelled gain, zero labels, zero user burden.**
+  3. **If the gate is low** (~1 in 4 sessions): a **labelled calibration block** is still best
+     (0.460 vs ReFIT's 0.264 on bad sessions) but **no longer mandatory** (≥60 s;
      ≥4 min for ~0.5), **re-select channels** (label-free, +0.08/+0.04 — ~70% of the best-8 churn
      over months) and **RETRAIN, don't fine-tune** (resel_ft loses 0.05–0.13; LOG-047 confirmed).
      Best unseen-session result: **0.634** (32ch + re-select + train-on-calibration).
