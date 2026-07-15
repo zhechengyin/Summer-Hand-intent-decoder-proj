@@ -28,7 +28,20 @@ multiunit rates, 3 Hz vel-LP target. Reference: Zhou/Sun/Basu arXiv:2312.15889.
   is the whole lever; the Gaussian (and its leak) adds ~nothing. **Adoption pending**:
   swap the centered Gaussian for a causal smoother in `models/tcn_gru/evaluate.py`,
   regenerate the 40 ms cache, retrain — then "0 ms lookahead" becomes true at ~0.63.
-- 🔥 **BIGGEST LEVER — CHANNEL COUNT (LOG-078).** Training the SAME pipeline with
+- 🚨 **UNBIASED EVAL — THE HEADLINES ARE *NEAR-SESSION* NUMBERS, NOT GENERALIZATION
+  (LOG-079).** Frozen pipeline scored ONCE on 4 indy sessions never used for anything:
+  **8ch → FRESH mean R² = 0.054** (negative on 3 of 4 — worse than predicting the mean!)
+  vs its 0.630 on the near, burned test1. **32ch → FRESH 0.305** vs 0.741 near. So the
+  deployable 8-ch decoder **does not survive months of electrode drift**; 0.63/0.755 only
+  describe sessions temporally close to the training pool. **Stop quoting them as
+  generalization.** Caveat: the fresh sessions are Apr–Jun 2016 vs a Sep 2016–Jan 2017
+  pool, i.e. *backward* extrapolation over 3–6 months — a harsh lower bound, not the
+  deployment number (you'd calibrate near in time). Drift is non-uniform (one fresh
+  session scores 0.484 even at 8ch). ⇒ **Drift/recalibration is now the #1 problem**,
+  ahead of any model tweak.
+- 🔥 **BIGGEST LEVER — CHANNEL COUNT (LOG-078/079).** Also the best drift defense: the
+  32ch advantage **grows** on unseen data (**+0.251 fresh** vs +0.112 near) — 8 firing-
+  selected channels can be dead/different months later, 32 keep redundancy. Training the SAME pipeline with
   **32** firing channels (vs 8) → **TEST R² = 0.755 / EVAL 0.752**, i.e. **+0.12 R²**,
   still **~77 KB int8** (+3k params — 32ch only widens the first conv). EVAL and TEST
   move together, so it's robust. This dwarfs every model-side lever (multiscale, the

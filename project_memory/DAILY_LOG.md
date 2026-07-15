@@ -1400,6 +1400,69 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-079 - UNBIASED EVAL: the decoder does NOT generalize to unseen distant sessions (8ch → 0.054)
+
+Question: test1 is burned (LOG-073) and sits near the training pool in time. What is our
+HONEST number on sessions never used for anything? Does the 32ch gain (LOG-078) survive?
+
+Method: research/iter27_fresh_session.py. Pipeline FROZEN, nothing tuned on the fresh
+set: strictly-causal wide TCN+GRU (F64/H64/L1, dils[1,2,4,8], bidir=False), HONEST causal
+input (counts + causal EWMA(0.1), NO centered Gaussian -> genuinely 0 ms lookahead,
+LOG-074), 24-session pool, 40 ms bins, top-N firing channels selected on the base-6,
+3-seed, epoch selected on eval1. Fresh sessions read ONCE. loco excluded (different
+monkey, LOG-027).
+
+Command: py research/iter27_fresh_session.py
+
+Files:
+  - research/iter27_fresh_session.py -- this experiment (load_counts_full, frozen eval)
+  - research/iter25_causal_smoothing.py -- ewma() (causal EWMA)
+  - research/iter20_multiscale.py -- CAUSAL cfg, WIN; research/iter7_final.py -- EXTRA18
+  - research/harness.py -- H.run(ret_preds=True); models/tcn_gru/best_model.py -- build_net, r2
+  - models/tcn_gru/evaluate.py -- load_source_electrode (RATE_SIGMA forced 0)
+  - results/iter27_run.log, results/metrics/iter27_fresh_session.json -- outputs
+
+Fresh sessions (NEVER used for train/eval/test): indy_20160407_02, indy_20160419_01,
+indy_20160624_03, indy_20160630_01.
+
+Results (3-seed):
+  | model | EVAL  | test1 (burned, near) | FRESH mean (unbiased) |
+  |-------|------:|---------------------:|----------------------:|
+  | 8 ch  | 0.636 | 0.630                | **0.054**             |
+  | 32 ch | 0.738 | 0.741                | **0.305**             |
+  Per-session FRESH -- 8ch: -0.043 / -0.006 / 0.484 / -0.220;
+                      32ch: 0.319 / 0.407 / 0.632 / -0.137.
+  32ch vs 8ch on FRESH: **+0.251** (on burned test1 it was only +0.112).
+
+Interpretation:
+  1. **THE HEADLINE NUMBERS WERE NOT GENERALIZATION NUMBERS.** 0.63 (8ch) / 0.74-0.755
+     (32ch) are measured on test1, which is temporally NEAR the training pool. On sessions
+     never seen, the 8ch model COLLAPSES to 0.054 -- NEGATIVE R² on 3 of 4 (worse than
+     predicting the mean). The deployable 8-ch decoder does not survive months of drift.
+  2. **32 channels is not just more accurate, it is far more ROBUST.** Its advantage GROWS
+     on unseen data (+0.251 vs +0.112 near). Mechanism: the 8 channels were firing-selected
+     on Oct-2016 data; on an Apr-2016 session those specific electrodes may be dead/carry
+     different units, leaving the model nothing. 32 ch has redundancy -> some channels stay
+     informative through drift. Strongly strengthens the more-detectors case (LOG-078).
+  3. Honest causal input costs ~0.014 at 32ch (0.741 vs 0.755 leaky) -- still ~free, and now
+     genuinely 0 ms lookahead.
+  4. Session variance is huge (-0.22..+0.63): indy_20160624_03 works even at 8ch (0.484).
+     Drift is NOT uniform -- some sessions remain compatible, most do not.
+
+CAVEATS (cuts both ways): the only never-used indy sessions are Apr-Jun 2016 while the
+pool is Sep 2016-Jan 2017, so this is BACKWARD extrapolation across a 3-6 month gap --
+harsher than real deployment, where you would calibrate near in time. It is a lower bound,
+not the deployment number. Not a bug: the same pipeline scores 0.305-0.632 at 32ch on
+those sessions. Consistent with LOG-065 (distant sessions hurt) and LOG-027 (cross-subject
+collapse) -- this quantifies the drift problem.
+
+Decision: (1) STOP quoting 0.63/0.755 as generalization -- they are near-session numbers;
+qualify every claim. (2) Drift/recalibration is now the #1 problem, ahead of any model
+tweak -- per-session calibration and/or dynamic channel re-selection (the hardware CAN
+rescan/switch) are the leads. (3) More detectors (32) is doubly justified: accuracy AND
+drift robustness. (4) Next: test per-session channel re-selection + light recalibration on
+the fresh sessions; and a FORWARD-in-time fresh split if any sessions allow it.
+
 ### LOG-078 - 32 channels = TEST R² 0.755 (+0.12 over 8ch), still ~77 KB — the biggest lever
 
 Question: (user) train OUR CURRENT BEST pipeline with 32 peak-detection channels
