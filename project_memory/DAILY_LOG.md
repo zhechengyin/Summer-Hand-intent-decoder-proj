@@ -1400,6 +1400,60 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-085 - LABEL-FREE drift detector works: prediction variance predicts decode quality (r=0.92)
+
+Question: LOG-084 showed calibration is INSURANCE -- most forward sessions decode fine zero-shot
+(0.65-0.76) but ~1 in 4 drifts badly (indy_20170124_01: 0.201). Can we predict WHICH sessions
+need calibration, WITHOUT labels? If yes, calibrate only the flagged ones.
+
+Method: research/iter33_drift_detector.py. One pool model (train Sep 15 - Dec 20 2016, 20 sess,
+honest causal input), scored on 8 out-of-pool sessions (4 backward Apr-Jun 2016 + 4 forward Jan
+2017). Per session: proxies computed on the FIRST half (the observation window; NO labels used),
+zero-shot R2 measured on the SECOND half (what you'd get without calibrating).
+Proxies: overlap_topN (|top-N firing on window ∩ pool's top-N|/N -- no model needed),
+firing_corr (per-channel mean firing, window vs pool, over all 96), pred_std_ratio
+(std of the model's own predictions on the window / pool training velocity std -- no labels).
+
+Command: py research/iter33_drift_detector.py
+
+Files:
+  - research/iter33_drift_detector.py -- this experiment (proxies + correlation)
+  - research/iter32_forward_split.py -- POOL (20 sess), FORWARD list; iter27 -- data build
+  - research/iter28_calibration.py -- stack/score; research/harness.py -- H.run(ret_net=True)
+  - results/iter33_run.log, results/metrics/iter33_drift_detector.json -- outputs
+  - NOTE: a real bug was fixed here -- test1 was referenced for H.run's required "test" dict but
+    not loaded (KeyError); test1 is only an interpolation reference (LOG-084), not a headline.
+
+Results (Pearson r between proxy and zero-shot R², 8 sessions):
+  | proxy          | 8 ch   | 32 ch  |
+  |----------------|-------:|-------:|
+  | pred_std_ratio | +0.832 | **+0.924** |
+  | overlap_topN   | +0.837 | +0.745 |
+  | firing_corr    | +0.530 | +0.589 |
+  32ch pred_std separation is clean: good sessions 0.824-0.846 -> zsR2 0.57-0.76; bad sessions
+  0.429-0.602 -> zsR2 -0.16..0.24. The bad forward session (indy_20170124_01) is flagged by both
+  detectors (pred_std 0.602 vs 0.82-0.85; overlap 0.25 vs 0.56-0.62).
+
+Interpretation:
+  1. **A LABEL-FREE DRIFT DETECTOR WORKS.** pred_std_ratio correlates r=+0.92 with zero-shot R2
+     at 32ch. MECHANISM: a drifted/confused model HEDGES -- it collapses its predictions toward
+     the mean, so its output variance drops. Comparing the model's own output std against the
+     training velocity std needs NO labels, NO ground truth, NO extra hardware: just run the
+     model on ~1 min of data and see how confidently it swings.
+  2. **overlap_topN is nearly as good (r=0.75-0.84) and needs NO MODEL AT ALL** -- just firing
+     rates -> you can flag a session BEFORE running inference. Cheapest possible gate.
+  3. firing_corr is the weakest (r~0.53-0.59); drop it.
+  4. Together with LOG-083/084 this closes the deployment loop: observe ~1 min (label-free) ->
+     compute pred_std_ratio / overlap -> if low, run a labelled calibration block (+ re-select
+     channels, retrain, LOG-083); else decode zero-shot at ~0.585-0.76.
+
+CAVEAT: only 8 sessions -> indicative, not conclusive. Thresholds (pred_std ~0.6-0.8) are fitted
+by eye on those 8 and would need a proper validation set before shipping.
+
+Decision: adopt a label-free drift gate. Recommended: overlap_topN as a pre-inference gate,
+pred_std_ratio as the in-flight confidence signal. Next: validate thresholds on more sessions,
+and test whether pred_std_ratio also tracks WITHIN-session drift (i.e. re-calibrate mid-use).
+
 ### LOG-084 - FORWARD in time is FINE: 32ch zero-shot 0.585 @1 month. LOG-079's collapse was a backward artifact
 
 Question: LOG-079's "collapse" (8ch 0.054) used the only never-used sessions -- Apr-Jun 2016,

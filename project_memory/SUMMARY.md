@@ -45,6 +45,19 @@ multiunit rates, 3 Hz vel-LP target. Reference: Zhou/Sun/Basu arXiv:2312.15889.
   (+0.11 forward vs +0.33 backward) — but ~**1 in 4 sessions drifts badly** (one Jan session:
   0.201 zero-shot → 0.589 calibrated), so a cheap **drift detector** (calibrate only flagged
   sessions) is the interesting lead.
+- 🎯 **THE DEPLOYMENT RECIPE (LOG-083/084/085)** — end-to-end, all label-free except the
+  rarely-needed calibration:
+  1. **32 detectors** (all 96 observable; 8 is a detection budget) → 0.410 → **0.585** zero-shot.
+  2. **Gate each session label-free**: `overlap_topN` (top-N firing vs the pool's set — *no model
+     needed*, r≈0.75–0.84 with decode quality) and/or `pred_std_ratio` (std of the model's own
+     predictions ÷ training velocity std, **r=+0.92** at 32ch). Mechanism: a drifted model
+     **hedges** — predictions collapse toward the mean, so output variance drops.
+  3. **If the gate is low** (~1 in 4 sessions): run a **labelled calibration block** (≥60 s;
+     ≥4 min for ~0.5), **re-select channels** (label-free, +0.08/+0.04 — ~70% of the best-8 churn
+     over months) and **RETRAIN, don't fine-tune** (resel_ft loses 0.05–0.13; LOG-047 confirmed).
+     Best unseen-session result: **0.634** (32ch + re-select + train-on-calibration).
+  4. **Else decode zero-shot** at ~0.585–0.76.
+  ⚠️ Thresholds fitted by eye on **8 sessions** — indicative, need validation before shipping.
 - 🚨 **(superseded framing, kept for context) LOG-079 backward-extrapolation result.** Frozen pipeline scored ONCE on 4 indy sessions never used for anything:
   **8ch → FRESH mean R² = 0.054** (negative on 3 of 4 — worse than predicting the mean!)
   vs its 0.630 on the near, burned test1. **32ch → FRESH 0.305** vs 0.741 near. So the
