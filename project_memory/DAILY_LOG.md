@@ -1400,6 +1400,53 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-090 - Channel-dropout "armour" FAILS: dropout simulates ABLATION, drift causes SUBSTITUTION
+
+Question (speculative idea #4): drift churns channels (~70% of the best-8 change, LOG-083) and we
+train with chdrop=0.1 -- a default chosen long before drift was understood. If training forced the
+model to decode with half its channels missing, would it spread the code redundantly across the
+population and survive churn? (Augmentation matched to the deployment perturbation.)
+
+Method: research/iter38_dropout_robust.py. Sweep chdrop in {0.1, 0.3, 0.5, 0.7}, 32ch, pool
+Sep-Dec 2016; measure ZERO-SHOT on 8 out-of-pool sessions, reporting the 4 BAD (drifted) separately
+-- that is where robustness must show up. eval1/test1 printed to catch "heavy dropout just makes a
+worse decoder".
+
+Command: py research/iter38_dropout_robust.py
+
+Files:
+  - research/iter38_dropout_robust.py -- this experiment (chdrop sweep)
+  - research/iter27_fresh_session.py -- data build; iter32 -- POOL/FORWARD; iter28 -- stack/score
+  - research/harness.py -- H.run (chdrop is applied in its training loop); iter20 -- CAUSAL cfg
+  - results/iter38_run.log, results/metrics/iter38_dropout_robust.json -- outputs
+
+Results (zero-shot R2):
+  | chdrop | BAD (4) | good (4) | all    | eval  | test1 |
+  |--------|--------:|---------:|-------:|------:|------:|
+  | 0.1    | +0.087  | +0.710   | +0.399 | 0.740 | 0.686 |
+  | 0.3    | +0.087  | +0.725   | +0.406 | 0.749 | 0.732 |
+  | 0.5    | +0.033  | +0.698   | +0.365 | 0.733 | 0.720 |
+  | 0.7    | -0.043  | +0.664   | +0.311 | 0.698 | 0.677 |
+
+Interpretation:
+  1. **FAILS.** The BAD sessions -- the whole point -- are FLAT at 0.087 (0.1 -> 0.3) then degrade
+     monotonically (0.033, -0.043). Heavy dropout buys no drift robustness, only damage.
+  2. **WHY -- the distinction that kills it: DROPOUT SIMULATES ABLATION; DRIFT CAUSES SUBSTITUTION.**
+     A dropped channel is SILENT, so the model learns "if a channel is quiet, ignore it". A drifted
+     channel is not silent -- it is LYING: it carries a DIFFERENT neuron's signal at full amplitude.
+     Robustness to absence does not transfer to robustness to corruption. Wrong augmentation for the
+     actual perturbation.
+  3. This retro-explains why channel RE-SELECTION works (+0.08, LOG-083): it REMOVES the lying
+     channels and routes to fresh informative ones -- attacking substitution directly.
+  4. chdrop=0.3 is marginally better overall (+0.007 all, eval 0.749 vs 0.740, test1 0.732 vs 0.686)
+     but does NOTHING for the bad sessions; single-seed, so treat as noise. Not worth changing the
+     default on this evidence.
+
+Decision: **DEAD END -- keep chdrop=0.1.** If anyone revisits "train for the failure mode", simulate
+SUBSTITUTION (swap a channel's content for another's), not ablation. Against drift, the tools that
+actually work are: more channels (LOG-078), re-selection (LOG-083), the label-free detector
+(LOG-085/086) and gated ReFIT (LOG-089).
+
 ### LOG-089 - ReFIT WORKS on drifted sessions (+0.18, NO labels) -- gate it with the drift detector
 
 Question (speculative idea #3, the one that HIT): we proved drift correction needs labels (BN adapt
