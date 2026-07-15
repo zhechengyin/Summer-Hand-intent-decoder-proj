@@ -28,7 +28,21 @@ multiunit rates, 3 Hz vel-LP target. Reference: Zhou/Sun/Basu arXiv:2312.15889.
   is the whole lever; the Gaussian (and its leak) adds ~nothing. **Adoption pending**:
   swap the centered Gaussian for a causal smoother in `models/tcn_gru/evaluate.py`,
   regenerate the 40 ms cache, retrain — then "0 ms lookahead" becomes true at ~0.63.
-- ✅ **THE HONEST DEPLOYABLE NUMBER (LOG-084) — train on the past, decode the future.**
+- 🏁 **THE HONEST DEPLOYABLE NUMBER — VALIDATED ON 25 SESSIONS (LOG-086).** Leave-one-MONTH-out
+  CV (hold out a whole month so no same-month neighbour can leak — the trap `test1` fell into):
+  **32ch zero-shot R² = mean 0.703, and the typical session is ~0.75** (tight cluster 0.70–0.82).
+  **12% of sessions (3/25) fail** (<0.4) — and the distribution is **bimodal**, so quote the
+  distribution, not the mean. The earlier "0.585 forward" (LOG-084) was **one** pathological
+  session dragging three good ones (0.756 / **0.098** / 0.750 / 0.739).
+  **Direction doesn't matter — gap size does**: excluding the 3 failures, every fold sits at
+  0.70–0.82 whether held-out earlier (Sep, backward) or later (Jan, forward); ~1 month is fine
+  either way, while 3–6 months collapses (LOG-079).
+  **The failures are perfectly flagged label-free**: `pred_std_ratio < 0.65` catches exactly the
+  3 bad sessions (0 false pos / 0 false neg over 25); `overlap_topN` correlates even better
+  (r=0.903) and needs no model → use it as a cheap pre-gate.
+  ⇒ **~0.75 with NO calibration on 88% of sessions; flag the other 12% and calibrate only those**
+  (the Jan failure recovers 0.098 → 0.589). Caveat: single seed/fold, one monkey (indy).
+- ✅ **(earlier framing, superseded by LOG-086) LOG-084 forward/backward result.**
   Split dates expose the whole confusion: **`test1` (Oct 24 2016) sits INSIDE the training
   pool's range** (Oct 5–27) ⇒ it was **interpolation**, not generalization — which is why it
   reads 0.63/0.755. And LOG-079's "collapse" used the only never-used sessions (Apr–Jun 2016),

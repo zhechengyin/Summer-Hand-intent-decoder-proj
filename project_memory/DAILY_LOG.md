@@ -1400,6 +1400,60 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-086 - VALIDATED (25 sessions): typical zero-shot ~0.75, 12% bad, detector separates them perfectly
+
+Question: LOG-085's drift detector rested on 8 sessions with eyeballed thresholds. Validate it
+properly -- and get an honest distribution of zero-shot quality across many sessions.
+
+Method: research/iter34_detector_cv.py -- leave-one-MONTH-out CV. Hold out a whole month
+(Sep/Oct/Dec 2016, Jan 2017), train on the rest, score the held-out month. Holding out the whole
+MONTH (not just the session) prevents the LOG-084 interpolation trap (test1 was surrounded by
+same-month sessions). eval1 (Oct 17) is held out of every fold as the fixed epoch selector.
+Channels re-selected per fold on THAT FOLD'S training sessions (else the Oct fold would pick
+channels using held-out data). Proxies from each session's FIRST half (label-free); zero-shot R2
+on the SECOND half. 32ch, honest causal input, single seed.
+
+Command: py research/iter34_detector_cv.py
+
+Files:
+  - research/iter34_detector_cv.py -- this experiment (month_of(), leave-one-month-out CV)
+  - research/iter27_fresh_session.py -- load_counts_full/feats/build; iter28 -- stack/score
+  - models/tcn_gru/data_split.json -- resolves renamed train*/eval1/test1 -> original dates
+  - research/harness.py -- H.run(ret_net=True); research/iter20_multiscale.py -- CAUSAL cfg
+  - results/iter34_run.log, results/metrics/iter34_detector_cv.json -- outputs
+
+Results (25 out-of-fold sessions, 32ch):
+  proxy vs zero-shot R2:  overlap_topN r=+0.903 | pred_std_ratio r=+0.899
+  zero-shot R2: mean +0.703, max +0.821, min +0.098; **3/25 (12%) below 0.4**
+  Fold means: Sep 0.789 (1 mo BACKWARD) | Oct 0.715 | Dec 0.640 | Jan 0.586 (1 mo FORWARD)
+  Jan fold in detail: 0.756 / **0.098** / 0.750 / 0.739  -> 3 sessions at ~0.75; ONE bad session
+  drags the mean to 0.586 (this is exactly iter32's 0.585 -- same cause).
+  Detector separation (perfect on 25 sessions):
+    3 bad  : pred_std 0.481 / 0.530 / 0.607 -> zsR2 0.311 / 0.098 / 0.218
+    22 good: pred_std 0.751 - 0.997         -> zsR2 0.70 - 0.82
+
+Interpretation:
+  1. **THE TYPICAL SESSION DECODES AT ~0.75 ZERO-SHOT, not 0.585.** The forward "0.585" (iter32,
+     LOG-084) was ONE pathological session dragging three good ones (0.74-0.76). Means are the
+     wrong summary here -- the distribution is bimodal (a tight ~0.70-0.82 cluster + rare failures).
+  2. **DIRECTION DOES NOT MATTER; BAD SESSIONS DO.** Excluding the 3 failures, EVERY fold sits at
+     0.70-0.82 whether the held-out month is earlier (Sep, backward) or later (Jan, forward).
+     Combined with LOG-079 (3-6 months backward = collapse), the law is about the SIZE of the gap
+     (~1 month is fine either way), plus a ~12% per-session failure rate.
+  3. **THE DETECTOR IS VALIDATED WITH A CLEAN THRESHOLD**: pred_std_ratio < 0.65 flags exactly the
+     3 bad sessions -- 0 false positives, 0 false negatives across 25. overlap_topN correlates even
+     better (r=0.903) and needs NO model, but its threshold is less clean (a good session shares
+     0.47 overlap with a bad one), so use overlap as a cheap pre-gate and pred_std as the decider.
+  4. Deployment: ~0.75 with NO calibration on 88% of sessions; flag the other 12% label-free and
+     calibrate only those (the Jan failure recovers 0.098 -> 0.589, LOG-084).
+
+CAVEAT: single seed per fold; the Oct fold's selector (eval1) is itself an Oct session, so that
+fold may read slightly optimistic. 25 sessions, one monkey (indy).
+
+Decision: **the honest deployable claim = 32ch, strictly causal, ~1 month gap: typically ~0.75
+zero-shot (mean 0.703 over 25 sessions), with a label-free gate (pred_std_ratio<0.65) flagging the
+~12% that need a calibration block.** Report the DISTRIBUTION, not just the mean.
+
 ### LOG-085 - LABEL-FREE drift detector works: prediction variance predicts decode quality (r=0.92)
 
 Question: LOG-084 showed calibration is INSURANCE -- most forward sessions decode fine zero-shot
