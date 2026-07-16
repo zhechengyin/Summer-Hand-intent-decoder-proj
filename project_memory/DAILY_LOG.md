@@ -1400,6 +1400,85 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-091 - Identity-preserving 96-slot masked decoder: reselect channels WITHOUT retraining (partial win); dynamic mid-session NOT worth it
+
+Question (RMTBD "Dynamic-Channel Decoder" brief): can ONE decoder accept a changing set of 32
+electrodes WITHOUT retraining, using a fixed 96-electrode identity layout + observation mask?
+LOG-083 showed per-session reselection helps but feeding reselected electrodes into fixed generic
+slots hurts (model depends on identity). This builds the identity-preserving fix and tests it,
+plus a DYNAMIC (mid-session) mask variant (user request).
+
+Representation (research/masked_input.py): slot i == physical electrode i ALWAYS (never compacted).
+96 electrodes x {raw, EWMA} = 192 neural, z-scored, then masked electrodes forced to EXACTLY 0
+after normalization; a 96-bit observation mask is CONCATENATED (input 288) so the model tells an
+UNOBSERVED electrode from an observed-but-silent one. BatchNorm is post-conv, so a masked (0)
+electrode contributes exactly 0. Mask-correctness ASSERTED (masked=0; identity preserved; changing
+a masked electrode's value -> 0.000 prediction change).
+
+Method: research/iter39 (4-fold leave-one-month-out, KILLED after 2 folds for runtime -- salvaged
+below), research/iter40 (FAST: 1 pool training Sep-Dec, test 8 out-of-pool sessions incl. drifted),
+research/iter41 (dynamic mid-session mask). Single seed (labelled). All channel selection is
+firing-rate (LABEL-FREE); test1 excluded (interpolation). Configs: fixed32 (baseline), slot_fixedmask
+(pool mask, no adapt), slot_randommask (random 32/batch in training), slot_sessionmask (per-session
+top-32 in training). 96-slot model = 93,122 params (~91 KB int8).
+
+Commands: py research/iter40_masked_fast.py ; py research/iter41_dynamic_mask.py
+
+Files:
+  - research/masked_input.py -- reusable identity-preserving masked input (build_neural_192, firing_mask,
+    apply_mask_torch, make_masked_input_torch)
+  - research/iter39_masked_identity.py -- full 4-fold experiment + mask-correctness tests + train_masked
+  - research/iter40_masked_fast.py -- fast 1-pool version (drifted-session test)
+  - research/iter41_dynamic_mask.py -- dynamic mid-session mask (rolling causal reselection)
+  - research/iter27_fresh_session.py -- load_counts_full; iter32 -- POOL/FORWARD; harness.py -- H.run
+  - results/iter39_run.log (2 folds), iter40_run.log, iter41_run.log; results/metrics/iter40_*, iter41_*
+
+Results (iter40, MEAN R2 on 8 out-of-pool sessions):
+  | group            | fixed32 | slot_fixedmask | slot_randommask | slot_sessionmask |
+  |------------------|--------:|---------------:|----------------:|-----------------:|
+  | ALL (8)          | 0.403   | 0.409          | **0.448**       | 0.429            |
+  | HEALTHY (4)      | 0.699   | 0.690          | **0.711**       | 0.682            |
+  | FAILED/drift (4) | 0.108   | 0.128          | **0.185**       | 0.176            |
+  DECISIVE SESSION indy_20170124_01 (only 6/32 pool channels survive): fixed32 0.116 | slot_fixedmask
+  0.100 (stuck) | slot_randommask 0.468 | slot_sessionmask 0.587 -> a ~5x RESCUE with NO retraining.
+  RESCUE TRACKS OVERLAP: ov6 +0.47; ov14 +0.10; ov17 +0.05; ov17 -0.05. (Salvaged iter39 2-fold data
+  corroborates: train5, ov8/32, fixed32 0.247 -> randommask 0.480.)
+
+Results (iter41, dynamic mid-session; random-mask model):
+  | group        | pool_fixed | session_causal | dyn30 | dyn10 | session_whole |
+  |--------------|-----------:|---------------:|------:|------:|--------------:|
+  | ALL (8)      | 0.415      | **0.451**      | 0.441 | 0.431 | 0.443         |
+  | HEALTHY (5)  | 0.586      | **0.675**      | 0.668 | 0.661 | 0.674         |
+  DYNAMIC-MASK CHURN = 0.02 of 32 channels per 2 s -- the channel set is essentially FROZEN within a
+  session. Dynamic ~= session_causal but slightly WORSE, and worse the faster it updates (chases noise).
+
+Interpretation:
+  1. **THE 96-SLOT REPRESENTATION IS FREE**: slot_fixedmask ~= fixed32 everywhere (control holds at
+     full scale). So downstream differences are the ADAPTATION, not the representation.
+  2. **RESELECTION WITHOUT RETRAINING WORKS -- but only for CHANNEL DEATH.** When the pool channels
+     actually died (ov 6/32), re-masking to the session's own live channels rescues 0.116 -> 0.47-0.59.
+     When overlap is moderate (14-17/32) the session channels ~= pool channels, so reselection can't
+     help and mildly HURTS -- those sessions failed because still-active channels CHANGED MEANING
+     (substitution, not ablation, LOG-090). Masking fixes MISSING channels, not LYING ones.
+  3. **random-mask training is the config**: matches baseline on healthy (0.711 vs 0.699) AND helps
+     failed (0.185 vs 0.108). session-mask training OVERFITS the selection (bimodal: huge on the
+     death case, but hurts healthy 0.682 < 0.699) -- too few distinct masks seen in training.
+  4. **DYNAMIC MID-SESSION SELECTION IS NOT WORTH IT.** Churn ~0.02/2s => sessions are locally
+     stationary at the firing level; re-masking mid-session chases noise and mildly hurts. Pick the
+     32 ONCE (from calibration) and hold. (A changing mask does not crash the model -- safety check
+     passed -- it just adds no value here.)
+
+CAVEATS: single seed; n=4 drifted (fast run) / n=1 (salvaged folds); one monkey (indy). Rescue
+demonstrated on the ONE severe channel-death session -- strong but not a distribution.
+
+Decision (answers the brief's final question): **PARTIAL SUCCESS.** A fixed 96-slot identity model
++ random-mask training + a LABEL-FREE per-session firing mask CAN change its active channel set with
+NO retraining, matches healthy accuracy, and RESCUES channel-death drift -- but does NOT fix
+changed-meaning drift on still-active channels (that still needs labelled/ReFIT calibration, LOG-089).
+Adopt: 96-slot + random-mask training + per-session (ONCE) reselection, gated by channel overlap /
+the drift detector. Do NOT do dynamic mid-session switching. Keep the current fixed-32 checkpoint as
+the model of record; the masked model is a promising sibling family, not yet promoted.
+
 ### LOG-090 - Channel-dropout "armour" FAILS: dropout simulates ABLATION, drift causes SUBSTITUTION
 
 Question (speculative idea #4): drift churns channels (~70% of the best-8 change, LOG-083) and we

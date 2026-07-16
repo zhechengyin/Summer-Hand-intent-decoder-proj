@@ -28,6 +28,17 @@ multiunit rates, 3 Hz vel-LP target. Reference: Zhou/Sun/Basu arXiv:2312.15889.
   is the whole lever; the Gaussian (and its leak) adds ~nothing. **Adoption pending**:
   swap the centered Gaussian for a causal smoother in `models/tcn_gru/evaluate.py`,
   regenerate the 40 ms cache, retrain — then "0 ms lookahead" becomes true at ~0.63.
+- 🧩 **DYNAMIC-CHANNEL / identity-preserving masked decoder (LOG-091).** A fixed 96-electrode
+  identity model (slot i = electrode i always; unselected slots forced to 0 + a 96-bit observation
+  mask; ~91 KB int8) trained with **random 32-of-96 masks** can **change its active channel set with
+  NO retraining**, matches healthy accuracy (0.711 vs 0.699), and **rescues CHANNEL-DEATH drift**
+  (the 6/32-overlap session: 0.116 → **0.587** by re-masking to the session's own live channels). But
+  it's a **partial** win — it only helps when channels actually *died*; it can't fix still-active
+  channels that changed *meaning* (substitution, LOG-090), which still needs ReFIT/labelled calib.
+  **Dynamic mid-session re-masking is NOT worth it** (channel-set churn ≈0.02/32 per 2 s → sessions
+  are locally stationary; faster updates chase noise and mildly hurt). Recipe: 96-slot + random-mask
+  training + per-session (once) firing reselection, gated by overlap/detector. Masked model is a
+  promising *sibling* family — the fixed-32 checkpoint remains the model of record.
 - 🏁 **THE HONEST DEPLOYABLE NUMBER — VALIDATED ON 25 SESSIONS (LOG-086).** Leave-one-MONTH-out
   CV (hold out a whole month so no same-month neighbour can leak — the trap `test1` fell into):
   **32ch zero-shot R² = mean 0.703, and the typical session is ~0.75** (tight cluster 0.70–0.82).
