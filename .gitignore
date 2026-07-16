@@ -12,6 +12,7 @@ data/ds004362/
 data/way_eeg_gal/
 data/raw/**
 data/cache/
+data/external/
 !data/raw/**/
 !data/raw/**/README.md
 # Generated processed arrays are reproducible; schemas and processing code remain tracked.
@@ -25,6 +26,7 @@ data/processed/**/manifest.json
 # Large results are regenerated. Small JSON run manifests are versioned evidence.
 results/figures/*
 results/large/*
+results/*.log
 !results/figures/.gitkeep
 !results/large/.gitkeep
 
