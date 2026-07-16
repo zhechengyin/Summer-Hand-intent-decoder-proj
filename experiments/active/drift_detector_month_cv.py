@@ -30,7 +30,7 @@ if str(ROOT) not in sys.path:
 from src.intent_decoder.data.indy import (
     apply_feature_stats,
     fit_feature_stats,
-    load_counts_velocity,
+    load_model_data,
     load_session_manifest,
     resolve_source_name,
     top_firing_channels,
@@ -148,7 +148,7 @@ def main() -> None:
     manifest = load_session_manifest()
     sessions = manifest["experiment_pool"]
     print(f"Loading {len(sessions)} sessions from data/raw/indy_loco ...", flush=True)
-    loaded = {session: load_counts_velocity(session) for session in sessions}
+    loaded = {session: load_model_data(session) for session in sessions}
     folds: dict[str, list[str]] = {}
     for session in sessions:
         folds.setdefault(month_of(session), []).append(session)

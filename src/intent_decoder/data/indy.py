@@ -20,9 +20,10 @@ import numpy as np
 import yaml
 
 from src.intent_decoder.features.causal import causal_velocity
-from src.intent_decoder.paths import DATASET_CONFIG_DIR, RAW_DATA_DIR
+from src.intent_decoder.paths import DATASET_CONFIG_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR
 
 RAW_DIR = RAW_DATA_DIR / "indy_loco"
+PROCESSED_DIR = PROCESSED_DATA_DIR / "indy_loco" / "bin_40ms_causal_counts"
 MANIFEST = DATASET_CONFIG_DIR / "indy_sessions.yaml"
 URL = "https://zenodo.org/records/3854034/files/{}?download=1"
 DEFAULT_BIN_S = 0.040
@@ -111,6 +112,22 @@ def load_counts_velocity(
     )
     velocity = causal_velocity(position, bin_s, velocity_lowpass_hz)
     return counts, velocity
+
+
+def load_model_data(name: str) -> tuple[np.ndarray, np.ndarray]:
+    """Load the supported causal artifact, falling back to causal raw processing."""
+    artifact = PROCESSED_DIR / f"{name}.npz"
+    if artifact.exists():
+        with np.load(artifact) as data:
+            filter_name = str(data["velocity_filter"])
+            difference = str(data["velocity_difference"])
+            if filter_name != "causal_forward_butterworth" or difference != "backward":
+                raise ValueError(f"Unsupported target metadata in {artifact}")
+            return (
+                data["counts"].astype(np.float32),
+                data["velocity"].astype(np.float32),
+            )
+    return load_counts_velocity(name)
 
 
 def top_firing_channels(sessions: dict[str, tuple[np.ndarray, np.ndarray]], n: int) -> np.ndarray:

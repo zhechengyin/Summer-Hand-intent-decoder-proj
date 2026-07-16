@@ -40,5 +40,7 @@ included centered Gaussian input smoothing, so it must not be described as a
 fully zero-lookahead deployment artifact.
 
 The 32-channel counts-plus-causal-EWMA pipeline is the current research candidate.
-It still needs a streaming-normalization evaluation, independently validated
-drift threshold, trained checkpoint, int8 export, and MCU timing before promotion.
+Its code now also uses forward-only target filtering, backward differences,
+past-only prefix normalization and a strictly causal model. All earlier scores
+must be rerun. It still needs full-session-pool evaluation, an independently
+validated drift threshold, checkpoint, int8 export, and MCU timing before promotion.

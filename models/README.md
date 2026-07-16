@@ -6,7 +6,7 @@ trained artifacts.
 
 | Directory | Status |
 | --- | --- |
-| `tcn_gru/` | Readable shared implementation plus historical 96-channel reference. |
+| `tcn_gru/` | Historical 96-channel reference; future-capable code, unsupported for new results. |
 | `tcn_gru_8ch/` | Historical 8-channel checkpoint; network is unidirectional, but saved preprocessing used centered Gaussian input smoothing. |
 | `indy_32ch/` | Reserved candidate location; no promoted checkpoint yet. |
 
@@ -22,3 +22,6 @@ A promoted artifact directory must contain:
 
 Do not treat a result from `experiments/` as the model of record until those
 artifacts exist.
+
+The only supported architecture implementation for new work is
+`src/intent_decoder/model/tcn_gru.py`, which rejects bidirectional configuration.

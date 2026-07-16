@@ -7,11 +7,12 @@ Work in this order; do not resume broad architecture sweeps before these items.
    - Add/download the missing month-CV sessions under `data/raw/indy_loco/`.
    - Place and verify Deep Blue separately under `data/raw/umich_deepblue/`.
 
-2. **Causal preprocessing adoption**
-   - Generate counts directly from raw events.
-   - Add causal EWMA without centered Gaussian smoothing.
-   - Fit normalization on training data or a fixed observation prefix, never the
-     future portion of a held-out session.
+2. **Generate corrected causal data**
+   - Run `data/processing/indy_loco/build_bin_40ms_causal_counts.py` after the
+     required raw sessions are present.
+   - Treat every earlier score as historical because centered filtering, central
+     differences, or whole-session normalization were used in older paths.
+   - Run `python -m unittest tests/test_causality.py -v` before every benchmark.
 
 3. **Correct drift-detector evaluation**
    - Use a fixed 60-second observation prefix.
@@ -19,6 +20,7 @@ Work in this order; do not resume broad architecture sweeps before these items.
    - Select thresholds only inside training/validation folds.
    - Report sensitivity, specificity, false positives/negatives and uncertainty
      across seeds.
+   - Establish this leakage-free baseline before starting Optuna model sweeps.
 
 4. **Promote the 32-channel candidate**
    - Train the frozen selected configuration.

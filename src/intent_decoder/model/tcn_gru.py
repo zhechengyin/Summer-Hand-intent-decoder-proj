@@ -40,11 +40,21 @@ def build_net(config: dict, n_channels: int):
     }
     activation = activations.get(config.get("act", "relu"), nn.ReLU)
 
+    class PointwiseLayerNorm(nn.Module):
+        """Normalize channels independently at each timestep."""
+
+        def __init__(self, features: int) -> None:
+            super().__init__()
+            self.normalization = nn.LayerNorm(features)
+
+        def forward(self, values):
+            return self.normalization(values.transpose(1, 2)).transpose(1, 2)
+
     class CausalTCNGRU(nn.Module):
         def __init__(self) -> None:
             super().__init__()
             filters = config["F"]
-            spatial = [nn.Conv1d(n_channels, filters, 1), nn.BatchNorm1d(filters)]
+            spatial = [nn.Conv1d(n_channels, filters, 1), PointwiseLayerNorm(filters)]
             if config.get("sp_act", True):
                 spatial.append(activation())
             self.spatial = nn.Sequential(*spatial)

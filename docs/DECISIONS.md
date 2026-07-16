@@ -19,6 +19,12 @@ not imply interchangeable inputs or labels.
 
 Centered temporal smoothing is prohibited in deployable inputs. A unidirectional
 network is not sufficient if preprocessing or normalization reads future samples.
+Target velocity also follows the causal rule: forward-only filtering plus backward
+difference. During the 60-second normalization warm-up no decoder output is valid.
+
+Known non-causal code is retained only under historical model/archive paths for
+provenance. Supported code under `src/`, `data/processing/`, `experiments/active/`
+and `experiments/deepblue/` must pass `tests/test_causality.py`.
 
 ## Evaluation
 
