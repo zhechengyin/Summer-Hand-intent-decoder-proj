@@ -1,0 +1,16 @@
+name: indy_8ch_legacy
+status: legacy_checkpoint
+dataset: indy_loco
+input:
+  channels: 8
+  bin_ms: 40
+  window_s: 2.0
+  multiscale_alpha: [1.0, 0.2]
+warning: The saved checkpoint was trained from centered-Gaussian inputs and is not fully causal.
+model:
+  family: tcn_gru
+  filters: 64
+  gru_hidden: 64
+  gru_layers: 1
+  dilations: [1, 2, 4, 8]
+  bidirectional: false

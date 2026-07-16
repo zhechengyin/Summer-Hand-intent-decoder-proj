@@ -22,7 +22,7 @@ Label-free proxies:
                    confused model tends to collapse toward the mean (low output variance)
 
 Reports each proxy's correlation with zero-shot R2 across the 8 sessions.
-Usage: py research/iter33_drift_detector.py
+Usage: py experiments/archive/indy/iter33_drift_detector.py
 """
 from __future__ import annotations
 
@@ -33,15 +33,15 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter20_multiscale as I20
-import research.iter27_fresh_session as I27
-import research.iter28_calibration as I28
-import research.iter32_forward_split as I32
+import experiments.common.harness as H
+import experiments.archive.indy.iter20_multiscale as I20
+import experiments.archive.indy.iter27_fresh_session as I27
+import experiments.archive.indy.iter28_calibration as I28
+import experiments.archive.indy.iter32_forward_split as I32
 import models.tcn_gru.evaluate as E
 import models.tcn_gru.best_model as M
 

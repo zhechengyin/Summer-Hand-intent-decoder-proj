@@ -10,7 +10,7 @@ Answers the questions the live-selection design hinges on:
      velocity-corr / FFT-weighted (sum f*P).
 
 Per-channel scores on 96 electrodes, per session, then compared. 25 Hz rates.
-Usage: py research/iter12_channel_scores.py
+Usage: py experiments/archive/indy/iter12_channel_scores.py
 """
 from __future__ import annotations
 
@@ -21,11 +21,11 @@ from pathlib import Path
 import numpy as np
 from scipy.signal import welch
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.iter7_final as I7
+import experiments.archive.indy.iter7_final as I7
 import models.tcn_gru.evaluate as E
 
 FS = 1.0 / E.BIN                    # 25 Hz

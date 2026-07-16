@@ -8,7 +8,7 @@ Grounded in standard motor-BCI practice:
   ema_post    : causal exponential smoothing of outputs -- velocity is smooth,
                 a light Kalman-like prior at zero model cost.
   combo       : corr_loss + ensemble3 + ema_post.
-Compared against the baseline (research/harness.py) under the identical harness.
+Compared against the baseline (experiments/common/harness.py) under the identical harness.
 """
 from __future__ import annotations
 
@@ -19,11 +19,11 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
+import experiments.common.harness as H
 import models.tcn_gru.evaluate as E
 
 

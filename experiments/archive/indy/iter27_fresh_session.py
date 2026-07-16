@@ -21,7 +21,7 @@ sessions drift and hurt (LOG-065), so this is a HARSH lower bound, not a like-fo
 test1 replacement. Reported alongside test1 for context. loco excluded (different monkey;
 cross-subject transfer collapses, LOG-027).
 
-Usage: py research/iter27_fresh_session.py
+Usage: py experiments/archive/indy/iter27_fresh_session.py
 """
 from __future__ import annotations
 
@@ -32,16 +32,16 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter20_multiscale as I20
-import research.iter25_causal_smoothing as I25
+import experiments.common.harness as H
+import experiments.archive.indy.iter20_multiscale as I20
+import experiments.archive.indy.iter25_causal_smoothing as I25
 import models.tcn_gru.evaluate as E
 import models.tcn_gru.best_model as M
-import research.iter7_final as I7
+import experiments.archive.indy.iter7_final as I7
 
 SEEDS = (42, 1, 7)
 ALPHA = 0.1                       # eval-valid causal EWMA (LOG-073)

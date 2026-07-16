@@ -6,8 +6,8 @@ Clarifies what the model targets. MC `y` columns: 0:2 = finger-group POSITION
 r=0.91). The model of record (LOG-075) already decodes VELOCITY (y[:,2:4]) at
 mean TEST R2 ~0.408. This A/B adds the POSITION decode (y[:,0:2]) under the exact
 same pipeline so the two are directly comparable. Position is smoother (integrated)
-and typically decodes higher. Everything else identical to research/deepblue_tcn_gru.py.
-Usage: py research/deepblue_pos_vs_vel.py
+and typically decodes higher. Everything else identical to experiments/deepblue/deepblue_tcn_gru.py.
+Usage: py experiments/deepblue/deepblue_pos_vs_vel.py
 """
 from __future__ import annotations
 
@@ -19,12 +19,12 @@ from pathlib import Path
 import numpy as np
 from scipy.io import loadmat
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.deepblue_tcn_gru as db
-import research.harness as H
+import experiments.deepblue.deepblue_tcn_gru as db
+from src.intent_decoder.training import run
 
 SEEDS = (42, 1, 7)
 TARGETS = {"position": (0, 2), "velocity": (2, 4)}     # y column ranges
@@ -59,7 +59,7 @@ def main():
         rows[monkey] = {}
         for tname, cols in TARGETS.items():
             t0 = time.time()
-            res = H.run(prepare(path, cols), db.CFG, seeds=SEEDS)
+            res = run(prepare(path, cols), db.CFG, seeds=SEEDS)
             rows[monkey][tname] = {"eval_r2": res["eval_r2"], "test_r2": res["test_r2"],
                                    "test_r": res["test_r"]}
             print(f"  {monkey} {tname:9s} EVAL R2={res['eval_r2']:.3f}  "

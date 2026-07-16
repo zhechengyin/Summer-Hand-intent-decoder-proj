@@ -19,7 +19,7 @@ Splits are chronological and trial-disjoint: 70% train, 15% eval, 15% test.
 Model/epoch selection uses EVAL only; TEST is reported after selection.
 
 Usage:
-    py research/deepblue_tcn_gru.py
+    py experiments/deepblue/deepblue_tcn_gru.py
 """
 from __future__ import annotations
 
@@ -31,29 +31,21 @@ from pathlib import Path
 import numpy as np
 from scipy.io import loadmat
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import models.tcn_gru.evaluate as E
-import research.harness as H
+from src.intent_decoder.model.tcn_gru import causal_config
+from src.intent_decoder.training import run
 
-DATA = ROOT / "data" / "external" / "umich_deepblue_finger" / "original" / "Data"
+DATA = ROOT / "data" / "raw" / "umich_deepblue" / "Data"
 FILES = {"MonkeyN": DATA / "MonkeyN_MC.mat", "MonkeyW": DATA / "MonkeyW_MC.mat"}
 OUT = ROOT / "results" / "metrics" / "deepblue_tcn_gru.json"
 
 BIN_S = 0.032                    # released MC data are integrated into 32 ms bins
 WINDOW_BINS = 32                 # 1.024 s sequences, reset at trial boundaries
 SEEDS = (42, 1, 7)
-CFG = {
-    **E.CFG,
-    "F": 64,
-    "H": 64,
-    "L": 1,
-    "dils": [1, 2, 4, 8],
-    "bidir": False,
-    "n_out": 2,
-}
+CFG = causal_config(n_out=2)
 
 
 def load_mc(path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -121,7 +113,7 @@ def main() -> None:
         t0 = time.time()
         data, meta = prepare(path)
         print(f"  {monkey}: windows train/eval/test={meta['window_counts']}", flush=True)
-        res = H.run(data, CFG, seeds=SEEDS, verbose=True)
+        res = run(data, CFG, seeds=SEEDS, verbose=True)
         rows[monkey] = {
             **meta,
             "eval_r": res["eval_r"],

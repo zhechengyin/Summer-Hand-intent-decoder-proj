@@ -15,7 +15,7 @@ training or evaluation. Channels are re-selected per fold on THAT FOLD'S TRAININ
 the fixed base-6) -- otherwise the Oct fold would pick channels using held-out data.
 
 Proxies (label-free, from the session's FIRST half): overlap_topN, pred_std_ratio.
-Zero-shot R2 is measured on the SECOND half. Usage: py research/iter34_detector_cv.py
+Zero-shot R2 is measured on the SECOND half. Usage: py experiments/archive/indy/iter34_detector_cv.py
 """
 from __future__ import annotations
 
@@ -27,15 +27,15 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter20_multiscale as I20
-import research.iter27_fresh_session as I27
-import research.iter28_calibration as I28
-import research.iter7_final as I7
+import experiments.common.harness as H
+import experiments.archive.indy.iter20_multiscale as I20
+import experiments.archive.indy.iter27_fresh_session as I27
+import experiments.archive.indy.iter28_calibration as I28
+import experiments.archive.indy.iter7_final as I7
 import models.tcn_gru.evaluate as E
 
 SEED = 42

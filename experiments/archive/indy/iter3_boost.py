@@ -18,13 +18,13 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
+import experiments.common.harness as H
 import models.tcn_gru.evaluate as E
-from research.iter1_cheap_wins import corr_loss
+from experiments.archive.indy.iter1_cheap_wins import corr_loss
 
 SMALL = dict(F=32, H=32, L=1, dils=[1, 2, 4, 8])
 

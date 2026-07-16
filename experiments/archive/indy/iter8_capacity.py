@@ -5,7 +5,7 @@ At 6 sessions the 'small' model was best (bigger overfit). With 24 sessions the
 data may support more capacity. Sweep architecture size at fixed 24-session data,
 8 channels. Report TEST R² and int8 size (must stay STM32-friendly). Ref: small
 24-session single = 0.655.
-Usage: py research/iter8_capacity.py
+Usage: py experiments/archive/indy/iter8_capacity.py
 """
 from __future__ import annotations
 
@@ -16,13 +16,13 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter5_scale as I5
-import research.iter7_final as I7
+import experiments.common.harness as H
+import experiments.archive.indy.iter5_scale as I5
+import experiments.archive.indy.iter7_final as I7
 import models.tcn_gru.evaluate as E
 
 ARCHS = {

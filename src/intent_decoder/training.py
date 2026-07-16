@@ -1,48 +1,21 @@
 #!/usr/bin/env python
-"""Research harness for improving monkey velocity-decoding R^2.
+"""Training and evaluation harness for the strictly causal decoder.
 
-Reuses the EXACT data pipeline and fixed train/eval/test split from the model of
-record (`models/tcn_gru/evaluate.py`) so numbers are comparable, but adds:
+``run`` operates on already prepared train/eval/test trials. Active pipelines
+prepare data through ``src.intent_decoder.data`` so causal and normalization
+assumptions remain explicit. Historical compatibility lives in
+``experiments.common.harness`` and is not imported here.
+
+Features include:
   * both Pearson r and R^2 (coefficient of determination) reporting,
-  * swappable hooks -- architecture (`build`), loss (`loss_fn`), output
-    post-filter (`post`), seed ensembling (`seeds`), channel subset (`nch`),
-so each research idea is a few lines rather than a forked script.
-
-`prep(nch)` loads once; `run(prep_data, cfg, ...)` trains with early stopping on
-eval and scores test once. Import and call, or run this file for the baseline.
+  * optional architecture/loss hooks and seed ensembling.
 """
 from __future__ import annotations
 
-import sys
-import time
-from pathlib import Path
-
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
-import models.tcn_gru.evaluate as E
-import models.tcn_gru.best_model as M
-
-
-def prep(nch=96):
-    """Load the fixed split; return trial dict with optional top-nch firing subset."""
-    loaded = {s: E.load_electrode(s) for s in E.TRAIN + E.EVAL + E.TEST}
-    var = np.mean([loaded[s][1].std(0) for s in E.TRAIN], 0)
-    axes = np.sort(np.argsort(var)[-2:])                       # 2D movement axes
-    if nch < 96:
-        fr = np.mean([loaded[s][0].mean(1) for s in E.TRAIN], 0)
-        sel = np.sort(np.argsort(fr)[-nch:])                   # top-nch by train firing
-    else:
-        sel = np.arange(96)
-    tr = []
-    for s in E.TRAIN:
-        tr += E.windows(loaded[s][0][sel], loaded[s][1], axes)
-    ev = {s: E.windows(loaded[s][0][sel], loaded[s][1], axes) for s in E.EVAL}
-    te = {s: E.windows(loaded[s][0][sel], loaded[s][1], axes) for s in E.TEST}
-    return {"train": tr, "eval": ev, "test": te, "axes": axes, "sel": sel, "nch": len(sel)}
+from src.intent_decoder.model.tcn_gru import build_net as causal_build_net
+from src.intent_decoder.model.tcn_gru import corr, r2
 
 
 def _stack(trials):
@@ -57,11 +30,11 @@ def run(data, cfg, build=None, loss_fn=None, post=None, seeds=(42,), verbose=Fal
     """Train (early-stop on eval mean r) and score. Ensembled over `seeds`.
 
     Returns dict: eval_r, eval_r2, test_r, test_r2, per-axis arrays, n_params.
-    build(cfg, n_ch)->net (default M.build_net); loss_fn(pred,targ)->scalar
+    build(cfg, n_ch)->net (default strictly causal model); loss_fn(pred,targ)->scalar
     (default MSE); post(pred (n,T,D))->pred smooths outputs (default identity)."""
     import torch
     import torch.nn as nn
-    build = build or M.build_net
+    build = build or causal_build_net
     post = post or (lambda p: p)
     n_ch = data["train"][0]["e"].shape[0]
     n_out = data["train"][0]["vel"].shape[-1]
@@ -113,7 +86,7 @@ def run(data, cfg, build=None, loss_fn=None, post=None, seeds=(42,), verbose=Fal
             rs = []
             for name, (Xe, Ye) in ev_p.items():
                 p = post(predict(net, Xe))
-                rs.append(M.corr(Ye.reshape(-1, n_out), p.reshape(-1, n_out)).mean())
+                rs.append(corr(Ye.reshape(-1, n_out), p.reshape(-1, n_out)).mean())
             m_ = float(np.mean(rs))
             if m_ > best:
                 best = m_
@@ -130,12 +103,12 @@ def run(data, cfg, build=None, loss_fn=None, post=None, seeds=(42,), verbose=Fal
     raw_te = {name: np.mean(preds, 0) for name, preds in ens_te.items()}
 
     def agg(raw, part):
-        rr, r2 = [], []
+        correlations, r2_values = [], []
         for name, p in raw.items():
             Ye = part[name][1]
             yh = post(p).reshape(-1, n_out); y = Ye.reshape(-1, n_out)
-            rr.append(M.corr(y, yh)); r2.append(M.r2(y, yh))
-        return np.mean(rr, 0), np.mean(r2, 0)
+            correlations.append(corr(y, yh)); r2_values.append(r2(y, yh))
+        return np.mean(correlations, 0), np.mean(r2_values, 0)
     er, er2 = agg(raw_ev, ev_p)
     tr, tr2 = agg(raw_te, te_p)
     out = {"eval_r": float(er.mean()), "eval_r2": float(er2.mean()),
@@ -150,16 +123,3 @@ def run(data, cfg, build=None, loss_fn=None, post=None, seeds=(42,), verbose=Fal
         out["norm"] = (ym, ys)
         out["ev_p"], out["te_p"], out["n_out"] = ev_p, te_p, n_out
     return out
-
-
-if __name__ == "__main__":
-    print("=== BASELINE (model of record) on fixed split ===", flush=True)
-    for nch in (96, 8):
-        t0 = time.time()
-        data = prep(nch=nch)
-        res = run(data, E.CFG)
-        print(f"\n[{nch} ch]  params={res['n_params']:,} ({res['mb']:.2f} MB)  "
-              f"[{time.time()-t0:.0f}s]")
-        print(f"  EVAL : r={res['eval_r']:.3f}  R2={res['eval_r2']:.3f}")
-        print(f"  TEST : r={res['test_r']:.3f}  R2={res['test_r2']:.3f}  "
-              f"(per-axis R2 {[round(x,3) for x in res['test_r2_ax']]})", flush=True)

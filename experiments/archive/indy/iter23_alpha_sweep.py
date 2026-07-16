@@ -4,7 +4,7 @@
 Multiscale saturates at 2 scales = raw + one slow EWMA (LOG-069, alpha=0.2 -> 0.646).
 Which slow timescale is best? Sweep alpha in {0.1, 0.2, 0.3} (smaller = slower =
 longer memory), each a 3-seed ensemble, strictly causal, 8 ch, 24 sess.
-Usage: py research/iter23_alpha_sweep.py
+Usage: py experiments/archive/indy/iter23_alpha_sweep.py
 """
 from __future__ import annotations
 
@@ -15,12 +15,12 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter20_multiscale as I20
+import experiments.common.harness as H
+import experiments.archive.indy.iter20_multiscale as I20
 import models.tcn_gru.evaluate as E
 
 SEEDS = (42, 1, 7)

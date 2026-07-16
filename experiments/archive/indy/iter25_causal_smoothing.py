@@ -20,7 +20,7 @@ counts (RATE_SIGMA=0, read from .mat, bypassing the smoothed cache) and compare:
     counts + 3 causal EWMAs      (32)
 
 Selection is on EVAL (alpha=0.1, the eval-valid slow scale; LOG-073). 3-seed,
-strictly-causal TCN+GRU, 8 ch, 24 sess. Usage: py research/iter25_causal_smoothing.py
+strictly-causal TCN+GRU, 8 ch, 24 sess. Usage: py experiments/archive/indy/iter25_causal_smoothing.py
 """
 from __future__ import annotations
 
@@ -32,19 +32,19 @@ from pathlib import Path
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter20_multiscale as I20
+import experiments.common.harness as H
+import experiments.archive.indy.iter20_multiscale as I20
 import models.tcn_gru.evaluate as E
 
 SEEDS = (42, 1, 7)
 CH = I20.CHANNELS                 # the 8 deployed firing channels
 WIN = I20.WIN
 ALPHA = 0.1                       # eval-valid slow EWMA scale (LOG-073)
-POOL = list(E.TRAIN) + __import__("research.iter7_final", fromlist=["EXTRA18"]).EXTRA18
+POOL = list(E.TRAIN) + __import__("experiments.archive.indy.iter7_final", fromlist=["EXTRA18"]).EXTRA18
 
 
 # --- feature transforms on UNSMOOTHED counts (8, T) ---

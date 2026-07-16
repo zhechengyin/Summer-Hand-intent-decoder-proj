@@ -5,7 +5,7 @@ iter13 selected on 24 sessions; the deployed model selects the 8 channels on the
 base 6 (firing-6 -> [26,51,53,66,71,73,75,94], R2~0.655). Does low-freq (0.2-3 Hz)
 or fft-weighted selection on the SAME base-6 beat firing-6? If yes, swap the
 deployed channels. Decode each on the 24-session pool, small model, test1.
-Usage: py research/iter16_base6_selectors.py
+Usage: py experiments/archive/indy/iter16_base6_selectors.py
 """
 from __future__ import annotations
 
@@ -16,14 +16,14 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter7_final as I7
-import research.iter12_channel_scores as SC
-import research.iter13_selector_decode as I13
+import experiments.common.harness as H
+import experiments.archive.indy.iter7_final as I7
+import experiments.archive.indy.iter12_channel_scores as SC
+import experiments.archive.indy.iter13_selector_decode as I13
 import models.tcn_gru.evaluate as E
 
 SMALL = dict(F=32, H=32, L=1, dils=[1, 2, 4, 8])

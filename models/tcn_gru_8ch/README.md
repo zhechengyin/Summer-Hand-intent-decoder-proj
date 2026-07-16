@@ -1,16 +1,23 @@
-# tcn_gru_8ch — 8-channel STM32 decoder (deployment model of record)
+# tcn_gru_8ch — historical 8-channel STM32 baseline
 
-The **deployable** decoder for the current hardware: **8 spike-detection channels**
-→ **multi-timescale input** (raw + causal EWMA, 16 features) → dilated-TCN +
-**strictly-causal (unidirectional) GRU** ([`../tcn_gru`](../tcn_gru) `build_net`
-with `bidir=False`), STM32-sized, trained on 24 sessions.
+> Status: retained for reproduction, not the current deployment model. Although
+> the network is unidirectional, this checkpoint was trained with centered
+> Gaussian input smoothing and therefore is not fully causal end to end. See
+> `../../docs/STATUS.md` and `../../configs/indy_8ch.yaml`.
 
-## Headline (deployable = strictly causal + multiscale)
+This is the historical decoder for the 8-channel hardware: **8 spike-detection
+channels** → **multi-timescale input** (raw + causal EWMA, 16 features) →
+dilated-TCN + a unidirectional GRU ([`../tcn_gru`](../tcn_gru) `build_net` with
+`bidir=False`). The neural network itself is causal, but the saved preprocessing
+uses a centered Gaussian and reads future bins.
+
+## Historical result (not an end-to-end deployment claim)
 
 | | value |
 | --- | ---: |
-| **TEST R²** (test1, causal, eval-valid) | **≈ 0.63** (3-seed) |
-| latency | **0 ms lookahead** (real-time) |
+| **TEST R²** (test1, historical protocol) | **≈ 0.63** (3-seed) |
+| network lookahead | **0 ms** |
+| preprocessing lookahead | centered Gaussian, approximately **160 ms** at 40 ms/bin |
 | compute | ~5.6 ms/pred, 1 CPU core |
 | int8 size | **~74 KB — lossless** |
 | input | 8 channels × {raw, EWMA} = 16 features |
@@ -22,10 +29,12 @@ first model-side lever to beat the 0.606 causal ceiling; it is adopted.
 
 > ⚠️ **Methodology caveat (LOG-073).** The earlier **0.646** headline was
 > **test-selected**: the EWMA α was tuned on `test1` R² (leakage). The eval-valid
-> pick (α=0.1) scores **0.630** on test; α barely matters (within noise). The honest
-> deployable number is **≈ 0.63**. Also, `test1` has now been read across ~25
+> pick (α=0.1) scores **0.630** on test; α barely matters (within noise). Treat
+> **≈ 0.63** only as a historical model-comparison result. Also, `test1` has
+> now been read across ~25
 > experiments, so it is **no longer a truly untouched test set** — an unbiased final
-> headline needs a freshly reserved session, pipeline frozen, scored once.
+> headline needs a freshly reserved session, a causal preprocessing pipeline
+> frozen in advance, and a single final score.
 > Rule: select configs on **eval**, read test **once**; never promote a config
 > because its test score is higher.
 
@@ -33,8 +42,8 @@ first model-side lever to beat the 0.606 causal ceiling; it is adopted.
 needs the whole future; *bounded lookahead* gives 0.619 @ 80 ms / 0.623 @ 200 ms —
 at 40 ms/bin that latency is too high for closed-loop (LOG-062).
 
-`checkpoint.pt` = the causal + multiscale weights (75,714 params). `evaluate.py` /
-`export_int8.py` reproduce and quantize it.
+`checkpoint.pt` = the unidirectional + multiscale weights (75,714 params).
+`evaluate.py` / `export_int8.py` reproduce and quantize the historical artifact.
 
 ## Contents
 
@@ -45,7 +54,7 @@ at 40 ms/bin that latency is too high for closed-loop (LOG-062).
 
 ```bash
 py models/tcn_gru_8ch/evaluate.py        # reproduce R²
-py models/tcn_gru_8ch/train_and_save.py  # (re)train + save the (now causal) checkpoint
+py models/tcn_gru_8ch/train_and_save.py  # reproduce the historical checkpoint
 ```
 
 ## What we learned (LOG-050..065)
@@ -60,8 +69,9 @@ py models/tcn_gru_8ch/train_and_save.py  # (re)train + save the (now causal) che
 - **Channels**: firing-rate top-8 on the base-6 sessions is best (0.655 in the
   bidir frame). Learned / low-freq / fft / re-selection all lose or tie (LOG-063).
 - **int8 quantization is free** (no R² loss).
-- **Causality costs ~0.07 R²** (0.677 bidir → 0.606 causal); lookahead buys back
-  little and plateaus fast, so strictly causal is the right deployable choice.
+- A unidirectional network costs ~0.07 R² versus the bidirectional upper bound
+  (0.677 → 0.606). A truly deployable successor must also replace the centered
+  input filter with causal features.
 
 ## Where more R² could come from (not model-side)
 

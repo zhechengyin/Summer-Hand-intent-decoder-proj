@@ -15,7 +15,7 @@ Only the velocity head is scored (R2 on test1). The aux head is a training-time
 regularizer (lambda-weighted), dropped at inference -> deployable size unchanged.
 Strictly causal, 8 ch, 24 sess, 3-seed. Same recipe/aug as the model of record.
 
-Usage: py research/iter24_aux_heads.py
+Usage: py experiments/archive/indy/iter24_aux_heads.py
 """
 from __future__ import annotations
 
@@ -26,11 +26,11 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.iter20_multiscale as I20
+import experiments.archive.indy.iter20_multiscale as I20
 import models.tcn_gru.evaluate as E
 import models.tcn_gru.best_model as M
 

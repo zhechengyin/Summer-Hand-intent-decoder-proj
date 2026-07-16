@@ -1,0 +1,26 @@
+name: indy_32ch_candidate
+status: research_candidate_no_checkpoint
+dataset: indy_loco
+input:
+  channels: 32
+  bin_ms: 40
+  window_s: 2.0
+  features: [counts, causal_ewma]
+  multiscale_alpha: [1.0, 0.1]
+  normalization: observation_prefix_frozen
+  warmup_outputs: disabled
+target:
+  velocity_filter: causal_forward_butterworth
+  velocity_lowpass_hz: 3.0
+  difference: backward
+model:
+  family: tcn_gru
+  filters: 64
+  gru_hidden: 64
+  gru_layers: 1
+  dilations: [1, 2, 4, 8]
+  bidirectional: false
+deployment:
+  observation_seconds: 60
+  drift_threshold: null
+  note: Threshold must be selected in nested validation before deployment.

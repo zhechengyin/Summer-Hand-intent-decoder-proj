@@ -5,7 +5,7 @@ iter8 was still rising at 100 KB int8 (wide=0.677). Budget is ~400 KB, so push
 capacity: xwide (F96), xxwide (F128 ~400 KB int8), and a bigger-receptive variant.
 Report TEST R² and int8 size. Watch for overfitting (eval vs test) -- if the
 bigger models overfit, the fix is more data (iter11).
-Usage: py research/iter10_bigger.py
+Usage: py experiments/archive/indy/iter10_bigger.py
 """
 from __future__ import annotations
 
@@ -16,13 +16,13 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter5_scale as I5
-import research.iter7_final as I7
+import experiments.common.harness as H
+import experiments.archive.indy.iter5_scale as I5
+import experiments.archive.indy.iter7_final as I7
 import models.tcn_gru.evaluate as E
 
 ARCHS = {

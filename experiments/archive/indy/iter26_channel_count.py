@@ -8,7 +8,7 @@ know what more peak-detection channels actually buy TODAY.
 
 Channels = top-N by mean firing rate on the base-6 sessions (same rule that picked the
 deployed 8). Multiscale expands each to {raw, EWMA} -> N*2 features. N in {8,16,32}.
-N=8 reproduces the model of record. Select on EVAL, 3-seed. Usage: py research/iter26_channel_count.py
+N=8 reproduces the model of record. Select on EVAL, 3-seed. Usage: py experiments/archive/indy/iter26_channel_count.py
 """
 from __future__ import annotations
 
@@ -19,12 +19,12 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter20_multiscale as I20
+import experiments.common.harness as H
+import experiments.archive.indy.iter20_multiscale as I20
 import models.tcn_gru.evaluate as E
 
 SEEDS = (42, 1, 7)

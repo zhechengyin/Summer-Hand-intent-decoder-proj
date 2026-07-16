@@ -19,7 +19,7 @@ Conditions (per fresh session; calibration = first N windows, scored on the fixe
   bn+affine   : bn_adapt then affine                         (needs labels)
   finetune    : pool weights adapted                         (needs labels; upper reference)
 
-Usage: py research/iter30_unsup_calibration.py
+Usage: py experiments/archive/indy/iter30_unsup_calibration.py
 """
 from __future__ import annotations
 
@@ -31,14 +31,14 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter20_multiscale as I20
-import research.iter27_fresh_session as I27
-import research.iter28_calibration as I28
+import experiments.common.harness as H
+import experiments.archive.indy.iter20_multiscale as I20
+import experiments.archive.indy.iter27_fresh_session as I27
+import experiments.archive.indy.iter28_calibration as I28
 import models.tcn_gru.evaluate as E
 import models.tcn_gru.best_model as M
 

@@ -5,7 +5,7 @@ Same pipeline as the model of record (strictly-causal wide TCN+GRU + multiscale
 raw+EWMA(0.2), 8 firing channels, 24 sessions, 40 ms bins), single seed, 60 epochs.
 Logs mean train MSE (on normalized targets) and eval mean r / R2 each epoch so we can
 see convergence and where early-stopping picks the best epoch.
-Usage: py research/epoch_loss_curve.py
+Usage: py experiments/tools/epoch_loss_curve.py
 """
 from __future__ import annotations
 
@@ -16,11 +16,11 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.iter20_multiscale as I20
+import experiments.archive.indy.iter20_multiscale as I20
 import models.tcn_gru.evaluate as E
 import models.tcn_gru.best_model as M
 

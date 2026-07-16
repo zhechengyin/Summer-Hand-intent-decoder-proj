@@ -5,7 +5,7 @@ Instead of feeding one 40 ms rate per channel, feed each of the 8 channels at
 several causal timescales -- raw + EWMA at alpha 0.5/0.25/0.1 (~fast..slow) -> 32
 input features. Gives the causal model explicit long+short history at the input
 (distinct from the dilation/receptive-field approach, which didn't help). Same
-strictly-causal TCN+GRU. Usage: py research/iter20_multiscale.py
+strictly-causal TCN+GRU. Usage: py experiments/archive/indy/iter20_multiscale.py
 """
 from __future__ import annotations
 
@@ -16,12 +16,12 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter7_final as I7
+import experiments.common.harness as H
+import experiments.archive.indy.iter7_final as I7
 import models.tcn_gru.evaluate as E
 
 CHANNELS = np.array([26, 51, 53, 66, 71, 73, 75, 94])         # deployed firing-8

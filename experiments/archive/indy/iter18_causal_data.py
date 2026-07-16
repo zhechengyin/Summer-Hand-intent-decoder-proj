@@ -4,7 +4,7 @@
 Data was the biggest lever for the bidir model; test it for the causal one.
 Strictly-causal wide TCN+GRU (bidir=False), 24 vs 28 sessions (the 4 extra are
 early-2016, temporally distant from the Oct test -- may add drift). 8 fixed ch.
-Usage: py research/iter18_causal_data.py
+Usage: py experiments/archive/indy/iter18_causal_data.py
 """
 from __future__ import annotations
 
@@ -15,13 +15,13 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter5_scale as I5
-import research.iter7_final as I7
+import experiments.common.harness as H
+import experiments.archive.indy.iter5_scale as I5
+import experiments.archive.indy.iter7_final as I7
 import models.tcn_gru.evaluate as E
 
 CAUSAL = {**E.CFG, "F": 64, "H": 64, "L": 1, "dils": [1, 2, 4, 8], "bidir": False}

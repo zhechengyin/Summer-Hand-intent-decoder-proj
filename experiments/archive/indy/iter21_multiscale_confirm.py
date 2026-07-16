@@ -3,7 +3,7 @@
 
 iter20 gave single 0.606 vs multiscale 0.611 (+0.006 test, +0.015 eval) -- inside
 the run-noise band. Re-run both as 3-seed ensembles (variance-reduced) to see if
-the multiscale lead survives. Usage: py research/iter21_multiscale_confirm.py
+the multiscale lead survives. Usage: py experiments/archive/indy/iter21_multiscale_confirm.py
 """
 from __future__ import annotations
 
@@ -14,12 +14,12 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter20_multiscale as I20
+import experiments.common.harness as H
+import experiments.archive.indy.iter20_multiscale as I20
 import models.tcn_gru.evaluate as E
 
 SEEDS = (42, 1, 7)

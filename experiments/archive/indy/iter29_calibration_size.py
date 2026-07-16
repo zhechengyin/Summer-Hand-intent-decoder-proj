@@ -14,7 +14,7 @@ Each window = 2.0 s (50 bins x 40 ms).
   affine   : per-axis gain/offset on the calibration data (2 scalars/axis, net untouched)
   finetune : pool weights fine-tuned on the calibration data
 
-Sizes: 30 s / 1 / 2 / 4 / 8 min and the full first half. Usage: py research/iter29_calibration_size.py
+Sizes: 30 s / 1 / 2 / 4 / 8 min and the full first half. Usage: py experiments/archive/indy/iter29_calibration_size.py
 """
 from __future__ import annotations
 
@@ -25,14 +25,14 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter20_multiscale as I20
-import research.iter27_fresh_session as I27
-import research.iter28_calibration as I28
+import experiments.common.harness as H
+import experiments.archive.indy.iter20_multiscale as I20
+import experiments.archive.indy.iter27_fresh_session as I27
+import experiments.archive.indy.iter28_calibration as I28
 import models.tcn_gru.evaluate as E
 import models.tcn_gru.best_model as M
 

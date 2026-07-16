@@ -7,7 +7,7 @@ original 6) helps -- the deployable device routes 8 fixed electrodes, so a more
 robust choice matters.
 
 Base 'small' 100 kB model, fixed eval1/test1. Reference: 6=0.529, 9=0.589.
-Usage: py research/iter5_scale.py
+Usage: py experiments/archive/indy/iter5_scale.py
 """
 from __future__ import annotations
 
@@ -18,11 +18,11 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
+import experiments.common.harness as H
 import models.tcn_gru.evaluate as E
 
 SMALL = dict(F=32, H=32, L=1, dils=[1, 2, 4, 8])

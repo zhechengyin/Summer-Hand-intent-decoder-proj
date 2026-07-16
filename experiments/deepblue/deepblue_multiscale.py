@@ -10,9 +10,9 @@ EWMA lever transfers to this dataset too.
 
 EWMA is computed PER TRIAL (reset at trial boundaries) so no causal state leaks
 across trials or across the train/eval/test split. Everything else is identical to
-research/deepblue_tcn_gru.py (MC files, chronological trial-disjoint 70/15/15 split,
+experiments/deepblue/deepblue_tcn_gru.py (MC files, chronological trial-disjoint 70/15/15 split,
 TRAIN-only normalization, EVAL selection, 3-seed, strictly-causal TCN+GRU, 32 ms bins,
-separate model per monkey). Usage: py research/deepblue_multiscale.py
+separate model per monkey). Usage: py experiments/deepblue/deepblue_multiscale.py
 """
 from __future__ import annotations
 
@@ -23,12 +23,12 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.deepblue_tcn_gru as db          # reuse validated loader/split/window/CFG
-import research.harness as H
+import experiments.deepblue.deepblue_tcn_gru as db          # reuse validated loader/split/window/CFG
+from src.intent_decoder.training import run
 
 SEEDS = (42, 1, 7)
 CONFIGS = {                                       # label: EWMA alphas (1.0 = raw)
@@ -87,7 +87,7 @@ def main():
         for label, alphas in CONFIGS.items():
             t0 = time.time()
             data, meta = prepare_ms(path, alphas)
-            res = H.run(data, db.CFG, seeds=SEEDS)
+            res = run(data, db.CFG, seeds=SEEDS)
             rows[monkey][label] = {"eval_r2": res["eval_r2"], "test_r2": res["test_r2"],
                                    "n_feat": meta["n_feat"], "n_params": res["n_params"]}
             print(f"  {monkey} {label:12s} n_feat={meta['n_feat']:3d}  "

@@ -7,7 +7,7 @@ train1-6, so this isolates the effect of training DATA (not channel/axis choice)
 Same 'small' 100 kB model and fixed eval1/test1.
 
 Base 'small', 6 train sessions: TEST R2 = 0.529.
-Usage: py research/iter4_moredata.py
+Usage: py experiments/archive/indy/iter4_moredata.py
 """
 from __future__ import annotations
 
@@ -18,11 +18,11 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
+import experiments.common.harness as H
 import models.tcn_gru.evaluate as E
 
 SMALL = dict(F=32, H=32, L=1, dils=[1, 2, 4, 8])

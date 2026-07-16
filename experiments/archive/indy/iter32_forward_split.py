@@ -18,7 +18,7 @@ This does the honest, deployment-realistic thing: TRAIN ON THE PAST, DECODE THE 
 Conditions per forward session (chronological 50/50: calibrate on 1st half, score 2nd):
   zero_shot | affine (2 scalars/axis) | finetune -- so we also learn whether calibration is
   still needed when the gap is only ~1 month. Honest causal input (counts + causal EWMA,
-  no leaky Gaussian). Usage: py research/iter32_forward_split.py
+  no leaky Gaussian). Usage: py experiments/archive/indy/iter32_forward_split.py
 """
 from __future__ import annotations
 
@@ -29,15 +29,15 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter20_multiscale as I20
-import research.iter27_fresh_session as I27
-import research.iter28_calibration as I28
-import research.iter31_channel_reselect as I31
+import experiments.common.harness as H
+import experiments.archive.indy.iter20_multiscale as I20
+import experiments.archive.indy.iter27_fresh_session as I27
+import experiments.archive.indy.iter28_calibration as I28
+import experiments.archive.indy.iter31_channel_reselect as I31
 import models.tcn_gru.evaluate as E
 
 SEED = 42
@@ -91,7 +91,7 @@ def main():
             p0_c = predict(pool_net, Xc, pym, pys).reshape(-1, 2)
             p0_t = predict(pool_net, Xt, pym, pys).reshape(-1, 2)
             out["zero_shot"] = I28.score(yt, p0_t)
-            g, o = __import__("research.iter30_unsup_calibration", fromlist=["fit_affine"]).fit_affine(
+            g, o = __import__("experiments.archive.indy.iter30_unsup_calibration", fromlist=["fit_affine"]).fit_affine(
                 p0_c, Yc.reshape(-1, 2))
             out["affine"] = I28.score(yt, p0_t * g + o)
             net, ym, ys = I31.train(Xc, Yc, I20.CAUSAL, FT_EPOCHS, FT_LR,

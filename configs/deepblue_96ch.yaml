@@ -1,0 +1,16 @@
+name: deepblue_96ch_benchmark
+status: research_benchmark
+dataset: umich_deepblue_finger
+input:
+  channels: 96
+  bin_ms: 32
+  feature: spiking_band_power
+  normalization: training_split
+target: finger_group_velocity
+model:
+  family: tcn_gru
+  filters: 64
+  gru_hidden: 64
+  gru_layers: 1
+  dilations: [1, 2, 4, 8]
+  bidirectional: false

@@ -13,7 +13,7 @@ Two levers from the paper:
 Filter cutoff is chosen on EVAL and reported on TEST (no test cherry-picking).
 
 Baseline (this split, 8 ch, 0.75 MB): TEST R^2 = 0.548.
-Usage: py research/iter2_tiny_bessel.py
+Usage: py experiments/archive/indy/iter2_tiny_bessel.py
 """
 from __future__ import annotations
 
@@ -25,11 +25,11 @@ from pathlib import Path
 import numpy as np
 from scipy.signal import bessel, sosfilt, sosfiltfilt
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
+import experiments.common.harness as H
 import models.tcn_gru.best_model as M
 import models.tcn_gru.evaluate as E
 

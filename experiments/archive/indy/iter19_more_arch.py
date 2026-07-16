@@ -8,7 +8,7 @@ Rules out (or in) the architectures we hadn't tried:
   lstm_only     : LSTM, no CNN front-end.
   plain_cnn_gru : NON-dilated causal conv stack + GRU (do the dilations matter?).
   transformer   : causal Transformer encoder (attention).
-Report TEST R2 and ~int8 size. Usage: py research/iter19_more_arch.py
+Report TEST R2 and ~int8 size. Usage: py experiments/archive/indy/iter19_more_arch.py
 """
 from __future__ import annotations
 
@@ -19,14 +19,14 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter5_scale as I5
-import research.iter7_final as I7
-import research.architectures as A
+import experiments.common.harness as H
+import experiments.archive.indy.iter5_scale as I5
+import experiments.archive.indy.iter7_final as I7
+import experiments.common.architectures as A
 import models.tcn_gru.best_model as M
 import models.tcn_gru.evaluate as E
 

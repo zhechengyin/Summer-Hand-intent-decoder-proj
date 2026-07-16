@@ -6,7 +6,7 @@ GRU, linear -- the TFLite convention), biases/BatchNorm left fp (they fold/are
 int32 and negligible). Measures TEST R^2 fp32 vs int8 and the int8 weight size.
 This estimates the STM32 accuracy/size story without a full TFLite export.
 
-Uses the best data config from iter5 (18 sessions). Usage: py research/iter6_quant.py
+Uses the best data config from iter5 (18 sessions). Usage: py experiments/archive/indy/iter6_quant.py
 """
 from __future__ import annotations
 
@@ -16,12 +16,12 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter5_scale as I5
+import experiments.common.harness as H
+import experiments.archive.indy.iter5_scale as I5
 import models.tcn_gru.best_model as M
 import models.tcn_gru.evaluate as E
 

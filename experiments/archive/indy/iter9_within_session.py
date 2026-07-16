@@ -6,7 +6,7 @@ on a held-out day). A real implant is usually calibrated on the user's own recen
 data. This measures that easier, realistic scenario: per session, temporal split
 70% train / 15% eval / 15% test (no leakage), 8 fixed channels, 'small' model.
 Comparable to the paper's within-session numbers.
-Usage: py research/iter9_within_session.py
+Usage: py experiments/archive/indy/iter9_within_session.py
 """
 from __future__ import annotations
 
@@ -17,11 +17,11 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
+import experiments.common.harness as H
 import models.tcn_gru.evaluate as E
 
 SMALL = dict(F=32, H=32, L=1, dils=[1, 2, 4, 8])

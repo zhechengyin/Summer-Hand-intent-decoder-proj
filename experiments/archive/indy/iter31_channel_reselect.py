@@ -18,7 +18,7 @@ Per fresh session, chronological 50/50: calibrate on the 1st half, score the 2nd
                   start -- included to show whether that mismatch hurts)
 
 Key comparison: resel_scratch vs fixed_scratch (same training, only the channel set differs).
-Also reports channel overlap with the pool set. Usage: py research/iter31_channel_reselect.py
+Also reports channel overlap with the pool set. Usage: py experiments/archive/indy/iter31_channel_reselect.py
 """
 from __future__ import annotations
 
@@ -29,14 +29,14 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter20_multiscale as I20
-import research.iter27_fresh_session as I27
-import research.iter28_calibration as I28
+import experiments.common.harness as H
+import experiments.archive.indy.iter20_multiscale as I20
+import experiments.archive.indy.iter27_fresh_session as I27
+import experiments.archive.indy.iter28_calibration as I28
 import models.tcn_gru.evaluate as E
 import models.tcn_gru.best_model as M
 

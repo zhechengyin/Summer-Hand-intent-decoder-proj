@@ -4,7 +4,7 @@
 Recipe so far: 18 sessions, fixed train1-6 top-8 channels, 100 kB TCN+GRU = 0.628.
 Test: (a) 24 sessions (does the plateau hold?), (b) 18 sessions + 3-seed ensemble
 (iter3 showed ensembling +0.022; 3x25 kB int8 still fits STM32).
-Usage: py research/iter7_final.py
+Usage: py experiments/archive/indy/iter7_final.py
 """
 from __future__ import annotations
 
@@ -15,12 +15,12 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter5_scale as I5
+import experiments.common.harness as H
+import experiments.archive.indy.iter5_scale as I5
 import models.tcn_gru.evaluate as E
 
 # 18 extra sessions = iter5's 12 + prefetch-2's 6 (24-session pool with the base 6)

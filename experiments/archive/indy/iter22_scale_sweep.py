@@ -6,7 +6,7 @@ slower EWMA scales (more past history) keep helping? Test 2 and 6 scales here;
 compare to the known 1 and 4. alpha smaller = slower = longer effective memory.
   ms2 : raw + alpha 0.2                          (16 features, ~160 ms memory)
   ms6 : raw + 0.5/0.25/0.1/0.05/0.025            (48 features, ~1.5 s memory)
-Usage: py research/iter22_scale_sweep.py
+Usage: py experiments/archive/indy/iter22_scale_sweep.py
 """
 from __future__ import annotations
 
@@ -17,12 +17,12 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter20_multiscale as I20
+import experiments.common.harness as H
+import experiments.archive.indy.iter20_multiscale as I20
 import models.tcn_gru.evaluate as E
 
 SEEDS = (42, 1, 7)

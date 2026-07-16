@@ -8,7 +8,7 @@ window (how long we sum spikes) from the output stride (how often we predict):
   * near-continuous:  10 ms boxcar (approximates "no bins")
 Fixed 8 electrodes (checkpoint channels), 2D velocity, 'small' model for speed.
 Compares against the 40 ms boxcar internal reference (same causal pipeline).
-Usage: py research/iter11_binning.py
+Usage: py experiments/archive/indy/iter11_binning.py
 """
 from __future__ import annotations
 
@@ -22,13 +22,13 @@ import h5py
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import butter, sosfiltfilt
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter5_scale as I5
-import research.iter7_final as I7
+import experiments.common.harness as H
+import experiments.archive.indy.iter5_scale as I5
+import experiments.archive.indy.iter7_final as I7
 import models.tcn_gru.evaluate as E
 
 SMALL = dict(F=32, H=32, L=1, dils=[1, 2, 4, 8])

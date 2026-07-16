@@ -1,1 +1,1 @@
-"""8-channel STM32-deployable finger-velocity decoder (model family)."""
+"""Historical 8-channel STM32-targeted finger-velocity model family."""

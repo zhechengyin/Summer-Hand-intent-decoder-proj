@@ -17,7 +17,7 @@ chronological 50/50 split (calibrate on the 1st half, score the 2nd half):
   scratch   : train only on the calibration half (no pool) -- is the pool helping at all?
 
 Reports Pearson r AND R2. If r is high while zero-shot R2 is negative, the collapse is
-SCALE, not representation, and `affine` will recover it. Usage: py research/iter28_calibration.py
+SCALE, not representation, and `affine` will recover it. Usage: py experiments/archive/indy/iter28_calibration.py
 """
 from __future__ import annotations
 
@@ -28,13 +28,13 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import research.harness as H
-import research.iter20_multiscale as I20
-import research.iter27_fresh_session as I27
+import experiments.common.harness as H
+import experiments.archive.indy.iter20_multiscale as I20
+import experiments.archive.indy.iter27_fresh_session as I27
 import models.tcn_gru.evaluate as E
 import models.tcn_gru.best_model as M
 
