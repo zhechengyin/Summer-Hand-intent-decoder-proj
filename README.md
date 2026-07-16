@@ -1,47 +1,46 @@
 # Neural Intent Decoder
 
-This repository decodes continuous 2D hand/finger velocity from intracortical
-spike rates with a compact TCN+GRU sequence model.
+Compact causal TCN+GRU decoding experiments for intracortical monkey recordings,
+with STM32 deployment constraints.
 
-## Current model
+## Start here
 
-Model families live under [`models/`](models/). The current model of record is
-[`models/tcn_gru/`](models/tcn_gru/), with readable architecture source in
-[`models/tcn_gru/best_model.py`](models/tcn_gru/best_model.py); `checkpoint.pt` contains
-only its learned weights. The package also includes the exact configuration,
-file-level train/eval/test evaluation, and training entry point.
-
-| Historical benchmark | Pearson r |
-| --- | ---: |
-| 96 electrodes | **0.87** |
-| Top 8 electrodes by firing rate | 0.76 |
-
-These numbers predate the new fixed train/eval/test allocation. Run
-`models/tcn_gru/evaluate.py` to produce metrics for the new split.
-
-```bash
-py models/tcn_gru/evaluate.py       # train/eval/test evaluation
-py models/tcn_gru/train_and_save.py # retrain the TCN+GRU checkpoint
-```
-
-The eight same-subject `.mat` sessions use the nearest possible whole-file split
-to 70/15/15: six training files, one validation file, and one test file
-(75/12.5/12.5), named `train1`…`train6`, `eval1`, and `test1`. The model uses
-40 ms bins, a 2 s window, and predicts the two dominant velocity axes.
+- [`docs/STATUS.md`](docs/STATUS.md) — the single authoritative current status.
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — ordered next steps.
+- [`docs/DECISIONS.md`](docs/DECISIONS.md) — active engineering decisions and caveats.
+- [`data/README.md`](data/README.md) — where newly downloaded, raw, interim, and
+  processed data belong.
 
 ## Repository map
 
 ```text
-models/                  one self-contained folder per model family
-legacy/                  concluded pipelines and old experiment trials
-  monkey_trials/         intracortical sweeps and ablations
-  src/ and tools/        earlier EEG/fNIRS and WAY-EEG-GAL work
-project_memory/          current summary and chronological daily log
-data/                    immutable source data plus packaged preprocessing methods
-results/                 generated metrics and figures
+src/intent_decoder/       reusable data, feature, model, training and drift code
+configs/                  versioned dataset/model/deployment configurations
+models/                   checkpoints and model-specific deployment artifacts
+experiments/
+  active/                 experiments that may change a current decision
+  archive/indy/           completed numbered Indy/Loco experiments
+  deepblue/               separate U-M finger-SBP benchmark
+  common/                 compatibility helpers for archived experiments
+data/
+  raw/                    verified immutable source recordings
+  processed/              documented model-ready datasets
+  processing/             dataset-specific Python conversion scripts
+docs/history/             historical summary and chronological experiment log
+results/metrics/          small versioned JSON evidence
+results/large/            large regenerated logs/figures, ignored by Git
+legacy/                   older EEG/fNIRS and concluded pre-current pipelines
 ```
 
-Start with [`project_memory/SUMMARY.md`](project_memory/SUMMARY.md) for the
-current research state and [`project_memory/DAILY_LOG.md`](project_memory/DAILY_LOG.md)
-for experiment provenance. Legacy code is retained for reproducibility, not as
-the recommended entry point.
+## Current truth
+
+The existing `models/tcn_gru_8ch/checkpoint.pt` is a historical 8-channel
+checkpoint. It uses a unidirectional network, but its saved training pipeline
+included centered Gaussian input smoothing, so it must not be described as a
+fully zero-lookahead deployment artifact.
+
+The 32-channel counts-plus-causal-EWMA pipeline is the current research candidate.
+Its code now also uses forward-only target filtering, backward differences,
+past-only prefix normalization and a strictly causal model. All earlier scores
+must be rerun. It still needs full-session-pool evaluation, an independently
+validated drift threshold, checkpoint, int8 export, and MCU timing before promotion.

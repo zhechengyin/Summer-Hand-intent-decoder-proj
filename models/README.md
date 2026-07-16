@@ -1,35 +1,27 @@
-# Models
+# Models and artifacts
 
-Each model family owns one snake-case folder containing everything required to
-understand, train, evaluate, and deploy it.
+Reusable architecture code now has a stable import surface at
+`src/intent_decoder/model/`. This directory stores model-family references and
+trained artifacts.
 
-```text
-models/
-  tcn_gru/
-    best_model.py       readable architecture source
-    config.py           preprocessing and model configuration
-    data_split.json     recording split provenance
-    evaluate.py         train/validation/test evaluation
-    train_and_save.py   checkpoint training entry point
-    checkpoint.pt       learned weights and normalization metadata
-    README.md            results, assumptions, and commands
-```
+| Directory | Status |
+| --- | --- |
+| `tcn_gru/` | Historical 96-channel reference; future-capable code, unsupported for new results. |
+| `tcn_gru_8ch/` | Historical 8-channel checkpoint; network is unidirectional, but saved preprocessing used centered Gaussian input smoothing. |
+| `indy_32ch/` | Reserved candidate location; no promoted checkpoint yet. |
 
-New model families must use separate sibling folders, such as `ewma_mlp/` or
-`channel_aware_tcn/`. Do not place architecture-specific source or checkpoints
-at the `models/` root, and do not share mutable configuration between model
-folders. This keeps comparisons reproducible and prevents one experiment from
-silently changing another model.
+A promoted artifact directory must contain:
 
-## Families
+- checkpoint;
+- exact configuration;
+- source-session manifest/checksums;
+- channel-selection rule and selected channels;
+- input and target normalization state;
+- validation protocol and small metrics JSON;
+- int8 export result and hardware timing.
 
-- [`tcn_gru/`](tcn_gru/) — full 96-channel reference decoder (TCN+GRU, 0.77 MB).
-  Offline/high-channel ceiling.
-- [`tcn_gru_8ch/`](tcn_gru_8ch/) — **deployment model of record**: **8 channels /
-  STM32**, **strictly causal** (real-time), 24 sessions → **TEST R² 0.606, ~73 KB
-  int8, 0 ms lookahead**. (Bidirectional 0.677 is an offline reference only —
-  not deployable.) The target for the current 8-channel spike-detection hardware.
-  Reuses `tcn_gru`'s `build_net` with `bidir=False`.
+Do not treat a result from `experiments/` as the model of record until those
+artifacts exist.
 
-Active R²-improvement experiments live in [`../research/`](../research); archived
-sweeps in [`../legacy/`](../legacy).
+The only supported architecture implementation for new work is
+`src/intent_decoder/model/tcn_gru.py`, which rejects bidirectional configuration.

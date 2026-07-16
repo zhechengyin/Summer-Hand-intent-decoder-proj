@@ -1,12 +1,16 @@
-"""8-channel STM32 decoder — exact spec of record (importable).
+"""Historical 8-channel STM32 decoder configuration (importable).
 
-The deployable decoder: 8 spike-detection channels -> multi-timescale input
+Historical baseline: 8 spike-detection channels -> multi-timescale input
 (raw + causal EWMA, 16 features) -> dilated-TCN + STRICTLY-CAUSAL (unidirectional)
 GRU (`models.tcn_gru.build_net`, bidir=False), STM32-sized, trained on 24 sessions.
-Causal because real-time inference has no future; int8 is lossless. Deployable
-TEST R2 ~= 0.63 (eval-valid, 3-seed); bidirectional 0.677 is OFFLINE only.
+The network has no future context, but the centered Gaussian preprocessing does;
+therefore TEST R2 ~= 0.63 is a historical result, not a deployment-valid claim.
+Bidirectional 0.677 is an additional offline-only upper bound.
 NOTE (LOG-073): the earlier 0.646 headline was test-selected (alpha tuned on test1);
 the eval-valid number is ~0.63, and test1 is now burned. See LOG-062/068/073.
+
+Warning: the saved preprocessing used centered Gaussian smoothing upstream, so
+this artifact is not fully causal despite ``bidir=False``.
 
 Hardware: 8 channels (threshold-crossing spike detection), STM32-class MCU.
 Metric: R² (coefficient of determination, avg of X,Y velocity).
@@ -52,12 +56,13 @@ EXTRA_TRAIN = ["indy_20160927_06", "indy_20160930_02", "indy_20160930_05",
                "indy_20170124_01", "indy_20170127_03", "indy_20170131_02"]
 
 # --- headline metrics (R² on test1 after eval1 model selection) ---
-# DEPLOYABLE = strictly causal + multiscale input. Bidir numbers are OFFLINE only.
+# The network is unidirectional, but this complete historical pipeline is not
+# deployment-causal because RATE_SMOOTH_SIGMA_BINS uses a centered Gaussian.
 # ⚠️ test1 has been read across ~25 experiments -> it is NO LONGER a truly untouched
 # test set. For an unbiased final headline, reserve a fresh session, freeze the
 # pipeline, and score once (LOG-073). Select configs on EVAL, never on test_r2.
 METRICS = {
-    "test_r2_causal_multiscale_evalvalid": 0.630,  # DEPLOYABLE, eval-valid alpha=0.1, 3-seed (LOG-073)
+    "test_r2_unidir_multiscale_evalvalid": 0.630,  # historical preprocessing, eval-valid alpha=0.1 (LOG-073)
     "test_r2_causal_multiscale_3seed_TESTSELECTED": 0.646,  # HISTORICAL: alpha=0.2 was tuned on test -> biased high (LOG-073)
     "test_r2_causal_single_scale": 0.606,      # causal, single-scale input (pre-multiscale)
     "test_r2_bidir_offline": 0.677,            # offline upper bound (bidirectional, NOT deployable)

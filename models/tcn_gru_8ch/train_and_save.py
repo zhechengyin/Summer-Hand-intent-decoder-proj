@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-"""Train the 8-channel STM32 decoder and save a deployable checkpoint.
+"""Reproduce the historical 8-channel checkpoint.
 
 Writes checkpoint.pt with: fp32 state_dict, the selected 8 channel indices, the
 movement axes, target normalization (ym, ys), the config, and the measured R².
-The int8 form (~27 kB, lossless) is produced at export time from these weights.
+The int8 form is produced at export time from these weights. The architecture is
+unidirectional, but the associated centered-Gaussian preprocessing is not causal.
 
 Usage: py models/tcn_gru_8ch/train_and_save.py
 """

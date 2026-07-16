@@ -1,0 +1,167 @@
+"""Canonical Indy/Loco raw-data loader.
+
+Raw MAT files live in ``data/raw/indy_loco``.  Human-friendly aliases such as
+``train1`` are resolved through ``configs/datasets/indy_sessions.yaml``.  Original
+Zenodo names (``indy_YYYYMMDD_NN`` or ``loco_YYYYMMDD_NN``) work directly, so a
+missing extra session no longer fails through the old eight-entry alias table.
+
+This loader returns unsmoothed spike counts.  Causal temporal features are owned
+by :mod:`src.intent_decoder.features.causal`; non-causal Gaussian smoothing is
+deliberately not part of the stable data API.
+"""
+from __future__ import annotations
+
+import re
+import urllib.request
+from pathlib import Path
+
+import h5py
+import numpy as np
+import yaml
+
+from src.intent_decoder.features.causal import causal_velocity
+from src.intent_decoder.paths import DATASET_CONFIG_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR
+
+RAW_DIR = RAW_DATA_DIR / "indy_loco"
+PROCESSED_DIR = PROCESSED_DATA_DIR / "indy_loco" / "bin_40ms_causal_counts"
+MANIFEST = DATASET_CONFIG_DIR / "indy_sessions.yaml"
+URL = "https://zenodo.org/records/3854034/files/{}?download=1"
+DEFAULT_BIN_S = 0.040
+DEFAULT_VELOCITY_LOWPASS_HZ = 3.0
+DEFAULT_N_CHANNELS = 96
+_ORIGINAL_NAME = re.compile(r"^(indy|loco)_\d{8}_\d{2}$")
+
+
+def load_session_manifest(path: Path = MANIFEST) -> dict:
+    """Load the versioned alias and experiment-session registry."""
+    with path.open("r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def resolve_source_name(name: str, manifest: dict | None = None) -> str:
+    """Resolve an alias to its original Zenodo stem."""
+    manifest = manifest or load_session_manifest()
+    aliases = manifest.get("aliases", {})
+    if name in aliases:
+        return aliases[name]
+    if _ORIGINAL_NAME.fullmatch(name):
+        return name
+    raise KeyError(f"Unknown Indy/Loco session name: {name!r}")
+
+
+def session_path(name: str, raw_dir: Path = RAW_DIR) -> Path:
+    """Return the preferred local path, accepting alias-named legacy files."""
+    alias_path = raw_dir / f"{name}.mat"
+    if alias_path.exists():
+        return alias_path
+    source = resolve_source_name(name)
+    return raw_dir / f"{source}.mat"
+
+
+def fetch_session(name: str, raw_dir: Path = RAW_DIR) -> Path:
+    """Download one missing public session into the immutable raw-data area."""
+    path = session_path(name, raw_dir)
+    if path.exists():
+        return path
+    source = resolve_source_name(name)
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    urllib.request.urlretrieve(URL.format(f"{source}.mat"), path)
+    return path
+
+
+def load_counts_velocity(
+    name: str,
+    *,
+    bin_s: float = DEFAULT_BIN_S,
+    velocity_lowpass_hz: float = DEFAULT_VELOCITY_LOWPASS_HZ,
+    n_channels: int = DEFAULT_N_CHANNELS,
+    download: bool = False,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return unsmoothed per-electrode counts and primary-fingertip velocity.
+
+    Returns ``counts`` with shape ``(channels, time_bins)`` and ``velocity`` with
+    shape ``(time_bins, 3)``.  Sessions containing two tracked markers are reduced
+    to the primary marker's first three coordinates for a consistent target.
+    """
+    path = fetch_session(name) if download else session_path(name)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Missing raw session {name!r}: {path}. Place it under {RAW_DIR} or "
+            "call load_counts_velocity(..., download=True)."
+        )
+
+    with h5py.File(path, "r") as f:
+        t = np.asarray(f["t"]).squeeze()
+        finger_pos = np.asarray(f["finger_pos"])[:3]
+        spikes = f["spikes"]
+        edges = np.arange(t[0], t[-1], bin_s)
+        centers = edges[:-1] + bin_s / 2
+        counts = np.zeros((min(spikes.shape[1], n_channels), len(edges) - 1), dtype=np.float32)
+        for channel in range(counts.shape[0]):
+            event_blocks = []
+            for unit in range(spikes.shape[0]):
+                events = np.asarray(f[spikes[unit, channel]]).squeeze()
+                if events.ndim and events.size:
+                    event_blocks.append(np.atleast_1d(events))
+            if event_blocks:
+                counts[channel] = np.histogram(np.concatenate(event_blocks), bins=edges)[0]
+
+    position = np.stack(
+        [np.interp(centers, t, finger_pos[axis]) for axis in range(finger_pos.shape[0])],
+        axis=1,
+    )
+    velocity = causal_velocity(position, bin_s, velocity_lowpass_hz)
+    return counts, velocity
+
+
+def load_model_data(name: str) -> tuple[np.ndarray, np.ndarray]:
+    """Load the supported causal artifact, falling back to causal raw processing."""
+    artifact = PROCESSED_DIR / f"{name}.npz"
+    if artifact.exists():
+        with np.load(artifact) as data:
+            filter_name = str(data["velocity_filter"])
+            difference = str(data["velocity_difference"])
+            if filter_name != "causal_forward_butterworth" or difference != "backward":
+                raise ValueError(f"Unsupported target metadata in {artifact}")
+            return (
+                data["counts"].astype(np.float32),
+                data["velocity"].astype(np.float32),
+            )
+    return load_counts_velocity(name)
+
+
+def top_firing_channels(sessions: dict[str, tuple[np.ndarray, np.ndarray]], n: int) -> np.ndarray:
+    """Select top-N channels using only the supplied training sessions."""
+    firing = np.mean([counts.mean(1) for counts, _ in sessions.values()], axis=0)
+    return np.sort(np.argsort(firing)[-n:])
+
+
+def fit_feature_stats(features: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Fit per-feature normalization statistics on an allowed prefix/split."""
+    return features.mean(1, keepdims=True), features.std(1, keepdims=True) + 1e-6
+
+
+def apply_feature_stats(
+    features: np.ndarray, stats: tuple[np.ndarray, np.ndarray]
+) -> np.ndarray:
+    """Apply previously fitted statistics without inspecting future samples."""
+    mean, std = stats
+    return ((features - mean) / std).astype(np.float32)
+
+
+def window_arrays(
+    features: np.ndarray,
+    velocity: np.ndarray,
+    axes: np.ndarray | tuple[int, int] = (1, 2),
+    *,
+    window_bins: int = 50,
+    start_bin: int = 0,
+) -> list[dict[str, np.ndarray]]:
+    """Create non-overlapping windows without crossing a requested start boundary."""
+    usable = (features.shape[1] - start_bin) // window_bins
+    out = []
+    for index in range(usable):
+        start = start_bin + index * window_bins
+        stop = start + window_bins
+        out.append({"e": features[:, start:stop], "vel": velocity[start:stop][:, axes]})
+    return out

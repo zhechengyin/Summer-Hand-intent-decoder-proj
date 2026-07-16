@@ -32,8 +32,8 @@ if str(ROOT) not in sys.path:
 
 import models.tcn_gru.best_model as R
 
-DATA = ROOT / "data" / "source_data" / "indy_loco"
-PROCESSED_DATA = ROOT / "data" / "processed" / "bin_40ms" / "artifacts"
+DATA = ROOT / "data" / "raw" / "indy_loco"
+PROCESSED_DATA = ROOT / "data" / "processed" / "indy_loco" / "bin_40ms"
 URL = "https://zenodo.org/records/3854034/files/{}?download=1"
 BIN = 0.04          # 40 ms bins -> 25 Hz
 WIN = 2.0
