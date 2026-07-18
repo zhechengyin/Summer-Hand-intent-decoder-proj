@@ -6,9 +6,11 @@ trained artifacts.
 
 | Directory | Status |
 | --- | --- |
-| `tcn_gru/` | Historical 96-channel reference; future-capable code, unsupported for new results. |
-| `tcn_gru_8ch/` | Historical 8-channel checkpoint; network is unidirectional, but saved preprocessing used centered Gaussian input smoothing. |
 | `indy_32ch/` | Reserved candidate location; no promoted checkpoint yet. |
+
+The historical 96-channel and 8-channel model folders were deleted because
+their preprocessing was not end-to-end causal. Their recorded state is preserved
+in `docs/history/ARCHIVE_RETIREMENT.md`.
 
 A promoted artifact directory must contain:
 

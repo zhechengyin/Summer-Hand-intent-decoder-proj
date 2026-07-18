@@ -22,9 +22,10 @@ network is not sufficient if preprocessing or normalization reads future samples
 Target velocity also follows the causal rule: forward-only filtering plus backward
 difference. During the 60-second normalization warm-up no decoder output is valid.
 
-Known non-causal code is retained only under historical model/archive paths for
-provenance. Supported code under `src/`, `data/processing/`, `experiments/active/`
-and `experiments/deepblue/` must pass `tests/test_causality.py`.
+Known non-causal archive/model implementations are not retained as executable
+code. Their outcomes remain in `docs/history/`. Supported code under `src/`,
+`data/processing/`, `experiments/active/` and `experiments/deepblue/` must pass
+`tests/test_causality.py`.
 
 ## Evaluation
 
@@ -35,5 +36,5 @@ and `experiments/deepblue/` must pass `tests/test_causality.py`.
 
 ## Model status
 
-The 8-channel checkpoint is retained as a historical baseline. The 32-channel
-pipeline remains a candidate until checkpoint/export/hardware evidence exists.
+No historical checkpoint is promoted or retained as a runnable baseline. The
+32-channel pipeline remains a candidate until checkpoint/export/hardware evidence exists.

@@ -1,6 +1,6 @@
 # Current project status
 
-Last audited: 2026-07-15.
+Last audited: 2026-07-17.
 
 This is the only document intended to state the current project truth. Historical
 claims remain in `history/EXPERIMENT_LOG.md` for provenance.
@@ -27,18 +27,24 @@ with Indy/Loco training because its input feature and behavioral target differ.
   sessions have been moved there locally.
 - Those eight sessions have been regenerated locally under
   `data/processed/indy_loco/bin_40ms_causal_counts/` with causal target metadata.
-- The historical 8-channel checkpoint has 75,714 parameters and records test R²
-  0.6325, but its centered-Gaussian input preprocessing used future samples.
-- Archived research supports counts + causal EWMA as the preferred input feature.
-- Archived results suggest 32 channels are substantially more robust than 8 and
-  that a prediction-variance proxy may identify drifted sessions.
+- An eight-session causal smoke test now trains the 32-channel candidate end to
+  end. On the fixed 6/1/1 diagnostic split, eval selected epoch 32 with eval R²
+  0.5781 and reused-test1 R² 0.5851. This confirms the pipeline trains, but is
+  not an unbiased generalization result.
+- The retired 8-channel checkpoint record had 75,714 parameters and reported
+  test R² 0.6325, but its centered-Gaussian input preprocessing used future samples.
+- Historical research supports counts + causal EWMA and 32 channels as the most
+  promising candidate; its code is retired and its old scores are not reusable.
+- Historical outcomes and caveats are preserved in
+  `history/ARCHIVE_RETIREMENT.md` and `history/EXPERIMENT_LOG.md`.
 
 ## What does not yet exist
 
 - No promoted 32-channel checkpoint or int8 export.
 - The corrected causal implementation has not yet been benchmarked across the
-  complete session pool. Old scores cannot be reused because the target-velocity
-  definition and normalization protocol changed.
+  complete session pool. The eight-session smoke test cannot replace month-CV,
+  and old scores cannot be reused because the target-velocity definition and
+  normalization protocol changed.
 - No independently validated drift threshold. The historical 0.65 threshold was
   chosen after observing the same 25 sessions.
 - No evidence that a fixed 60-second observation is sufficient; the historical
@@ -50,9 +56,18 @@ with Indy/Loco training because its input feature and behavioral target differ.
 
 | Path | Status | Use |
 | --- | --- | --- |
-| `models/tcn_gru/` | historical reference | Old 96-channel code; may reproduce non-causal protocols and is not imported by supported code. |
-| `models/tcn_gru_8ch/` | legacy checkpoint | Reproduction baseline only; not fully causal end to end. |
 | `models/indy_32ch/` | candidate slot | Destination for the future validated causal checkpoint and manifest. |
+
+No historical checkpoint is a runnable model of record.
+
+## Supported executable surface
+
+- `src/intent_decoder/`: reusable causal implementation.
+- `data/processing/`: reproducible raw-to-processed conversion.
+- `experiments/active/`: decision-changing Indy evaluation only.
+- `experiments/deepblue/`: separate-input U-M benchmark.
+
+The former archive/legacy/compatibility code was deleted after documentation.
 
 ## Current research question
 

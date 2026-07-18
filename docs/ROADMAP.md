@@ -28,7 +28,7 @@ Work in this order; do not resume broad architecture sweeps before these items.
    - Export int8 and measure R² after quantization.
    - Measure actual STM32 RAM, flash, execution time and detector cost.
 
-5. **Archive cleanup**
-   - Once the new pipeline reproduces the required baselines, remove compatibility
-     imports that archived `iter*` scripts still need.
+5. **Version evidence and deploy**
    - Keep small metrics JSON and manifests versioned; keep large logs ignored.
+   - Treat retired experiment directions as documentation only. Reimplement any
+     revived idea against the supported causal API and nested protocol.

@@ -4,7 +4,7 @@
 ``run`` operates on already prepared train/eval/test trials. Active pipelines
 prepare data through ``src.intent_decoder.data`` so causal and normalization
 assumptions remain explicit. Historical compatibility lives in
-``experiments.common.harness`` and is not imported here.
+the research log rather than in an executable parallel harness.
 
 Features include:
   * both Pearson r and R^2 (coefficient of determination) reporting,

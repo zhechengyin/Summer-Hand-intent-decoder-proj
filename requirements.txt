@@ -1,23 +1,9 @@
 # Core scientific stack
 numpy>=1.24
 scipy>=1.10
-pandas>=1.5
-matplotlib>=3.6
 PyYAML>=6.0
+h5py>=3.8
+matplotlib>=3.6
 
-# Machine learning (N1 classifiers, pipelines, metrics)
-scikit-learn>=1.2
-
-# Neuro I/O + preprocessing
-mne>=1.5           # reads EEGLAB .set/.fdt, filtering, epoching, Beer-Lambert
-mne-bids>=0.13     # optional: BIDS-aware discovery (code also works without it)
-h5py>=3.8          # fallback reader for MATLAB v7.3 (.mat) files
-
-# Neural-network branches (GELU MLP and temporal CNN)
+# Causal TCN+GRU training and evaluation
 torch>=2.0
-
-# Optional stronger baseline (Stage 5)
-# xgboost>=1.7
-
-# Optional dataset downloader (Stage 1)
-# openneuro-py>=2022.4

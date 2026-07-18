@@ -7,6 +7,11 @@ from pathlib import Path
 
 import numpy as np
 
+from src.intent_decoder.data.indy import (
+    apply_feature_stats,
+    fit_feature_stats,
+    top_firing_channels,
+)
 from src.intent_decoder.features.causal import causal_ewma, causal_velocity
 from src.intent_decoder.model.tcn_gru import build_net, causal_config
 
@@ -16,6 +21,7 @@ SUPPORTED_CODE = (
     ROOT / "data" / "processing",
     ROOT / "experiments" / "active",
     ROOT / "experiments" / "deepblue",
+    ROOT / "models" / "indy_32ch",
 )
 FORBIDDEN_CALLS = {"filtfilt", "sosfiltfilt", "gaussian_filter1d", "gradient"}
 
@@ -42,6 +48,34 @@ class CausalityTests(unittest.TestCase):
             atol=0,
             rtol=0,
         )
+
+    def test_feature_stats_ignore_scored_suffix(self):
+        rng = np.random.default_rng(6)
+        original = rng.normal(size=(8, 100)).astype(np.float32)
+        changed = original.copy()
+        changed[:, 60:] += 1000
+        first = fit_feature_stats(original, observation_bins=60)
+        second = fit_feature_stats(changed, observation_bins=60)
+        np.testing.assert_array_equal(first[0], second[0])
+        np.testing.assert_array_equal(first[1], second[1])
+        np.testing.assert_array_equal(
+            apply_feature_stats(original[:, :60], first),
+            apply_feature_stats(changed[:, :60], second),
+        )
+
+    def test_channel_selection_ignores_scored_suffix(self):
+        rng = np.random.default_rng(7)
+        counts = rng.poisson(2.0, size=(6, 100)).astype(np.float32)
+        velocity = np.zeros((100, 3), dtype=np.float32)
+        changed = counts.copy()
+        changed[0, 60:] += 10000
+        first = top_firing_channels(
+            {"session": (counts, velocity)}, 2, observation_bins=60
+        )
+        second = top_firing_channels(
+            {"session": (changed, velocity)}, 2, observation_bins=60
+        )
+        np.testing.assert_array_equal(first, second)
 
     def test_model_prefix_does_not_change_when_future_changes(self):
         import torch

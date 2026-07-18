@@ -19,9 +19,7 @@ configs/                  versioned dataset/model/deployment configurations
 models/                   checkpoints and model-specific deployment artifacts
 experiments/
   active/                 experiments that may change a current decision
-  archive/indy/           completed numbered Indy/Loco experiments
   deepblue/               separate U-M finger-SBP benchmark
-  common/                 compatibility helpers for archived experiments
 data/
   raw/                    verified immutable source recordings
   processed/              documented model-ready datasets
@@ -29,15 +27,13 @@ data/
 docs/history/             historical summary and chronological experiment log
 results/metrics/          small versioned JSON evidence
 results/large/            large regenerated logs/figures, ignored by Git
-legacy/                   older EEG/fNIRS and concluded pre-current pipelines
 ```
 
 ## Current truth
 
-The existing `models/tcn_gru_8ch/checkpoint.pt` is a historical 8-channel
-checkpoint. It uses a unidirectional network, but its saved training pipeline
-included centered Gaussian input smoothing, so it must not be described as a
-fully zero-lookahead deployment artifact.
+Historical checkpoints and executable archive/legacy code were removed after
+their outcomes were preserved in
+[`docs/history/ARCHIVE_RETIREMENT.md`](docs/history/ARCHIVE_RETIREMENT.md).
 
 The 32-channel counts-plus-causal-EWMA pipeline is the current research candidate.
 Its code now also uses forward-only target filtering, backward differences,

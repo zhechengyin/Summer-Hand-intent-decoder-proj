@@ -1,5 +1,9 @@
 # Project Summary
 
+> Code-path notice (2026-07-17): archived and legacy implementations referenced
+> below were deleted after their outcomes were preserved. See
+> `ARCHIVE_RETIREMENT.md` for the complete retired-file and experiment mapping.
+
 Last updated: 2026-07-14
 
 ## CURRENT FOCUS: 8-channel STM32 monkey velocity decoder (LOG-042..073)

@@ -1400,6 +1400,85 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-093 - Eight-session end-to-end causal 32-channel smoke test passes
+
+Question: before acquiring the remaining month-CV sessions, can the cleaned
+32-channel pipeline train end to end on the eight local sessions, expose its
+per-epoch convergence, and produce inspectable artifacts without reintroducing
+future-data preprocessing?
+
+Method: `models/indy_32ch/train_smoke_test.py`, fixed diagnostic split
+train1..train6 / eval1 / test1, seed 42, 60 epochs. Channel selection uses only
+the first 60 seconds of the six training sessions. Every session fits feature
+normalization from its own first 60 seconds, discards warm-up outputs, and uses
+only later non-overlapping 2-second windows. Input is 32 electrodes ×
+{counts, causal EWMA(0.1)} = 64 features. Target is causal-filtered backward-
+difference velocity on axes 1 and 2. The checkpoint is selected by eval R²;
+test metrics are plotted for diagnostics only.
+
+Run inventory: 1,354 train windows, 217 eval windows, 206 test windows; 78,786
+parameters. Eval selected epoch 32.
+
+Selected-checkpoint results:
+
+| split | normalized MSE | R² |
+| --- | ---: | ---: |
+| train | 0.13627 | not used |
+| eval1 | 0.55081 | 0.57814 |
+| test1 | 0.51000 | 0.58509 |
+
+Artifacts:
+
+- `results/metrics/indy_32ch_smoke_test.json`: complete 60-epoch history.
+- `results/large/indy_32ch_smoke_test_checkpoint.pt`: diagnostic checkpoint,
+  explicitly marked not promoted.
+- `results/figures/indy_32ch_smoke_test_losses.png`: train/eval/test normalized
+  MSE curves.
+- `results/figures/indy_32ch_smoke_test_test_r2.png`: diagnostic test R² curve.
+
+Interpretation: the fully causal data/model path trains successfully and reaches
+useful signal on the local split. Train loss continues falling after eval/test
+plateau, so the plots also expose overfitting rather than hiding it. This is not
+the project headline: test1 is historically reused, all eight sessions are close
+in time, and no month is held out. Next step remains acquiring the missing
+sessions and running nested leave-one-month-out evaluation.
+
+### LOG-092 - Past-only protocol enforced; archive/legacy code retired after preserving evidence
+
+Request: make every supported non-end-to-end operation causal, using a fixed
+first-60-second observation prefix for per-session normalization and channel
+selection, then remove unused archived/legacy code without losing research
+knowledge.
+
+Changes:
+
+- The stable Indy loader already uses unsmoothed spike counts, a causal
+  forward-only target filter, and backward-difference velocity.
+- `top_firing_channels` now requires an explicit `observation_bins` boundary;
+  the active nested month evaluation passes 1,500 bins (60 seconds at 40 ms).
+- Feature normalization is fitted on the same first 60 seconds, frozen, and
+  applied to later windows. No output during the observation prefix is scored.
+- Historical iter27–41 paths were audited before retirement. Whole-session or
+  future-dependent use was found in per-session z-scoring, held-out firing masks,
+  manifold reference statistics, half-session channel selection/calibration,
+  ReFIT 240-second/half-session calibration, and the explicit iter41
+  `session_whole` reference. Earlier target construction also called centered
+  filtering/central differences through the old evaluator.
+- All numbered archived experiments, retired EEG/fNIRS/WAY-EEG-GAL code, early
+  monkey sweeps, compatibility helpers, old epoch-curve tooling, and two
+  non-current checkpoint families were deleted. Their directions, numerical
+  outcomes, caveats, and deletion reasons are indexed exhaustively in
+  `docs/history/ARCHIVE_RETIREMENT.md`.
+- Requirements were reduced to current direct runtime dependencies; MNE,
+  MNE-BIDS, scikit-learn, pandas and matplotlib were removed with the retired
+  pipelines.
+
+Decision: only `src/intent_decoder/`, `data/processing/`, `experiments/active/`,
+and `experiments/deepblue/` are runnable research surfaces. Historical claims
+are knowledge, not executable baselines. Any retired direction must be
+reimplemented against the supported causal API and nested validation before it
+can return to active work.
+
 ### LOG-091 - Identity-preserving 96-slot masked decoder: reselect channels WITHOUT retraining (partial win); dynamic mid-session NOT worth it
 
 Question (RMTBD "Dynamic-Channel Decoder" brief): can ONE decoder accept a changing set of 32

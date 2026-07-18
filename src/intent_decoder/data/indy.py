@@ -130,15 +130,33 @@ def load_model_data(name: str) -> tuple[np.ndarray, np.ndarray]:
     return load_counts_velocity(name)
 
 
-def top_firing_channels(sessions: dict[str, tuple[np.ndarray, np.ndarray]], n: int) -> np.ndarray:
-    """Select top-N channels using only the supplied training sessions."""
-    firing = np.mean([counts.mean(1) for counts, _ in sessions.values()], axis=0)
+def top_firing_channels(
+    sessions: dict[str, tuple[np.ndarray, np.ndarray]],
+    n: int,
+    *,
+    observation_bins: int,
+) -> np.ndarray:
+    """Select top-N channels from each session's allowed past prefix only."""
+    if observation_bins <= 0:
+        raise ValueError("observation_bins must be positive")
+    firing = np.mean(
+        [counts[:, :observation_bins].mean(1) for counts, _ in sessions.values()],
+        axis=0,
+    )
     return np.sort(np.argsort(firing)[-n:])
 
 
-def fit_feature_stats(features: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Fit per-feature normalization statistics on an allowed prefix/split."""
-    return features.mean(1, keepdims=True), features.std(1, keepdims=True) + 1e-6
+def fit_feature_stats(
+    features: np.ndarray, *, observation_bins: int
+) -> tuple[np.ndarray, np.ndarray]:
+    """Fit per-feature statistics from an explicit past observation prefix."""
+    if observation_bins <= 0 or observation_bins > features.shape[1]:
+        raise ValueError("observation_bins must be within the feature timeline")
+    observation = features[:, :observation_bins]
+    return (
+        observation.mean(1, keepdims=True),
+        observation.std(1, keepdims=True) + 1e-6,
+    )
 
 
 def apply_feature_stats(

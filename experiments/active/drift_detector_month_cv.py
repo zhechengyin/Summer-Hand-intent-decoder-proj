@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Nested month-level drift-detector evaluation with streaming-safe inputs.
 
-Differences from archived ``iter34_detector_cv.py``:
+Protocol guarantees:
 
 * a fixed 60-second observation prefix fits every session's normalization;
 * the scored suffix never contributes to its own normalization;
@@ -81,7 +81,7 @@ def prefix_parts(
     features = session_features(loaded[session][0], channels)
     if features.shape[1] <= OBSERVATION_BINS + WINDOW_BINS:
         raise ValueError(f"{session} is too short for a {OBSERVATION_SECONDS}s prefix")
-    stats = fit_feature_stats(features[:, :OBSERVATION_BINS])
+    stats = fit_feature_stats(features, observation_bins=OBSERVATION_BINS)
     normalized = apply_feature_stats(features, stats)
     observation = window_arrays(
         normalized[:, :OBSERVATION_BINS],
@@ -166,7 +166,9 @@ def main() -> None:
         validation_sessions = [sorted(group)[-1] for group in by_month.values()]
         training_sessions = [session for session in candidates if session not in validation_sessions]
         training_loaded = {session: loaded[session] for session in training_sessions}
-        channels = top_firing_channels(training_loaded, N_CHANNELS)
+        channels = top_firing_channels(
+            training_loaded, N_CHANNELS, observation_bins=OBSERVATION_BINS
+        )
 
         # Training follows the same deployment rule: collect a past-only prefix,
         # freeze its statistics, discard warm-up outputs, then train on the suffix.
