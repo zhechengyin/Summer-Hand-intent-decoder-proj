@@ -10,9 +10,11 @@ import numpy as np
 from src.intent_decoder.data.indy import (
     apply_feature_stats,
     fit_feature_stats,
+    load_session_manifest,
+    processed_session_path,
     top_firing_channels,
 )
-from src.intent_decoder.features.causal import causal_ewma, causal_velocity
+from src.intent_decoder.features.causal import causal_ewma, causal_sample_hold, causal_velocity
 from src.intent_decoder.model.tcn_gru import build_net, causal_config
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,10 +25,37 @@ SUPPORTED_CODE = (
     ROOT / "experiments" / "deepblue",
     ROOT / "models" / "indy_32ch",
 )
-FORBIDDEN_CALLS = {"filtfilt", "sosfiltfilt", "gaussian_filter1d", "gradient"}
+FORBIDDEN_CALLS = {"filtfilt", "sosfiltfilt", "gaussian_filter1d", "gradient", "interp"}
 
 
 class CausalityTests(unittest.TestCase):
+    def test_chronological_split_is_complete_and_disjoint(self):
+        manifest = load_session_manifest()
+        expected = set(manifest["official_indy_sessions"])
+        splits = manifest["chronological_split"]
+        self.assertEqual(
+            {"train": 29, "validation": 4, "test": 4},
+            {name: len(sessions) for name, sessions in splits.items()},
+        )
+        flattened = [session for sessions in splits.values() for session in sessions]
+        self.assertEqual(37, len(flattened))
+        self.assertEqual(37, len(set(flattened)))
+        self.assertEqual(expected, set(flattened))
+        self.assertEqual("train", processed_session_path("train1").parent.name)
+        self.assertEqual(
+            "validation", processed_session_path("indy_20161206_02").parent.name
+        )
+        self.assertEqual("test", processed_session_path("indy_20170131_02").parent.name)
+
+    def test_sample_hold_never_reads_the_next_kinematic_sample(self):
+        timestamps = np.array([0.0, 0.004, 0.008, 0.012])
+        values = np.array([[0.0], [1.0], [2.0], [10_000.0]])
+        queries = np.array([0.003, 0.004, 0.007, 0.008])
+        np.testing.assert_array_equal(
+            causal_sample_hold(timestamps, values, queries).ravel(),
+            np.array([0.0, 1.0, 1.0, 2.0]),
+        )
+
     def test_ewma_prefix_does_not_change_when_future_changes(self):
         rng = np.random.default_rng(2)
         original = rng.normal(size=(4, 80)).astype(np.float32)

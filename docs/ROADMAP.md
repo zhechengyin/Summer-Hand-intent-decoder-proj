@@ -3,13 +3,15 @@
 Work in this order; do not resume broad architecture sweeps before these items.
 
 1. **Reproducible data inventory**
-   - Complete `configs/datasets/indy_sessions.yaml` with checksums and local presence.
-   - Add/download the missing month-CV sessions under `data/raw/indy_loco/`.
+   - Indy complete: all 37 official sessions are present under
+     `data/raw/indy_loco/indy/`, with Zenodo checksums recorded in
+     `configs/datasets/indy_sessions.yaml`.
    - Place and verify Deep Blue separately under `data/raw/umich_deepblue/`.
 
 2. **Generate corrected causal data**
-   - Run `data/processing/indy_loco/build_bin_40ms_causal_counts.py` after the
-     required raw sessions are present.
+   - Run `data/processing/indy_loco/indy/prepare_indy_model_ready.ipynb` from top
+     to bottom. It must report 37/37 valid outputs under
+     `data/processed/indy_loco/indy/{train,validation,test}/` with counts 29/4/4.
    - Treat every earlier score as historical because centered filtering, central
      differences, or whole-session normalization were used in older paths.
    - Run `python -m unittest tests/test_causality.py -v` before every benchmark.

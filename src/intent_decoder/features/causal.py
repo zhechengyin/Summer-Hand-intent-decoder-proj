@@ -5,6 +5,31 @@ import numpy as np
 from scipy.signal import butter, sosfilt, sosfilt_zi
 
 
+def causal_sample_hold(
+    timestamps: np.ndarray,
+    values: np.ndarray,
+    query_times: np.ndarray,
+) -> np.ndarray:
+    """Return the latest value observed at or before each query time.
+
+    Unlike linear interpolation, this operation never reads the sample after a
+    query. ``values`` uses time on its first axis.
+    """
+    timestamps = np.asarray(timestamps, dtype=np.float64)
+    values = np.asarray(values)
+    query_times = np.asarray(query_times, dtype=np.float64)
+    if timestamps.ndim != 1 or query_times.ndim != 1:
+        raise ValueError("timestamps and query_times must be one-dimensional")
+    if values.ndim < 1 or values.shape[0] != timestamps.size:
+        raise ValueError("values must use timestamps on its first axis")
+    if timestamps.size == 0 or not np.all(np.diff(timestamps) > 0):
+        raise ValueError("timestamps must be non-empty and strictly increasing")
+    indices = np.searchsorted(timestamps, query_times, side="right") - 1
+    if np.any(indices < 0):
+        raise ValueError("query_times cannot precede the first timestamp")
+    return values[np.minimum(indices, timestamps.size - 1)]
+
+
 def causal_ewma(values: np.ndarray, alpha: float) -> np.ndarray:
     """EWMA along the final axis; output at ``t`` never reads ``t+1``."""
     if not 0 < alpha <= 1:

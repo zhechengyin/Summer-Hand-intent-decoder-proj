@@ -1,6 +1,6 @@
 # Current project status
 
-Last audited: 2026-07-17.
+Last audited: 2026-07-18.
 
 This is the only document intended to state the current project truth. Historical
 claims remain in `history/EXPERIMENT_LOG.md` for provenance.
@@ -23,10 +23,16 @@ with Indy/Loco training because its input feature and behavioral target differ.
   unidirectional GRU.
 - `tests/test_causality.py` verifies prefix invariance and rejects known
   future-data operations in supported code.
-- The canonical data path is `data/raw/indy_loco/`; the original eight aliased MAT
-  sessions have been moved there locally.
-- Those eight sessions have been regenerated locally under
-  `data/processed/indy_loco/bin_40ms_causal_counts/` with causal target metadata.
+- All 37 official Indy MAT sessions are present under the immutable canonical path
+  `data/raw/indy_loco/indy/`. The versioned dataset registry contains the matching
+  Zenodo MD5 for every session.
+- `data/processing/indy_loco/indy/prepare_indy_model_ready.ipynb` is the supported
+  raw-data preprocessing surface. It validates the source map and stores only a
+  stable 96-channel M1 count input plus two-axis velocity target in each NPZ under
+  `data/processed/indy_loco/indy/{train,validation,test}/` using a fixed
+  chronological 29/4/4 session split. January 2017 is the locked test month.
+- The loader now samples kinematics using the latest already-observed sample at each
+  bin end. It no longer uses linear interpolation across a future 250 Hz sample.
 - An eight-session causal smoke test now trains the 32-channel candidate end to
   end. On the fixed 6/1/1 diagnostic split, eval selected epoch 32 with eval R²
   0.5781 and reused-test1 R² 0.5851. This confirms the pipeline trains, but is
@@ -41,6 +47,8 @@ with Indy/Loco training because its input feature and behavioral target differ.
 ## What does not yet exist
 
 - No promoted 32-channel checkpoint or int8 export.
+- The new 37-session preprocessing notebook has intentionally not been executed;
+  the user will generate and validate the new processed artifacts locally.
 - The corrected causal implementation has not yet been benchmarked across the
   complete session pool. The eight-session smoke test cannot replace month-CV,
   and old scores cannot be reused because the target-velocity definition and
@@ -49,8 +57,8 @@ with Indy/Loco training because its input feature and behavioral target differ.
   chosen after observing the same 25 sessions.
 - No evidence that a fixed 60-second observation is sufficient; the historical
   detector used half of each session.
-- Pulled commits do not include their ignored metrics JSON/run logs or most raw
-  sessions, so numerical claims have not been rerun on this checkout.
+- Pulled commits do not include their ignored metrics JSON/run logs, so historical
+  numerical claims have not been rerun on this checkout.
 
 ## Current model designation
 
@@ -63,7 +71,7 @@ No historical checkpoint is a runnable model of record.
 ## Supported executable surface
 
 - `src/intent_decoder/`: reusable causal implementation.
-- `data/processing/`: reproducible raw-to-processed conversion.
+- `data/processing/indy_loco/indy/`: reproducible Indy audit and conversion notebook.
 - `experiments/active/`: decision-changing Indy evaluation only.
 - `experiments/deepblue/`: separate-input U-M benchmark.
 

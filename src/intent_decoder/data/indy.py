@@ -1,9 +1,9 @@
-"""Canonical Indy/Loco raw-data loader.
+"""Canonical Indy raw and model-ready data loader.
 
-Raw MAT files live in ``data/raw/indy_loco``.  Human-friendly aliases such as
+Raw MAT files live in ``data/raw/indy_loco/indy``. Human-friendly aliases such as
 ``train1`` are resolved through ``configs/datasets/indy_sessions.yaml``.  Original
-Zenodo names (``indy_YYYYMMDD_NN`` or ``loco_YYYYMMDD_NN``) work directly, so a
-missing extra session no longer fails through the old eight-entry alias table.
+Zenodo names (``indy_YYYYMMDD_NN``) work directly, so all 37 sessions share the
+same interface.
 
 This loader returns unsmoothed spike counts.  Causal temporal features are owned
 by :mod:`src.intent_decoder.features.causal`; non-causal Gaussian smoothing is
@@ -19,17 +19,19 @@ import h5py
 import numpy as np
 import yaml
 
-from src.intent_decoder.features.causal import causal_velocity
+from src.intent_decoder.features.causal import causal_sample_hold, causal_velocity
 from src.intent_decoder.paths import DATASET_CONFIG_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR
 
-RAW_DIR = RAW_DATA_DIR / "indy_loco"
-PROCESSED_DIR = PROCESSED_DATA_DIR / "indy_loco" / "bin_40ms_causal_counts"
+RAW_DIR = RAW_DATA_DIR / "indy_loco" / "indy"
+PROCESSED_DIR = PROCESSED_DATA_DIR / "indy_loco" / "indy"
 MANIFEST = DATASET_CONFIG_DIR / "indy_sessions.yaml"
 URL = "https://zenodo.org/records/3854034/files/{}?download=1"
 DEFAULT_BIN_S = 0.040
 DEFAULT_VELOCITY_LOWPASS_HZ = 3.0
 DEFAULT_N_CHANNELS = 96
-_ORIGINAL_NAME = re.compile(r"^(indy|loco)_\d{8}_\d{2}$")
+MODEL_READY_SCHEMA = "indy_counts_velocity_v2"
+LEGACY_MODEL_READY_SCHEMA = "indy_model_ready_v1"
+_ORIGINAL_NAME = re.compile(r"^indy_\d{8}_\d{2}$")
 
 
 def load_session_manifest(path: Path = MANIFEST) -> dict:
@@ -50,12 +52,23 @@ def resolve_source_name(name: str, manifest: dict | None = None) -> str:
 
 
 def session_path(name: str, raw_dir: Path = RAW_DIR) -> Path:
-    """Return the preferred local path, accepting alias-named legacy files."""
-    alias_path = raw_dir / f"{name}.mat"
-    if alias_path.exists():
-        return alias_path
+    """Return the canonical source-named raw MAT path."""
     source = resolve_source_name(name)
     return raw_dir / f"{source}.mat"
+
+
+def processed_session_path(name: str, processed_dir: Path = PROCESSED_DIR) -> Path:
+    """Return the fixed chronological-split artifact path for a session."""
+    manifest = load_session_manifest()
+    source = resolve_source_name(name, manifest)
+    matches = [
+        split
+        for split, sessions in manifest["chronological_split"].items()
+        if source in sessions
+    ]
+    if len(matches) != 1:
+        raise ValueError(f"Expected one chronological split for {source}, found {matches}")
+    return processed_dir / matches[0] / f"{source}.npz"
 
 
 def fetch_session(name: str, raw_dir: Path = RAW_DIR) -> Path:
@@ -69,6 +82,28 @@ def fetch_session(name: str, raw_dir: Path = RAW_DIR) -> Path:
     return path
 
 
+def _decode_matlab_text(dataset: h5py.Dataset) -> str:
+    """Decode a MATLAB char array stored behind an HDF5 object reference."""
+    values = np.asarray(dataset).reshape(-1)
+    return "".join(chr(int(value)) for value in values if int(value))
+
+
+def _channel_names(file: h5py.File) -> list[str]:
+    return [_decode_matlab_text(file[ref]) for ref in np.asarray(file["chan_names"]).reshape(-1)]
+
+
+def _m1_channel_indices(file: h5py.File, limit: int) -> np.ndarray:
+    """Return stable M1 indices using channel metadata, not array position alone."""
+    names = _channel_names(file)
+    indices = np.asarray(
+        [index for index, channel_name in enumerate(names) if channel_name.startswith("M1 ")],
+        dtype=np.int64,
+    )
+    if indices.size < limit:
+        raise ValueError(f"Expected at least {limit} M1 channels, found {indices.size}")
+    return indices[:limit]
+
+
 def load_counts_velocity(
     name: str,
     *,
@@ -77,11 +112,12 @@ def load_counts_velocity(
     n_channels: int = DEFAULT_N_CHANNELS,
     download: bool = False,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Return unsmoothed per-electrode counts and primary-fingertip velocity.
+    """Return unsmoothed M1 counts and two-axis primary-fingertip velocity.
 
     Returns ``counts`` with shape ``(channels, time_bins)`` and ``velocity`` with
-    shape ``(time_bins, 3)``.  Sessions containing two tracked markers are reduced
-    to the primary marker's first three coordinates for a consistent target.
+    shape ``(time_bins, 2)`` for the ``(-x, -y)`` axes. Sessions containing two
+    tracked markers are reduced to the primary marker's first three coordinates
+    before the causal velocity calculation.
     """
     path = fetch_session(name) if download else session_path(name)
     if not path.exists():
@@ -94,39 +130,55 @@ def load_counts_velocity(
         t = np.asarray(f["t"]).squeeze()
         finger_pos = np.asarray(f["finger_pos"])[:3]
         spikes = f["spikes"]
-        edges = np.arange(t[0], t[-1], bin_s)
-        centers = edges[:-1] + bin_s / 2
-        counts = np.zeros((min(spikes.shape[1], n_channels), len(edges) - 1), dtype=np.float32)
-        for channel in range(counts.shape[0]):
-            event_blocks = []
+        if t.ndim != 1 or t.size < 2 or not np.all(np.diff(t) > 0):
+            raise ValueError(f"Invalid timestamps in {path}")
+        n_bins = int(np.floor((t[-1] - t[0]) / bin_s))
+        edges = t[0] + np.arange(n_bins + 1, dtype=np.float64) * bin_s
+        bin_end_time = edges[1:]
+        selected_channels = _m1_channel_indices(f, min(n_channels, spikes.shape[1]))
+        counts = np.zeros((len(selected_channels), n_bins), dtype=np.float32)
+        for output_channel, source_channel in enumerate(selected_channels):
             for unit in range(spikes.shape[0]):
-                events = np.asarray(f[spikes[unit, channel]]).squeeze()
-                if events.ndim and events.size:
-                    event_blocks.append(np.atleast_1d(events))
-            if event_blocks:
-                counts[channel] = np.histogram(np.concatenate(event_blocks), bins=edges)[0]
+                unit_data = f[spikes[unit, source_channel]]
+                if bool(unit_data.attrs.get("MATLAB_empty", 0)):
+                    continue
+                events = np.asarray(unit_data).reshape(-1)
+                if events.size:
+                    counts[output_channel] += np.histogram(events, bins=edges)[0]
 
-    position = np.stack(
-        [np.interp(centers, t, finger_pos[axis]) for axis in range(finger_pos.shape[0])],
-        axis=1,
-    )
-    velocity = causal_velocity(position, bin_s, velocity_lowpass_hz)
+    # At each completed neural bin, use only the latest kinematic sample whose
+    # timestamp is not later than that bin end. Linear interpolation would read
+    # the next 250 Hz sample and therefore introduce a small future-data leak.
+    position = causal_sample_hold(t, finger_pos.T, bin_end_time)
+    velocity = causal_velocity(position, bin_s, velocity_lowpass_hz)[:, 1:3]
     return counts, velocity
 
 
 def load_model_data(name: str) -> tuple[np.ndarray, np.ndarray]:
     """Load the supported causal artifact, falling back to causal raw processing."""
-    artifact = PROCESSED_DIR / f"{name}.npz"
+    artifact = processed_session_path(name)
     if artifact.exists():
-        with np.load(artifact) as data:
-            filter_name = str(data["velocity_filter"])
-            difference = str(data["velocity_difference"])
-            if filter_name != "causal_forward_butterworth" or difference != "backward":
+        with np.load(artifact, allow_pickle=False) as data:
+            schema = str(np.asarray(data["schema_version"]).item())
+            filter_name = str(np.asarray(data["velocity_filter"]).item())
+            difference = str(np.asarray(data["velocity_difference"]).item())
+            sampling = str(np.asarray(data["kinematic_sampling"]).item())
+            if schema not in {MODEL_READY_SCHEMA, LEGACY_MODEL_READY_SCHEMA}:
+                raise ValueError(f"Unsupported schema {schema!r} in {artifact}")
+            if (
+                filter_name != "causal_forward_butterworth"
+                or difference != "backward"
+                or sampling != "causal_latest_sample_at_bin_end"
+            ):
                 raise ValueError(f"Unsupported target metadata in {artifact}")
-            return (
-                data["counts"].astype(np.float32),
-                data["velocity"].astype(np.float32),
-            )
+            if schema == LEGACY_MODEL_READY_SCHEMA:
+                m1_indices = data["m1_indices"].astype(np.int64)
+                counts = data["counts"][m1_indices]
+                velocity = data["velocity"][:, 1:3]
+            else:
+                counts = data["counts"]
+                velocity = data["velocity"]
+            return counts.astype(np.float32), velocity.astype(np.float32)
     return load_counts_velocity(name)
 
 
@@ -170,7 +222,7 @@ def apply_feature_stats(
 def window_arrays(
     features: np.ndarray,
     velocity: np.ndarray,
-    axes: np.ndarray | tuple[int, int] = (1, 2),
+    axes: np.ndarray | tuple[int, int] = (0, 1),
     *,
     window_bins: int = 50,
     start_bin: int = 0,

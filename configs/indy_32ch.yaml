@@ -10,6 +10,7 @@ input:
   normalization: observation_prefix_frozen
   warmup_outputs: disabled
 target:
+  axes: [-x, -y]
   velocity_filter: causal_forward_butterworth
   velocity_lowpass_hz: 3.0
   difference: backward

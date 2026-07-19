@@ -4,6 +4,8 @@ scipy>=1.10
 PyYAML>=6.0
 h5py>=3.8
 matplotlib>=3.6
+pandas>=2.0
+ipykernel>=6.0
 
 # Causal TCN+GRU training and evaluation
 torch>=2.0

@@ -6,6 +6,7 @@ from .indy import (
     load_counts_velocity,
     load_model_data,
     load_session_manifest,
+    processed_session_path,
     resolve_source_name,
 )
 
@@ -15,5 +16,6 @@ __all__ = [
     "load_counts_velocity",
     "load_model_data",
     "load_session_manifest",
+    "processed_session_path",
     "resolve_source_name",
 ]

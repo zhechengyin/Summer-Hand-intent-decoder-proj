@@ -1,9 +1,8 @@
-# Indy/Loco raw recordings
+# Immutable Indy raw recordings
 
-Canonical location for the Zenodo 3854034 MAT sessions. Both original names such
-as `indy_20161005_06.mat` and documented aliases such as `train1.mat` are accepted
-by `src.intent_decoder.data.indy`.
+The 37 original-name Indy MAT sessions from Zenodo 3854034 live under `indy/`.
+The MAT payloads are immutable: processing code may only read them.
 
-The local workspace currently stores the original eight aliased split files here.
-Additional sessions required by month-level experiments should also be placed here.
-See `../../../configs/datasets/indy_sessions.yaml`.
+Aliases such as `train1` are resolved by `src.intent_decoder.data.indy` without
+renaming source files. The official filename/checksum inventory is versioned in
+`../../../configs/datasets/indy_sessions.yaml`.

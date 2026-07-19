@@ -1,6 +1,6 @@
 # Daily Engineering Log
 
-Last updated: 2026-07-04
+Last updated: 2026-07-18
 
 Purpose: append what was done each day: commands, code changes, artifacts,
 results, interpretation, and decisions. Do not use this as the short project
@@ -1400,6 +1400,265 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-097 - CPU seed-42 sampling comparison completes; session-balanced is provisional winner
+
+Experiment time: completed 2026-07-18 22:43:30 UTC (18:43:30 Toronto),
+elapsed 1,193.2 seconds (19 minutes 53 seconds).
+
+Question: after localising the earlier collapse to MPS, which train-only
+sampling distribution gives the strongest chronological December validation
+result on the fully causal 32-channel decoder?
+
+Protocol: CPU, seed 42, 25 epochs per arm, 29 April-October training sessions,
+4 December validation sessions, 11,175 training windows per epoch, learning
+rate 3e-4 with cosine decay, AdamW weight decay 1e-3, dropout 0.3, no input
+noise, no channel dropout, and global gradient clip 1. All three arms used the
+same initial weights, preprocessing, target statistics, optimizer, number of
+samples and epoch count. Validation was inference-only and selected the minimum
+pooled normalized-MSE checkpoint. The four January sessions remained locked and
+were not loaded.
+
+Sampling policies:
+
+1. `window` / Window-weighted: every available training window appears exactly
+   once per epoch. Longer sessions and months with more windows receive more
+   weight. Month exposure was April 33.2%, June 33.7%, September 10.9%, and
+   October 22.2%.
+2. `session` / Session-balanced: every one of the 29 training sessions receives
+   equal expected draws per epoch, using resampling where necessary. Month
+   exposure became April 24.1%, June 13.8%, September 24.1%, and October 38.0%
+   because the months contain different numbers of sessions.
+3. `month` / Month-balanced: each of the four training months receives 25% of
+   the epoch, then sessions are balanced within each month. This is the
+   strongest correction for month-count and session-duration imbalance.
+
+Selected-checkpoint results:
+
+| Sampling | Epoch | Train loss | Train R² | Validation loss | Validation R² | Train-validation R² gap |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Window-weighted | 19 | 0.21733 | 0.7826 | 0.54231 | 0.4980 | 0.2847 |
+| Session-balanced | 17 | 0.23720 | 0.7628 | **0.52313** | **0.5211** | **0.2417** |
+| Month-balanced | 15 | 0.23435 | 0.7656 | 0.53214 | 0.5117 | 0.2540 |
+
+Validation stability: the plot visually exaggerates movement because the loss
+axis is focused near 0.52-0.62. Across epochs 8-25, validation-R² sample SD was
+0.00832 for window, 0.00764 for session, and 0.00818 for month. This is ordinary
+checkpoint variation rather than optimizer collapse. However, all arms show a
+large 0.24-0.28 train-validation R² gap, consistent with cross-month/session
+generalisation difficulty.
+
+Per-session evidence at the selected Session-balanced checkpoint:
+
+- `indy_20161206_02`: 338 windows, R² 0.2241;
+- `indy_20161207_02`: 192 windows, R² 0.7332;
+- `indy_20161212_02`: 250 windows, R² 0.6408;
+- `indy_20161220_02`: 258 windows, R² 0.5405.
+
+The December 6 session is much harder and contributes 32.6% of pooled
+validation windows. This makes a single pooled validation minimum sensitive to
+one session and reinforces the earlier month-drift finding; it is not evidence
+of corrupted data. All 37 sessions still pass checksum, provenance, schema,
+shape, and finite-value checks.
+
+Artifacts:
+
+- `results/metrics/indy_32ch_sampling_comparison.json` — complete seed-42
+  histories, selected metrics, sampling exposures and per-session results;
+- `results/figures/indy_32ch_sampling_comparison.png` — four-panel loss/R²
+  comparison;
+- `results/large/indy_32ch_sampling_{window,session,month}_checkpoint.pt` —
+  validation-selected seed-42 diagnostic checkpoints.
+
+Decision: Session-balanced is the provisional direction because it has the
+lowest validation loss, highest validation R², and smallest generalisation gap.
+Its R² advantage over Month-balanced is only 0.0094, so one seed is insufficient
+for promotion. Reuse this completed seed-42 CPU run and train only seeds 43/44
+across all three sampling policies. Within each new seed, preserve identical
+initialization across samplers. Keep the original minimum pooled-validation-loss
+checkpoint rule so the reused seed 42 and new seeds remain directly comparable;
+report session-macro loss and worst-session R² as additional diagnostics.
+Compare mean, sample SD, worst-session R² and per-seed wins. Keep January
+locked, do not remove any session, and do not begin broad hyperparameter tuning
+until sampling variance is measured.
+
+Implementation prepared 2026-07-19: `train_sampling_comparison.py` now defaults
+to CPU, imports the compatible seed-42 result above, and trains only seeds 43/44
+across window/session/month sampling (six new arms, nine arms in the aggregate).
+It verifies that the reused configuration and chronological split match before
+training. The new run preserves the seed-42 artifacts above and writes:
+
+- `results/metrics/indy_32ch_sampling_seed_sweep.json` — every seed-level
+  history plus mean/sample-SD, per-session and per-seed-win summaries;
+- `results/figures/indy_32ch_sampling_seed_sweep.png` — mean curves with ±1
+  sample-SD bands;
+- `results/large/indy_32ch_sampling_seed{43,44}_{strategy}_checkpoint.pt` — six
+  new seed-specific diagnostic checkpoints; the three existing seed-42
+  checkpoints remain the seed-42 source.
+
+Run from the repository root with
+`python models/indy_32ch/train_sampling_comparison.py`. The full CPU sweep is
+expected to take roughly 40 minutes on the current Mac. The script still refuses
+to load the test split.
+
+### LOG-096 - R² collapse localised to MPS training path, not dirty sessions
+
+Question: why do all three 37-session sampling runs collapse after epoch one
+when earlier causal models reached roughly 0.57-0.63 R²?
+
+Evidence: the user ran all three sampling policies on MPS. Window-, session-,
+and month-balanced arms all followed the same trajectory toward normalized MSE
+approximately 1 and R² approximately 0. Their pre-clipping gradient norms were
+roughly 3,700-6,200. Because changing the sampler did not change the failure,
+sampling and isolated dirty sessions are not sufficient explanations.
+
+Control: reran the first three window-weighted epochs on CPU with the same 29
+train / 4 validation sessions, seed 42, 11,175 windows per epoch, model,
+preprocessing, learning rate 3e-4, no augmentation, and gradient clip 1. CPU
+train R² improved 0.5840 -> 0.6316 -> 0.6483 while gradient norm stayed
+0.918-0.968 on average. The MPS arm fell 0.4580 -> 0.1864 -> -0.0126 with
+gradient norm 3,750-5,448 on average.
+
+Artifact:
+
+- `results/metrics/indy_32ch_cpu_parity_diagnostic.json` — exact three-epoch
+  CPU/MPS comparison and reproduction command.
+
+Interpretation: high confidence that the current collapse is in the MPS
+training path. The exact subcomponent is not yet isolated; candidates include
+the MPS GRU backward path and/or its interaction with global gradient clipping.
+This is a backend-parity failure, not evidence that the 29-session training set
+is corrupt. The one higher normalized-input session (`indy_20160630_01`, max
+32.58 but only 0.05% of values above 10) trains normally on CPU and should not
+be removed based on this run.
+
+Reconciliation with historical R²: the latest fully causal eight-session smoke
+test was CPU-only and used six October sessions to predict October 17/24,
+reaching eval/test R² 0.578/0.585. Older 0.63 and 0.755 claims used near-session,
+burned interpolation references and often three-seed evaluation; some retired
+pipelines were later found to use session-wide preprocessing. The present split
+uses April-October training and future December validation, so its validation
+R² is expected to be lower even after the optimizer is fixed.
+
+Decision: invalidate the MPS comparison as model evidence. Use CPU until a
+minimal CPU/MPS parity check passes, then rerun the sampler comparison. Do not
+remove sessions based on the failed MPS run, and keep January test locked.
+
+### LOG-095 - Fair three-policy sampling comparison prepared; test remains locked
+
+Request: train otherwise identical 32-channel causal models with natural
+window-weighted, session-balanced, and month-balanced training windows so the
+effect of sampling can be measured directly.
+
+Method: added `models/indy_32ch/train_sampling_comparison.py`. Every strategy
+starts from the same model state and uses the same training/validation data,
+training-derived channel mapping and normalization, optimizer, epoch count,
+batch size, and exactly 11,175 sampled windows per epoch. Window sampling uses
+each available window once; session sampling gives all 29 training sessions
+equal exposure; month sampling gives the four training months equal exposure
+and balances sessions within each month. Validation is inference-only and
+selects one checkpoint per strategy. The January test split is not loaded.
+
+Command:
+
+`python models/indy_32ch/train_sampling_comparison.py`
+
+Expected artifacts after the user runs the experiment:
+
+- `results/metrics/indy_32ch_sampling_comparison.json` — complete histories,
+  sampling exposure, validation metrics and per-validation-session R².
+- `results/large/indy_32ch_sampling_{window,session,month}_checkpoint.pt` — one
+  validation-selected diagnostic checkpoint per sampling policy.
+- `results/figures/indy_32ch_sampling_comparison.png` — comparable train and
+  validation loss/R² curves.
+
+Verification before the full run: 14 unit/causality tests pass. The real 29
+training sessions produce 11,175 windows per epoch. First-epoch month exposure
+is 33.2%/33.7%/10.9%/22.2% for natural window sampling,
+24.1%/13.8%/24.1%/38.0% for session-balanced sampling, and approximately 25%
+per month for month-balanced sampling.
+
+Decision: do not infer dirty sessions from the earlier five-epoch collapse.
+Run this controlled comparison first and use December validation loss plus
+per-session R² to choose the sampling policy. Keep January locked until the
+sampling and all other hyperparameters are frozen.
+
+### LOG-094 - Full 37-session Indy audit confirms substantial month drift
+
+Question: are apparently poor sessions corrupted, or does the Indy input/target
+distribution genuinely change from month to month?
+
+Method: audited all 37 raw MAT files and their chronological processed NPZ
+artifacts; verified checksums, embedded provenance, schema, shapes, dtypes and
+finite values. Computed session duration, 96-channel count statistics, prefix
+channel availability, within-session stability, velocity statistics and
+count/speed association. Compared six recording months using robust monthly
+summaries, Kruskal-Wallis tests, within-versus-between-month distances,
+pseudo-F permutation tests (5,000 shuffles), leave-one-session-out nearest-
+centroid classification, pairwise distribution distances and a sensitivity
+analysis excluding the one high-priority normalization-risk session.
+
+Command:
+
+`python experiments/active/indy_month_drift_analysis.py --verify-raw-checksums`
+
+Files:
+
+- `experiments/active/indy_month_drift_analysis.py` — read-only, reproducible
+  37-session audit and month-drift analysis.
+- `experiments/active/indy_month_drift_analysis.ipynb` — executed narrative
+  notebook that reads the verified outputs and can recompute them on demand.
+- `data/processed/indy_loco/indy/{train,validation,test}/*.npz` — chronological
+  counts-only artifacts inspected by the analysis.
+- `data/raw/indy_loco/*.mat` — immutable sources used only for checksum and
+  provenance verification.
+
+Artifacts:
+
+- `results/metrics/indy_session_quality.csv` — one row per session.
+- `results/metrics/indy_month_summary.csv` — one row per month.
+- `results/metrics/indy_month_pairwise.csv` — all month-pair distances.
+- `results/metrics/indy_month_drift_analysis.json` — integrity, statistical
+  tests, separation metrics, sensitivity results and quality flags.
+- `results/figures/indy_month_drift_overview.png` — monthly neural/behavioral
+  drift overview.
+- `results/figures/indy_session_quality_overview.png` — session-level audit.
+
+Results:
+
+- Inventory and integrity: 37/37 raw and processed sessions, 8.108 hours, six
+  months; zero checksum, provenance, schema, shape or non-finite-value failures.
+- Neural counts drift strongly with time: session mean firing rate Spearman
+  rho=-0.807 (p=1.58e-9), count zero fraction rho=+0.831 (p=1.85e-10).
+  Monthly median firing falls from 17.59 Hz in April to 8.54 Hz in December.
+- Month identity is recoverable from counts: selected-32 log-rate features give
+  72.97% leave-one-out nearest-centroid accuracy versus a 16.96% shuffled null;
+  pseudo-F permutation p=0.00020. Between-month distance is 1.351 times the
+  within-month distance. All-96 rates give 70.27% accuracy.
+- Target drift is weaker and more overlapping: velocity profiles give 35.14%
+  month accuracy, negative silhouette, and no significant chronological trend
+  in RMS speed (rho=0.220, p=0.191).
+- The conclusion remains after excluding `indy_20170124_01`: selected-32 month
+  accuracy rises to 77.78% and permutation p remains 0.00020.
+- No session is technically corrupt. `indy_20170124_01` is high priority only
+  because a selected channel is silent during the 60-second calibration prefix
+  and later becomes active, which makes naive per-session division by nearly
+  zero variance explode. Seven other sessions are medium-priority inspection
+  cases, not automatic exclusion candidates.
+
+Interpretation: the dataset contains real non-stationarity rather than a simple
+set of broken files. Neural input scale and channel composition change much more
+cleanly by month than movement kinematics. Internally, sessions remain stable
+(median first-half/second-half channel-rate Spearman 0.989), so deleting entire
+months would throw away valid training diversity. Because session duration also
+varies strongly, concatenating every training window overweights long April and
+June recordings and can bias the model toward early-month input statistics.
+
+Decision: retain all sessions for now. Keep channel selection and scaling
+training-only with a variance floor, evaluate strictly by held-out month, report
+per-session/per-month R², and compare ordinary window sampling with session-
+balanced and month-balanced training. Use validation months for model choice and
+touch the final test month only once.
+
 ### LOG-093 - Eight-session end-to-end causal 32-channel smoke test passes
 
 Question: before acquiring the remaining month-CV sessions, can the cleaned
@@ -2612,6 +2871,68 @@ result achieved: 0.633 single / 0.646 ensemble, strictly causal, ~74 kB int8,
 Decision: shipped config = causal wide TCN+GRU + raw+EWMA(0.2) 2-scale input.
 Ensemble (0.646, 3x) optional if size budget allows. Next levers: LFADS-lite,
 multi-task, Kalman post-filter (see NEXT_EXPERIMENTS.txt).
+
+### LOG-073 - Minimal counts-only Indy training artifacts
+
+Request: remove all nonessential and Chinese content from the Indy notebook and
+make the stored data match the deployable input contract.
+
+Decision: replace the exploratory 23-cell notebook with a focused English-only
+10-cell preprocessing notebook. Each v2 NPZ stores `(96, bins)` uint8 M1 counts
+as the only model input, `(bins, 2)` float32 causal fingertip velocity as the
+supervised target, and minimal scalar provenance. The canonical M1 channel order
+is validated for every raw session and recorded once in the root manifest.
+Cursor, target, sampled position, timestamps, channel strings/areas, unit counts,
+S1 counts, waveforms, plots, exploratory summaries, and model-loading examples
+are not copied into the artifacts. The notebook retains checksum validation,
+strictly causal processing, atomic split-aware writes, inventory/manifest output,
+and final 29/4/4 validation. Existing v1 artifacts are overwritten on the next
+full notebook run; the loader temporarily supports both schemas during migration.
+
+### LOG-072 - Fixed chronological 29/4/4 processed split
+
+Request: save the newly processed Indy artifacts directly into the existing
+train, validation, and test folders using an approximately 80/10/10 split.
+
+Decision: use complete sessions and calendar order, never random time windows.
+Train contains 29 sessions from 2016-04 through 2016-10 (78.4%), validation is
+the four 2016-12 sessions (10.8%), and the four 2017-01 sessions are locked test
+(10.8%). The canonical mapping lives in `configs/datasets/indy_sessions.yaml`.
+The preprocessing notebook writes and validates the three folders, records the
+split in `manifest.json` and `session_inventory.csv`, and the model loader resolves
+canonical or alias names through that same mapping. Nested leave-one-month-out
+remains the preferred final drift evaluation; the fixed split is the stable
+baseline and hyperparameter-development surface.
+
+### LOG-071 - Complete Indy inventory and notebook-only preprocessing migration
+
+Request: keep all raw recordings untouched, replace the old eight-session
+preprocessing script with a readable notebook, write future model-ready data to
+an Indy-specific output directory, and remove the retired processed method.
+
+Method: registered all 37 Zenodo v2 Indy session names and MD5 checksums. Audited
+the local raw collection without writing to it: the sessions span 96/192 neural
+channels, always contain 96 M1 channels, optionally contain 96 S1 channels, use
+3/6 fingertip fields, and expose 3/5 unit slots. The notebook uses 40 ms event
+counts, causal latest-sample-at-bin-end kinematic alignment, forward-only
+Butterworth filtering, and backward-difference velocity.
+
+Files:
+  - data/processing/indy_loco/indy/prepare_indy_model_ready.ipynb -- raw structure walkthrough, checksum gate, QC, figures, causal conversion, and 37-output validation
+  - configs/datasets/indy_sessions.yaml -- official 37-session checksum inventory and canonical paths
+  - src/intent_decoder/data/indy.py -- canonical nested raw/new processed loader with metadata-based M1 alignment
+  - data/processed/indy_loco/indy/README.md -- new NPZ schema and provenance contract
+  - data/processing/indy_loco/build_bin_40ms_causal_counts.py -- deleted retired eight-session script
+  - data/processed/indy_loco/bin_40ms_causal_counts/ -- deleted retired generated artifacts and method documentation
+
+Artifacts: the notebook is intentionally unexecuted at handoff. When the user
+runs it, it writes 37 canonical-name NPZ files, `session_inventory.csv`, and
+`manifest.json` under `data/processed/indy_loco/indy/`.
+
+Decision: raw MAT is the immutable scientific source; model-ready NPZ preserves
+session boundaries and all recorded channels. Current training receives a stable
+96-M1 view through `m1_indices`. Channel selection, normalization, and causal
+EWMA remain training-time operations fitted only from allowed past/training data.
 
 ### LOG-070 - EWMA alpha tuned: 0.2 is best (0.646); 2-scale multiscale config settled
 

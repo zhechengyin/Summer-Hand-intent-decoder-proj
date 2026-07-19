@@ -1,5 +1,93 @@
 dataset: indy_loco
 source: https://zenodo.org/records/3854034
+subject: indy
+raw_dir: data/raw/indy_loco/indy
+processed_dir: data/processed/indy_loco/indy
+
+# Canonical Zenodo v2 inventory. The preprocessing notebook verifies every raw
+# file against these checksums before it writes model-ready artifacts.
+official_indy_sessions:
+  indy_20160407_02: 63ab3e2e55652fb5709eb024642111cf
+  indy_20160411_01: cee905e1021535626a442748e5612643
+  indy_20160411_02: 1f7b4d964f931411789d1aa2ff10f018
+  indy_20160418_01: ae16e46a6f1614103b451c17674ff3eb
+  indy_20160419_01: e5155b431035f32ee37c81915db755fc
+  indy_20160420_01: 02546235653357a08430b5dd8d5d1265
+  indy_20160426_01: cfbeaffc1717e2dd11ee8c5ac6f7a297
+  indy_20160622_01: c33d5fff31320d709d23fe445561fb6e
+  indy_20160624_03: 9aa921f0788f6ccd32a1b8808c18eabd
+  indy_20160627_01: de58797d649bdf2bec589c074ee991d2
+  indy_20160630_01: 197413a5339630ea926cbd22b8b43338
+  indy_20160915_01: ef6a95c5a1a8d2126b90f5be0505e398
+  indy_20160916_01: 5587d27f46efa3c09a7f589f2addf3a9
+  indy_20160921_01: 788a0fc779bdfffa8388b1108e1d1ce5
+  indy_20160927_04: c7f84c83f10494b34ec836ed2b3c9d58
+  indy_20160927_06: af9b8bacc1079e5a1edb2bd6eadecfb8
+  indy_20160930_02: 87bd8c05d60200a5e0d86fd8e88748e2
+  indy_20160930_05: 30a8dc9229306d81288e8ae39c9e4942
+  indy_20161005_06: 5ea300952642e0fc54245144499db9bb
+  indy_20161006_02: 8e19ada5feee4cdef47a0ec66503076f
+  indy_20161007_02: 6426f0fe91a9a90f66cbb17c44e20c0d
+  indy_20161011_03: 90dc409a749b3c0da72b901d2b5d106e
+  indy_20161013_03: 8f92ff163bc409134af6ebd161dec826
+  indy_20161014_04: d8cf4a2866f56b4c46513ff9fe5ddaf4
+  indy_20161017_02: 7a1bff8e115e7e58eae7cbc63a72ed98
+  indy_20161024_03: cc8e198ae6330338af584d9e1204800d
+  indy_20161025_04: 13589b4c7cfad158e5a1aebd2d71f6e3
+  indy_20161026_03: 3b5f2c35eecc5175c526869d50f2eada
+  indy_20161027_03: bae4f5b76c50e2e2aed775e6d2482fc3
+  indy_20161206_02: ce33b61b7870e635bea5cab7601d27c3
+  indy_20161207_02: b984a86fd30417fa8301136102caf2ad
+  indy_20161212_02: 41f420af06373b456ede45da0536a10f
+  indy_20161220_02: ad57bf06ac505e4d70ae7100c721b8aa
+  indy_20170123_02: a3ce046e0b67b489d19e34a31232d512
+  indy_20170124_01: ea1721fefe443420a356b4f93f5bb731
+  indy_20170127_03: 3d77802c59e3e4ebe6778326cfc68c0a
+  indy_20170131_02: 2790b1c869564afaa7772dbf9e42d784
+
+# Fixed chronological baseline. Splits are session-level (never random windows):
+# 2016-04..10 train, 2016-12 validation, and the future 2017-01 month locked as test.
+chronological_split:
+  train:
+    - indy_20160407_02
+    - indy_20160411_01
+    - indy_20160411_02
+    - indy_20160418_01
+    - indy_20160419_01
+    - indy_20160420_01
+    - indy_20160426_01
+    - indy_20160622_01
+    - indy_20160624_03
+    - indy_20160627_01
+    - indy_20160630_01
+    - indy_20160915_01
+    - indy_20160916_01
+    - indy_20160921_01
+    - indy_20160927_04
+    - indy_20160927_06
+    - indy_20160930_02
+    - indy_20160930_05
+    - indy_20161005_06
+    - indy_20161006_02
+    - indy_20161007_02
+    - indy_20161011_03
+    - indy_20161013_03
+    - indy_20161014_04
+    - indy_20161017_02
+    - indy_20161024_03
+    - indy_20161025_04
+    - indy_20161026_03
+    - indy_20161027_03
+  validation:
+    - indy_20161206_02
+    - indy_20161207_02
+    - indy_20161212_02
+    - indy_20161220_02
+  test:
+    - indy_20170123_02
+    - indy_20170124_01
+    - indy_20170127_03
+    - indy_20170131_02
 
 aliases:
   train1: indy_20161005_06
