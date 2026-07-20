@@ -80,6 +80,22 @@ checkpoints, a complete JSON result at
 `results/figures/indy_32ch_sampling_seed_sweep.png`. The earlier seed-42 files
 are deliberately preserved as historical evidence.
 
+### Frozen sampling decision
+
+The completed CPU seed 42/43/44 aggregate freezes `session` /
+Session-balanced sampling for subsequent model development:
+
+| Sampling | Validation loss, mean +/- SD | Validation R², mean +/- SD | Seed wins |
+| --- | ---: | ---: | ---: |
+| Window-weighted | 0.5329 +/- 0.0112 | 0.5080 +/- 0.0113 | 0/3 |
+| **Session-balanced** | **0.5074 +/- 0.0221** | **0.5342 +/- 0.0198** | **3/3** |
+| Month-balanced | 0.5259 +/- 0.0066 | 0.5183 +/- 0.0077 | 0/3 |
+
+Session-balanced also has the highest session-macro validation R² (0.5468) and
+the smallest train-validation R² gap (0.2321). It is now fixed for Optuna and
+other hyperparameter comparisons; the sampling script remains only as a
+reproducible experiment. January test data is still locked.
+
 For a short pipeline check without committing to the full comparison:
 
 ```bash

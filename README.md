@@ -38,5 +38,8 @@ their outcomes were preserved in
 The 32-channel counts-plus-causal-EWMA pipeline is the current research candidate.
 Its code now also uses forward-only target filtering, backward differences,
 past-only prefix normalization and a strictly causal model. All earlier scores
-must be rerun. It still needs full-session-pool evaluation, an independently
-validated drift threshold, checkpoint, int8 export, and MCU timing before promotion.
+were superseded by the corrected pipeline. All chronological training and
+validation sessions have now been evaluated across CPU seeds 42/43/44, and
+session-balanced training is the frozen sampler. It still needs validation-only
+hyperparameter optimization, an independently validated drift threshold, one
+locked January test evaluation, checkpoint promotion, int8 export, and MCU timing.

@@ -1400,6 +1400,72 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-098 - Three-seed sampling sweep completes; session-balanced sampling frozen
+
+Experiment time: completed 2026-07-19 17:54:02 UTC (13:54:02 Toronto),
+elapsed 2,835.2 seconds (47 minutes 15 seconds) for the seed-43/44 continuation.
+Seed 42 was reused exactly from LOG-097 rather than retrained.
+
+Question: does the provisional seed-42 advantage of session-balanced training
+persist across random initialization, or is it ordinary single-seed variance?
+
+Protocol: CPU seeds 42, 43, and 44; 25 epochs per sampling arm; 29
+April-October training sessions; 4 December validation sessions; 11,175 draws
+per epoch; 32 raw-count channels plus their causal EWMA features; learning rate
+3e-4 with cosine decay; AdamW weight decay 1e-3; dropout 0.3; no input noise or
+channel dropout; global gradient clip 1. Within every seed, window-, session-,
+and month-balanced arms used identical initial weights, preprocessing, optimizer,
+sample count, and epoch count. Minimum pooled December normalized MSE selected
+each checkpoint. January test artifacts were not loaded.
+
+Cross-seed selected-checkpoint results (mean +/- sample SD):
+
+| Sampling | Epoch | Train R² | Validation loss | Validation R² | Macro validation R² | Worst-session R² | R² gap | Seed wins |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Window-weighted | 17.33 +/- 2.08 | 0.7797 +/- 0.0054 | 0.5329 +/- 0.0112 | 0.5080 +/- 0.0113 | 0.5218 +/- 0.0104 | 0.2043 +/- 0.0233 | 0.2716 +/- 0.0164 | 0/3 |
+| **Session-balanced** | **18.33 +/- 1.53** | **0.7663 +/- 0.0033** | **0.5074 +/- 0.0221** | **0.5342 +/- 0.0198** | **0.5468 +/- 0.0182** | **0.2457 +/- 0.0415** | **0.2321 +/- 0.0195** | **3/3** |
+| Month-balanced | 13.00 +/- 4.36 | 0.7583 +/- 0.0195 | 0.5259 +/- 0.0066 | 0.5183 +/- 0.0077 | 0.5305 +/- 0.0067 | 0.2301 +/- 0.0299 | 0.2400 +/- 0.0179 | 0/3 |
+
+Session-balanced per-seed validation results:
+
+- seed 42: loss 0.52313, R² 0.5211, selected epoch 17;
+- seed 43: loss 0.48213, R² 0.5570, selected epoch 18;
+- seed 44: loss 0.51683, R² 0.5244, selected epoch 20.
+
+Session-balanced also produced the highest across-seed mean R² on every
+individual December validation session:
+
+- `indy_20161206_02`: 0.2457 +/- 0.0415;
+- `indy_20161207_02`: 0.7307 +/- 0.0023;
+- `indy_20161212_02`: 0.6562 +/- 0.0157;
+- `indy_20161220_02`: 0.5547 +/- 0.0191.
+
+Interpretation: random initialization changes the absolute validation result,
+especially on the difficult December 6 session, but not the sampling ranking.
+Session balancing gives a lower train R² than window weighting while improving
+validation R² and reducing the generalisation gap, consistent with reduced
+overfitting to long sessions rather than under-training. Month balancing is the
+least seed-variable strategy, but its mean performance is lower and it wins no
+seed.
+
+Artifacts:
+
+- `results/metrics/indy_32ch_sampling_seed_sweep.json` — nine-arm histories,
+  selected metrics, cross-seed summaries, and per-session diagnostics;
+- `results/figures/indy_32ch_sampling_seed_sweep.png` — mean loss/R² curves with
+  +/-1 sample-SD bands;
+- `results/large/indy_32ch_sampling_seed{43,44}_{window,session,month}_checkpoint.pt`
+  — six new checkpoints, with the three LOG-097 seed-42 checkpoints reused.
+
+Decision: freeze training sampling as **session-balanced**. Window- and
+month-balanced sampling are retained only as documented comparison baselines.
+The next model-selection phase may tune optimizer and regularization parameters,
+but every trial must keep session-balanced exposure and the same causal data
+protocol. Use pooled validation loss as the primary selection metric and retain
+session-macro R² and worst-session R² as guardrails. Keep January test locked
+until sampling, hyperparameters, architecture, epoch-selection policy, and seed
+protocol are all frozen.
+
 ### LOG-097 - CPU seed-42 sampling comparison completes; session-balanced is provisional winner
 
 Experiment time: completed 2026-07-18 22:43:30 UTC (18:43:30 Toronto),

@@ -34,7 +34,22 @@ code. Their outcomes remain in `docs/history/`. Supported code under `src/`,
 - Month-level claims require month-level outer folds.
 - Detector thresholds require nested or separately held-out validation.
 
+## Training sampling
+
+- The Indy 32-channel decoder uses **session-balanced** training-window sampling.
+- This decision is frozen from the CPU seed 42/43/44 comparison: session-balanced
+  achieved the lowest pooled December validation loss in all three seeds and the
+  highest cross-seed mean pooled and session-macro R².
+- Window-weighted and month-balanced sampling remain documented comparison
+  baselines, not active tuning choices.
+- Hyperparameter optimization must keep the sampler fixed so Optuna trials do not
+  confound optimizer/model effects with data-exposure effects.
+- January test data remains locked until preprocessing, hyperparameters,
+  architecture, epoch-selection policy, and seed protocol are all frozen.
+
 ## Model status
 
 No historical checkpoint is promoted or retained as a runnable baseline. The
-32-channel pipeline remains a candidate until checkpoint/export/hardware evidence exists.
+32-channel pipeline has a frozen session-balanced sampler but remains a candidate
+until hyperparameter selection, locked-test evaluation, checkpoint/export, and
+hardware evidence exist.

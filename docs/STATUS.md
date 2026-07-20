@@ -1,6 +1,6 @@
 # Current project status
 
-Last audited: 2026-07-18.
+Last audited: 2026-07-20.
 
 This is the only document intended to state the current project truth. Historical
 claims remain in `history/EXPERIMENT_LOG.md` for provenance.
@@ -31,6 +31,8 @@ with Indy/Loco training because its input feature and behavioral target differ.
   stable 96-channel M1 count input plus two-axis velocity target in each NPZ under
   `data/processed/indy_loco/indy/{train,validation,test}/` using a fixed
   chronological 29/4/4 session split. January 2017 is the locked test month.
+- The notebook has produced all 37 processed session artifacts and
+  `manifest.json` in the chronological 29/4/4 train/validation/test layout.
 - The loader now samples kinematics using the latest already-observed sample at each
   bin end. It no longer uses linear interpolation across a future 250 Hz sample.
 - An eight-session causal smoke test now trains the 32-channel candidate end to
@@ -41,18 +43,29 @@ with Indy/Loco training because its input feature and behavioral target differ.
   test R² 0.6325, but its centered-Gaussian input preprocessing used future samples.
 - Historical research supports counts + causal EWMA and 32 channels as the most
   promising candidate; its code is retired and its old scores are not reusable.
+- The corrected 32-channel causal model has now been trained on the complete
+  29-session training split and evaluated on all four December validation
+  sessions using CPU. A controlled seed 42/43/44 comparison froze the training
+  sampler as **session-balanced**: it won 3/3 seeds, with mean validation R²
+  0.5342 +/- 0.0198 and normalized MSE 0.5074 +/- 0.0221. Window- and
+  month-balanced sampling are no longer active candidates.
+- The four January sessions remained locked and were not loaded during the
+  sampling comparison.
 - Historical outcomes and caveats are preserved in
   `history/ARCHIVE_RETIREMENT.md` and `history/EXPERIMENT_LOG.md`.
 
 ## What does not yet exist
 
 - No promoted 32-channel checkpoint or int8 export.
-- The new 37-session preprocessing notebook has intentionally not been executed;
-  the user will generate and validate the new processed artifacts locally.
-- The corrected causal implementation has not yet been benchmarked across the
-  complete session pool. The eight-session smoke test cannot replace month-CV,
-  and old scores cannot be reused because the target-velocity definition and
-  normalization protocol changed.
+- No Optuna hyperparameter sweep has been implemented or run. Learning rate,
+  weight decay, dropout, augmentation, and model capacity remain at baseline
+  values rather than validated optima.
+- `session_inventory.csv`, which the processing notebook is designed to emit,
+  is currently absent from the processed Indy directory. The 37 NPZ files and
+  manifest used by training are present; regenerate the inventory on the next
+  notebook audit rather than reconstructing it manually.
+- The complete-pool result is a chronological December validation benchmark,
+  not nested month cross-validation and not a January test result.
 - No independently validated drift threshold. The historical 0.65 threshold was
   chosen after observing the same 25 sessions.
 - No evidence that a fixed 60-second observation is sufficient; the historical
@@ -64,7 +77,7 @@ with Indy/Loco training because its input feature and behavioral target differ.
 
 | Path | Status | Use |
 | --- | --- | --- |
-| `models/indy_32ch/` | candidate slot | Destination for the future validated causal checkpoint and manifest. |
+| `models/indy_32ch/` | active candidate; sampler frozen | Session-balanced causal TCN+GRU pending hyperparameter selection, locked-test evaluation, export, and hardware validation. |
 
 No historical checkpoint is a runnable model of record.
 
@@ -79,5 +92,7 @@ The former archive/legacy/compatibility code was deleted after documentation.
 
 ## Current research question
 
-Can the corrected 32-channel end-to-end causal pipeline retain useful month-level
-performance and support a drift threshold selected without outer-fold leakage?
+Can session-balanced training improve the corrected 32-channel causal decoder
+through validation-only hyperparameter optimization while retaining robust
+performance on every December session? January remains locked until the full
+configuration is frozen.
