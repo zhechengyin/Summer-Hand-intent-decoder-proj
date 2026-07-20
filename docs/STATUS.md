@@ -3,7 +3,7 @@
 Last audited: 2026-07-20.
 
 This is the only document intended to state the current project truth. Historical
-claims remain in `history/EXPERIMENT_LOG.md` for provenance.
+claims remain in `docs/history/EXPERIMENT_LOG.md` for provenance.
 
 ## Objective
 
@@ -51,15 +51,18 @@ with Indy/Loco training because its input feature and behavioral target differ.
   month-balanced sampling are no longer active candidates.
 - The four January sessions remained locked and were not loaded during the
   sampling comparison.
+- `models/indy_32ch/sweep_phase1_optuna.py` is ready for the first validation-only
+  search. It is self-contained, keeps session balancing fixed, tunes learning
+  rate/AdamW weight decay/dropout jointly, and never loads January arrays.
 - Historical outcomes and caveats are preserved in
-  `history/ARCHIVE_RETIREMENT.md` and `history/EXPERIMENT_LOG.md`.
+  `docs/history/ARCHIVE_RETIREMENT.md` and `docs/history/EXPERIMENT_LOG.md`.
 
 ## What does not yet exist
 
 - No promoted 32-channel checkpoint or int8 export.
-- No Optuna hyperparameter sweep has been implemented or run. Learning rate,
-  weight decay, dropout, augmentation, and model capacity remain at baseline
-  values rather than validated optima.
+- The Phase-1 Optuna implementation exists, but no Optuna trial has been run.
+  Learning rate, weight decay, dropout, augmentation, and model capacity remain
+  at baseline values rather than validated optima.
 - `session_inventory.csv`, which the processing notebook is designed to emit,
   is currently absent from the processed Indy directory. The 37 NPZ files and
   manifest used by training are present; regenerate the inventory on the next
@@ -87,8 +90,12 @@ No historical checkpoint is a runnable model of record.
 - `data/processing/indy_loco/indy/`: reproducible Indy audit and conversion notebook.
 - `experiments/active/`: decision-changing Indy evaluation only.
 - `experiments/deepblue/`: separate-input U-M benchmark.
+- `models/indy_32ch/sweep_phase1_optuna.py`: self-contained active model-selection
+  entry point.
 
-The former archive/legacy/compatibility code was deleted after documentation.
+Superseded recent training scripts are isolated under root `history/` and are
+not imported by active code. Older archive/legacy/compatibility code remains
+deleted after documentation.
 
 ## Current research question
 

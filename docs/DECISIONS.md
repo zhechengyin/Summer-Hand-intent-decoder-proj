@@ -22,8 +22,10 @@ network is not sufficient if preprocessing or normalization reads future samples
 Target velocity also follows the causal rule: forward-only filtering plus backward
 difference. During the 60-second normalization warm-up no decoder output is valid.
 
-Known non-causal archive/model implementations are not retained as executable
-code. Their outcomes remain in `docs/history/`. Supported code under `src/`,
+Known non-causal model implementations are not part of the executable research
+surface. Their outcomes remain in `docs/history/`. A few recent superseded
+experiment scripts are isolated under root `history/` for provenance and must
+never be imported by active code. Supported code under `src/`, `models/indy_32ch/`,
 `data/processing/`, `experiments/active/` and `experiments/deepblue/` must pass
 `tests/test_causality.py`.
 

@@ -20,6 +20,9 @@ not here.
   R² curves with +/-1 sample-SD bands across the three seeds.
 - Decision: session-balanced sampling is frozen for subsequent hyperparameter
   sweeps; January test remains locked and was not loaded.
+- The Phase-1 sweep will write `metrics/indy_32ch_phase1_optuna.json`,
+  `figures/indy_32ch_phase1_optuna.png`, and the resumable study/checkpoint under
+  `large/`. These are planned outputs until the user runs the sweep.
 
 Retired EEG/fNIRS binaries and unversioned historical iter logs are not retained.
 Their reported outcomes and caveats are indexed in

@@ -1400,6 +1400,50 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-099 - Phase-1 Optuna sweep prepared; old training entry points isolated
+
+Preparation date: 2026-07-20.
+
+Question: after freezing session-balanced sampling, what learning rate, AdamW
+weight decay, and pre-GRU dropout should be carried into multi-seed confirmation?
+
+Implementation: added `models/indy_32ch/sweep_phase1_optuna.py` as the only
+active Indy model-selection entry point. The script is deliberately
+self-contained and does not import a shared `common.py` or any historical
+training script. This prevents changes to old experimental code from silently
+changing the active sweep.
+
+Search protocol:
+
+- TPE samples learning rate from `5e-5` to `1e-3` on a log scale;
+- AdamW weight decay ranges from `1e-6` to `3e-2` on a log scale;
+- pre-GRU dropout ranges from `0.10` to `0.50` in steps of `0.05`;
+- the existing baseline (`3e-4`, `1e-3`, `0.30`) is queued first;
+- default budget is 40 trials and 20 epochs per trial, seed 42;
+- session-balanced exposure, batch size 32, cosine decay, gradient clip 1,
+  model architecture, causal preprocessing, and initialization are fixed;
+- pooled December validation normalized MSE selects and prunes trials, while
+  session-macro and worst-session R-squared are recorded as guardrails;
+- January session names are recorded from the manifest, but January arrays are
+  never loaded.
+
+The study is persisted in SQLite and can resume after interruption. Planned
+outputs are `results/metrics/indy_32ch_phase1_optuna.json`,
+`results/figures/indy_32ch_phase1_optuna.png`,
+`results/large/indy_32ch_phase1_optuna.db`, and the current best checkpoint
+under `results/large/`.
+
+Repository organization: the superseded chronological baseline, completed
+three-policy sampling comparison, and its old test were moved to
+`history/indy_32ch/`. `history/README.md` explains why each file exists. Nothing
+under root `history/` is imported by the active model. The sampling result JSON
+remains as versioned decision evidence.
+
+Status: implementation prepared but no Optuna trial has been run yet. The next
+action is for the user to install the updated requirements and execute the
+Phase-1 command. Finalists must later be confirmed on seeds 43 and 44 before any
+January test evaluation.
+
 ### LOG-098 - Three-seed sampling sweep completes; session-balanced sampling frozen
 
 Experiment time: completed 2026-07-19 17:54:02 UTC (13:54:02 Toronto),

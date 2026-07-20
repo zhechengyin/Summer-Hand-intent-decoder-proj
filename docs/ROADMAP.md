@@ -24,6 +24,8 @@ Work in this order; do not resume broad architecture sweeps before these items.
    - January test remained locked and unloaded.
 
 4. **Tune optimization and regularization on validation only — next**
+   - Run `python models/indy_32ch/sweep_phase1_optuna.py`; the self-contained
+     implementation is ready and defaults to 40 trials at 20 epochs each.
    - Use session-balanced sampling for every Optuna trial.
    - Tune optimizer/regularization parameters before architecture capacity.
    - Use pooled December validation loss as the primary objective and retain

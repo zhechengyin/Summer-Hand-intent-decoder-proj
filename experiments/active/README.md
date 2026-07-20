@@ -16,6 +16,11 @@ prefix for every split, a causal velocity target, and selects a detector
 threshold only from inner validation sessions. No prediction during warm-up is
 treated as valid. All 37 sessions are now present locally. The completed CPU
 seed 42/43/44 sampling comparison selected session-balanced training in all
-three seeds. The next model experiment is an Optuna sweep of optimizer and
-regularization parameters with that sampler fixed; detector threshold work
-remains a separate nested-validation experiment.
+three seeds. The next model experiment is implemented in the self-contained
+`models/indy_32ch/sweep_phase1_optuna.py`: an Optuna sweep of learning rate,
+AdamW weight decay, and dropout with that sampler fixed. Detector threshold work
+remains a separate nested-validation experiment. Run it from the repository root:
+
+```bash
+python models/indy_32ch/sweep_phase1_optuna.py
+```

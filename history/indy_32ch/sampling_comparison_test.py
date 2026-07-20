@@ -5,7 +5,7 @@ import unittest
 
 import numpy as np
 
-from models.indy_32ch.train_sampling_comparison import (
+from history.indy_32ch.train_sampling_comparison import (
     draw_epoch_indices,
     summarize_values,
 )

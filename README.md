@@ -25,21 +25,24 @@ data/
   processed/              documented model-ready datasets
   processing/             dataset-specific Python conversion scripts
 docs/history/             historical summary and chronological experiment log
+history/                  superseded executable experiments; never imported by active code
 results/metrics/          small versioned JSON evidence
 results/large/            large regenerated logs/figures, ignored by Git
 ```
 
 ## Current truth
 
-Historical checkpoints and executable archive/legacy code were removed after
-their outcomes were preserved in
-[`docs/history/ARCHIVE_RETIREMENT.md`](docs/history/ARCHIVE_RETIREMENT.md).
+Most historical checkpoint and legacy code was removed after its outcomes were
+preserved in [`docs/history/`](docs/history/). The few recent executable files
+needed to explain the sampling decision are isolated under [`history/`](history/README.md)
+and are never imported by active code.
 
 The 32-channel counts-plus-causal-EWMA pipeline is the current research candidate.
 Its code now also uses forward-only target filtering, backward differences,
 past-only prefix normalization and a strictly causal model. All earlier scores
 were superseded by the corrected pipeline. All chronological training and
 validation sessions have now been evaluated across CPU seeds 42/43/44, and
-session-balanced training is the frozen sampler. It still needs validation-only
-hyperparameter optimization, an independently validated drift threshold, one
+session-balanced training is the frozen sampler. A self-contained Phase-1 Optuna
+entry point is ready but has not been run. The project still needs that
+validation-only optimization, an independently validated drift threshold, one
 locked January test evaluation, checkpoint promotion, int8 export, and MCU timing.

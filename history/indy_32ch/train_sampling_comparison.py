@@ -35,7 +35,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from models.indy_32ch.train_chronological_baseline import (
+from history.indy_32ch.train_chronological_baseline import (
     ALPHAS,
     AXES,
     BIN_S,

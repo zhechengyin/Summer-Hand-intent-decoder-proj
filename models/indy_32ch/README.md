@@ -15,72 +15,7 @@ Required before promotion:
 5. int8 export with accuracy comparison;
 6. measured STM32 flash, RAM, and inference time.
 
-## Chronological causal baseline
-
-`train_chronological_baseline.py` uses all 37 processed Indy sessions with the
-fixed chronological split: 29 train, 4 validation, and 4 test. The default run
-is 25 epochs. Only training sessions can update model weights, select the 32
-channels, or fit target-normalization statistics. Validation and test are
-inference-only diagnostics and never select a checkpoint. The checkpoint is
-selected using training loss only.
-
-The baseline uses a conservative learning rate, no input augmentation by
-default, gradient clipping, and a training-derived standard-deviation floor.
-The floor prevents a channel that is silent during the causal 60-second
-calibration from turning a later spike into an extremely large normalized value.
-
-Every epoch prints train/validation/test normalized MSE and mean velocity R2.
-The run writes a checkpoint, a complete JSON history, and one figure containing
-the three loss curves and three R2 curves.
-
-```bash
-../venv/bin/python models/indy_32ch/train_chronological_baseline.py
-```
-
-The four test sessions are displayed every epoch only for the requested
-diagnostic curve. Their values must not be used to change the architecture,
-hyperparameters, epoch count, preprocessing, or checkpoint. For unbiased model
-selection, use validation or nested leave-one-month-out evaluation and inspect
-the locked test result only after the full configuration is frozen.
-
-## Sampling comparison
-
-`train_sampling_comparison.py` runs a multi-seed comparison of three otherwise
-identical sampling policies. By default it imports the completed compatible
-CPU seed-42 result and trains seeds 43 and 44, producing six new arms and a
-three-seed/nine-arm aggregate:
-
-1. `window` — every training window appears once per epoch, so long sessions
-   naturally have more weight;
-2. `session` — all 29 training sessions contribute equally per epoch;
-3. `month` — the four training months contribute equally, then sessions are
-   balanced within each month.
-
-Within each newly trained seed, every strategy uses the same initial weights,
-preprocessing, optimizer, number of samples per epoch, and 25 epochs.
-Validation remains inference-only. Checkpoints use minimum pooled validation
-loss, exactly matching the existing seed-42 run; session-macro loss and
-worst-session R² are additional diagnostics. The script rejects reuse if the
-requested configuration or chronological split differs from seed 42. The
-January test artifacts are not loaded. CPU is the default because the current
-MPS path failed the CPU/MPS parity diagnostic.
-
-Run the complete comparison from the repository root:
-
-```bash
-python models/indy_32ch/train_sampling_comparison.py
-```
-
-The terminal reports each seed/strategy/epoch, pooled and session-macro
-validation metrics, worst-session R², checkpoint selection score, gradient
-norms, and month exposure. The final section reports mean ± sample SD across
-all three seeds and the number of per-seed wins. It writes six new seed-specific
-checkpoints, a complete JSON result at
-`results/metrics/indy_32ch_sampling_seed_sweep.json`, and a mean ± SD figure at
-`results/figures/indy_32ch_sampling_seed_sweep.png`. The earlier seed-42 files
-are deliberately preserved as historical evidence.
-
-### Frozen sampling decision
+## Frozen sampling decision
 
 The completed CPU seed 42/43/44 aggregate freezes `session` /
 Session-balanced sampling for subsequent model development:
@@ -96,12 +31,55 @@ the smallest train-validation R² gap (0.2321). It is now fixed for Optuna and
 other hyperparameter comparisons; the sampling script remains only as a
 reproducible experiment. January test data is still locked.
 
-For a short pipeline check without committing to the full comparison:
+The completed baseline and three-sampler entry points now live under the root
+[`history/`](../../history/README.md) folder. Their result JSON files remain
+versioned as decision evidence.
+
+## Active Phase-1 Optuna sweep
+
+`sweep_phase1_optuna.py` is the only active model-selection entry point. It is
+self-contained: it does not import `common.py`, archived training scripts, or
+code under `history/`. It jointly tunes:
+
+- learning rate: `5e-5` to `1e-3`, log scale;
+- AdamW weight decay: `1e-6` to `3e-2`, log scale;
+- pre-GRU dropout: `0.10` to `0.50`, step `0.05`.
+
+Every trial uses 20 epochs by default, seed 42, session-balanced training,
+batch size 32, cosine decay, gradient clip 1, no augmentation, and identical
+initial weights and sampled training windows. The current baseline
+`lr=3e-4`, `weight_decay=1e-3`, `dropout=0.30` is queued as trial 0.
+
+Only the 29 training and four December validation sessions are loaded. Pooled
+validation normalized MSE is the Optuna objective; session-macro and
+worst-session R² are stored as guardrails. The January test split is never
+loaded.
+
+Install the updated requirements and run from the repository root:
 
 ```bash
-python models/indy_32ch/train_sampling_comparison.py \
-  --seeds 43 \
-  --no-reuse-seed42 \
-  --epochs 1 \
-  --device cpu
+python -m pip install -r requirements.txt
+python models/indy_32ch/sweep_phase1_optuna.py
 ```
+
+The default adds 40 trials. For a short pipeline check:
+
+```bash
+python models/indy_32ch/sweep_phase1_optuna.py --validate-only
+```
+
+The SQLite study is resumable: running the default command again adds another
+40 trials to the same study. Completed and pruned trials are preserved if the
+process is interrupted. Outputs are:
+
+- `results/large/indy_32ch_phase1_optuna.db` — resumable Optuna study;
+- `results/metrics/indy_32ch_phase1_optuna.json` — inspectable trial histories,
+  selected metrics, protocol, and ranking;
+- `results/figures/indy_32ch_phase1_optuna.png` — objective and parameter plots;
+- `results/large/indy_32ch_phase1_best_checkpoint.pt` — current best
+  validation-selected checkpoint.
+
+Do not use the best Phase-1 checkpoint as the final model. The top five trials
+must first be confirmed on seeds 43 and 44, after which later phases may examine
+paired-electrode dropout and model capacity. January remains locked until every
+phase and the final seed protocol are frozen.
