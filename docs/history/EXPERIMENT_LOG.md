@@ -1400,6 +1400,85 @@ tools/way_gal_* + src/ + main.py -> legacy/. Imports rewritten and smoke-tested.
 
 ## Entry Template
 
+### LOG-100 - Phase-1 Optuna sweep completes; low-dropout high-LR region advances
+
+Experiment time: 2026-07-21 16:52:57 to 20:19:33 UTC (12:52:57 to
+16:19:33 Toronto), approximately 3 hours 27 minutes.
+
+Question: with session-balanced sampling frozen, which learning rate, AdamW
+weight decay, and pre-GRU dropout region improves the fully causal 32-channel
+decoder on the four December validation sessions?
+
+Protocol: CPU seed 42; 40 TPE trials; at most 20 epochs per trial; 29 training
+sessions and four validation sessions; 11,175 session-balanced training windows
+per full epoch; batch size 32; cosine schedule; gradient clip 1; no input noise
+or channel dropout. Search ranges were learning rate `5e-5..1e-3` log scale,
+weight decay `1e-6..3e-2` log scale, and dropout `0.10..0.50` in steps of 0.05.
+Pooled validation normalized MSE was the objective. The MedianPruner used eight
+startup trials and eight warm-up epochs. January test arrays were not loaded.
+
+Completion: 29 complete, 11 pruned, zero failed. The study evaluated 684 epochs
+instead of the unpruned maximum of 800, a 14.5% epoch reduction. SQLite and JSON
+agree on the final trial states.
+
+Best trial versus the queued within-study baseline:
+
+| Configuration | Trial | LR | Weight decay | Dropout | Epoch | Validation loss | Pooled validation R² | Macro R² | Worst-session R² | Train-validation R² gap |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Baseline | 0 | 0.000300 | 0.001000 | 0.30 | 17 | 0.530948 | 0.517261 | 0.530627 | 0.198875 | 0.238443 |
+| **Phase-1 objective winner** | **32** | **0.000914** | **0.013712** | **0.10** | **7** | **0.482066** | **0.557579** | **0.567371** | **0.319848** | **0.210542** |
+
+Relative to trial 0, trial 32 reduced pooled validation loss by 9.21%, raised
+pooled R² by 0.0403, raised macro R² by 0.0367, raised worst-session R² by
+0.1210, and reduced the train-validation R² gap by 0.0279.
+
+Top five objective-ranked trials:
+
+| Rank | Trial | LR | Weight decay | Dropout | Epoch | Validation loss | Validation R² | Macro R² | Worst-session R² |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 32 | 0.000914 | 0.013712 | 0.10 | 7 | 0.482066 | 0.557579 | 0.567371 | 0.319848 |
+| 2 | 22 | 0.000850 | 0.004532 | 0.10 | 7 | 0.482424 | 0.557763 | 0.567463 | 0.317394 |
+| 3 | 16 | 0.000918 | 0.008840 | 0.10 | 7 | 0.483701 | 0.556009 | 0.565840 | 0.316778 |
+| 4 | 31 | 0.000917 | 0.024976 | 0.10 | 7 | 0.484157 | 0.555115 | 0.565287 | 0.314333 |
+| 5 | 11 | 0.000938 | 0.005060 | 0.10 | 7 | 0.484222 | 0.555791 | 0.565588 | 0.315751 |
+
+Trial 22 has slightly higher pooled and macro R² than trial 32, but trial 32 is
+the declared winner because the study objective is pooled normalized MSE. Their
+loss difference is only 0.000358 (0.074%), so Phase 1 does not establish a
+meaningful winner between them.
+
+Per-session R² for trial 32 versus trial 0:
+
+| Validation session | Baseline R² | Trial 32 R² | Change |
+| --- | ---: | ---: | ---: |
+| `indy_20161206_02` | 0.198875 | 0.319848 | +0.120973 |
+| `indy_20161207_02` | 0.736193 | 0.735759 | -0.000433 |
+| `indy_20161212_02` | 0.648015 | 0.668125 | +0.020110 |
+| `indy_20161220_02` | 0.539425 | 0.545752 | +0.006327 |
+
+Interpretation: the aggregate improvement is not produced by sacrificing the
+difficult December 6 session; that session accounts for the largest robustness
+gain. However, every top-five trial uses dropout 0.10, the lower search bound,
+and selects epoch 7. Learning rate concentrates around `8.5e-4..9.4e-4`, while
+near-tied results span weight decay `0.0045..0.0250`. This supports a low-dropout,
+high-learning-rate region but does not yet identify a stable weight decay or
+prove that dropout 0.10 is optimal rather than range-limited.
+
+Decision: Phase 1 is complete, but trial 32 is not promoted. Before the planned
+seed 43/44 confirmation, run a small new-study boundary refinement that includes
+dropout below 0.10 and preserves candidates with materially different weight
+decay. Then confirm a small set of distinct finalists across seeds 42/43/44.
+Do not resume this database with changed ranges, and keep January locked.
+
+Artifacts:
+
+- `results/metrics/indy_32ch_phase1_optuna.json` — complete trial histories and
+  metrics;
+- `results/large/indy_32ch_phase1_optuna.db` — final Optuna study;
+- `results/large/indy_32ch_phase1_best_checkpoint.pt` — verified trial-32,
+  epoch-7 checkpoint with 78,786 parameters;
+- `results/figures/indy_32ch_phase1_optuna.png` — objective and parameter plots.
+
 ### LOG-099 - Phase-1 Optuna sweep prepared; old training entry points isolated
 
 Preparation date: 2026-07-20.

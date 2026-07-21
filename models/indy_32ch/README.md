@@ -35,9 +35,9 @@ The completed baseline and three-sampler entry points now live under the root
 [`history/`](../../history/README.md) folder. Their result JSON files remain
 versioned as decision evidence.
 
-## Active Phase-1 Optuna sweep
+## Completed Phase-1 Optuna sweep
 
-`sweep_phase1_optuna.py` is the only active model-selection entry point. It is
+`sweep_phase1_optuna.py` completed the seed-42 Phase-1 model-selection study. It is
 self-contained: it does not import `common.py`, archived training scripts, or
 code under `history/`. It jointly tunes:
 
@@ -62,15 +62,20 @@ python -m pip install -r requirements.txt
 python models/indy_32ch/sweep_phase1_optuna.py
 ```
 
-The default adds 40 trials. For a short pipeline check:
+The completed study contains 40 trials: 29 complete, 11 pruned, and zero failed.
+Trial 32 is the objective winner (`lr=0.000913763`, `weight_decay=0.0137117`,
+`dropout=0.10`, selected epoch 7), with validation loss 0.482066 and validation
+R² 0.557579. Relative to the queued baseline, it reduced validation loss by
+9.21% and improved the difficult December 6 session R² from 0.198875 to
+0.319848.
+
+For a short pipeline check:
 
 ```bash
 python models/indy_32ch/sweep_phase1_optuna.py --validate-only
 ```
 
-The SQLite study is resumable: running the default command again adds another
-40 trials to the same study. Completed and pruned trials are preserved if the
-process is interrupted. Outputs are:
+Do not resume the completed database with modified ranges. Its outputs are:
 
 - `results/large/indy_32ch_phase1_optuna.db` — resumable Optuna study;
 - `results/metrics/indy_32ch_phase1_optuna.json` — inspectable trial histories,
@@ -79,7 +84,9 @@ process is interrupted. Outputs are:
 - `results/large/indy_32ch_phase1_best_checkpoint.pt` — current best
   validation-selected checkpoint.
 
-Do not use the best Phase-1 checkpoint as the final model. The top five trials
-must first be confirmed on seeds 43 and 44, after which later phases may examine
-paired-electrode dropout and model capacity. January remains locked until every
-phase and the final seed protocol are frozen.
+Do not use the best Phase-1 checkpoint as the final model. Every top-five trial
+used dropout 0.10, the lower search boundary, and the top two losses differ by
+only 0.074%. First run a small separate boundary-refinement study including
+dropout below 0.10, then confirm a few distinct finalists on seeds 42/43/44.
+Later phases may examine paired-electrode dropout and model capacity. January
+remains locked until every phase and the final seed protocol are frozen.

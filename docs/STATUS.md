@@ -51,18 +51,23 @@ with Indy/Loco training because its input feature and behavioral target differ.
   month-balanced sampling are no longer active candidates.
 - The four January sessions remained locked and were not loaded during the
   sampling comparison.
-- `models/indy_32ch/sweep_phase1_optuna.py` is ready for the first validation-only
-  search. It is self-contained, keeps session balancing fixed, tunes learning
-  rate/AdamW weight decay/dropout jointly, and never loads January arrays.
+- The seed-42 Phase-1 Optuna search completed 40/40 trials: 29 complete,
+  11 pruned, and zero failed. Trial 32 achieved validation loss 0.482066,
+  pooled R² 0.557579, macro R² 0.567371, and worst-session R² 0.319848.
+  January arrays were not loaded.
+- The top five trials all used dropout 0.10, the lower search bound, and selected
+  epoch 7. Their learning rates cluster near `8.5e-4..9.4e-4`, but near-tied
+  weight decays span `0.0045..0.0250`; this region needs a narrow boundary check
+  and multi-seed confirmation before promotion.
 - Historical outcomes and caveats are preserved in
   `docs/history/ARCHIVE_RETIREMENT.md` and `docs/history/EXPERIMENT_LOG.md`.
 
 ## What does not yet exist
 
 - No promoted 32-channel checkpoint or int8 export.
-- The Phase-1 Optuna implementation exists, but no Optuna trial has been run.
-  Learning rate, weight decay, dropout, augmentation, and model capacity remain
-  at baseline values rather than validated optima.
+- No Phase-1 hyperparameter is frozen yet. The single-seed search found a strong
+  region, but dropout hit its lower bound and the top configurations are nearly
+  tied. Boundary refinement and seeds 43/44 confirmation remain outstanding.
 - `session_inventory.csv`, which the processing notebook is designed to emit,
   is currently absent from the processed Indy directory. The 37 NPZ files and
   manifest used by training are present; regenerate the inventory on the next
@@ -80,7 +85,7 @@ with Indy/Loco training because its input feature and behavioral target differ.
 
 | Path | Status | Use |
 | --- | --- | --- |
-| `models/indy_32ch/` | active candidate; sampler frozen | Session-balanced causal TCN+GRU pending hyperparameter selection, locked-test evaluation, export, and hardware validation. |
+| `models/indy_32ch/` | active candidate; Phase-1 complete | Session-balanced causal TCN+GRU pending narrow boundary refinement, multi-seed confirmation, locked-test evaluation, export, and hardware validation. |
 
 No historical checkpoint is a runnable model of record.
 
@@ -99,7 +104,6 @@ deleted after documentation.
 
 ## Current research question
 
-Can session-balanced training improve the corrected 32-channel causal decoder
-through validation-only hyperparameter optimization while retaining robust
-performance on every December session? January remains locked until the full
-configuration is frozen.
+Does the Phase-1 low-dropout/high-learning-rate region remain optimal after
+testing dropout below 0.10 and confirming distinct finalists across seeds?
+January remains locked until the full configuration is frozen.

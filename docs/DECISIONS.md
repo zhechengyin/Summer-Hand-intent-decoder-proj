@@ -46,6 +46,12 @@ never be imported by active code. Supported code under `src/`, `models/indy_32ch
   baselines, not active tuning choices.
 - Hyperparameter optimization must keep the sampler fixed so Optuna trials do not
   confound optimizer/model effects with data-exposure effects.
+- Phase-1 seed-42 optimization identifies a low-dropout/high-learning-rate region,
+  not a frozen point estimate. Trial 32 is the current objective winner, but the
+  top five all hit dropout 0.10 and are nearly tied; run a separate boundary
+  refinement before multi-seed confirmation.
+- Do not resume the completed Phase-1 SQLite study with changed search ranges.
+  A different range is a new protocol and must use a new study name/database.
 - January test data remains locked until preprocessing, hyperparameters,
   architecture, epoch-selection policy, and seed protocol are all frozen.
 

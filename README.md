@@ -43,6 +43,8 @@ past-only prefix normalization and a strictly causal model. All earlier scores
 were superseded by the corrected pipeline. All chronological training and
 validation sessions have now been evaluated across CPU seeds 42/43/44, and
 session-balanced training is the frozen sampler. A self-contained Phase-1 Optuna
-entry point is ready but has not been run. The project still needs that
-validation-only optimization, an independently validated drift threshold, one
-locked January test evaluation, checkpoint promotion, int8 export, and MCU timing.
+study has completed 40 seed-42 trials and identified a low-dropout,
+high-learning-rate region, but its top candidates remain nearly tied and hit the
+dropout search boundary. The project still needs narrow boundary refinement,
+multi-seed confirmation, an independently validated drift threshold, one locked
+January test evaluation, checkpoint promotion, int8 export, and MCU timing.
