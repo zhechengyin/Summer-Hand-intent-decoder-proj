@@ -1,4 +1,4 @@
-"""Training samplers used by the supported Indy decoder."""
+"""Session-balanced sampling used to select the frozen Indy model."""
 from __future__ import annotations
 
 from collections import Counter

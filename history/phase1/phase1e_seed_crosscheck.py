@@ -21,6 +21,7 @@ import json
 import math
 import statistics
 import sys
+import tempfile
 import time
 from collections import Counter
 from datetime import datetime, timezone
@@ -32,7 +33,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.intent_decoder.data.indy import (
+from models.indy_32ch.input_pipeline import (
     apply_feature_stats,
     fit_feature_stats,
     load_model_data,
@@ -40,8 +41,8 @@ from src.intent_decoder.data.indy import (
     top_firing_channels,
     window_arrays,
 )
-from src.intent_decoder.features.causal import multiscale_counts
-from src.intent_decoder.model.tcn_gru import build_net, causal_config, r2
+from models.indy_32ch.features import multiscale_counts
+from models.indy_32ch.model import build_net, causal_config, r2
 
 BIN_S = 0.040
 WINDOW_BINS = 50
@@ -72,18 +73,14 @@ MAX_GUARDRAIL_R2_DROP = 0.005
 TIEBREAK_WEIGHT_DECAY = 0.025
 
 PHASE1D_METRICS_PATH = (
-    ROOT / "results" / "metrics" / "indy_32ch_phase1d_seed_confirmation.json"
+    ROOT / "results" / "indy" / "phase1d_seed_confirmation"
+    / "phase1d_seed_confirmation_metrics.json"
 )
-METRICS_PATH = (
-    ROOT / "results" / "metrics" / "indy_32ch_phase1e_seed_crosscheck.json"
-)
-FIGURE_PATH = (
-    ROOT / "results" / "figures" / "indy_32ch_phase1e_seed_crosscheck.png"
-)
-STORAGE_PATH = (
-    ROOT / "results" / "large" / "indy_32ch_phase1e_seed_crosscheck.db"
-)
-CHECKPOINT_DIR = ROOT / "results" / "large" / "indy_32ch_phase1e_checkpoints"
+RESULT_DIR = ROOT / "results" / "indy" / "phase1e_seed_crosscheck"
+METRICS_PATH = RESULT_DIR / "phase1e_seed_crosscheck_metrics.json"
+FIGURE_PATH = RESULT_DIR / "phase1e_seed_crosscheck_figure.png"
+STORAGE_PATH = RESULT_DIR / "phase1e_seed_crosscheck_study.db"
+CHECKPOINT_DIR = RESULT_DIR / "checkpoints"
 
 
 def stack_windows(
@@ -267,7 +264,7 @@ def choose_device(requested: str):
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--threads", type=int, default=4)
-    parser.add_argument("--study-name", default="indy_32ch_phase1e_seed_crosscheck")
+    parser.add_argument("--study-name", default="phase1e_seed_crosscheck")
     parser.add_argument("--storage-path", type=Path, default=STORAGE_PATH)
     parser.add_argument("--timeout-hours", type=float)
     parser.add_argument(
@@ -370,7 +367,7 @@ def load_phase1d_references() -> list[dict]:
         raise ValueError(f"Phase-1d reference protocol mismatch: {mismatches}")
     if payload.get("test_policy") != "January test is locked and was not loaded.":
         raise ValueError("Phase-1d reference does not confirm the locked-test policy")
-    if payload.get("purpose") != "indy_32ch_phase1d_seed_confirmation":
+    if payload.get("purpose") != "phase1d_seed_confirmation":
         raise ValueError("Reference JSON is not the completed Phase-1d study")
     if not payload.get("aggregate", {}).get("complete"):
         raise ValueError("Phase-1d aggregate is incomplete; Phase-1e cannot start")
@@ -601,7 +598,7 @@ def write_metrics(
 ) -> None:
     rows = crosscheck_rows(study, phase1d_references)
     payload = {
-        "purpose": "indy_32ch_phase1e_seed_crosscheck",
+        "purpose": "phase1e_seed_crosscheck",
         "generated_at_utc": utc_now(),
         "run_started_at_utc": started_at,
         "study_name": study.study_name,
@@ -650,7 +647,7 @@ def plot_crosscheck(study, phase1d_references: list[dict]) -> None:
 
     import os
 
-    cache = ROOT / "results" / "large" / ".matplotlib"
+    cache = Path(tempfile.gettempdir()) / "indy_decoder_matplotlib"
     cache.mkdir(parents=True, exist_ok=True)
     os.environ.setdefault("MPLCONFIGDIR", str(cache))
     import matplotlib
@@ -1128,7 +1125,7 @@ def main() -> None:
         cell_checkpoint.parent.mkdir(parents=True, exist_ok=True)
         torch.save(
             {
-                "purpose": "indy_32ch_phase1e_crosscheck_cell",
+                "purpose": "phase1e_crosscheck_cell",
                 "created_at_utc": utc_now(),
                 "trial_number": trial.number,
                 "seed": seed,

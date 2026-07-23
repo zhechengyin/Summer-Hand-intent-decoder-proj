@@ -1,11 +1,11 @@
-"""Tests for the active session-balanced Indy training sampler."""
+"""Archived checks for the frozen session-balanced Indy sampler."""
 from __future__ import annotations
 
 import unittest
 
 import numpy as np
 
-from src.intent_decoder.sampling import draw_session_balanced_indices
+from models.indy_32ch.sampling import draw_session_balanced_indices
 
 
 class SessionBalancedSamplingTests(unittest.TestCase):

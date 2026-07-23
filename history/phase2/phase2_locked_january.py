@@ -19,6 +19,7 @@ import argparse
 import json
 import math
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -28,15 +29,15 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.intent_decoder.data.indy import (
+from models.indy_32ch.input_pipeline import (
     apply_feature_stats,
     fit_feature_stats,
     load_model_data,
     load_session_manifest,
     window_arrays,
 )
-from src.intent_decoder.features.causal import multiscale_counts
-from src.intent_decoder.model.tcn_gru import build_net, corr, r2
+from models.indy_32ch.features import multiscale_counts
+from models.indy_32ch.model import build_net, corr, r2
 
 BIN_S = 0.040
 WINDOW_BINS = 50
@@ -57,14 +58,12 @@ FROZEN_SAMPLER = "session_balanced"
 
 CHECKPOINT_PATH = ROOT / "models" / "indy_32ch" / "checkpoint.pt"
 PHASE1E_METRICS_PATH = (
-    ROOT / "history" / "phase1" / "results" / "phase1e_seed_crosscheck.json"
+    ROOT / "results" / "indy" / "phase1e_seed_crosscheck"
+    / "phase1e_seed_crosscheck_metrics.json"
 )
-OUTPUT_PATH = (
-    ROOT / "results" / "metrics" / "indy_32ch_locked_january_seed43.json"
-)
-FIGURE_PATH = (
-    ROOT / "results" / "figures" / "indy_32ch_locked_january_seed43.png"
-)
+RESULT_DIR = ROOT / "results" / "indy" / "phase2_locked_january"
+OUTPUT_PATH = RESULT_DIR / "phase2_locked_january_metrics.json"
+FIGURE_PATH = RESULT_DIR / "phase2_locked_january_figure.png"
 
 
 def utc_now() -> str:
@@ -366,7 +365,7 @@ def aggregate_results(by_session: dict[str, dict]) -> dict:
 def plot_results(payload: dict) -> None:
     import os
 
-    cache = ROOT / "results" / "large" / ".matplotlib"
+    cache = Path(tempfile.gettempdir()) / "indy_decoder_matplotlib"
     cache.mkdir(parents=True, exist_ok=True)
     os.environ.setdefault("MPLCONFIGDIR", str(cache))
     import matplotlib
@@ -485,7 +484,7 @@ def run_locked_test(context: dict, device) -> dict:
         name: item["metrics"] for name, item in by_session_internal.items()
     }
     payload = {
-        "purpose": "indy_32ch_locked_january_seed43_inference_only",
+        "purpose": "phase2_locked_january_inference_only",
         "generated_at_utc": utc_now(),
         "locked_test_opened": True,
         "model_selection_complete_before_test": True,
@@ -579,7 +578,7 @@ def main() -> None:
         print("validation-only complete: January arrays were not loaded")
         print("run the locked test only when ready:")
         print(
-            "python history/locked_test/evaluate_locked_january.py "
+            "python history/phase2/phase2_locked_january.py "
             "--confirm-locked-test"
         )
         return

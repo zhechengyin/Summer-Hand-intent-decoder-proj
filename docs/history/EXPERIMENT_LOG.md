@@ -4,7 +4,7 @@ Only experiments that determine the current data pipeline, frozen model or next
 research direction are retained here. Superseded model families, exploratory
 calibration attempts and abandoned sweep branches were intentionally removed.
 
-## EXP-001 — Causal Indy dataset and month audit
+## Phase 0a — Causal Indy dataset and month audit
 
 All 37 official Indy sessions were verified against the Zenodo checksum
 inventory and converted to `indy_counts_velocity_v2`.
@@ -29,12 +29,12 @@ metrics.
 
 Evidence:
 
-- `results/metrics/indy_month_drift_analysis.json`
-- `results/metrics/indy_session_quality.csv`
-- `results/metrics/indy_month_summary.csv`
-- `results/metrics/indy_month_pairwise.csv`
+- `results/indy/phase0a_data_audit/phase0a_data_audit_metrics.json`
+- `results/indy/phase0a_data_audit/phase0a_data_audit_session_quality.csv`
+- `results/indy/phase0a_data_audit/phase0a_data_audit_month_summary.csv`
+- `results/indy/phase0a_data_audit/phase0a_data_audit_month_pairwise.csv`
 
-## EXP-002 — Training sampler selection
+## Phase 0b — Training sampler selection
 
 Window-, session- and month-balanced training were compared under identical
 budgets on CPU seeds 42, 43 and 44.
@@ -45,12 +45,13 @@ budgets on CPU seeds 42, 43 and 44.
 | Session-balanced | **0.5074 +/- 0.0221** | **0.5342 +/- 0.0198** | **3/3** |
 | Month-balanced | 0.5259 +/- 0.0066 | 0.5183 +/- 0.0077 | 0/3 |
 
-Decision: freeze session-balanced sampling. The reusable sampler now lives in
-`src/intent_decoder/sampling.py`; the old training scripts were deleted.
+Decision: freeze session-balanced sampling. The model-specific sampler now
+lives in `models/indy_32ch/sampling.py`; the old training scripts were deleted.
 
-Evidence: `results/metrics/indy_32ch_sampling_seed_sweep.json`.
+Evidence:
+`results/indy/phase0b_sampler_selection/phase0b_sampler_selection_metrics.json`.
 
-## EXP-003 — Phase-1 hyperparameter selection
+## Phase 1a–1e — Hyperparameter selection
 
 Phase-1 through Phase-1e used December validation only; January was not loaded.
 The sequence was:
@@ -79,7 +80,7 @@ Intermediate databases, figures, checkpoints and duplicate JSON files were
 deleted. The only retained model artifact is
 `models/indy_32ch/checkpoint.pt`.
 
-## EXP-004 — Locked January evaluation
+## Phase 2 — Locked January evaluation
 
 Completed: 2026-07-22 20:38:30 UTC.
 
@@ -115,6 +116,6 @@ sessions. Its first action is decode versus flag/abstain, not adaptation.
 
 Evidence:
 
-- `results/metrics/indy_32ch_locked_january_seed43.json`
-- `results/figures/indy_32ch_locked_january_seed43.png`
-- historical runner: `history/locked_test/evaluate_locked_january.py`
+- `results/indy/phase2_locked_january/phase2_locked_january_metrics.json`
+- `results/indy/phase2_locked_january/phase2_locked_january_figure.png`
+- historical runner: `history/phase2/phase2_locked_january.py`

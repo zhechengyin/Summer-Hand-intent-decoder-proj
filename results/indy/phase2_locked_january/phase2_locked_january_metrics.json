@@ -1,5 +1,5 @@
 {
-  "purpose": "indy_32ch_locked_january_seed43_inference_only",
+  "purpose": "phase2_locked_january_inference_only",
   "generated_at_utc": "2026-07-22T20:38:30.344563+00:00",
   "locked_test_opened": true,
   "model_selection_complete_before_test": true,
@@ -55,7 +55,7 @@
     "n_parameters": 78786
   },
   "selection_evidence": {
-    "phase1e_metrics": "history/phase1/results/phase1e_seed_crosscheck.json",
+    "phase1e_metrics": "results/indy/phase1e_seed_crosscheck/phase1e_seed_crosscheck_metrics.json",
     "rule_status": "selected_by_preregistered_rule",
     "selected_weight_decay": 0.06,
     "seed_rule": "best validation loss and pooled R2 within frozen WD=0.060",
@@ -168,8 +168,8 @@
     }
   },
   "artifacts": {
-    "metrics": "results/metrics/indy_32ch_locked_january_seed43.json",
-    "figure": "results/figures/indy_32ch_locked_january_seed43.png",
+    "metrics": "results/indy/phase2_locked_january/phase2_locked_january_metrics.json",
+    "figure": "results/indy/phase2_locked_january/phase2_locked_january_figure.png",
     "new_checkpoint_written": false
   }
 }

@@ -2,6 +2,13 @@
 
 `checkpoint.pt` is the only retained model checkpoint.
 
+The active code beside it is intentionally model-specific:
+
+- `input_pipeline.py`: processed-session loading, normalization and windowing;
+- `features.py`: raw counts plus causal EWMA;
+- `model.py`: causal TCN+GRU architecture and metrics;
+- `sampling.py`: frozen session-balanced sampling rule.
+
 | Item | Value |
 | --- | --- |
 | SHA-256 | `2ee52c426ee43ba88cebe7c85dd8392f40f9e75748abe9bbf4e94093556363a5` |

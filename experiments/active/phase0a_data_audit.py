@@ -29,12 +29,13 @@ PROCESSED_DIR = ROOT / "data" / "processed" / "indy_loco" / "indy"
 RAW_DIR = ROOT / "data" / "raw" / "indy_loco" / "indy"
 MANIFEST_PATH = PROCESSED_DIR / "manifest.json"
 
-SESSION_CSV = ROOT / "results" / "metrics" / "indy_session_quality.csv"
-MONTH_CSV = ROOT / "results" / "metrics" / "indy_month_summary.csv"
-PAIRWISE_CSV = ROOT / "results" / "metrics" / "indy_month_pairwise.csv"
-SUMMARY_JSON = ROOT / "results" / "metrics" / "indy_month_drift_analysis.json"
-OVERVIEW_FIGURE = ROOT / "results" / "figures" / "indy_month_drift_overview.png"
-QUALITY_FIGURE = ROOT / "results" / "figures" / "indy_session_quality_overview.png"
+RESULT_DIR = ROOT / "results" / "indy" / "phase0a_data_audit"
+SESSION_CSV = RESULT_DIR / "phase0a_data_audit_session_quality.csv"
+MONTH_CSV = RESULT_DIR / "phase0a_data_audit_month_summary.csv"
+PAIRWISE_CSV = RESULT_DIR / "phase0a_data_audit_month_pairwise.csv"
+SUMMARY_JSON = RESULT_DIR / "phase0a_data_audit_metrics.json"
+OVERVIEW_FIGURE = RESULT_DIR / "phase0a_data_audit_overview.png"
+QUALITY_FIGURE = RESULT_DIR / "phase0a_data_audit_session_quality.png"
 
 BIN_S = 0.040
 PREFIX_BINS = int(60 / BIN_S)
@@ -715,7 +716,7 @@ def run_analysis(*, verify_raw_checksums: bool = True, permutations: int = 5000)
     integrity["status"] = "pass" if integrity_failure_count == 0 else "fail"
 
     summary = {
-        "analysis": "indy_month_drift_analysis_v1",
+        "analysis": "phase0a_data_audit_v1",
         "session_count": len(session_frame),
         "month_count": len(MONTH_ORDER),
         "months": MONTH_ORDER,

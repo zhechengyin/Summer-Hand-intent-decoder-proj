@@ -1,11 +1,16 @@
 #!/usr/bin/env python
-"""Optuna Phase-1 sweep for the session-balanced causal Indy decoder.
+"""Phase-1b grid search for Indy decoder weight decay and dropout.
 
-This study tunes learning rate, AdamW weight decay, and pre-GRU dropout jointly.
-Every trial uses the same model initialization, session-balanced epoch sampler,
-training/validation data, causal preprocessing, 20-epoch default budget, cosine
-schedule, batch size, and gradient clipping. The January test split is recorded
-as locked but is never loaded.
+The Phase-1 Optuna study placed every top trial at the dropout=0.10 lower
+boundary while leaving several weight-decay values competitive. This separate
+study fixes learning rate at 9e-4 and evaluates the complete 3 x 6 grid below.
+All 18 trials receive the full epoch budget; pruning is intentionally disabled.
+
+The script is self-contained at the experiment level: it imports only the
+active data, feature, and model APIs under ``src/``. It does not import the
+completed Phase-1 script, archived scripts, ``common.py``, or ``history/``.
+January test session names are recorded as locked, but their arrays are never
+loaded.
 """
 from __future__ import annotations
 
@@ -14,6 +19,7 @@ import copy
 import json
 import math
 import sys
+import tempfile
 import time
 from collections import Counter
 from datetime import datetime, timezone
@@ -25,7 +31,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.intent_decoder.data.indy import (
+from models.indy_32ch.input_pipeline import (
     apply_feature_stats,
     fit_feature_stats,
     load_model_data,
@@ -33,8 +39,8 @@ from src.intent_decoder.data.indy import (
     top_firing_channels,
     window_arrays,
 )
-from src.intent_decoder.features.causal import multiscale_counts
-from src.intent_decoder.model.tcn_gru import build_net, causal_config, r2
+from models.indy_32ch.features import multiscale_counts
+from models.indy_32ch.model import build_net, causal_config, r2
 
 BIN_S = 0.040
 WINDOW_BINS = 50
@@ -46,29 +52,26 @@ AXES = np.array([0, 1])
 EXPECTED_SPLIT_COUNTS = {"train": 29, "validation": 4, "test": 4}
 STD_FLOOR_PERCENTILE = 10.0
 
-METRICS_PATH = ROOT / "results" / "metrics" / "indy_32ch_phase1_optuna.json"
-FIGURE_PATH = ROOT / "results" / "figures" / "indy_32ch_phase1_optuna.png"
-CHECKPOINT_PATH = (
-    ROOT / "results" / "large" / "indy_32ch_phase1_best_checkpoint.pt"
-)
-STORAGE_PATH = ROOT / "results" / "large" / "indy_32ch_phase1_optuna.db"
+FIXED_LEARNING_RATE = 9e-4
+WEIGHT_DECAYS = (0.0045, 0.0137, 0.0250)
+DROPOUTS = (0.0, 0.025, 0.05, 0.075, 0.10, 0.15)
+GRID_SPACE = {
+    "weight_decay": list(WEIGHT_DECAYS),
+    "dropout": list(DROPOUTS),
+}
+GRID_SIZE = len(WEIGHT_DECAYS) * len(DROPOUTS)
 
-BASELINE_PARAMS = {
-    "learning_rate": 3e-4,
-    "weight_decay": 1e-3,
-    "dropout": 0.30,
-}
-SEARCH_SPACE = {
-    "learning_rate": {"low": 5e-5, "high": 1e-3, "scale": "log"},
-    "weight_decay": {"low": 1e-6, "high": 3e-2, "scale": "log"},
-    "dropout": {"low": 0.10, "high": 0.50, "step": 0.05},
-}
+RESULT_DIR = ROOT / "results" / "indy" / "phase1b_regularization_grid"
+METRICS_PATH = RESULT_DIR / "phase1b_regularization_grid_metrics.json"
+FIGURE_PATH = RESULT_DIR / "phase1b_regularization_grid_figure.png"
+CHECKPOINT_PATH = RESULT_DIR / "phase1b_regularization_grid_best_checkpoint.pt"
+STORAGE_PATH = RESULT_DIR / "phase1b_regularization_grid_study.db"
 
 
 def stack_windows(
     windows: list[dict[str, np.ndarray]],
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Stack model windows from one session."""
+    """Stack all post-observation windows from one session."""
     if not windows:
         raise ValueError("No post-observation windows available")
     return (
@@ -185,8 +188,6 @@ def balanced_allocations(
     """Allocate an exact total as evenly as possible across named items."""
     if not items:
         raise ValueError("Cannot balance an empty item list")
-    if total < 0:
-        raise ValueError("Allocation total cannot be negative")
     base, remainder = divmod(total, len(items))
     allocation = {item: base for item in items}
     if remainder:
@@ -247,21 +248,16 @@ def choose_device(requested: str):
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--n-trials", type=int, default=40)
     parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--threads", type=int, default=4)
-    parser.add_argument("--study-name", default="indy_32ch_phase1")
+    parser.add_argument("--study-name", default="phase1b_regularization_grid")
     parser.add_argument("--storage-path", type=Path, default=STORAGE_PATH)
     parser.add_argument("--timeout-hours", type=float)
-    parser.add_argument("--sampler-startup-trials", type=int, default=8)
-    parser.add_argument("--pruner-startup-trials", type=int, default=8)
-    parser.add_argument("--pruner-warmup-epochs", type=int, default=8)
-    parser.add_argument("--no-pruning", action="store_true")
     parser.add_argument(
         "--validate-only",
         action="store_true",
-        help="Validate data preparation and model construction, then exit.",
+        help="Validate preparation, model construction, and grid definition, then exit.",
     )
     parser.add_argument(
         "--device",
@@ -292,7 +288,6 @@ def json_safe(value):
 
 
 def report_path(path: Path) -> str:
-    """Prefer a repository-relative artifact path, allowing external overrides."""
     try:
         return str(path.relative_to(ROOT))
     except ValueError:
@@ -338,14 +333,15 @@ def write_metrics(study, context: dict, started_at: str) -> None:
     complete = completed_trials(study)
     best = min(complete, key=lambda trial: trial.value) if complete else None
     payload = {
-        "purpose": "indy_32ch_phase1_optuna",
+        "purpose": "phase1b_regularization_grid",
         "generated_at_utc": utc_now(),
-        "study_started_at_utc": started_at,
+        "run_started_at_utc": started_at,
         "study_name": study.study_name,
         "direction": "minimize",
         "primary_metric": "pooled_validation_normalized_mse",
-        "search_space": SEARCH_SPACE,
-        "baseline_params": BASELINE_PARAMS,
+        "fixed_learning_rate": FIXED_LEARNING_RATE,
+        "grid": GRID_SPACE,
+        "grid_size": GRID_SIZE,
         "fixed_protocol": context["fixed_protocol"],
         "split": context["split"],
         "data_protocol": context["data_protocol"],
@@ -370,14 +366,16 @@ def write_metrics(study, context: dict, started_at: str) -> None:
     temporary.replace(METRICS_PATH)
 
 
-def plot_study(study) -> None:
-    complete = sorted(completed_trials(study), key=lambda trial: trial.number)
+def plot_grid(study) -> None:
+    complete = completed_trials(study)
     if not complete:
         return
+    protocol = study.user_attrs.get("protocol_signature", {})
+    study_seed = protocol.get("seed", "?")
 
     import os
 
-    cache = ROOT / "results" / "large" / ".matplotlib"
+    cache = Path(tempfile.gettempdir()) / "indy_decoder_matplotlib"
     cache.mkdir(parents=True, exist_ok=True)
     os.environ.setdefault("MPLCONFIGDIR", str(cache))
     import matplotlib
@@ -385,51 +383,49 @@ def plot_study(study) -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    numbers = np.asarray([trial.number for trial in complete])
-    values = np.asarray([trial.value for trial in complete], dtype=np.float64)
-    running_best = np.minimum.accumulate(values)
-    figure, axes = plt.subplots(2, 2, figsize=(13.5, 9.0), dpi=180)
-
-    objective_axis = axes[0, 0]
-    objective_axis.plot(numbers, values, "o", color="#2368A2", label="Trial")
-    objective_axis.plot(
-        numbers, running_best, color="#C58B18", linewidth=2.0, label="Running best"
+    panels = (
+        ("value", "Validation normalized MSE", "viridis_r", ".4f"),
+        ("validation_r2_mean", "Pooled validation R2", "viridis", ".3f"),
+        ("validation_macro_r2_mean", "Session-macro validation R2", "viridis", ".3f"),
+        ("validation_worst_session_r2_mean", "Worst-session validation R2", "viridis", ".3f"),
     )
-    objective_axis.set_title("Completed-trial validation loss")
-    objective_axis.set_xlabel("Trial number")
-    objective_axis.set_ylabel("Pooled normalized MSE")
-    objective_axis.legend(frameon=False)
+    figure, axes = plt.subplots(2, 2, figsize=(12.5, 9.0), dpi=180)
+    for axis, (field, title, color_map, number_format) in zip(axes.flat, panels):
+        values = np.full((len(DROPOUTS), len(WEIGHT_DECAYS)), np.nan)
+        for trial in complete:
+            row = DROPOUTS.index(float(trial.params["dropout"]))
+            column = WEIGHT_DECAYS.index(float(trial.params["weight_decay"]))
+            values[row, column] = (
+                float(trial.value) if field == "value" else trial.user_attrs.get(field)
+            )
+        image = axis.imshow(values, cmap=color_map, aspect="auto")
+        axis.set_xticks(range(len(WEIGHT_DECAYS)))
+        axis.set_xticklabels([f"{value:.4f}" for value in WEIGHT_DECAYS])
+        axis.set_yticks(range(len(DROPOUTS)))
+        axis.set_yticklabels([f"{value:.3f}" for value in DROPOUTS])
+        axis.set_xlabel("AdamW weight decay")
+        axis.set_ylabel("Pre-GRU dropout")
+        axis.set_title(title)
+        for row in range(values.shape[0]):
+            for column in range(values.shape[1]):
+                if np.isfinite(values[row, column]):
+                    axis.text(
+                        column,
+                        row,
+                        format(values[row, column], number_format),
+                        ha="center",
+                        va="center",
+                        fontsize=8,
+                        color="black",
+                    )
+        figure.colorbar(image, ax=axis, fraction=0.046, pad=0.04)
 
-    parameter_specs = [
-        ("learning_rate", "Learning rate", True),
-        ("weight_decay", "AdamW weight decay", True),
-        ("dropout", "Pre-GRU dropout", False),
-    ]
-    for axis, (field, label, logarithmic) in zip(axes.flat[1:], parameter_specs):
-        x = np.asarray([trial.params[field] for trial in complete], dtype=np.float64)
-        points = axis.scatter(
-            x,
-            values,
-            c=numbers,
-            cmap="viridis",
-            edgecolor="#263238",
-            linewidth=0.4,
-        )
-        if logarithmic:
-            axis.set_xscale("log")
-        axis.set_title(f"Validation loss vs {label.lower()}")
-        axis.set_xlabel(label)
-        axis.set_ylabel("Pooled normalized MSE")
-        figure.colorbar(points, ax=axis, label="Trial number")
-
-    for axis in axes.flat:
-        axis.grid(axis="y", color="#D8DDE3", linewidth=0.8, alpha=0.8)
-        axis.spines[["top", "right"]].set_visible(False)
-    figure.suptitle("Indy 32-channel Phase-1 Optuna sweep")
+    figure.suptitle("Indy 32-channel Phase-1b regularization grid")
     figure.text(
         0.5,
         0.01,
-        "Session-balanced training; validation selects trials; January test is locked.",
+        f"lr=9e-4; session-balanced; seed {study_seed}; "
+        "validation selects; January test locked.",
         ha="center",
         color="#5B6470",
         fontsize=9,
@@ -445,18 +441,16 @@ def main() -> None:
         import optuna
     except ModuleNotFoundError as error:
         raise SystemExit(
-            "Optuna is not installed. Run: pip install -r requirements.txt"
+            "Optuna is not installed. Run: python -m pip install -r requirements.txt"
         ) from error
     import torch
     import torch.nn as nn
 
     args = parse_args()
-    if args.n_trials <= 0 or args.epochs <= 0 or args.threads <= 0:
-        raise ValueError("--n-trials, --epochs, and --threads must be positive")
+    if args.epochs <= 0 or args.threads <= 0:
+        raise ValueError("--epochs and --threads must be positive")
     if args.timeout_hours is not None and args.timeout_hours <= 0:
         raise ValueError("--timeout-hours must be positive")
-    if not 1 <= args.pruner_warmup_epochs <= args.epochs:
-        raise ValueError("--pruner-warmup-epochs must be within the epoch budget")
 
     torch.set_num_threads(args.threads)
     device = choose_device(args.device)
@@ -477,27 +471,28 @@ def main() -> None:
             f"Expected chronological split {EXPECTED_SPLIT_COUNTS}, found {actual_counts}"
         )
 
-    print("=== Indy 32-channel Phase-1 Optuna sweep ===")
+    print("=== Indy 32-channel Phase-1b regularization grid ===")
     print(
         f"sessions: train={actual_counts['train']} | "
         f"validation={actual_counts['validation']} | test={actual_counts['test']} LOCKED"
     )
     print(
-        f"trials to add={args.n_trials} | epochs/trial={args.epochs} | "
+        f"grid={GRID_SIZE} complete trials | epochs/trial={args.epochs} | "
         f"seed={args.seed} | device={device} | sampler=session-balanced"
     )
+    print(f"fixed learning rate: {FIXED_LEARNING_RATE:.1e}")
     print(
-        "search: learning_rate=5e-5..1e-3 log | "
-        "weight_decay=1e-6..3e-2 log | dropout=0.10..0.50 step 0.05"
+        "weight decay: " + ", ".join(f"{value:.4f}" for value in WEIGHT_DECAYS)
     )
+    print("dropout: " + ", ".join(f"{value:.3f}" for value in DROPOUTS))
     print(
         "fixed: AdamW | batch=32 | cosine schedule | gradient_clip=1 | "
         "noise=0 | channel_dropout=0"
     )
-    print("policy: train updates weights; validation selects/prunes; test not loaded")
+    print("policy: full budget/no pruning; validation selects; test not loaded")
 
-    # Load only train and validation artifacts. Merely reading test session names
-    # from the versioned manifest does not load any January arrays.
+    # Only train and validation arrays are loaded. Reading test names from the
+    # versioned manifest does not inspect any January test data.
     active_sessions = split_sessions["train"] + split_sessions["validation"]
     loaded = {session: load_model_data(session) for session in active_sessions}
     training_loaded = {
@@ -543,6 +538,7 @@ def main() -> None:
         "chdrop": 0.0,
         "gradient_clip": 1.0,
         "cosine": True,
+        "lr": FIXED_LEARNING_RATE,
     }
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
@@ -560,8 +556,7 @@ def main() -> None:
     )
     print(
         f"windows: train={len(splits['train']['x'])} | "
-        f"validation={len(splits['validation']['x'])} | "
-        f"parameters={n_parameters:,}"
+        f"validation={len(splits['validation']['x'])} | parameters={n_parameters:,}"
     )
     if args.validate_only:
         print("validation-only check complete; no study or checkpoint was written")
@@ -569,7 +564,7 @@ def main() -> None:
         return
 
     protocol_signature = {
-        "phase": 1,
+        "phase": "1b_regularization_grid",
         "seed": args.seed,
         "epochs": args.epochs,
         "sampler": "session_balanced",
@@ -578,43 +573,30 @@ def main() -> None:
         "scheduler": "cosine_annealing",
         "noise": 0.0,
         "channel_dropout": 0.0,
+        "learning_rate": FIXED_LEARNING_RATE,
         "train_sessions": split_sessions["train"],
         "validation_sessions": split_sessions["validation"],
         "channels": channels.tolist(),
-        "search_space": SEARCH_SPACE,
+        "grid": GRID_SPACE,
     }
-    sampler = optuna.samplers.TPESampler(
-        seed=args.seed,
-        n_startup_trials=args.sampler_startup_trials,
-        multivariate=True,
-    )
-    pruner = (
-        optuna.pruners.NopPruner()
-        if args.no_pruning
-        else optuna.pruners.MedianPruner(
-            n_startup_trials=args.pruner_startup_trials,
-            n_warmup_steps=args.pruner_warmup_epochs,
-            interval_steps=1,
-        )
-    )
+    sampler = optuna.samplers.GridSampler(GRID_SPACE, seed=args.seed)
     study = optuna.create_study(
         study_name=args.study_name,
         storage=storage_url,
         direction="minimize",
         sampler=sampler,
-        pruner=pruner,
+        pruner=optuna.pruners.NopPruner(),
         load_if_exists=True,
     )
     saved_signature = study.user_attrs.get("protocol_signature")
     if saved_signature is not None and saved_signature != protocol_signature:
         raise RuntimeError(
-            "The existing Optuna study uses a different data/training protocol. "
-            "Choose a new --study-name or --storage-path instead of mixing trials."
+            "The existing grid study uses a different data/training protocol. "
+            "Choose a new --study-name and --storage-path instead of mixing trials."
         )
     study.set_user_attr("protocol_signature", protocol_signature)
     study.set_user_attr("test_policy", "locked_not_loaded")
-    if not study.trials:
-        study.enqueue_trial(BASELINE_PARAMS)
+    study.set_user_attr("pruning", "disabled_for_equal_full_budget_comparison")
 
     context = {
         "storage_path": storage_path,
@@ -623,15 +605,7 @@ def main() -> None:
             "device": str(device),
             "optimizer": "AdamW",
             "checkpoint_selection": "minimum_pooled_validation_normalized_mse",
-            "pruning": (
-                "disabled"
-                if args.no_pruning
-                else {
-                    "type": "MedianPruner",
-                    "startup_trials": args.pruner_startup_trials,
-                    "warmup_epochs": args.pruner_warmup_epochs,
-                }
-            ),
+            "pruning": "disabled",
         },
         "split": {
             "train": split_sessions["train"],
@@ -659,47 +633,31 @@ def main() -> None:
     mse = nn.MSELoss()
 
     def objective(trial) -> float:
-        learning_rate = trial.suggest_float(
-            "learning_rate",
-            SEARCH_SPACE["learning_rate"]["low"],
-            SEARCH_SPACE["learning_rate"]["high"],
-            log=True,
-        )
-        weight_decay = trial.suggest_float(
-            "weight_decay",
-            SEARCH_SPACE["weight_decay"]["low"],
-            SEARCH_SPACE["weight_decay"]["high"],
-            log=True,
-        )
-        dropout = trial.suggest_float(
-            "dropout",
-            SEARCH_SPACE["dropout"]["low"],
-            SEARCH_SPACE["dropout"]["high"],
-            step=SEARCH_SPACE["dropout"]["step"],
-        )
+        weight_decay = float(trial.suggest_categorical("weight_decay", WEIGHT_DECAYS))
+        dropout = float(trial.suggest_categorical("dropout", DROPOUTS))
         config = {
             **fixed_config,
-            "lr": learning_rate,
             "wd": weight_decay,
             "dropout": dropout,
         }
         print(
-            f"\n=== trial {trial.number:03d} | lr={learning_rate:.3g} | "
-            f"wd={weight_decay:.3g} | dropout={dropout:.2f} ===",
+            f"\n=== trial {trial.number:03d}/{GRID_SIZE - 1:03d} | "
+            f"lr={FIXED_LEARNING_RATE:.1e} | wd={weight_decay:.4f} | "
+            f"dropout={dropout:.3f} ===",
             flush=True,
         )
 
+        # Every cell begins with the same weights and sees the same sequence of
+        # session-balanced epoch samples, isolating the two grid parameters.
         torch.manual_seed(args.seed)
         np.random.seed(args.seed)
         rng = np.random.default_rng(args.seed)
         net = build_net(config, splits["train"]["x"].shape[1]).to(device)
         net.load_state_dict(initial_state)
         optimizer = torch.optim.AdamW(
-            net.parameters(), lr=learning_rate, weight_decay=weight_decay
+            net.parameters(), lr=FIXED_LEARNING_RATE, weight_decay=weight_decay
         )
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-            optimizer, args.epochs
-        )
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, args.epochs)
         history = []
         best_validation_loss = np.inf
         best_epoch = 0
@@ -766,30 +724,6 @@ def main() -> None:
                 row[f"{split_name}_r2_x"] = float(split_r2[0])
                 row[f"{split_name}_r2_y"] = float(split_r2[1])
                 row[f"{split_name}_r2_mean"] = float(split_r2.mean())
-
-            epoch_session_metrics = {}
-            for session, session_split in validation_session_splits.items():
-                session_loss, session_r2 = evaluate_split(
-                    net,
-                    session_split,
-                    target_mean,
-                    target_std,
-                    config["bs"],
-                    device,
-                )
-                epoch_session_metrics[session] = {
-                    "loss": session_loss,
-                    "r2_mean": float(session_r2.mean()),
-                }
-            row["validation_macro_loss"] = float(
-                np.mean([item["loss"] for item in epoch_session_metrics.values()])
-            )
-            row["validation_macro_r2_mean"] = float(
-                np.mean([item["r2_mean"] for item in epoch_session_metrics.values()])
-            )
-            row["validation_worst_session_r2_mean"] = float(
-                min(item["r2_mean"] for item in epoch_session_metrics.values())
-            )
             history.append(row)
 
             improved = row["validation_loss"] < best_validation_loss
@@ -805,12 +739,9 @@ def main() -> None:
                 f"trial {trial.number:03d} | epoch {epoch:02d}/{args.epochs} | "
                 f"opt={row['optimization_loss']:.5f} | "
                 f"loss train={row['train_loss']:.5f} "
-                f"validation={row['validation_loss']:.5f} "
-                f"macro={row['validation_macro_loss']:.5f} | "
+                f"validation={row['validation_loss']:.5f} | "
                 f"R2 train={row['train_r2_mean']:+.4f} "
-                f"validation={row['validation_r2_mean']:+.4f} "
-                f"macro={row['validation_macro_r2_mean']:+.4f} "
-                f"worst={row['validation_worst_session_r2_mean']:+.4f} | "
+                f"validation={row['validation_r2_mean']:+.4f} | "
                 f"grad={row['gradient_norm_mean_before_clip']:.3f}/"
                 f"{row['gradient_norm_max_before_clip']:.3f}"
                 + (" *best*" if improved else ""),
@@ -819,18 +750,6 @@ def main() -> None:
 
             trial.report(float(row["validation_loss"]), step=epoch)
             scheduler.step()
-            if trial.should_prune():
-                trial.set_user_attr("best_epoch_before_prune", best_epoch)
-                trial.set_user_attr(
-                    "best_validation_loss_before_prune", best_validation_loss
-                )
-                trial.set_user_attr("history", history)
-                print(
-                    f"trial {trial.number:03d} pruned after epoch {epoch}; "
-                    f"best validation loss={best_validation_loss:.5f}",
-                    flush=True,
-                )
-                raise optuna.TrialPruned()
 
         if best_state is None:
             raise RuntimeError(f"Trial {trial.number} did not select a checkpoint")
@@ -878,23 +797,26 @@ def main() -> None:
         worst_r2 = float(
             min(item["r2_mean"] for item in validation_by_session.values())
         )
+        trial.set_user_attr("fixed_learning_rate", FIXED_LEARNING_RATE)
         trial.set_user_attr("selected_epoch", best_epoch)
         trial.set_user_attr("selected_checkpoint_metrics", selected_metrics)
+        trial.set_user_attr(
+            "validation_r2_mean", selected_metrics["validation"]["r2_mean"]
+        )
         trial.set_user_attr("validation_macro_loss", macro_loss)
         trial.set_user_attr("validation_macro_r2_mean", macro_r2)
         trial.set_user_attr("validation_worst_session_r2_mean", worst_r2)
         trial.set_user_attr("validation_by_session", validation_by_session)
         trial.set_user_attr("history", history)
 
-        previous = completed_trials(study)
         previous_best = min(
-            (completed.value for completed in previous), default=np.inf
+            (completed.value for completed in completed_trials(study)), default=np.inf
         )
         if best_validation_loss < previous_best:
             CHECKPOINT_PATH.parent.mkdir(parents=True, exist_ok=True)
             torch.save(
                 {
-                    "purpose": "indy_32ch_phase1_optuna_best",
+                    "purpose": "phase1b_regularization_grid_best",
                     "created_at_utc": utc_now(),
                     "trial_number": trial.number,
                     "model_state": best_state,
@@ -910,6 +832,7 @@ def main() -> None:
                     "checkpoint_epoch": best_epoch,
                     "selection_policy": "minimum_pooled_validation_normalized_mse",
                     "best_validation_loss": best_validation_loss,
+                    "validation_r2_mean": selected_metrics["validation"]["r2_mean"],
                     "validation_macro_r2_mean": macro_r2,
                     "validation_worst_session_r2_mean": worst_r2,
                 },
@@ -927,39 +850,45 @@ def main() -> None:
 
     def persist_callback(current_study, _trial) -> None:
         write_metrics(current_study, context, started_at)
-        plot_study(current_study)
+        plot_grid(current_study)
 
-    timeout = args.timeout_hours * 3600 if args.timeout_hours else None
+    existing_complete = len(completed_trials(study))
+    remaining = max(GRID_SIZE - existing_complete, 0)
     print(f"study database: {storage_path}")
-    print("Ctrl-C is safe: completed/pruned trials persist in SQLite.\n")
-    try:
-        study.optimize(
-            objective,
-            n_trials=args.n_trials,
-            timeout=timeout,
-            n_jobs=1,
-            callbacks=[persist_callback],
-            gc_after_trial=True,
-        )
-    finally:
+    print(f"existing complete={existing_complete} | grid cells remaining<={remaining}")
+    print("Ctrl-C is safe: each completed trial persists in SQLite.\n")
+    if remaining:
+        timeout = args.timeout_hours * 3600 if args.timeout_hours else None
+        try:
+            study.optimize(
+                objective,
+                n_trials=remaining,
+                timeout=timeout,
+                n_jobs=1,
+                callbacks=[persist_callback],
+                gc_after_trial=True,
+            )
+        finally:
+            write_metrics(study, context, started_at)
+            plot_grid(study)
+    else:
         write_metrics(study, context, started_at)
-        plot_study(study)
+        plot_grid(study)
 
     complete = sorted(completed_trials(study), key=lambda trial: trial.value)
-    print("\n=== Phase-1 validation-only ranking ===")
-    for rank, trial in enumerate(complete[:10], start=1):
+    print("\n=== Phase-1b validation-only ranking ===")
+    for rank, trial in enumerate(complete, start=1):
         print(
-            f"{rank:02d}. trial {trial.number:03d} | "
-            f"loss={trial.value:.5f} | "
-            f"lr={trial.params['learning_rate']:.3g} | "
-            f"wd={trial.params['weight_decay']:.3g} | "
-            f"dropout={trial.params['dropout']:.2f} | "
+            f"{rank:02d}. trial {trial.number:03d} | loss={trial.value:.5f} | "
+            f"wd={trial.params['weight_decay']:.4f} | "
+            f"dropout={trial.params['dropout']:.3f} | "
             f"epoch={trial.user_attrs.get('selected_epoch', '?')} | "
-            f"macro/worst R2="
+            f"R2={trial.user_attrs.get('validation_r2_mean', float('nan')):+.4f} | "
+            f"macro/worst="
             f"{trial.user_attrs.get('validation_macro_r2_mean', float('nan')):+.4f}/"
             f"{trial.user_attrs.get('validation_worst_session_r2_mean', float('nan')):+.4f}"
         )
-    print(f"elapsed: {(time.time() - started) / 60:.1f} minutes")
+    print(f"elapsed this invocation: {(time.time() - started) / 60:.1f} minutes")
     print("test: LOCKED and not loaded")
     print(f"metrics: {METRICS_PATH}")
     print(f"figure: {FIGURE_PATH}")

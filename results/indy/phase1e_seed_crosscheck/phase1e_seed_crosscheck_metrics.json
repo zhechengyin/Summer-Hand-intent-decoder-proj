@@ -1,8 +1,8 @@
 {
-  "purpose": "indy_32ch_phase1e_seed_crosscheck",
+  "purpose": "phase1e_seed_crosscheck",
   "generated_at_utc": "2026-07-22T20:04:08.277119+00:00",
   "run_started_at_utc": "2026-07-22T19:38:23.517569+00:00",
-  "study_name": "indy_32ch_phase1e_seed_crosscheck",
+  "study_name": "phase1e_seed_crosscheck",
   "direction": "minimize",
   "primary_metric": "mean_pooled_validation_normalized_mse_across_seeds_42_to_46",
   "fixed_learning_rate": 0.0009,
@@ -117,7 +117,7 @@
       94
     ],
     "device": "cpu",
-    "phase1d_reference": "results/metrics/indy_32ch_phase1d_seed_confirmation.json",
+    "phase1d_reference": "deleted_intermediate:phase1d_seed_confirmation_metrics",
     "stop_rule": {
       "minimum_seed_wins": 3,
       "minimum_mean_validation_loss_advantage": 0.003,
@@ -229,7 +229,7 @@
     "validation": 1038
   },
   "phase1d_reference": {
-    "source": "results/metrics/indy_32ch_phase1d_seed_confirmation.json",
+    "source": "deleted_intermediate:phase1d_seed_confirmation_metrics",
     "policy": "reused_metrics_not_retrained",
     "cells": [
       {
@@ -521,7 +521,7 @@
         "20": 0.5483060156908568
       },
       "metrics": {
-        "checkpoint": "results/large/indy_32ch_phase1e_checkpoints/seed45_wd0p060_dropout0p025.pt",
+        "checkpoint": null,
         "fixed_dropout": 0.025,
         "fixed_learning_rate": 0.0009,
         "history": [
@@ -911,7 +911,7 @@
         "20": 0.5194687771659366
       },
       "metrics": {
-        "checkpoint": "results/large/indy_32ch_phase1e_checkpoints/seed46_wd0p060_dropout0p025.pt",
+        "checkpoint": null,
         "fixed_dropout": 0.025,
         "fixed_learning_rate": 0.0009,
         "history": [
@@ -1301,7 +1301,7 @@
         "20": 0.5525659403130269
       },
       "metrics": {
-        "checkpoint": "results/large/indy_32ch_phase1e_checkpoints/seed45_wd0p025_dropout0p025.pt",
+        "checkpoint": null,
         "fixed_dropout": 0.025,
         "fixed_learning_rate": 0.0009,
         "history": [
@@ -1691,7 +1691,7 @@
         "20": 0.5259755817038475
       },
       "metrics": {
-        "checkpoint": "results/large/indy_32ch_phase1e_checkpoints/seed46_wd0p025_dropout0p025.pt",
+        "checkpoint": null,
         "fixed_dropout": 0.025,
         "fixed_learning_rate": 0.0009,
         "history": [
@@ -2607,8 +2607,10 @@
   },
   "test_policy": "January test is locked and was not loaded.",
   "artifacts": {
-    "study_database": "results/large/indy_32ch_phase1e_seed_crosscheck.db",
-    "checkpoint_directory": "results/large/indy_32ch_phase1e_checkpoints",
-    "figure": "results/figures/indy_32ch_phase1e_seed_crosscheck.png"
+    "metrics": "results/indy/phase1e_seed_crosscheck/phase1e_seed_crosscheck_metrics.json",
+    "selected_checkpoint": "models/indy_32ch/checkpoint.pt",
+    "intermediate_study_database": null,
+    "intermediate_checkpoints": null,
+    "figure": null
   }
 }

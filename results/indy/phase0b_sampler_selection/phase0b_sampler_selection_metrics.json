@@ -1,5 +1,5 @@
 {
-  "purpose": "indy_32ch_sampling_seed_sweep",
+  "purpose": "phase0b_sampler_selection",
   "generated_at_utc": "2026-07-19T17:54:02.149869+00:00",
   "elapsed_seconds": 2835.2242438793182,
   "config": {
@@ -150,7 +150,7 @@
   "per_seed": {
     "42": {
       "seed": 42,
-      "source": "results/metrics/indy_32ch_sampling_comparison.json",
+      "source": "deleted_intermediate:seed42_sampling_comparison",
       "strategies": {
         "window": {
           "label": "Window-weighted",
@@ -620,8 +620,8 @@
               "2016-10": 61950
             }
           },
-          "checkpoint": "results/large/indy_32ch_sampling_window_checkpoint.pt",
-          "provenance": "results/metrics/indy_32ch_sampling_comparison.json"
+          "checkpoint": null,
+          "provenance": "deleted_intermediate:seed42_sampling_comparison"
         },
         "session": {
           "label": "Session-balanced",
@@ -1091,8 +1091,8 @@
               "2016-10": 105977
             }
           },
-          "checkpoint": "results/large/indy_32ch_sampling_session_checkpoint.pt",
-          "provenance": "results/metrics/indy_32ch_sampling_comparison.json"
+          "checkpoint": null,
+          "provenance": "deleted_intermediate:seed42_sampling_comparison"
         },
         "month": {
           "label": "Month-balanced",
@@ -1562,8 +1562,8 @@
               "2016-10": 69839
             }
           },
-          "checkpoint": "results/large/indy_32ch_sampling_month_checkpoint.pt",
-          "provenance": "results/metrics/indy_32ch_sampling_comparison.json"
+          "checkpoint": null,
+          "provenance": "deleted_intermediate:seed42_sampling_comparison"
         }
       },
       "recommended_by_minimum_validation_loss": "session"
@@ -2139,7 +2139,7 @@
               "2016-10": 61950
             }
           },
-          "checkpoint": "results/large/indy_32ch_sampling_seed43_window_checkpoint.pt"
+          "checkpoint": null
         },
         "session": {
           "label": "Session-balanced",
@@ -2709,7 +2709,7 @@
               "2016-10": 105966
             }
           },
-          "checkpoint": "results/large/indy_32ch_sampling_seed43_session_checkpoint.pt"
+          "checkpoint": null
         },
         "month": {
           "label": "Month-balanced",
@@ -3279,7 +3279,7 @@
               "2016-10": 69844
             }
           },
-          "checkpoint": "results/large/indy_32ch_sampling_seed43_month_checkpoint.pt"
+          "checkpoint": null
         }
       },
       "recommended_by_minimum_validation_loss": "session"
@@ -3855,7 +3855,7 @@
               "2016-10": 61950
             }
           },
-          "checkpoint": "results/large/indy_32ch_sampling_seed44_window_checkpoint.pt"
+          "checkpoint": null
         },
         "session": {
           "label": "Session-balanced",
@@ -4425,7 +4425,7 @@
               "2016-10": 105967
             }
           },
-          "checkpoint": "results/large/indy_32ch_sampling_seed44_session_checkpoint.pt"
+          "checkpoint": null
         },
         "month": {
           "label": "Month-balanced",
@@ -4995,7 +4995,7 @@
               "2016-10": 69841
             }
           },
-          "checkpoint": "results/large/indy_32ch_sampling_seed44_month_checkpoint.pt"
+          "checkpoint": null
         }
       },
       "recommended_by_minimum_validation_loss": "session"
@@ -5710,6 +5710,7 @@
   "recommended_by_mean_validation_loss": "session",
   "test_policy": "Do not evaluate January until sampling and all hyperparameters are frozen.",
   "artifacts": {
-    "figure": "results/figures/indy_32ch_sampling_seed_sweep.png"
+    "metrics": "results/indy/phase0b_sampler_selection/phase0b_sampler_selection_metrics.json",
+    "figure": "results/indy/phase0b_sampler_selection/phase0b_sampler_selection_figure.png"
   }
 }

@@ -11,6 +11,7 @@ data/
     test/                              4 consumed January sessions
   processing/indy_loco/indy/
     prepare_indy_model_ready.ipynb    supported conversion notebook
+    causal_targets.py                 causal sample-hold and target velocity
 ```
 
 Rules:
@@ -24,6 +25,9 @@ Rules:
 To rebuild the model-ready data, open
 `processing/indy_loco/indy/prepare_indy_model_ready.ipynb` with the project
 virtual environment and run it from top to bottom.
+
+Neural EWMA features and normalization are not preprocessing outputs; they are
+computed at model time under `models/indy_32ch/`.
 
 The canonical checksum/split manifest is
 `configs/datasets/indy_sessions.yaml`. The model-ready schema is documented in

@@ -74,13 +74,14 @@ because it used an obsolete pool and could reintroduce January into training.
 
 ## Supported files
 
-- `src/intent_decoder/data/indy.py`
-- `src/intent_decoder/features/causal.py`
-- `src/intent_decoder/model/tcn_gru.py`
-- `src/intent_decoder/sampling.py`
+- `data/processing/indy_loco/indy/causal_targets.py`
 - `data/processing/indy_loco/indy/prepare_indy_model_ready.ipynb`
-- `experiments/active/indy_month_drift_analysis.py`
-- `experiments/active/indy_month_drift_analysis.ipynb`
+- `models/indy_32ch/input_pipeline.py`
+- `models/indy_32ch/features.py`
+- `models/indy_32ch/model.py`
+- `models/indy_32ch/sampling.py`
+- `experiments/active/phase0a_data_audit.py`
+- `experiments/active/phase0a_data_audit.ipynb`
 - `models/indy_32ch/checkpoint.pt`
 
 Everything under `history/` is provenance only and must not be imported.

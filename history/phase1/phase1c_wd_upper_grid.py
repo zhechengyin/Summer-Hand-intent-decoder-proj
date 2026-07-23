@@ -17,6 +17,7 @@ import copy
 import json
 import math
 import sys
+import tempfile
 import time
 from collections import Counter
 from datetime import datetime, timezone
@@ -28,7 +29,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.intent_decoder.data.indy import (
+from models.indy_32ch.input_pipeline import (
     apply_feature_stats,
     fit_feature_stats,
     load_model_data,
@@ -36,8 +37,8 @@ from src.intent_decoder.data.indy import (
     top_firing_channels,
     window_arrays,
 )
-from src.intent_decoder.features.causal import multiscale_counts
-from src.intent_decoder.model.tcn_gru import build_net, causal_config, r2
+from models.indy_32ch.features import multiscale_counts
+from models.indy_32ch.model import build_net, causal_config, r2
 
 BIN_S = 0.040
 WINDOW_BINS = 50
@@ -58,10 +59,11 @@ GRID_SPACE = {
 }
 GRID_SIZE = len(WEIGHT_DECAYS) * len(DROPOUTS)
 
-METRICS_PATH = ROOT / "results" / "metrics" / "indy_32ch_phase1c_wd_upper_grid.json"
-FIGURE_PATH = ROOT / "results" / "figures" / "indy_32ch_phase1c_wd_upper_grid.png"
-CHECKPOINT_PATH = ROOT / "results" / "large" / "indy_32ch_phase1c_best_checkpoint.pt"
-STORAGE_PATH = ROOT / "results" / "large" / "indy_32ch_phase1c_wd_upper_grid.db"
+RESULT_DIR = ROOT / "results" / "indy" / "phase1c_wd_upper_grid"
+METRICS_PATH = RESULT_DIR / "phase1c_wd_upper_grid_metrics.json"
+FIGURE_PATH = RESULT_DIR / "phase1c_wd_upper_grid_figure.png"
+CHECKPOINT_PATH = RESULT_DIR / "phase1c_wd_upper_grid_best_checkpoint.pt"
+STORAGE_PATH = RESULT_DIR / "phase1c_wd_upper_grid_study.db"
 
 
 def stack_windows(
@@ -247,7 +249,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--threads", type=int, default=4)
-    parser.add_argument("--study-name", default="indy_32ch_phase1c_wd_upper_grid")
+    parser.add_argument("--study-name", default="phase1c_wd_upper_grid")
     parser.add_argument("--storage-path", type=Path, default=STORAGE_PATH)
     parser.add_argument("--timeout-hours", type=float)
     parser.add_argument(
@@ -329,7 +331,7 @@ def write_metrics(study, context: dict, started_at: str) -> None:
     complete = completed_trials(study)
     best = min(complete, key=lambda trial: trial.value) if complete else None
     payload = {
-        "purpose": "indy_32ch_phase1c_wd_upper_grid",
+        "purpose": "phase1c_wd_upper_grid",
         "generated_at_utc": utc_now(),
         "run_started_at_utc": started_at,
         "study_name": study.study_name,
@@ -369,7 +371,7 @@ def plot_grid(study) -> None:
 
     import os
 
-    cache = ROOT / "results" / "large" / ".matplotlib"
+    cache = Path(tempfile.gettempdir()) / "indy_decoder_matplotlib"
     cache.mkdir(parents=True, exist_ok=True)
     os.environ.setdefault("MPLCONFIGDIR", str(cache))
     import matplotlib
@@ -809,7 +811,7 @@ def main() -> None:
             CHECKPOINT_PATH.parent.mkdir(parents=True, exist_ok=True)
             torch.save(
                 {
-                    "purpose": "indy_32ch_phase1c_wd_upper_grid_best",
+                    "purpose": "phase1c_wd_upper_grid_best",
                     "created_at_utc": utc_now(),
                     "trial_number": trial.number,
                     "model_state": best_state,

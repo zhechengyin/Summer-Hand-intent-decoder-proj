@@ -1,4 +1,4 @@
-"""Strictly causal TCN+GRU used by active and deployable pipelines."""
+"""Strictly causal TCN+GRU architecture for the frozen Indy model."""
 from __future__ import annotations
 
 import numpy as np
@@ -18,11 +18,7 @@ def r2(actual: np.ndarray, predicted: np.ndarray) -> np.ndarray:
 
 
 def build_net(config: dict, n_channels: int):
-    """Build a TCN+GRU that cannot consume future timesteps.
-
-    Right-side convolution padding is cropped immediately, and the GRU is always
-    unidirectional. A configuration requesting bidirectionality is rejected.
-    """
+    """Build a right-cropped TCN followed by a unidirectional GRU."""
     import torch.nn as nn
 
     if config.get("bidir", False):
@@ -41,8 +37,6 @@ def build_net(config: dict, n_channels: int):
     activation = activations.get(config.get("act", "relu"), nn.ReLU)
 
     class PointwiseLayerNorm(nn.Module):
-        """Normalize channels independently at each timestep."""
-
         def __init__(self, features: int) -> None:
             super().__init__()
             self.normalization = nn.LayerNorm(features)
@@ -59,8 +53,16 @@ def build_net(config: dict, n_channels: int):
                 spatial.append(activation())
             self.spatial = nn.Sequential(*spatial)
             self.convolutions = nn.ModuleList(
-                [nn.Conv1d(filters, filters, 3, padding=2 * dilation, dilation=dilation)
-                 for dilation in config["dils"]]
+                [
+                    nn.Conv1d(
+                        filters,
+                        filters,
+                        3,
+                        padding=2 * dilation,
+                        dilation=dilation,
+                    )
+                    for dilation in config["dils"]
+                ]
             )
             self.padding = [2 * dilation for dilation in config["dils"]]
             self.activation = activation()
@@ -78,8 +80,9 @@ def build_net(config: dict, n_channels: int):
         def forward(self, values):
             encoded = self.spatial(values)
             for convolution, padding in zip(self.convolutions, self.padding):
-                # Crop the right padding: output[t] sees only input[:t+1].
-                encoded = self.activation(convolution(encoded)[:, :, :-padding] + encoded)
+                encoded = self.activation(
+                    convolution(encoded)[:, :, :-padding] + encoded
+                )
             encoded, _ = self.gru(self.dropout(encoded).transpose(1, 2))
             return self.head(encoded)
 
@@ -87,7 +90,7 @@ def build_net(config: dict, n_channels: int):
 
 
 def causal_config(n_out: int = 2) -> dict:
-    """Return the frozen Indy 32-channel architecture and training defaults."""
+    """Return the frozen Indy architecture and training defaults."""
     return {
         "F": 64,
         "H": 64,

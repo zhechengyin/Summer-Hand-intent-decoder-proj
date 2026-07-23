@@ -1,5 +1,5 @@
 {
-  "analysis": "indy_month_drift_analysis_v1",
+  "analysis": "phase0a_data_audit_v1",
   "session_count": 37,
   "month_count": 6,
   "months": [
@@ -324,10 +324,10 @@
     ]
   },
   "artifacts": {
-    "session_csv": "results/metrics/indy_session_quality.csv",
-    "month_csv": "results/metrics/indy_month_summary.csv",
-    "pairwise_csv": "results/metrics/indy_month_pairwise.csv",
-    "overview_figure": "results/figures/indy_month_drift_overview.png",
-    "quality_figure": "results/figures/indy_session_quality_overview.png"
+    "session_csv": "results/indy/phase0a_data_audit/phase0a_data_audit_session_quality.csv",
+    "month_csv": "results/indy/phase0a_data_audit/phase0a_data_audit_month_summary.csv",
+    "pairwise_csv": "results/indy/phase0a_data_audit/phase0a_data_audit_month_pairwise.csv",
+    "overview_figure": "results/indy/phase0a_data_audit/phase0a_data_audit_overview.png",
+    "quality_figure": "results/indy/phase0a_data_audit/phase0a_data_audit_session_quality.png"
   }
 }

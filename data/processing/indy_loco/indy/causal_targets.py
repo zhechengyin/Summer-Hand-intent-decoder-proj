@@ -1,4 +1,4 @@
-"""Strictly past-and-present neural feature transforms."""
+"""Causal kinematic transforms used when building Indy processed artifacts."""
 from __future__ import annotations
 
 import numpy as np
@@ -10,11 +10,7 @@ def causal_sample_hold(
     values: np.ndarray,
     query_times: np.ndarray,
 ) -> np.ndarray:
-    """Return the latest value observed at or before each query time.
-
-    Unlike linear interpolation, this operation never reads the sample after a
-    query. ``values`` uses time on its first axis.
-    """
+    """Return the latest value observed at or before each query time."""
     timestamps = np.asarray(timestamps, dtype=np.float64)
     values = np.asarray(values)
     query_times = np.asarray(query_times, dtype=np.float64)
@@ -30,34 +26,12 @@ def causal_sample_hold(
     return values[np.minimum(indices, timestamps.size - 1)]
 
 
-def causal_ewma(values: np.ndarray, alpha: float) -> np.ndarray:
-    """EWMA along the final axis; output at ``t`` never reads ``t+1``."""
-    if not 0 < alpha <= 1:
-        raise ValueError("alpha must be in (0, 1]")
-    out = values.astype(np.float64, copy=True)
-    for index in range(1, values.shape[-1]):
-        out[..., index] = alpha * values[..., index] + (1 - alpha) * out[..., index - 1]
-    return out.astype(np.float32)
-
-
-def multiscale_counts(counts: np.ndarray, alphas: tuple[float, ...] = (1.0, 0.1)) -> np.ndarray:
-    """Concatenate raw counts and requested causal EWMA timescales."""
-    blocks = [counts.astype(np.float32) if alpha == 1 else causal_ewma(counts, alpha)
-              for alpha in alphas]
-    return np.concatenate(blocks, axis=0)
-
-
 def causal_velocity(
     position: np.ndarray,
     sample_period_s: float,
     lowpass_hz: float | None = 3.0,
 ) -> np.ndarray:
-    """Compute velocity using only position samples available at each time.
-
-    The optional Butterworth filter runs forward once with an initial state based
-    on the first sample. Velocity then uses a backward difference. Unlike
-    ``sosfiltfilt`` and ``numpy.gradient``, neither operation reads ``t+1``.
-    """
+    """Filter forward and compute a backward-difference velocity."""
     position = np.asarray(position, dtype=np.float64)
     if position.ndim != 2:
         raise ValueError("position must have shape (time, coordinates)")

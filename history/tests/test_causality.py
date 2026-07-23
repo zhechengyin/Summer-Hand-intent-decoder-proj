@@ -1,4 +1,4 @@
-"""Regression tests preventing future-data access in supported pipelines."""
+"""Archived regression checks for future-data access in supported pipelines."""
 from __future__ import annotations
 
 import ast
@@ -7,19 +7,22 @@ from pathlib import Path
 
 import numpy as np
 
-from src.intent_decoder.data.indy import (
+from models.indy_32ch.input_pipeline import (
     apply_feature_stats,
     fit_feature_stats,
     load_session_manifest,
     processed_session_path,
     top_firing_channels,
 )
-from src.intent_decoder.features.causal import causal_ewma, causal_sample_hold, causal_velocity
-from src.intent_decoder.model.tcn_gru import build_net, causal_config
+from data.processing.indy_loco.indy.causal_targets import (
+    causal_sample_hold,
+    causal_velocity,
+)
+from models.indy_32ch.features import causal_ewma
+from models.indy_32ch.model import build_net, causal_config
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 SUPPORTED_CODE = (
-    ROOT / "src",
     ROOT / "data" / "processing",
     ROOT / "experiments" / "active",
     ROOT / "models" / "indy_32ch",
@@ -151,9 +154,12 @@ class CausalityTests(unittest.TestCase):
                     if isinstance(node, (ast.Import, ast.ImportFrom)):
                         modules = ([node.module] if isinstance(node, ast.ImportFrom)
                                    else [alias.name for alias in node.names])
-                        if any(module and module.startswith("models.tcn_gru") for module in modules):
+                        if any(
+                            module and module.startswith("src.intent_decoder")
+                            for module in modules
+                        ):
                             violations.append(
-                                f"{path.relative_to(ROOT)}:{node.lineno} imports historical model code"
+                                f"{path.relative_to(ROOT)}:{node.lineno} imports removed src code"
                             )
         self.assertEqual([], violations, "\n" + "\n".join(violations))
 

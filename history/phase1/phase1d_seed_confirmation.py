@@ -1,24 +1,26 @@
 #!/usr/bin/env python
-"""Phase-1b grid search for Indy decoder weight decay and dropout.
+"""Phase-1d multi-seed confirmation for the Indy 32-channel decoder.
 
-The Phase-1 Optuna study placed every top trial at the dropout=0.10 lower
-boundary while leaving several weight-decay values competitive. This separate
-study fixes learning rate at 9e-4 and evaluates the complete 3 x 6 grid below.
-All 18 trials receive the full epoch budget; pruning is intentionally disabled.
+Phase-1c bracketed the useful AdamW weight-decay region. This independent
+confirmation study fixes learning rate at 9e-4 and pre-GRU dropout at 0.025,
+then compares weight decay {0.025, 0.060} on seeds {43, 44}. The matching
+seed-42 cells are read from the completed Phase-1c metrics JSON for aggregate
+reporting; they are not retrained.
 
-The script is self-contained at the experiment level: it imports only the
-active data, feature, and model APIs under ``src/``. It does not import the
-completed Phase-1 script, archived scripts, ``common.py``, or ``history/``.
+Every new cell receives 20 epochs with session-balanced sampling and no
+pruning. The script imports only supported APIs under ``src/`` and does not
+import Phase-1/1b/1c scripts, ``common.py``, or anything under ``history/``.
 January test session names are recorded as locked, but their arrays are never
 loaded.
 """
 from __future__ import annotations
 
 import argparse
-import copy
 import json
 import math
+import statistics
 import sys
+import tempfile
 import time
 from collections import Counter
 from datetime import datetime, timezone
@@ -30,7 +32,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.intent_decoder.data.indy import (
+from models.indy_32ch.input_pipeline import (
     apply_feature_stats,
     fit_feature_stats,
     load_model_data,
@@ -38,8 +40,8 @@ from src.intent_decoder.data.indy import (
     top_firing_channels,
     window_arrays,
 )
-from src.intent_decoder.features.causal import multiscale_counts
-from src.intent_decoder.model.tcn_gru import build_net, causal_config, r2
+from models.indy_32ch.features import multiscale_counts
+from models.indy_32ch.model import build_net, causal_config, r2
 
 BIN_S = 0.040
 WINDOW_BINS = 50
@@ -52,26 +54,26 @@ EXPECTED_SPLIT_COUNTS = {"train": 29, "validation": 4, "test": 4}
 STD_FLOOR_PERCENTILE = 10.0
 
 FIXED_LEARNING_RATE = 9e-4
-WEIGHT_DECAYS = (0.0045, 0.0137, 0.0250)
-DROPOUTS = (0.0, 0.025, 0.05, 0.075, 0.10, 0.15)
+FIXED_DROPOUT = 0.025
+EPOCHS = 20
+REFERENCE_SEED = 42
+CONFIRMATION_SEEDS = (43, 44)
+WEIGHT_DECAYS = (0.025, 0.060)
 GRID_SPACE = {
+    "seed": list(CONFIRMATION_SEEDS),
     "weight_decay": list(WEIGHT_DECAYS),
-    "dropout": list(DROPOUTS),
 }
-GRID_SIZE = len(WEIGHT_DECAYS) * len(DROPOUTS)
+GRID_SIZE = len(CONFIRMATION_SEEDS) * len(WEIGHT_DECAYS)
 
-METRICS_PATH = (
-    ROOT / "results" / "metrics" / "indy_32ch_phase1b_regularization_grid.json"
+PHASE1C_METRICS_PATH = (
+    ROOT / "results" / "indy" / "phase1c_wd_upper_grid"
+    / "phase1c_wd_upper_grid_metrics.json"
 )
-FIGURE_PATH = (
-    ROOT / "results" / "figures" / "indy_32ch_phase1b_regularization_grid.png"
-)
-CHECKPOINT_PATH = (
-    ROOT / "results" / "large" / "indy_32ch_phase1b_best_checkpoint.pt"
-)
-STORAGE_PATH = (
-    ROOT / "results" / "large" / "indy_32ch_phase1b_regularization_grid.db"
-)
+RESULT_DIR = ROOT / "results" / "indy" / "phase1d_seed_confirmation"
+METRICS_PATH = RESULT_DIR / "phase1d_seed_confirmation_metrics.json"
+FIGURE_PATH = RESULT_DIR / "phase1d_seed_confirmation_figure.png"
+STORAGE_PATH = RESULT_DIR / "phase1d_seed_confirmation_study.db"
+CHECKPOINT_DIR = RESULT_DIR / "checkpoints"
 
 
 def stack_windows(
@@ -254,16 +256,14 @@ def choose_device(requested: str):
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--epochs", type=int, default=20)
-    parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--threads", type=int, default=4)
-    parser.add_argument("--study-name", default="indy_32ch_phase1b_regularization_grid")
+    parser.add_argument("--study-name", default="phase1d_seed_confirmation")
     parser.add_argument("--storage-path", type=Path, default=STORAGE_PATH)
     parser.add_argument("--timeout-hours", type=float)
     parser.add_argument(
         "--validate-only",
         action="store_true",
-        help="Validate preparation, model construction, and grid definition, then exit.",
+        help="Validate data, seed-42 references, model, and grid without training.",
     )
     parser.add_argument(
         "--device",
@@ -300,6 +300,18 @@ def report_path(path: Path) -> str:
         return str(path)
 
 
+def completed_trials(study) -> list:
+    import optuna
+
+    return [
+        trial
+        for trial in study.get_trials(deepcopy=False)
+        if trial.state == optuna.trial.TrialState.COMPLETE
+        and trial.value is not None
+        and math.isfinite(trial.value)
+    ]
+
+
 def trial_to_record(trial) -> dict:
     duration = None
     if trial.datetime_start is not None and trial.datetime_complete is not None:
@@ -323,46 +335,239 @@ def trial_to_record(trial) -> dict:
     }
 
 
-def completed_trials(study) -> list:
-    import optuna
+def load_seed42_references() -> list[dict]:
+    """Load the two comparable seed-42 cells from completed Phase-1c evidence."""
+    if not PHASE1C_METRICS_PATH.exists():
+        raise FileNotFoundError(
+            "Phase-1c metrics are required to reuse seed 42: "
+            f"{PHASE1C_METRICS_PATH}"
+        )
+    payload = json.loads(PHASE1C_METRICS_PATH.read_text(encoding="utf-8"))
+    protocol = payload.get("fixed_protocol", {})
+    expected = {
+        "seed": REFERENCE_SEED,
+        "epochs": EPOCHS,
+        "sampler": "session_balanced",
+        "learning_rate": FIXED_LEARNING_RATE,
+    }
+    mismatches = {
+        key: (protocol.get(key), value)
+        for key, value in expected.items()
+        if protocol.get(key) != value
+    }
+    if mismatches:
+        raise ValueError(f"Phase-1c reference protocol mismatch: {mismatches}")
+    if payload.get("test_policy") != "January test is locked and was not loaded.":
+        raise ValueError("Phase-1c reference does not confirm the locked-test policy")
 
-    return [
-        trial
-        for trial in study.get_trials(deepcopy=False)
-        if trial.state == optuna.trial.TrialState.COMPLETE
-        and trial.value is not None
-        and math.isfinite(trial.value)
-    ]
+    references = []
+    for weight_decay in WEIGHT_DECAYS:
+        matches = [
+            trial
+            for trial in payload.get("trials", [])
+            if trial.get("state") == "COMPLETE"
+            and math.isclose(
+                float(trial.get("params", {}).get("weight_decay", -1)),
+                weight_decay,
+            )
+            and math.isclose(
+                float(trial.get("params", {}).get("dropout", -1)),
+                FIXED_DROPOUT,
+            )
+        ]
+        if len(matches) != 1:
+            raise ValueError(
+                "Expected one completed Phase-1c seed-42 cell for "
+                f"weight_decay={weight_decay}, dropout={FIXED_DROPOUT}; "
+                f"found {len(matches)}"
+            )
+        trial = matches[0]
+        metrics = trial.get("metrics", {})
+        selected = metrics.get("selected_checkpoint_metrics", {})
+        validation = selected.get("validation", {})
+        required = (
+            "validation_r2_mean",
+            "validation_macro_r2_mean",
+            "validation_worst_session_r2_mean",
+            "selected_epoch",
+        )
+        missing = [key for key in required if metrics.get(key) is None]
+        if trial.get("value") is None or validation.get("loss") is None or missing:
+            raise ValueError(
+                f"Phase-1c reference cell wd={weight_decay} lacks {missing or 'loss'}"
+            )
+        references.append(
+            {
+                "source": "phase1c_reused_not_retrained",
+                "source_trial_number": trial.get("number"),
+                "seed": REFERENCE_SEED,
+                "weight_decay": weight_decay,
+                "dropout": FIXED_DROPOUT,
+                "validation_loss": float(trial["value"]),
+                "validation_r2_mean": float(metrics["validation_r2_mean"]),
+                "validation_macro_r2_mean": float(
+                    metrics["validation_macro_r2_mean"]
+                ),
+                "validation_worst_session_r2_mean": float(
+                    metrics["validation_worst_session_r2_mean"]
+                ),
+                "selected_epoch": int(metrics["selected_epoch"]),
+                "validation_by_session": metrics.get("validation_by_session", {}),
+            }
+        )
+    return references
 
 
-def write_metrics(study, context: dict, started_at: str) -> None:
-    complete = completed_trials(study)
-    best = min(complete, key=lambda trial: trial.value) if complete else None
+def confirmation_rows(study, seed42_references: list[dict]) -> list[dict]:
+    """Return comparable flat rows from reused seed 42 and new trials."""
+    rows = [dict(row) for row in seed42_references]
+    for trial in completed_trials(study):
+        rows.append(
+            {
+                "source": "phase1d_new_training",
+                "source_trial_number": trial.number,
+                "seed": int(trial.params["seed"]),
+                "weight_decay": float(trial.params["weight_decay"]),
+                "dropout": FIXED_DROPOUT,
+                "validation_loss": float(trial.value),
+                "validation_r2_mean": float(
+                    trial.user_attrs["validation_r2_mean"]
+                ),
+                "validation_macro_r2_mean": float(
+                    trial.user_attrs["validation_macro_r2_mean"]
+                ),
+                "validation_worst_session_r2_mean": float(
+                    trial.user_attrs["validation_worst_session_r2_mean"]
+                ),
+                "selected_epoch": int(trial.user_attrs["selected_epoch"]),
+                "validation_by_session": trial.user_attrs.get(
+                    "validation_by_session", {}
+                ),
+            }
+        )
+    return sorted(rows, key=lambda row: (row["seed"], row["weight_decay"]))
+
+
+def mean_sd(values: list[float]) -> dict[str, float | None]:
+    return {
+        "mean": float(statistics.mean(values)),
+        "sample_sd": float(statistics.stdev(values)) if len(values) > 1 else None,
+    }
+
+
+def aggregate_candidates(rows: list[dict]) -> dict:
+    """Aggregate the paired candidate comparison across available seeds."""
+    metric_fields = (
+        "validation_loss",
+        "validation_r2_mean",
+        "validation_macro_r2_mean",
+        "validation_worst_session_r2_mean",
+    )
+    summaries = []
+    for weight_decay in WEIGHT_DECAYS:
+        candidate_rows = [
+            row
+            for row in rows
+            if math.isclose(float(row["weight_decay"]), weight_decay)
+        ]
+        summary = {
+            "weight_decay": weight_decay,
+            "dropout": FIXED_DROPOUT,
+            "seeds": [int(row["seed"]) for row in candidate_rows],
+            "n_seeds": len(candidate_rows),
+            "metrics": {
+                field: mean_sd([float(row[field]) for row in candidate_rows])
+                for field in metric_fields
+            },
+        }
+        summaries.append(summary)
+
+    paired = []
+    expected_seeds = (REFERENCE_SEED, *CONFIRMATION_SEEDS)
+    seed_wins = {f"weight_decay_{weight_decay:.3f}": 0 for weight_decay in WEIGHT_DECAYS}
+    for seed in expected_seeds:
+        by_weight_decay = {
+            float(row["weight_decay"]): row for row in rows if row["seed"] == seed
+        }
+        if not all(weight_decay in by_weight_decay for weight_decay in WEIGHT_DECAYS):
+            continue
+        lower = by_weight_decay[WEIGHT_DECAYS[0]]
+        upper = by_weight_decay[WEIGHT_DECAYS[1]]
+        loss_delta = float(upper["validation_loss"] - lower["validation_loss"])
+        r2_delta = float(upper["validation_r2_mean"] - lower["validation_r2_mean"])
+        paired.append(
+            {
+                "seed": seed,
+                "loss_wd_0.060_minus_0.025": loss_delta,
+                "r2_wd_0.060_minus_0.025": r2_delta,
+            }
+        )
+        winner = WEIGHT_DECAYS[0] if loss_delta >= 0 else WEIGHT_DECAYS[1]
+        seed_wins[f"weight_decay_{winner:.3f}"] += 1
+
+    complete = len(rows) == len(expected_seeds) * len(WEIGHT_DECAYS)
+    recommended = None
+    if complete:
+        recommended = min(
+            summaries,
+            key=lambda item: item["metrics"]["validation_loss"]["mean"],
+        )["weight_decay"]
+    return {
+        "complete": complete,
+        "expected_seeds": list(expected_seeds),
+        "candidate_summaries": summaries,
+        "paired_seed_differences": paired,
+        "seed_wins_by_validation_loss": seed_wins,
+        "recommended_weight_decay_by_mean_validation_loss": recommended,
+    }
+
+
+def checkpoint_path(seed: int, weight_decay: float) -> Path:
+    wd_token = f"{weight_decay:.3f}".replace(".", "p")
+    return CHECKPOINT_DIR / f"seed{seed}_wd{wd_token}_dropout0p025.pt"
+
+
+def write_metrics(
+    study,
+    context: dict,
+    seed42_references: list[dict],
+    started_at: str,
+) -> None:
+    rows = confirmation_rows(study, seed42_references)
     payload = {
-        "purpose": "indy_32ch_phase1b_regularization_grid",
+        "purpose": "phase1d_seed_confirmation",
         "generated_at_utc": utc_now(),
         "run_started_at_utc": started_at,
         "study_name": study.study_name,
         "direction": "minimize",
-        "primary_metric": "pooled_validation_normalized_mse",
+        "primary_metric": "mean_pooled_validation_normalized_mse_across_seeds",
         "fixed_learning_rate": FIXED_LEARNING_RATE,
-        "grid": GRID_SPACE,
-        "grid_size": GRID_SIZE,
+        "fixed_dropout": FIXED_DROPOUT,
+        "reference_seed": REFERENCE_SEED,
+        "new_training_seeds": list(CONFIRMATION_SEEDS),
+        "weight_decay_candidates": list(WEIGHT_DECAYS),
+        "new_grid_size": GRID_SIZE,
         "fixed_protocol": context["fixed_protocol"],
         "split": context["split"],
         "data_protocol": context["data_protocol"],
         "n_parameters": context["n_parameters"],
         "window_counts": context["window_counts"],
-        "best_trial": trial_to_record(best) if best else None,
-        "trials": [trial_to_record(trial) for trial in study.trials],
-        "trial_counts": {
+        "seed42_reference": {
+            "source": report_path(PHASE1C_METRICS_PATH),
+            "policy": "reused_metrics_not_retrained",
+            "cells": seed42_references,
+        },
+        "new_trials": [trial_to_record(trial) for trial in study.trials],
+        "new_trial_counts": {
             state: sum(trial.state.name == state for trial in study.trials)
             for state in ("COMPLETE", "PRUNED", "FAIL", "RUNNING", "WAITING")
         },
+        "all_seed_rows": rows,
+        "aggregate": aggregate_candidates(rows),
         "test_policy": "January test is locked and was not loaded.",
         "artifacts": {
             "study_database": report_path(context["storage_path"]),
-            "best_checkpoint": report_path(CHECKPOINT_PATH),
+            "checkpoint_directory": report_path(CHECKPOINT_DIR),
             "figure": report_path(FIGURE_PATH),
         },
     }
@@ -372,16 +577,14 @@ def write_metrics(study, context: dict, started_at: str) -> None:
     temporary.replace(METRICS_PATH)
 
 
-def plot_grid(study) -> None:
-    complete = completed_trials(study)
-    if not complete:
+def plot_confirmation(study, seed42_references: list[dict]) -> None:
+    rows = confirmation_rows(study, seed42_references)
+    if not rows:
         return
-    protocol = study.user_attrs.get("protocol_signature", {})
-    study_seed = protocol.get("seed", "?")
 
     import os
 
-    cache = ROOT / "results" / "large" / ".matplotlib"
+    cache = Path(tempfile.gettempdir()) / "indy_decoder_matplotlib"
     cache.mkdir(parents=True, exist_ok=True)
     os.environ.setdefault("MPLCONFIGDIR", str(cache))
     import matplotlib
@@ -389,54 +592,70 @@ def plot_grid(study) -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    panels = (
-        ("value", "Validation normalized MSE", "viridis_r", ".4f"),
-        ("validation_r2_mean", "Pooled validation R2", "viridis", ".3f"),
-        ("validation_macro_r2_mean", "Session-macro validation R2", "viridis", ".3f"),
-        ("validation_worst_session_r2_mean", "Worst-session validation R2", "viridis", ".3f"),
+    metric_panels = (
+        ("validation_loss", "Validation normalized MSE", "lower is better"),
+        ("validation_r2_mean", "Pooled validation R2", "higher is better"),
+        ("validation_macro_r2_mean", "Session-macro validation R2", "higher is better"),
+        (
+            "validation_worst_session_r2_mean",
+            "Worst-session validation R2",
+            "higher is better",
+        ),
     )
-    figure, axes = plt.subplots(2, 2, figsize=(12.5, 9.0), dpi=180)
-    for axis, (field, title, color_map, number_format) in zip(axes.flat, panels):
-        values = np.full((len(DROPOUTS), len(WEIGHT_DECAYS)), np.nan)
-        for trial in complete:
-            row = DROPOUTS.index(float(trial.params["dropout"]))
-            column = WEIGHT_DECAYS.index(float(trial.params["weight_decay"]))
-            values[row, column] = (
-                float(trial.value) if field == "value" else trial.user_attrs.get(field)
+    colors = {WEIGHT_DECAYS[0]: "#1F77B4", WEIGHT_DECAYS[1]: "#E69F00"}
+    figure, axes = plt.subplots(2, 2, figsize=(12.5, 7.5), dpi=180)
+    seeds = (REFERENCE_SEED, *CONFIRMATION_SEEDS)
+    for axis, (field, title, subtitle) in zip(axes.flat, metric_panels):
+        for weight_decay in WEIGHT_DECAYS:
+            candidate = {
+                int(row["seed"]): float(row[field])
+                for row in rows
+                if math.isclose(float(row["weight_decay"]), weight_decay)
+            }
+            available_seeds = [seed for seed in seeds if seed in candidate]
+            values = [candidate[seed] for seed in available_seeds]
+            if not values:
+                continue
+            mean = statistics.mean(values)
+            sd = statistics.stdev(values) if len(values) > 1 else None
+            label = f"wd={weight_decay:.3f}; mean={mean:.4f}"
+            if sd is not None:
+                label += f" +/- {sd:.4f}"
+            axis.plot(
+                available_seeds,
+                values,
+                marker="o",
+                linewidth=2,
+                markersize=5,
+                color=colors[weight_decay],
+                label=label,
             )
-        image = axis.imshow(values, cmap=color_map, aspect="auto")
-        axis.set_xticks(range(len(WEIGHT_DECAYS)))
-        axis.set_xticklabels([f"{value:.4f}" for value in WEIGHT_DECAYS])
-        axis.set_yticks(range(len(DROPOUTS)))
-        axis.set_yticklabels([f"{value:.3f}" for value in DROPOUTS])
-        axis.set_xlabel("AdamW weight decay")
-        axis.set_ylabel("Pre-GRU dropout")
         axis.set_title(title)
-        for row in range(values.shape[0]):
-            for column in range(values.shape[1]):
-                if np.isfinite(values[row, column]):
-                    axis.text(
-                        column,
-                        row,
-                        format(values[row, column], number_format),
-                        ha="center",
-                        va="center",
-                        fontsize=8,
-                        color="black",
-                    )
-        figure.colorbar(image, ax=axis, fraction=0.046, pad=0.04)
+        axis.set_xlabel("Training seed")
+        axis.set_ylabel(title)
+        axis.set_xticks(seeds)
+        axis.grid(axis="y", alpha=0.25)
+        axis.text(
+            0.01,
+            0.02,
+            subtitle,
+            transform=axis.transAxes,
+            fontsize=8,
+            color="#5B6470",
+        )
+        axis.legend(fontsize=8)
 
-    figure.suptitle("Indy 32-channel Phase-1b regularization grid")
+    figure.suptitle("Indy 32-channel Phase-1d multi-seed confirmation")
     figure.text(
         0.5,
         0.01,
-        f"lr=9e-4; session-balanced; seed {study_seed}; "
-        "validation selects; January test locked.",
+        "lr=9e-4; dropout=0.025; session-balanced; seed 42 reused from "
+        "Phase-1c; January test locked.",
         ha="center",
         color="#5B6470",
         fontsize=9,
     )
-    figure.tight_layout(rect=(0, 0.035, 1, 0.96))
+    figure.tight_layout(rect=(0, 0.04, 1, 0.95))
     FIGURE_PATH.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(FIGURE_PATH, bbox_inches="tight")
     plt.close(figure)
@@ -453,8 +672,8 @@ def main() -> None:
     import torch.nn as nn
 
     args = parse_args()
-    if args.epochs <= 0 or args.threads <= 0:
-        raise ValueError("--epochs and --threads must be positive")
+    if args.threads <= 0:
+        raise ValueError("--threads must be positive")
     if args.timeout_hours is not None and args.timeout_hours <= 0:
         raise ValueError("--timeout-hours must be positive")
 
@@ -466,6 +685,7 @@ def main() -> None:
     started = time.time()
     started_at = utc_now()
 
+    seed42_references = load_seed42_references()
     manifest = load_session_manifest()
     split_sessions = {
         name: list(manifest["chronological_split"][name])
@@ -477,24 +697,22 @@ def main() -> None:
             f"Expected chronological split {EXPECTED_SPLIT_COUNTS}, found {actual_counts}"
         )
 
-    print("=== Indy 32-channel Phase-1b regularization grid ===")
+    print("=== Indy 32-channel Phase-1d multi-seed confirmation ===")
     print(
         f"sessions: train={actual_counts['train']} | "
         f"validation={actual_counts['validation']} | test={actual_counts['test']} LOCKED"
     )
     print(
-        f"grid={GRID_SIZE} complete trials | epochs/trial={args.epochs} | "
-        f"seed={args.seed} | device={device} | sampler=session-balanced"
+        f"new grid={GRID_SIZE} complete trials | epochs/trial={EPOCHS} | "
+        f"seeds={list(CONFIRMATION_SEEDS)} | device={device} | sampler=session-balanced"
     )
-    print(f"fixed learning rate: {FIXED_LEARNING_RATE:.1e}")
     print(
-        "weight decay: " + ", ".join(f"{value:.4f}" for value in WEIGHT_DECAYS)
-    )
-    print("dropout: " + ", ".join(f"{value:.3f}" for value in DROPOUTS))
-    print(
-        "fixed: AdamW | batch=32 | cosine schedule | gradient_clip=1 | "
+        f"fixed: lr={FIXED_LEARNING_RATE:.1e} | dropout={FIXED_DROPOUT:.3f} | "
+        "AdamW | batch=32 | cosine schedule | gradient_clip=1 | "
         "noise=0 | channel_dropout=0"
     )
+    print("weight decay candidates: " + ", ".join(map(str, WEIGHT_DECAYS)))
+    print("seed 42: reused from Phase-1c metrics; not retrained")
     print("policy: full budget/no pruning; validation selects; test not loaded")
 
     # Only train and validation arrays are loaded. Reading test names from the
@@ -537,7 +755,7 @@ def main() -> None:
 
     fixed_config = {
         **causal_config(),
-        "epochs": args.epochs,
+        "epochs": EPOCHS,
         "n_out": 2,
         "bs": 32,
         "noise": 0.0,
@@ -545,11 +763,10 @@ def main() -> None:
         "gradient_clip": 1.0,
         "cosine": True,
         "lr": FIXED_LEARNING_RATE,
+        "dropout": FIXED_DROPOUT,
     }
-    torch.manual_seed(args.seed)
-    np.random.seed(args.seed)
+    torch.manual_seed(CONFIRMATION_SEEDS[0])
     template = build_net(fixed_config, splits["train"]["x"].shape[1])
-    initial_state = copy.deepcopy(template.state_dict())
     n_parameters = sum(parameter.numel() for parameter in template.parameters())
     del template
 
@@ -564,15 +781,23 @@ def main() -> None:
         f"windows: train={len(splits['train']['x'])} | "
         f"validation={len(splits['validation']['x'])} | parameters={n_parameters:,}"
     )
+    for reference in seed42_references:
+        print(
+            "seed-42 reference | "
+            f"wd={reference['weight_decay']:.3f} | "
+            f"loss={reference['validation_loss']:.5f} | "
+            f"R2={reference['validation_r2_mean']:+.4f}"
+        )
     if args.validate_only:
         print("validation-only check complete; no study or checkpoint was written")
         print("test: LOCKED and not loaded")
         return
 
     protocol_signature = {
-        "phase": "1b_regularization_grid",
-        "seed": args.seed,
-        "epochs": args.epochs,
+        "phase": "1d_seed_confirmation",
+        "reference_seed": REFERENCE_SEED,
+        "new_training_seeds": list(CONFIRMATION_SEEDS),
+        "epochs": EPOCHS,
         "sampler": "session_balanced",
         "batch_size": fixed_config["bs"],
         "gradient_clip": fixed_config["gradient_clip"],
@@ -580,12 +805,15 @@ def main() -> None:
         "noise": 0.0,
         "channel_dropout": 0.0,
         "learning_rate": FIXED_LEARNING_RATE,
+        "dropout": FIXED_DROPOUT,
+        "weight_decay_candidates": list(WEIGHT_DECAYS),
         "train_sessions": split_sessions["train"],
         "validation_sessions": split_sessions["validation"],
         "channels": channels.tolist(),
-        "grid": GRID_SPACE,
+        "device": str(device),
+        "seed42_reference": report_path(PHASE1C_METRICS_PATH),
     }
-    sampler = optuna.samplers.GridSampler(GRID_SPACE, seed=args.seed)
+    sampler = optuna.samplers.GridSampler(GRID_SPACE, seed=REFERENCE_SEED)
     study = optuna.create_study(
         study_name=args.study_name,
         storage=storage_url,
@@ -597,20 +825,21 @@ def main() -> None:
     saved_signature = study.user_attrs.get("protocol_signature")
     if saved_signature is not None and saved_signature != protocol_signature:
         raise RuntimeError(
-            "The existing grid study uses a different data/training protocol. "
-            "Choose a new --study-name and --storage-path instead of mixing trials."
+            "The existing Phase-1d study uses a different protocol. Choose a new "
+            "--study-name and --storage-path instead of mixing trials."
         )
     study.set_user_attr("protocol_signature", protocol_signature)
     study.set_user_attr("test_policy", "locked_not_loaded")
     study.set_user_attr("pruning", "disabled_for_equal_full_budget_comparison")
+    study.set_user_attr("seed42_policy", "reused_phase1c_metrics_not_retrained")
 
     context = {
         "storage_path": storage_path,
         "fixed_protocol": {
             **protocol_signature,
-            "device": str(device),
             "optimizer": "AdamW",
             "checkpoint_selection": "minimum_pooled_validation_normalized_mse",
+            "aggregate_selection": "minimum_mean_validation_loss_across_seeds_42_43_44",
             "pruning": "disabled",
         },
         "split": {
@@ -639,37 +868,36 @@ def main() -> None:
     mse = nn.MSELoss()
 
     def objective(trial) -> float:
-        weight_decay = float(trial.suggest_categorical("weight_decay", WEIGHT_DECAYS))
-        dropout = float(trial.suggest_categorical("dropout", DROPOUTS))
-        config = {
-            **fixed_config,
-            "wd": weight_decay,
-            "dropout": dropout,
-        }
+        seed = int(trial.suggest_categorical("seed", CONFIRMATION_SEEDS))
+        weight_decay = float(
+            trial.suggest_categorical("weight_decay", WEIGHT_DECAYS)
+        )
+        config = {**fixed_config, "wd": weight_decay}
         print(
             f"\n=== trial {trial.number:03d}/{GRID_SIZE - 1:03d} | "
-            f"lr={FIXED_LEARNING_RATE:.1e} | wd={weight_decay:.4f} | "
-            f"dropout={dropout:.3f} ===",
+            f"seed={seed} | lr={FIXED_LEARNING_RATE:.1e} | "
+            f"wd={weight_decay:.3f} | dropout={FIXED_DROPOUT:.3f} ===",
             flush=True,
         )
 
-        # Every cell begins with the same weights and sees the same sequence of
-        # session-balanced epoch samples, isolating the two grid parameters.
-        torch.manual_seed(args.seed)
-        np.random.seed(args.seed)
-        rng = np.random.default_rng(args.seed)
+        # Resetting both generators per cell gives the two weight decays the
+        # same initialization and session-balanced sample stream within a seed.
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
+        np.random.seed(seed)
+        rng = np.random.default_rng(seed)
         net = build_net(config, splits["train"]["x"].shape[1]).to(device)
-        net.load_state_dict(initial_state)
         optimizer = torch.optim.AdamW(
             net.parameters(), lr=FIXED_LEARNING_RATE, weight_decay=weight_decay
         )
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, args.epochs)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, EPOCHS)
         history = []
         best_validation_loss = np.inf
         best_epoch = 0
         best_state = None
 
-        for epoch in range(1, args.epochs + 1):
+        for epoch in range(1, EPOCHS + 1):
             indices, _, month_draws = draw_session_balanced_indices(
                 split_sessions["train"], session_lengths, rng
             )
@@ -742,7 +970,8 @@ def main() -> None:
                 }
 
             print(
-                f"trial {trial.number:03d} | epoch {epoch:02d}/{args.epochs} | "
+                f"trial {trial.number:03d} | seed={seed} | "
+                f"epoch {epoch:02d}/{EPOCHS} | "
                 f"opt={row['optimization_loss']:.5f} | "
                 f"loss train={row['train_loss']:.5f} "
                 f"validation={row['validation_loss']:.5f} | "
@@ -753,7 +982,6 @@ def main() -> None:
                 + (" *best*" if improved else ""),
                 flush=True,
             )
-
             trial.report(float(row["validation_loss"]), step=epoch)
             scheduler.step()
 
@@ -803,7 +1031,9 @@ def main() -> None:
         worst_r2 = float(
             min(item["r2_mean"] for item in validation_by_session.values())
         )
+        cell_checkpoint = checkpoint_path(seed, weight_decay)
         trial.set_user_attr("fixed_learning_rate", FIXED_LEARNING_RATE)
+        trial.set_user_attr("fixed_dropout", FIXED_DROPOUT)
         trial.set_user_attr("selected_epoch", best_epoch)
         trial.set_user_attr("selected_checkpoint_metrics", selected_metrics)
         trial.set_user_attr(
@@ -814,40 +1044,38 @@ def main() -> None:
         trial.set_user_attr("validation_worst_session_r2_mean", worst_r2)
         trial.set_user_attr("validation_by_session", validation_by_session)
         trial.set_user_attr("history", history)
+        trial.set_user_attr("checkpoint", report_path(cell_checkpoint))
 
-        previous_best = min(
-            (completed.value for completed in completed_trials(study)), default=np.inf
+        cell_checkpoint.parent.mkdir(parents=True, exist_ok=True)
+        torch.save(
+            {
+                "purpose": "phase1d_confirmation_cell",
+                "created_at_utc": utc_now(),
+                "trial_number": trial.number,
+                "seed": seed,
+                "model_state": best_state,
+                "config": config,
+                "channels": channels.tolist(),
+                "target_mean": target_mean.tolist(),
+                "target_std": target_std.tolist(),
+                "feature_std_floor": feature_std_floor[:, 0].tolist(),
+                "train_sessions": split_sessions["train"],
+                "validation_sessions": split_sessions["validation"],
+                "test_policy": "locked_not_loaded",
+                "observation_seconds": OBSERVATION_SECONDS,
+                "checkpoint_epoch": best_epoch,
+                "selection_policy": "minimum_pooled_validation_normalized_mse",
+                "best_validation_loss": best_validation_loss,
+                "validation_r2_mean": selected_metrics["validation"]["r2_mean"],
+                "validation_macro_r2_mean": macro_r2,
+                "validation_worst_session_r2_mean": worst_r2,
+            },
+            cell_checkpoint,
         )
-        if best_validation_loss < previous_best:
-            CHECKPOINT_PATH.parent.mkdir(parents=True, exist_ok=True)
-            torch.save(
-                {
-                    "purpose": "indy_32ch_phase1b_regularization_grid_best",
-                    "created_at_utc": utc_now(),
-                    "trial_number": trial.number,
-                    "model_state": best_state,
-                    "config": config,
-                    "channels": channels.tolist(),
-                    "target_mean": target_mean.tolist(),
-                    "target_std": target_std.tolist(),
-                    "feature_std_floor": feature_std_floor[:, 0].tolist(),
-                    "train_sessions": split_sessions["train"],
-                    "validation_sessions": split_sessions["validation"],
-                    "test_policy": "locked_not_loaded",
-                    "observation_seconds": OBSERVATION_SECONDS,
-                    "checkpoint_epoch": best_epoch,
-                    "selection_policy": "minimum_pooled_validation_normalized_mse",
-                    "best_validation_loss": best_validation_loss,
-                    "validation_r2_mean": selected_metrics["validation"]["r2_mean"],
-                    "validation_macro_r2_mean": macro_r2,
-                    "validation_worst_session_r2_mean": worst_r2,
-                },
-                CHECKPOINT_PATH,
-            )
 
         print(
-            f"trial {trial.number:03d} complete | selected epoch={best_epoch} | "
-            f"validation loss={best_validation_loss:.5f} | "
+            f"trial {trial.number:03d} complete | seed={seed} | "
+            f"selected epoch={best_epoch} | validation loss={best_validation_loss:.5f} | "
             f"R2={selected_metrics['validation']['r2_mean']:+.4f} | "
             f"macro/worst R2={macro_r2:+.4f}/{worst_r2:+.4f}",
             flush=True,
@@ -855,13 +1083,13 @@ def main() -> None:
         return best_validation_loss
 
     def persist_callback(current_study, _trial) -> None:
-        write_metrics(current_study, context, started_at)
-        plot_grid(current_study)
+        write_metrics(current_study, context, seed42_references, started_at)
+        plot_confirmation(current_study, seed42_references)
 
     existing_complete = len(completed_trials(study))
     remaining = max(GRID_SIZE - existing_complete, 0)
     print(f"study database: {storage_path}")
-    print(f"existing complete={existing_complete} | grid cells remaining<={remaining}")
+    print(f"existing complete={existing_complete} | new cells remaining<={remaining}")
     print("Ctrl-C is safe: each completed trial persists in SQLite.\n")
     if remaining:
         timeout = args.timeout_hours * 3600 if args.timeout_hours else None
@@ -875,30 +1103,49 @@ def main() -> None:
                 gc_after_trial=True,
             )
         finally:
-            write_metrics(study, context, started_at)
-            plot_grid(study)
+            write_metrics(study, context, seed42_references, started_at)
+            plot_confirmation(study, seed42_references)
     else:
-        write_metrics(study, context, started_at)
-        plot_grid(study)
+        write_metrics(study, context, seed42_references, started_at)
+        plot_confirmation(study, seed42_references)
 
-    complete = sorted(completed_trials(study), key=lambda trial: trial.value)
-    print("\n=== Phase-1b validation-only ranking ===")
-    for rank, trial in enumerate(complete, start=1):
-        print(
-            f"{rank:02d}. trial {trial.number:03d} | loss={trial.value:.5f} | "
-            f"wd={trial.params['weight_decay']:.4f} | "
-            f"dropout={trial.params['dropout']:.3f} | "
-            f"epoch={trial.user_attrs.get('selected_epoch', '?')} | "
-            f"R2={trial.user_attrs.get('validation_r2_mean', float('nan')):+.4f} | "
-            f"macro/worst="
-            f"{trial.user_attrs.get('validation_macro_r2_mean', float('nan')):+.4f}/"
-            f"{trial.user_attrs.get('validation_worst_session_r2_mean', float('nan')):+.4f}"
+    rows = confirmation_rows(study, seed42_references)
+    aggregate = aggregate_candidates(rows)
+    print("\n=== Phase-1d all-seed validation summary ===")
+    for summary in aggregate["candidate_summaries"]:
+        loss = summary["metrics"]["validation_loss"]
+        pooled = summary["metrics"]["validation_r2_mean"]
+        macro = summary["metrics"]["validation_macro_r2_mean"]
+        worst = summary["metrics"]["validation_worst_session_r2_mean"]
+        sd = lambda metric: (
+            f"{metric['sample_sd']:.5f}" if metric["sample_sd"] is not None else "n/a"
         )
+        print(
+            f"wd={summary['weight_decay']:.3f} | seeds={summary['seeds']} | "
+            f"loss={loss['mean']:.5f} +/- {sd(loss)} | "
+            f"R2={pooled['mean']:+.4f} +/- {sd(pooled)} | "
+            f"macro={macro['mean']:+.4f} +/- {sd(macro)} | "
+            f"worst={worst['mean']:+.4f} +/- {sd(worst)}"
+        )
+    if aggregate["complete"]:
+        print(
+            "recommended by mean validation loss: "
+            f"weight_decay={aggregate['recommended_weight_decay_by_mean_validation_loss']:.3f}"
+        )
+        print(
+            "seed wins: "
+            + ", ".join(
+                f"{name}={wins}"
+                for name, wins in aggregate["seed_wins_by_validation_loss"].items()
+            )
+        )
+    else:
+        print("aggregate incomplete: rerun the same command to finish remaining cells")
     print(f"elapsed this invocation: {(time.time() - started) / 60:.1f} minutes")
     print("test: LOCKED and not loaded")
     print(f"metrics: {METRICS_PATH}")
     print(f"figure: {FIGURE_PATH}")
-    print(f"best checkpoint: {CHECKPOINT_PATH}")
+    print(f"cell checkpoints: {CHECKPOINT_DIR}")
 
 
 if __name__ == "__main__":

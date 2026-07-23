@@ -23,6 +23,7 @@ dataset, with STM32 deployment constraints.
   record of the experiments that still affect the current model.
 - [`models/indy_32ch/README.md`](models/indy_32ch/README.md): frozen model card.
 - [`data/README.md`](data/README.md): data layout and immutability rules.
+- [`results/indy/README.md`](results/indy/README.md): phase-aligned result index.
 
 ## Repository layout
 
@@ -31,23 +32,21 @@ configs/                 dataset manifest and frozen model configuration
 data/
   raw/                   immutable source recordings
   processed/             generated model-ready arrays
-  processing/            supported Indy preprocessing notebook
-src/intent_decoder/      active causal data, feature, sampling and model code
-models/indy_32ch/        frozen checkpoint and model card
+  processing/            Indy conversion notebook and causal target transforms
+models/indy_32ch/        model input, features, architecture, sampler and checkpoint
 experiments/active/      reproducible data-quality/month-drift audit
-results/metrics/         current compact evidence only
+results/indy/            phase-aligned Indy metrics and figures
 docs/                    current status and concise experiment log
-history/                 completed Phase-1 and locked-test code; never imported
-tests/                   active causality and sampler regression tests
+history/                 completed Phase-1, locked-test and regression evidence
 ```
 
-## Validation
+There is no generic `src/` layer. Dataset-generation code lives with
+`data/processing/`; code specific to the only active decoder lives with
+`models/indy_32ch/`.
 
-From the repository root:
-
-```bash
-python -m unittest discover -s tests -v
-```
+Experiment naming is chronological: Phase 0 covers data/sampler decisions,
+Phase 1a--1e covers hyperparameter selection, Phase 2 is the consumed locked
+test, and Phase 3 is reserved for drift detection.
 
 Do not rerun model selection or compare another checkpoint on the consumed
 January test split.

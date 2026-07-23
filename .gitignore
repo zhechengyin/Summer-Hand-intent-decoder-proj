@@ -23,10 +23,11 @@ data/processed/**/manifest.json
 *.mat
 *.snirf
 
-# Large results are regenerated. Small JSON run manifests are versioned evidence.
-results/figures/*
+# Large results are regenerated. Small JSON/CSV evidence remains versioned.
+results/**/*.png
+results/**/*.pt
+results/**/*.db
 results/*.log
-!results/figures/.gitkeep
 
 # OS
 .DS_Store
