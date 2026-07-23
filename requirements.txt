@@ -5,8 +5,8 @@ PyYAML>=6.0
 h5py>=3.8
 matplotlib>=3.6
 pandas>=2.0
+scikit-learn>=1.2
 ipykernel>=6.0
 
-# Causal TCN+GRU training and evaluation
+# Frozen causal TCN+GRU model
 torch>=2.0
-optuna>=3.6,<5

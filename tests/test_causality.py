@@ -22,7 +22,6 @@ SUPPORTED_CODE = (
     ROOT / "src",
     ROOT / "data" / "processing",
     ROOT / "experiments" / "active",
-    ROOT / "experiments" / "deepblue",
     ROOT / "models" / "indy_32ch",
 )
 FORBIDDEN_CALLS = {"filtfilt", "sosfiltfilt", "gaussian_filter1d", "gradient", "interp"}
@@ -41,7 +40,9 @@ class CausalityTests(unittest.TestCase):
         self.assertEqual(37, len(flattened))
         self.assertEqual(37, len(set(flattened)))
         self.assertEqual(expected, set(flattened))
-        self.assertEqual("train", processed_session_path("train1").parent.name)
+        self.assertEqual(
+            "train", processed_session_path("indy_20161005_06").parent.name
+        )
         self.assertEqual(
             "validation", processed_session_path("indy_20161206_02").parent.name
         )

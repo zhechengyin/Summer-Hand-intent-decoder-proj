@@ -1,32 +1,21 @@
-# Historical executable files
+# History
 
-This folder holds superseded experiment scripts that are retained only so the
-project history stays understandable. Nothing under `history/` is imported by
-the active model or used by the current Optuna sweep.
+This directory contains only completed code needed to explain how the current
+frozen model was selected:
 
-## `indy_32ch/`
+- `phase1/sweep_phase1_optuna.py`
+- `phase1/sweep_phase1b_regularization_grid.py`
+- `phase1/sweep_phase1c_wd_upper_grid.py`
+- `phase1/sweep_phase1d_seed_confirmation.py`
+- `phase1/sweep_phase1e_seed_crosscheck.py`
+- `phase1/results/phase1e_seed_crosscheck.json`
+- `locked_test/evaluate_locked_january.py`
 
-- `train_chronological_baseline.py` is the earlier 29/4/4 diagnostic baseline.
-  It printed January test metrics during training, so it is not a valid model-
-  selection entry point.
-- `train_sampling_comparison.py` is the completed window/session/month study
-  from LOG-097 and LOG-098. It established session-balanced sampling as the
-  frozen policy.
-- `sampling_comparison_test.py` preserves the old sampler tests. It is outside
-  `tests/`, so it is not part of the active test suite.
+The Phase-1 scripts cover the completed Optuna search, boundary grids and
+five-seed confirmation. The locked-test runner produced the one-shot January
+result on 2026-07-22.
 
-Their numerical outcomes and original commands remain in
-`docs/history/EXPERIMENT_LOG.md`, while the small result JSON files remain in
-`results/metrics/` as decision evidence.
-
-## Current entry point
-
-Run the self-contained Phase-1 sweep from the repository root:
-
-```bash
-python models/indy_32ch/sweep_phase1_optuna.py
-```
-
-Do not import code from this folder into new scripts. If an old direction is
-reopened, copy the necessary idea into a new active implementation and document
-the new protocol explicitly.
+These files are provenance, not active entry points. Do not run or import them.
+They may reference deleted intermediate databases or non-selected checkpoints.
+The frozen configuration is in `configs/indy_32ch.yaml`; current conclusions are
+in `docs/history/EXPERIMENT_LOG.md`.

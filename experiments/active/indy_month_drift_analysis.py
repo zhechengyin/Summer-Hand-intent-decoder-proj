@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 import os
+import tempfile
 from itertools import combinations
 from pathlib import Path
 
@@ -243,7 +244,7 @@ def save_figures(
     neural_month_matrix: np.ndarray,
     speed_month_matrix: np.ndarray,
 ) -> None:
-    matplotlib_cache = ROOT / "results" / "large" / ".matplotlib"
+    matplotlib_cache = Path(tempfile.gettempdir()) / "indy_decoder_matplotlib"
     matplotlib_cache.mkdir(parents=True, exist_ok=True)
     os.environ.setdefault("MPLCONFIGDIR", str(matplotlib_cache))
     import matplotlib

@@ -1,50 +1,53 @@
 # Neural Intent Decoder
 
-Compact causal TCN+GRU decoding experiments for intracortical monkey recordings,
-with STM32 deployment constraints.
+Strictly causal 32-channel TCN+GRU decoding for the Indy intracortical reaching
+dataset, with STM32 deployment constraints.
 
-## Start here
+## Current state
 
-- [`docs/STATUS.md`](docs/STATUS.md) — the single authoritative current status.
-- [`docs/ROADMAP.md`](docs/ROADMAP.md) — ordered next steps.
-- [`docs/DECISIONS.md`](docs/DECISIONS.md) — active engineering decisions and caveats.
-- [`data/README.md`](data/README.md) — where newly downloaded, raw, interim, and
-  processed data belong.
+- All 37 Indy sessions are processed into a fixed chronological 29/4/4 split.
+- Input is 32-channel spike counts plus causal EWMA at 40 ms resolution.
+- Every session uses a 60-second past-only normalization prefix; warm-up outputs
+  are invalid.
+- The frozen model is `models/indy_32ch/checkpoint.pt`.
+- Frozen hyperparameters are recorded in `configs/indy_32ch.yaml`.
+- Locked January pooled R² is 0.5511. Three sessions scored about 0.68--0.70;
+  one drifted session scored -0.0524.
+- The only active research direction is a label-free session-drift detector
+  trained and validated without using January.
 
-## Repository map
+## Read these files
+
+- [`docs/STATUS.md`](docs/STATUS.md): current truth and next task.
+- [`docs/history/EXPERIMENT_LOG.md`](docs/history/EXPERIMENT_LOG.md): concise
+  record of the experiments that still affect the current model.
+- [`models/indy_32ch/README.md`](models/indy_32ch/README.md): frozen model card.
+- [`data/README.md`](data/README.md): data layout and immutability rules.
+
+## Repository layout
 
 ```text
-src/intent_decoder/       reusable data, feature, model, training and drift code
-configs/                  versioned dataset/model/deployment configurations
-models/                   checkpoints and model-specific deployment artifacts
-experiments/
-  active/                 experiments that may change a current decision
-  deepblue/               separate U-M finger-SBP benchmark
+configs/                 dataset manifest and frozen model configuration
 data/
-  raw/                    verified immutable source recordings
-  processed/              documented model-ready datasets
-  processing/             dataset-specific Python conversion scripts
-docs/history/             historical summary and chronological experiment log
-history/                  superseded executable experiments; never imported by active code
-results/metrics/          small versioned JSON evidence
-results/large/            large regenerated logs/figures, ignored by Git
+  raw/                   immutable source recordings
+  processed/             generated model-ready arrays
+  processing/            supported Indy preprocessing notebook
+src/intent_decoder/      active causal data, feature, sampling and model code
+models/indy_32ch/        frozen checkpoint and model card
+experiments/active/      reproducible data-quality/month-drift audit
+results/metrics/         current compact evidence only
+docs/                    current status and concise experiment log
+history/                 completed Phase-1 and locked-test code; never imported
+tests/                   active causality and sampler regression tests
 ```
 
-## Current truth
+## Validation
 
-Most historical checkpoint and legacy code was removed after its outcomes were
-preserved in [`docs/history/`](docs/history/). The few recent executable files
-needed to explain the sampling decision are isolated under [`history/`](history/README.md)
-and are never imported by active code.
+From the repository root:
 
-The 32-channel counts-plus-causal-EWMA pipeline is the current research candidate.
-Its code now also uses forward-only target filtering, backward differences,
-past-only prefix normalization and a strictly causal model. All earlier scores
-were superseded by the corrected pipeline. All chronological training and
-validation sessions have now been evaluated across CPU seeds 42/43/44, and
-session-balanced training is the frozen sampler. A self-contained Phase-1 Optuna
-study has completed 40 seed-42 trials and identified a low-dropout,
-high-learning-rate region, but its top candidates remain nearly tied and hit the
-dropout search boundary. The project still needs narrow boundary refinement,
-multi-seed confirmation, an independently validated drift threshold, one locked
-January test evaluation, checkpoint promotion, int8 export, and MCU timing.
+```bash
+python -m unittest discover -s tests -v
+```
+
+Do not rerun model selection or compare another checkpoint on the consumed
+January test split.

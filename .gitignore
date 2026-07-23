@@ -25,10 +25,8 @@ data/processed/**/manifest.json
 
 # Large results are regenerated. Small JSON run manifests are versioned evidence.
 results/figures/*
-results/large/*
 results/*.log
 !results/figures/.gitkeep
-!results/large/.gitkeep
 
 # OS
 .DS_Store

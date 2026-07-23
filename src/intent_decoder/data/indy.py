@@ -1,9 +1,8 @@
 """Canonical Indy raw and model-ready data loader.
 
-Raw MAT files live in ``data/raw/indy_loco/indy``. Human-friendly aliases such as
-``train1`` are resolved through ``configs/datasets/indy_sessions.yaml``.  Original
-Zenodo names (``indy_YYYYMMDD_NN``) work directly, so all 37 sessions share the
-same interface.
+Raw MAT files live in ``data/raw/indy_loco/indy``. Sessions use their canonical
+Zenodo names (``indy_YYYYMMDD_NN``), and the fixed chronological split lives in
+``configs/datasets/indy_sessions.yaml``.
 
 This loader returns unsmoothed spike counts.  Causal temporal features are owned
 by :mod:`src.intent_decoder.features.causal`; non-causal Gaussian smoothing is
@@ -30,22 +29,17 @@ DEFAULT_BIN_S = 0.040
 DEFAULT_VELOCITY_LOWPASS_HZ = 3.0
 DEFAULT_N_CHANNELS = 96
 MODEL_READY_SCHEMA = "indy_counts_velocity_v2"
-LEGACY_MODEL_READY_SCHEMA = "indy_model_ready_v1"
 _ORIGINAL_NAME = re.compile(r"^indy_\d{8}_\d{2}$")
 
 
 def load_session_manifest(path: Path = MANIFEST) -> dict:
-    """Load the versioned alias and experiment-session registry."""
+    """Load the canonical chronological session registry."""
     with path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
-def resolve_source_name(name: str, manifest: dict | None = None) -> str:
-    """Resolve an alias to its original Zenodo stem."""
-    manifest = manifest or load_session_manifest()
-    aliases = manifest.get("aliases", {})
-    if name in aliases:
-        return aliases[name]
+def resolve_source_name(name: str) -> str:
+    """Validate and return a canonical Zenodo session stem."""
     if _ORIGINAL_NAME.fullmatch(name):
         return name
     raise KeyError(f"Unknown Indy/Loco session name: {name!r}")
@@ -60,7 +54,7 @@ def session_path(name: str, raw_dir: Path = RAW_DIR) -> Path:
 def processed_session_path(name: str, processed_dir: Path = PROCESSED_DIR) -> Path:
     """Return the fixed chronological-split artifact path for a session."""
     manifest = load_session_manifest()
-    source = resolve_source_name(name, manifest)
+    source = resolve_source_name(name)
     matches = [
         split
         for split, sessions in manifest["chronological_split"].items()
@@ -163,7 +157,7 @@ def load_model_data(name: str) -> tuple[np.ndarray, np.ndarray]:
             filter_name = str(np.asarray(data["velocity_filter"]).item())
             difference = str(np.asarray(data["velocity_difference"]).item())
             sampling = str(np.asarray(data["kinematic_sampling"]).item())
-            if schema not in {MODEL_READY_SCHEMA, LEGACY_MODEL_READY_SCHEMA}:
+            if schema != MODEL_READY_SCHEMA:
                 raise ValueError(f"Unsupported schema {schema!r} in {artifact}")
             if (
                 filter_name != "causal_forward_butterworth"
@@ -171,13 +165,8 @@ def load_model_data(name: str) -> tuple[np.ndarray, np.ndarray]:
                 or sampling != "causal_latest_sample_at_bin_end"
             ):
                 raise ValueError(f"Unsupported target metadata in {artifact}")
-            if schema == LEGACY_MODEL_READY_SCHEMA:
-                m1_indices = data["m1_indices"].astype(np.int64)
-                counts = data["counts"][m1_indices]
-                velocity = data["velocity"][:, 1:3]
-            else:
-                counts = data["counts"]
-                velocity = data["velocity"]
+            counts = data["counts"]
+            velocity = data["velocity"]
             return counts.astype(np.float32), velocity.astype(np.float32)
     return load_counts_velocity(name)
 

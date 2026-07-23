@@ -5,7 +5,7 @@ import unittest
 
 import numpy as np
 
-from models.indy_32ch.sweep_phase1_optuna import draw_session_balanced_indices
+from src.intent_decoder.sampling import draw_session_balanced_indices
 
 
 class SessionBalancedSamplingTests(unittest.TestCase):

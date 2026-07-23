@@ -87,21 +87,22 @@ def build_net(config: dict, n_channels: int):
 
 
 def causal_config(n_out: int = 2) -> dict:
-    """Return current causal architecture and training defaults."""
+    """Return the frozen Indy 32-channel architecture and training defaults."""
     return {
         "F": 64,
         "H": 64,
         "L": 1,
         "dils": [1, 2, 4, 8],
         "bidir": False,
-        "dropout": 0.3,
-        "lr": 1e-3,
-        "wd": 1e-3,
-        "epochs": 60,
+        "dropout": 0.025,
+        "lr": 9e-4,
+        "wd": 0.06,
+        "epochs": 20,
         "bs": 32,
-        "noise": 0.1,
-        "chdrop": 0.1,
+        "noise": 0.0,
+        "chdrop": 0.0,
         "cosine": True,
         "act": "relu",
         "n_out": n_out,
+        "gradient_clip": 1.0,
     }

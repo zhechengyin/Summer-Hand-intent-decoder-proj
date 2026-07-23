@@ -1,0 +1,175 @@
+{
+  "purpose": "indy_32ch_locked_january_seed43_inference_only",
+  "generated_at_utc": "2026-07-22T20:38:30.344563+00:00",
+  "locked_test_opened": true,
+  "model_selection_complete_before_test": true,
+  "frozen_checkpoint": "models/indy_32ch/checkpoint.pt",
+  "frozen_protocol": {
+    "seed": 43,
+    "learning_rate": 0.0009,
+    "dropout": 0.025,
+    "weight_decay": 0.06,
+    "epoch_budget": 20,
+    "checkpoint_epoch": 7,
+    "sampler": "session_balanced",
+    "batch_size_inference_only": 32,
+    "observation_seconds": 60,
+    "features": [
+      "raw_counts",
+      "causal_ewma_0.1"
+    ],
+    "channels": [
+      1,
+      3,
+      6,
+      18,
+      20,
+      22,
+      24,
+      26,
+      32,
+      36,
+      38,
+      43,
+      49,
+      50,
+      51,
+      53,
+      55,
+      59,
+      61,
+      63,
+      65,
+      66,
+      67,
+      69,
+      70,
+      71,
+      72,
+      73,
+      75,
+      79,
+      87,
+      94
+    ],
+    "n_parameters": 78786
+  },
+  "selection_evidence": {
+    "phase1e_metrics": "history/phase1/results/phase1e_seed_crosscheck.json",
+    "rule_status": "selected_by_preregistered_rule",
+    "selected_weight_decay": 0.06,
+    "seed_rule": "best validation loss and pooled R2 within frozen WD=0.060",
+    "seed43_validation_loss": 0.4801663878336118,
+    "seed43_validation_r2": 0.5603620111942291,
+    "seed43_validation_macro_r2": 0.570223405957222,
+    "seed43_validation_worst_session_r2": 0.3143501281738281
+  },
+  "test_sessions": [
+    "indy_20170123_02",
+    "indy_20170124_01",
+    "indy_20170127_03",
+    "indy_20170131_02"
+  ],
+  "safeguards": {
+    "optimizer_created": false,
+    "backward_called": false,
+    "model_weights_updated": false,
+    "test_used_for_checkpoint_selection": false,
+    "test_used_for_seed_selection": false,
+    "test_used_for_hyperparameter_selection": false,
+    "test_labels_used_only_after_inference": true,
+    "test_observation_prefix": "first 60 seconds of neural counts fit session-local feature normalization; prefix outputs and labels are discarded"
+  },
+  "results": {
+    "by_session": {
+      "indy_20170123_02": {
+        "loss": 0.30525484681129456,
+        "r2_x": 0.6794692277908325,
+        "r2_y": 0.7099335193634033,
+        "r2_mean": 0.6947013735771179,
+        "pearson_r_x": 0.8261277079582214,
+        "pearson_r_y": 0.8447869420051575,
+        "pearson_r_mean": 0.8354573249816895,
+        "windows": 274,
+        "scored_bins": 13700,
+        "scored_seconds": 548.0
+      },
+      "indy_20170124_01": {
+        "loss": 0.8741369843482971,
+        "r2_x": -0.1770625114440918,
+        "r2_y": 0.07225823402404785,
+        "r2_mean": -0.05240213871002197,
+        "pearson_r_x": 0.05436272174119949,
+        "pearson_r_y": 0.33801978826522827,
+        "pearson_r_mean": 0.19619125500321388,
+        "windows": 265,
+        "scored_bins": 13250,
+        "scored_seconds": 530.0
+      },
+      "indy_20170127_03": {
+        "loss": 0.31869086623191833,
+        "r2_x": 0.6616491079330444,
+        "r2_y": 0.7361071109771729,
+        "r2_mean": 0.6988781094551086,
+        "pearson_r_x": 0.8173804879188538,
+        "pearson_r_y": 0.8605104088783264,
+        "pearson_r_mean": 0.8389454483985901,
+        "windows": 336,
+        "scored_bins": 16800,
+        "scored_seconds": 672.0
+      },
+      "indy_20170131_02": {
+        "loss": 0.2829749286174774,
+        "r2_x": 0.6365751028060913,
+        "r2_y": 0.7193834781646729,
+        "r2_mean": 0.6779792904853821,
+        "pearson_r_x": 0.8036270141601562,
+        "pearson_r_y": 0.8486689925193787,
+        "pearson_r_mean": 0.8261480033397675,
+        "windows": 377,
+        "scored_bins": 18850,
+        "scored_seconds": 754.0
+      }
+    },
+    "pooled": {
+      "loss": 0.4225621521472931,
+      "r2_x": 0.499164879322052,
+      "r2_y": 0.6031277775764465,
+      "r2_mean": 0.5511463284492493,
+      "pearson_r_x": 0.7157437205314636,
+      "pearson_r_y": 0.7766678333282471,
+      "pearson_r_mean": 0.7462057769298553
+    },
+    "session_macro": {
+      "loss": 0.44526440650224686,
+      "r2_x": 0.4501577317714691,
+      "r2_y": 0.5594205856323242,
+      "r2_mean": 0.5047891587018967,
+      "pearson_r_x": 0.6253744829446077,
+      "pearson_r_y": 0.7229965329170227,
+      "pearson_r_mean": 0.6741855079308152
+    },
+    "worst_session": {
+      "session": "indy_20170124_01",
+      "r2_mean": -0.05240213871002197,
+      "loss": 0.8741369843482971
+    },
+    "frozen_validation_reference": {
+      "loss": 0.4801663878336118,
+      "pooled_r2": 0.5603620111942291,
+      "macro_r2": 0.570223405957222,
+      "worst_session_r2": 0.3143501281738281
+    },
+    "comparison_to_frozen_validation": {
+      "pooled_loss_delta_test_minus_validation": -0.05760423568631873,
+      "pooled_r2_delta_test_minus_validation": -0.009215682744979858,
+      "macro_r2_delta_test_minus_validation": -0.06543424725532532,
+      "worst_r2_delta_test_minus_validation": -0.3667522668838501
+    }
+  },
+  "artifacts": {
+    "metrics": "results/metrics/indy_32ch_locked_january_seed43.json",
+    "figure": "results/figures/indy_32ch_locked_january_seed43.png",
+    "new_checkpoint_written": false
+  }
+}

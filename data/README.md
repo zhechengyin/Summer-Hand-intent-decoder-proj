@@ -1,35 +1,33 @@
-# Data organization
+# Data
 
-The data tree intentionally uses only two data-storage states plus one code folder:
+The active project uses one dataset: Indy.
 
 ```text
 data/
-  raw/                      immutable source recordings
-    indy_loco/
-      indy/                 37 original Zenodo MAT sessions
-    umich_deepblue/
-  processed/                generated model-ready datasets
-    indy_loco/
-      indy/
-        train/              29 chronological training sessions
-        validation/          4 December validation sessions
-        test/                4 locked January test sessions
-    umich_deepblue/
-  processing/               notebooks/scripts that build processed data
-    indy_loco/
-      indy/                 structure + preprocessing notebook
-    umich_deepblue/
+  raw/indy_loco/indy/                 37 immutable Zenodo MAT files
+  processed/indy_loco/indy/
+    train/                            29 sessions
+    validation/                        4 sessions
+    test/                              4 consumed January sessions
+  processing/indy_loco/indy/
+    prepare_indy_model_ready.ipynb    supported conversion notebook
 ```
 
-## Rules
+Rules:
 
-1. Place source recordings in `raw/` and never edit them in place.
-2. Keep processing notebooks/scripts in `processing/`, not beside generated data.
-3. Write generated arrays to `processed/`; they must be reproducible from raw data.
-4. Each processed method keeps a README describing schema and parameters.
-5. Preserve recording/session boundaries; model windows must never cross files.
+1. Never modify files under `raw/`.
+2. Preserve session boundaries.
+3. Generate processed data only through the supported notebook.
+4. Do not convert MAT to CSV for model training.
+5. Do not use January for future model or detector selection.
 
-The canonical Indy loader is `src/intent_decoder/data/indy.py`. Alias/session
-provenance and the official 37-file checksum inventory are stored outside the
-data tree in `configs/datasets/indy_sessions.yaml`, together with the fixed
-chronological split.
+To rebuild the model-ready data, open
+`processing/indy_loco/indy/prepare_indy_model_ready.ipynb` with the project
+virtual environment and run it from top to bottom.
+
+The canonical checksum/split manifest is
+`configs/datasets/indy_sessions.yaml`. The model-ready schema is documented in
+`processed/indy_loco/indy/README.md`.
+
+Any inactive U-M/Deep Blue files already present under raw or processed storage
+are left untouched, but no active code in this repository consumes them.
