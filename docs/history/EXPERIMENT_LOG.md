@@ -119,3 +119,55 @@ Evidence:
 - `results/indy/phase2_locked_january/phase2_locked_january_metrics.json`
 - `results/indy/phase2_locked_january/phase2_locked_january_figure.png`
 - historical runner: `history/phase2/phase2_locked_january.py`
+
+## Phase 3a — Pre-January label-free drift-detector baseline
+
+Completed: 2026-07-24.
+
+The first detector implementation uses only the 29 train and four December
+validation sessions. It reads the first 1,500 fixed-channel count bins, never
+loads velocity, rejects January-or-later names in code, and compares:
+
+1. multi-month log-rate correlation, robust rate distance, global rate ratio
+   and unexpectedly silent channels;
+2. one global five-dimensional Gaussian KLD;
+3. the nearest of several month-reference five-dimensional Gaussian KLDs;
+4. the interpretable features and multi-reference KLD together.
+
+The KLD baseline is inspired by MINDFUL but is intentionally project-specific:
+PCA and normalization are fitted only from historical references, monthly
+prototypes replace the paper's performance-selected initial reference, and no
+self-supervised correction is performed.
+
+The first 0.95-quantile run showed that session-level calibration was
+over-optimistic for a completely unseen month. Calibration was corrected to an
+inner leave-one-complete-month-out loop. A conservative 0.99 empirical
+quantile, selected using pre-January data only, reduced intact-session flags to
+5/33 and abstentions to 3/33.
+
+| Condition | Combined flag | Combined abstain |
+| --- | ---: | ---: |
+| Intact held-month session | 15.2% | 9.1% |
+| 50% global thinning | 18.2% | 6.1% |
+| 75% global thinning | 72.7% | 45.5% |
+| 25% channel dropout | 100.0% | 18.2% |
+| Channel permutation | 18.2% | 3.0% |
+| 65% thinning + 25% dropout | 100.0% | 72.7% |
+
+Global KLD and multi-reference KLD each flagged 1/33 intact sessions, but global
+KLD was more sensitive to most synthetic faults. Therefore the multi-reference
+MINDFUL variant is retained as a baseline, not promoted as the winner.
+
+Decision: the implementation is valid enough for the next experiment, but the
+9.1% intact-data abstain rate is too high to freeze without performance labels.
+Phase 3b must pair these scores with strictly out-of-month decoder R² and
+determine whether the three abstained sessions were actually incompatible.
+Synthetic faults are engineering checks, not evidence that real decoder
+failures can be predicted.
+
+Evidence:
+
+- `results/indy/phase3a_drift_detector/phase3a_drift_detector_metrics.json`
+- `results/indy/phase3a_drift_detector/phase3a_drift_detector_scores.csv`
+- `results/indy/phase3a_drift_detector/phase3a_drift_detector_figure.png`
+- `results/indy/phase3a_drift_detector/phase3a_drift_detector_reference.npz`

@@ -1,0 +1,61 @@
+name: indy_32ch_phase3a_drift_detector
+status: implemented_not_yet_experimentally_frozen
+decoder: configs/indy_32ch.yaml
+literature:
+  mindful: https://www.nature.com/articles/s42003-024-06784-4
+  manifold_alignment_context: https://www.nature.com/articles/s41551-020-0542-9
+
+data_policy:
+  allowed_splits: [train, validation]
+  forbidden_split: test
+  forbidden_month: 2017-01
+  development_sessions: 33
+  velocity_labels_loaded: false
+  observation_seconds: 60
+  observation_bins: 1500
+
+simple_detector:
+  channel_profile: log1p_firing_rate_correlation
+  robust_rate_distance: median_absolute_channel_z
+  global_rate: absolute_log_median_rate_ratio
+  dropout: unexpectedly_silent_historically_active_channels
+  references: historical_months
+
+mindful_inspired_detector:
+  input: fixed_32_raw_counts
+  normalization: reference_only_fixed_affine
+  dimensions: 5
+  projection: reference_only_pca
+  distribution: full_covariance_gaussian
+  distance: kld_reference_to_current
+  references:
+    global: one_pooled_pre_january_reference
+    multi: one_reference_per_available_historical_month
+  note: This is a project-specific simplified MINDFUL baseline, not a paper reproduction.
+
+thresholds:
+  method: empirical_higher_quantile
+  quantile: 0.99
+  outer_validation: leave_one_complete_month_out
+  calibration: leave_one_complete_month_out_inside_outer_reference_pool
+  frozen_values: null
+
+decision:
+  pass: no_abnormal_evidence
+  warning: one_abnormal_evidence_family
+  abstain: at_least_two_abnormal_evidence_families
+  mindful_can_abstain_alone: false
+  action_on_abstain: pause_decoder_and_request_recalibration_or_review
+
+validation_scope:
+  phase3a:
+    - intact_held_month_false_alarm_rate
+    - synthetic_global_thinning
+    - synthetic_channel_dropout
+    - synthetic_channel_permutation
+    - synthetic_mixed_fault
+  deferred:
+    - held_month_out_of_sample_decoder_r2_relationship
+    - frozen_january_posthoc_check
+    - prospective_future_session_validation
+    - stm32_fixed_point_equivalence

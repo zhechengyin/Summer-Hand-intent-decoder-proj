@@ -1,6 +1,6 @@
 # Current Status
 
-Last audited: 2026-07-23.
+Last audited: 2026-07-24.
 
 ## Objective
 
@@ -59,18 +59,37 @@ feature or detector selection.
 
 ## Active work
 
-Build a new label-free drift detector from scratch. It must:
+Phase 3a now provides a label-free 60-second compatibility gate:
 
-1. use only the 33 pre-January sessions;
-2. use the first 60 seconds of fixed-32 counts;
-3. evaluate firmware-feasible rate correlation, robust distance, silent-channel
-   count and rate-ratio features;
-4. select features and thresholds inside nested leave-one-month-out validation;
-5. prioritize avoiding false negatives and report sensitivity, specificity,
-   balanced accuracy, accepted-session coverage/R² and firmware cost.
+- layer A compares log-rate shape, robust rate distance, global rate ratio and
+  unexpectedly silent channels against multiple historical month references;
+- layer B projects all 1,500 prefix bins into a fixed five-dimensional PCA space
+  and compares full mean/covariance distributions with Gaussian KLD;
+- global and multi-month KLD are both reported instead of assuming that
+  multi-reference is better;
+- one abnormal evidence family produces `warning`; at least two produce
+  `abstain`; KLD alone cannot abstain;
+- the loader accepts only the 29 train and four December validation sessions,
+  and the model code hard-fails on January-or-later session names.
 
-No active detector script exists yet. The previous detector scaffold was deleted
-because it used an obsolete pool and could reintroduce January into training.
+Thresholds use a conservative 0.99 empirical quantile and are recalibrated by an
+inner leave-one-complete-month-out loop inside every outer held-month fold.
+January and velocity labels are never loaded.
+
+Initial pre-January results are developmental, not a frozen detector:
+
+- intact held-month sessions: combined flag 5/33 (15.2%), abstain 3/33 (9.1%);
+- global KLD and multi-reference KLD each flagged 1/33 intact sessions;
+- 25% synthetic channel dropout: combined flag 33/33;
+- mixed 65% thinning plus 25% channel dropout: combined flag 33/33 and abstain
+  24/33;
+- multi-reference KLD did not outperform global KLD in these stress tests.
+
+The intact-data abstain rate is still too high to freeze without performance
+labels. Phase 3b must obtain strict held-month decoder R² by retraining a
+temporary decoder without each month, then determine whether the three flagged
+intact sessions were genuinely decoder-incompatible. Do not load January for
+this work.
 
 ## Supported files
 
@@ -79,9 +98,12 @@ because it used an obsolete pool and could reintroduce January into training.
 - `models/indy_32ch/input_pipeline.py`
 - `models/indy_32ch/features.py`
 - `models/indy_32ch/model.py`
+- `models/indy_32ch/drift_detector.py`
 - `models/indy_32ch/sampling.py`
 - `experiments/active/phase0a_data_audit.py`
 - `experiments/active/phase0a_data_audit.ipynb`
+- `experiments/active/phase3a_drift_detector.py`
+- `experiments/active/test_phase3a_drift_detector.py`
 - `models/indy_32ch/checkpoint.pt`
 
 Everything under `history/` is provenance only and must not be imported.

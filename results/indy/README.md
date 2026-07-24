@@ -10,6 +10,7 @@ experiment stay together.
 | `phase0b_sampler_selection/` | Window-, session-, and month-balanced sampler comparison | Three-seed aggregate metrics and comparison figure |
 | `phase1e_seed_crosscheck/` | Final hyperparameter cross-seed confirmation | Retained five-seed metrics supporting the frozen configuration |
 | `phase2_locked_january/` | One-shot locked January evaluation | Final inference-only metrics and evaluation figure |
+| `phase3a_drift_detector/` | Pre-January label-free detector baseline | Held-month scores, synthetic stress-test summary, figure and fitted reference artifact |
 
 ## Phase mapping
 
@@ -21,8 +22,8 @@ experiment stay together.
   `history/phase1/phase1e_seed_crosscheck.py`
 - Phase 2 runner:
   `history/phase2/phase2_locked_january.py`
-- Phase 3: reserved for the label-free drift detector; no result folder exists
-  until an experiment is actually run.
+- Phase 3a runner:
+  `experiments/active/phase3a_drift_detector.py`
 
 Phase 1a--1d intermediate databases, figures, metrics, and non-selected
 checkpoints were intentionally deleted. The retained Phase 1e metrics and

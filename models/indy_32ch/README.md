@@ -7,6 +7,7 @@ The active code beside it is intentionally model-specific:
 - `input_pipeline.py`: processed-session loading, normalization and windowing;
 - `features.py`: raw counts plus causal EWMA;
 - `model.py`: causal TCN+GRU architecture and metrics;
+- `drift_detector.py`: active pre-January 60-second compatibility gate;
 - `sampling.py`: frozen session-balanced sampling rule.
 
 | Item | Value |
@@ -36,3 +37,9 @@ Evidence:
 This is the frozen research candidate, not yet a deployment release. Promotion
 still requires a validated label-free drift gate, int8 accuracy comparison and
 measured STM32 memory/timing.
+
+The detector is separate from the checkpoint and never changes decoder weights.
+Its first candidate combines multi-month rate references with a
+five-dimensional, full-covariance Gaussian KLD inspired by MINDFUL. The
+authoritative detector protocol is `configs/indy_32ch_detector.yaml`; Phase 3a
+results are not yet strong enough to freeze deployment thresholds.

@@ -1,0 +1,304 @@
+{
+  "phase": "3a",
+  "completed_at_utc": "2026-07-24T20:12:13.223643+00:00",
+  "status": "development_only_not_january_validated",
+  "january_loaded": false,
+  "velocity_labels_loaded": false,
+  "sessions": 33,
+  "months": [
+    "2016-04",
+    "2016-06",
+    "2016-09",
+    "2016-10",
+    "2016-12"
+  ],
+  "selected_channels_zero_based": [
+    1,
+    3,
+    6,
+    18,
+    20,
+    22,
+    24,
+    26,
+    32,
+    36,
+    38,
+    43,
+    49,
+    50,
+    51,
+    53,
+    55,
+    59,
+    61,
+    63,
+    65,
+    66,
+    67,
+    69,
+    70,
+    71,
+    72,
+    73,
+    75,
+    79,
+    87,
+    94
+  ],
+  "outer_validation": "leave_one_complete_month_out",
+  "threshold_calibration": "leave_one_complete_month_out within each outer-fold reference pool",
+  "detector": {
+    "method": "phase3a_multi_reference_rate_plus_low_dimensional_kld",
+    "config": {
+      "observation_bins": 1500,
+      "bin_seconds": 0.04,
+      "n_components": 5,
+      "covariance_shrinkage": 0.1,
+      "covariance_floor": 0.0001,
+      "channel_scale_floor": 0.1,
+      "warning_quantile": 0.99,
+      "silent_rate_hz": 0.05,
+      "expected_active_rate_hz": 0.5,
+      "expected_active_fraction": 0.75
+    },
+    "reference_sessions": [
+      "indy_20160407_02",
+      "indy_20160411_01",
+      "indy_20160411_02",
+      "indy_20160418_01",
+      "indy_20160419_01",
+      "indy_20160420_01",
+      "indy_20160426_01",
+      "indy_20160622_01",
+      "indy_20160624_03",
+      "indy_20160627_01",
+      "indy_20160630_01",
+      "indy_20160915_01",
+      "indy_20160916_01",
+      "indy_20160921_01",
+      "indy_20160927_04",
+      "indy_20160927_06",
+      "indy_20160930_02",
+      "indy_20160930_05",
+      "indy_20161005_06",
+      "indy_20161006_02",
+      "indy_20161007_02",
+      "indy_20161011_03",
+      "indy_20161013_03",
+      "indy_20161014_04",
+      "indy_20161017_02",
+      "indy_20161024_03",
+      "indy_20161025_04",
+      "indy_20161026_03",
+      "indy_20161027_03",
+      "indy_20161206_02",
+      "indy_20161207_02",
+      "indy_20161212_02",
+      "indy_20161220_02"
+    ],
+    "reference_months": [
+      "2016-04",
+      "2016-06",
+      "2016-09",
+      "2016-10",
+      "2016-12"
+    ],
+    "thresholds": {
+      "pattern_distance": 0.9956881814058915,
+      "robust_rate_distance": 3.8580854327590792,
+      "absolute_log_rate_ratio": 1.6907938568998864,
+      "unexpected_silent_channels": 5.0,
+      "global_mindful_kld": 25.8620283856194,
+      "multi_reference_mindful_kld": 8.123579450565117
+    },
+    "threshold_calibration": "nested_leave_one_complete_month_out",
+    "decision_policy": {
+      "warning": "one abnormal evidence family",
+      "abstain": "at least two abnormal evidence families",
+      "mindful_alone_can_abstain": false
+    }
+  },
+  "baseline_summary": [
+    {
+      "condition": "normal",
+      "baseline": "A_simple_multi_reference",
+      "sessions": 33,
+      "flag_rate": 0.15151515151515152,
+      "abstain_rate": 0.09090909090909091
+    },
+    {
+      "condition": "normal",
+      "baseline": "B_global_mindful",
+      "sessions": 33,
+      "flag_rate": 0.030303030303030304,
+      "abstain_rate": 0.0
+    },
+    {
+      "condition": "normal",
+      "baseline": "C_multi_reference_mindful",
+      "sessions": 33,
+      "flag_rate": 0.030303030303030304,
+      "abstain_rate": 0.0
+    },
+    {
+      "condition": "normal",
+      "baseline": "combined_A_plus_C",
+      "sessions": 33,
+      "flag_rate": 0.15151515151515152,
+      "abstain_rate": 0.09090909090909091
+    },
+    {
+      "condition": "spike_thinning_50pct",
+      "baseline": "A_simple_multi_reference",
+      "sessions": 33,
+      "flag_rate": 0.18181818181818182,
+      "abstain_rate": 0.06060606060606061
+    },
+    {
+      "condition": "spike_thinning_50pct",
+      "baseline": "B_global_mindful",
+      "sessions": 33,
+      "flag_rate": 0.30303030303030304,
+      "abstain_rate": 0.0
+    },
+    {
+      "condition": "spike_thinning_50pct",
+      "baseline": "C_multi_reference_mindful",
+      "sessions": 33,
+      "flag_rate": 0.030303030303030304,
+      "abstain_rate": 0.0
+    },
+    {
+      "condition": "spike_thinning_50pct",
+      "baseline": "combined_A_plus_C",
+      "sessions": 33,
+      "flag_rate": 0.18181818181818182,
+      "abstain_rate": 0.06060606060606061
+    },
+    {
+      "condition": "spike_thinning_75pct",
+      "baseline": "A_simple_multi_reference",
+      "sessions": 33,
+      "flag_rate": 0.5151515151515151,
+      "abstain_rate": 0.42424242424242425
+    },
+    {
+      "condition": "spike_thinning_75pct",
+      "baseline": "B_global_mindful",
+      "sessions": 33,
+      "flag_rate": 0.696969696969697,
+      "abstain_rate": 0.0
+    },
+    {
+      "condition": "spike_thinning_75pct",
+      "baseline": "C_multi_reference_mindful",
+      "sessions": 33,
+      "flag_rate": 0.6060606060606061,
+      "abstain_rate": 0.0
+    },
+    {
+      "condition": "spike_thinning_75pct",
+      "baseline": "combined_A_plus_C",
+      "sessions": 33,
+      "flag_rate": 0.7272727272727273,
+      "abstain_rate": 0.45454545454545453
+    },
+    {
+      "condition": "channel_dropout_25pct",
+      "baseline": "A_simple_multi_reference",
+      "sessions": 33,
+      "flag_rate": 1.0,
+      "abstain_rate": 0.18181818181818182
+    },
+    {
+      "condition": "channel_dropout_25pct",
+      "baseline": "B_global_mindful",
+      "sessions": 33,
+      "flag_rate": 0.18181818181818182,
+      "abstain_rate": 0.0
+    },
+    {
+      "condition": "channel_dropout_25pct",
+      "baseline": "C_multi_reference_mindful",
+      "sessions": 33,
+      "flag_rate": 0.030303030303030304,
+      "abstain_rate": 0.0
+    },
+    {
+      "condition": "channel_dropout_25pct",
+      "baseline": "combined_A_plus_C",
+      "sessions": 33,
+      "flag_rate": 1.0,
+      "abstain_rate": 0.18181818181818182
+    },
+    {
+      "condition": "channel_permutation",
+      "baseline": "A_simple_multi_reference",
+      "sessions": 33,
+      "flag_rate": 0.18181818181818182,
+      "abstain_rate": 0.030303030303030304
+    },
+    {
+      "condition": "channel_permutation",
+      "baseline": "B_global_mindful",
+      "sessions": 33,
+      "flag_rate": 0.030303030303030304,
+      "abstain_rate": 0.0
+    },
+    {
+      "condition": "channel_permutation",
+      "baseline": "C_multi_reference_mindful",
+      "sessions": 33,
+      "flag_rate": 0.0,
+      "abstain_rate": 0.0
+    },
+    {
+      "condition": "channel_permutation",
+      "baseline": "combined_A_plus_C",
+      "sessions": 33,
+      "flag_rate": 0.18181818181818182,
+      "abstain_rate": 0.030303030303030304
+    },
+    {
+      "condition": "thinning_65pct_plus_dropout_25pct",
+      "baseline": "A_simple_multi_reference",
+      "sessions": 33,
+      "flag_rate": 1.0,
+      "abstain_rate": 0.6060606060606061
+    },
+    {
+      "condition": "thinning_65pct_plus_dropout_25pct",
+      "baseline": "B_global_mindful",
+      "sessions": 33,
+      "flag_rate": 0.6666666666666666,
+      "abstain_rate": 0.0
+    },
+    {
+      "condition": "thinning_65pct_plus_dropout_25pct",
+      "baseline": "C_multi_reference_mindful",
+      "sessions": 33,
+      "flag_rate": 0.6363636363636364,
+      "abstain_rate": 0.0
+    },
+    {
+      "condition": "thinning_65pct_plus_dropout_25pct",
+      "baseline": "combined_A_plus_C",
+      "sessions": 33,
+      "flag_rate": 1.0,
+      "abstain_rate": 0.7272727272727273
+    }
+  ],
+  "limitations": [
+    "Synthetic faults test known perturbations but are not real failures.",
+    "No decoder R2 is used in Phase 3a.",
+    "January was previously observed and cannot tune this detector.",
+    "Final thresholds require frozen prospective sessions."
+  ],
+  "files": {
+    "scores_csv": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3a_drift_detector/phase3a_drift_detector_scores.csv",
+    "summary_csv": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3a_drift_detector/phase3a_drift_detector_summary.csv",
+    "figure": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3a_drift_detector/phase3a_drift_detector_figure.png",
+    "reference_artifact": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3a_drift_detector/phase3a_drift_detector_reference.npz"
+  }
+}
