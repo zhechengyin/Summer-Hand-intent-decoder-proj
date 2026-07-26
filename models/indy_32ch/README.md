@@ -7,7 +7,10 @@ The active code beside it is intentionally model-specific:
 - `input_pipeline.py`: processed-session loading, normalization and windowing;
 - `features.py`: raw counts plus causal EWMA;
 - `model.py`: causal TCN+GRU architecture and metrics;
-- `drift_detector.py`: active pre-January 60-second compatibility gate;
+- `drift_detector.py`: first-layer raw-count compatibility checks;
+- `decoder_state_detector.py`: second-layer hidden/output detector and the
+  active two-layer gate wrapper;
+- `runtime.py`: the only integrated gate-then-decode execution path;
 - `sampling.py`: frozen session-balanced sampling rule.
 
 | Item | Value |
@@ -38,8 +41,32 @@ This is the frozen research candidate, not yet a deployment release. Promotion
 still requires a validated label-free drift gate, int8 accuracy comparison and
 measured STM32 memory/timing.
 
-The detector is separate from the checkpoint and never changes decoder weights.
-Its first candidate combines multi-month rate references with a
-five-dimensional, full-covariance Gaussian KLD inspired by MINDFUL. The
-authoritative detector protocol is `configs/indy_32ch_detector.yaml`; Phase 3a
-results are not yet strong enough to freeze deployment thresholds.
+The detector never changes decoder weights. Layer 1 combines multi-month rate
+references with a five-dimensional, full-covariance Gaussian KLD inspired by
+MINDFUL. Layer 2 runs inference during the gated 60-second prefix and vetoes
+only when both GRU-hidden and absolute-output distributions exceed their
+reference-only severe thresholds. Output-delta and 10-second temporal scores
+remain diagnostic only.
+
+Phase 3c caught both known negative-R² pre-January sessions and passed the other
+31 across nine detector sensitivity variants. The implementation is therefore
+integrated as a development candidate, not as prospectively validated behavior.
+
+The final saved gate is fitted on 31 compatible development references. With
+the retained active checkpoint it blocks the known October 13 failure but not
+June 30, because that checkpoint had already trained on both sessions. The
+stronger two-failure result belongs specifically to strict held-month
+evaluation. The authoritative protocol and this limitation are recorded in
+`configs/indy_32ch_detector.yaml`.
+
+Offline runtime example:
+
+```bash
+python models/indy_32ch/runtime.py \
+  --session indy_20161207_02 \
+  --device cpu
+```
+
+The first 60 seconds are diagnostic warm-up only. `abstain` blocks output;
+`warning` releases output by default and can be made blocking with
+`--block-on-warning`.

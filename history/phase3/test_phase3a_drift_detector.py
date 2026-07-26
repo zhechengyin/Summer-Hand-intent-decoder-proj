@@ -1,4 +1,4 @@
-"""Small regression checks for the active Phase-3a detector."""
+"""Archived regression checks for the completed Phase-3a detector."""
 from __future__ import annotations
 
 import sys

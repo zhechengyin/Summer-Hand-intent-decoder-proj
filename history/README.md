@@ -9,14 +9,19 @@ frozen model was selected:
 - `phase1/phase1d_seed_confirmation.py`
 - `phase1/phase1e_seed_crosscheck.py`
 - `phase2/phase2_locked_january.py`
+- `phase3/phase3a_drift_detector.py`
+- `phase3/phase3b_leave_one_month_out.py`
+- `phase3/phase3c_decoder_state_detector.py`
+- `phase3/test_*.py`
 - `tests/test_causality.py`
 - `tests/test_session_balanced_sampling.py`
 
 The Phase-1 scripts cover the completed Optuna search, boundary grids and
 five-seed confirmation. Their retained evidence is under matching
 `results/indy/phase*/` directories. The Phase-2 runner produced the one-shot
-January result on 2026-07-22. The archived tests document the causal and
-session-balanced invariants verified before this cleanup.
+January result on 2026-07-22. Phase 3 contains the completed raw-count,
+leave-one-month-out, and decoder-state detector studies. The archived tests
+document the protocol invariants verified before each cleanup.
 
 These files are provenance, not active entry points. Do not run or import them.
 They may reference deleted intermediate databases or non-selected checkpoints.

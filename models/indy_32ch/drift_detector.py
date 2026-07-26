@@ -7,7 +7,9 @@ fixed from reference sessions so that it can be deployed without target labels.
 """
 from __future__ import annotations
 
+import json
 from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Mapping
 
 import numpy as np
@@ -148,6 +150,7 @@ class DriftDetector:
         self.global_gaussian: GaussianSummary | None = None
         self.month_gaussians: dict[str, GaussianSummary] = {}
         self.thresholds: dict[str, float] = {}
+        self.selected_channels: np.ndarray | None = None
 
     def _prefixes(
         self, sessions: Mapping[str, np.ndarray]
@@ -498,5 +501,110 @@ class DriftDetector:
             channels = np.asarray(selected_channels, dtype=np.int16)
             if channels.shape != (32,):
                 raise ValueError("selected_channels must contain exactly 32 indices")
+            self.selected_channels = channels.astype(np.int64)
             arrays["selected_channels_zero_based"] = channels
         np.savez_compressed(path, **arrays)
+
+    @classmethod
+    def load(cls, path: str | Path) -> "DriftDetector":
+        """Restore a fitted detector from its non-pickle deployment artifact."""
+        artifact = Path(path)
+        required = {
+            "metadata_json",
+            "normalization_mean",
+            "normalization_std",
+            "pca_components",
+            "channel_log_rate_scale",
+            "month_names",
+            "month_rate_profiles",
+            "month_active_masks",
+            "global_mean",
+            "global_covariance",
+            "month_means",
+            "month_covariances",
+        }
+        with np.load(artifact, allow_pickle=False) as arrays:
+            missing = required - set(arrays.files)
+            if missing:
+                raise ValueError(
+                    f"Layer-1 artifact is missing arrays: {sorted(missing)}"
+                )
+            metadata = json.loads(str(np.asarray(arrays["metadata_json"]).item()))
+            detector = cls(DetectorConfig(**metadata["config"]))
+            detector.reference_session_names = tuple(
+                str(value) for value in metadata["reference_sessions"]
+            )
+            detector.reference_months = tuple(
+                str(value) for value in metadata["reference_months"]
+            )
+            detector.thresholds = {
+                str(name): float(value)
+                for name, value in metadata["thresholds"].items()
+            }
+            months = tuple(str(value) for value in arrays["month_names"].tolist())
+            if months != detector.reference_months:
+                raise ValueError(
+                    "Layer-1 month arrays do not match artifact metadata"
+                )
+
+            detector.normalization_mean = np.asarray(
+                arrays["normalization_mean"], dtype=np.float64
+            )
+            detector.normalization_std = np.asarray(
+                arrays["normalization_std"], dtype=np.float64
+            )
+            detector.pca_components = np.asarray(
+                arrays["pca_components"], dtype=np.float64
+            )
+            detector.channel_log_rate_scale = np.asarray(
+                arrays["channel_log_rate_scale"], dtype=np.float64
+            )
+            rate_profiles = np.asarray(
+                arrays["month_rate_profiles"], dtype=np.float64
+            )
+            active_masks = np.asarray(
+                arrays["month_active_masks"], dtype=np.uint8
+            ).astype(bool)
+            detector.reference_rate_profiles = {
+                month: rate_profiles[index] for index, month in enumerate(months)
+            }
+            detector.reference_active_masks = {
+                month: active_masks[index] for index, month in enumerate(months)
+            }
+            detector.global_gaussian = GaussianSummary(
+                np.asarray(arrays["global_mean"], dtype=np.float64),
+                np.asarray(arrays["global_covariance"], dtype=np.float64),
+            )
+            month_means = np.asarray(arrays["month_means"], dtype=np.float64)
+            month_covariances = np.asarray(
+                arrays["month_covariances"], dtype=np.float64
+            )
+            detector.month_gaussians = {
+                month: GaussianSummary(
+                    month_means[index], month_covariances[index]
+                )
+                for index, month in enumerate(months)
+            }
+            if "selected_channels_zero_based" in arrays.files:
+                channels = np.asarray(
+                    arrays["selected_channels_zero_based"], dtype=np.int64
+                )
+                if channels.shape != (32,) or len(np.unique(channels)) != 32:
+                    raise ValueError(
+                        "Layer-1 artifact has an invalid selected-channel mapping"
+                    )
+                detector.selected_channels = channels
+
+        expected_shapes = {
+            "normalization_mean": (32,),
+            "normalization_std": (32,),
+            "channel_log_rate_scale": (32,),
+            "pca_components": (detector.config.n_components, 32),
+        }
+        for name, expected in expected_shapes.items():
+            if np.asarray(getattr(detector, name)).shape != expected:
+                raise ValueError(
+                    f"Layer-1 {name} has shape "
+                    f"{np.asarray(getattr(detector, name)).shape}, expected {expected}"
+                )
+        return detector

@@ -11,6 +11,8 @@ experiment stay together.
 | `phase1e_seed_crosscheck/` | Final hyperparameter cross-seed confirmation | Retained five-seed metrics supporting the frozen configuration |
 | `phase2_locked_january/` | One-shot locked January evaluation | Final inference-only metrics and evaluation figure |
 | `phase3a_drift_detector/` | Pre-January label-free detector baseline | Held-month scores, synthetic stress-test summary, figure and fitted reference artifact |
+| `phase3b_leave_one_month_out/` | Strict out-of-month decoder evaluation | Five fold checkpoints, fold/session metrics and figure |
+| `phase3c_decoder_state_detector/` | Decoder-derived second-layer gate | Session and sensitivity metrics, figure and active two-layer reference artifacts |
 
 ## Phase mapping
 
@@ -23,7 +25,11 @@ experiment stay together.
 - Phase 2 runner:
   `history/phase2/phase2_locked_january.py`
 - Phase 3a runner:
-  `experiments/active/phase3a_drift_detector.py`
+  `history/phase3/phase3a_drift_detector.py`
+- Phase 3b runner:
+  `history/phase3/phase3b_leave_one_month_out.py`
+- Phase 3c runner:
+  `history/phase3/phase3c_decoder_state_detector.py`
 
 Phase 1a--1d intermediate databases, figures, metrics, and non-selected
 checkpoints were intentionally deleted. The retained Phase 1e metrics and
@@ -32,3 +38,5 @@ artifacts.
 
 The January split is consumed. Do not use Phase 2 results to select another
 model, feature set, detector threshold, or hyperparameter configuration.
+Phase 3 is also development-selected and archived; the active execution path is
+`models/indy_32ch/runtime.py`.

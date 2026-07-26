@@ -1,6 +1,6 @@
 # Current Status
 
-Last audited: 2026-07-24.
+Last audited: 2026-07-26.
 
 ## Objective
 
@@ -57,39 +57,64 @@ The model generalizes well on compatible sessions but has a severe
 session-level tail. January is consumed and cannot be used again for model,
 feature or detector selection.
 
-## Active work
+## Active detector
 
-Phase 3a now provides a label-free 60-second compatibility gate:
+Phase 3b completed all five strict pre-January leave-one-month-out folds. Every
+temporary decoder used seed 43, stopped at fixed epoch 7, excluded the complete
+held month from training, and loaded held velocity only after optimization:
 
-- layer A compares log-rate shape, robust rate distance, global rate ratio and
-  unexpectedly silent channels against multiple historical month references;
-- layer B projects all 1,500 prefix bins into a fixed five-dimensional PCA space
-  and compares full mean/covariance distributions with Gaussian KLD;
-- global and multi-month KLD are both reported instead of assuming that
-  multi-reference is better;
-- one abnormal evidence family produces `warning`; at least two produce
-  `abstain`; KLD alone cannot abstain;
-- the loader accepts only the 29 train and four December validation sessions,
-  and the model code hard-fails on January-or-later session names.
+- 33-session macro R²: 0.559710;
+- pooled R²: 0.526599;
+- best held month: September, macro R² 0.735912;
+- `indy_20160630_01`: R² -0.136478;
+- `indy_20161013_03`: R² -0.054134.
 
-Thresholds use a conservative 0.99 empirical quantile and are recalibrated by an
-inner leave-one-complete-month-out loop inside every outer held-month fold.
-January and velocity labels are never loaded.
+The raw-count Phase-3a gate detected the October failure but missed the June
+failure. Its thresholds should not be lowered to fit the known outcomes.
 
-Initial pre-January results are developmental, not a frozen detector:
+Phase 3c therefore adds a second, decoder-derived layer. During the same gated
+60-second prefix the frozen network runs inference but does not release output.
+The detector compares:
 
-- intact held-month sessions: combined flag 5/33 (15.2%), abstain 3/33 (9.1%);
-- global KLD and multi-reference KLD each flagged 1/33 intact sessions;
-- 25% synthetic channel dropout: combined flag 33/33;
-- mixed 65% thinning plus 25% channel dropout: combined flag 33/33 and abstain
-  24/33;
-- multi-reference KLD did not outperform global KLD in these stress tests.
+- five-dimensional PCA summaries of all GRU hidden states;
+- the two-dimensional predicted-output distribution;
+- predicted-output first differences and 10-second hidden chunks as
+  diagnostic-only scores.
 
-The intact-data abstain rate is still too high to freeze without performance
-labels. Phase 3b must obtain strict held-month decoder R² by retraining a
-temporary decoder without each month, then determine whether the three flagged
-intact sessions were genuinely decoder-incompatible. Do not load January for
-this work.
+All projections, month references and thresholds are fitted from reference
+months only. No velocity label enters the detector and no decoder weight is
+updated. The second layer vetoes only when hidden-state KLD and absolute-output
+KLD both exceed their conservative 0.99 severe thresholds.
+
+Development evaluation:
+
+- both known negative-R² sessions: `abstain`;
+- remaining 31 held sessions: `pass`;
+- sensitivity: the same separation held for hidden dimensions 3/5/8 crossed
+  with covariance shrinkage 0.05/0.10/0.20;
+- output-delta and temporal scores produced five extra diagnostic flags, so
+  they cannot veto.
+
+The detector and model are now connected by
+`models/indy_32ch/runtime.py`. The runtime collects exactly 1,500 count bins,
+runs both gate layers, and releases only post-warm-up model predictions when
+the combined decision permits it. It never loads velocity and never updates a
+weight.
+
+The final references contain 31 compatible development sessions; the two known
+negative-R² sessions are excluded from the compatible reference fit. Artifact
+reload and an end-to-end December smoke test passed. However, an important
+distinction remains:
+
+- strict out-of-month fold decoders: both June 30 and October 13 abstain;
+- final integrated active checkpoint: October 13 abstains, June 30 passes.
+
+The active checkpoint had already learned from both sessions, whereas each
+outer-fold checkpoint had never seen its held month. Therefore Phase 3 is
+complete as a development experiment and integrated as a runtime candidate,
+but it is not a demonstrated universal failure detector. January remains
+forbidden, and final detector claims require prospective sessions. STM32
+memory, timing and fixed-point equivalence are also pending.
 
 ## Supported files
 
@@ -99,11 +124,12 @@ this work.
 - `models/indy_32ch/features.py`
 - `models/indy_32ch/model.py`
 - `models/indy_32ch/drift_detector.py`
+- `models/indy_32ch/decoder_state_detector.py`
+- `models/indy_32ch/runtime.py`
 - `models/indy_32ch/sampling.py`
 - `experiments/active/phase0a_data_audit.py`
 - `experiments/active/phase0a_data_audit.ipynb`
-- `experiments/active/phase3a_drift_detector.py`
-- `experiments/active/test_phase3a_drift_detector.py`
 - `models/indy_32ch/checkpoint.pt`
 
 Everything under `history/` is provenance only and must not be imported.
+Completed detector runners and regression checks are in `history/phase3/`.

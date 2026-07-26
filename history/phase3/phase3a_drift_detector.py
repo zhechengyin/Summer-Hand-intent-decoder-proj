@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase 3a: pre-January drift-detector development.
+"""Archived Phase 3a: pre-January drift-detector development.
 
 This experiment intentionally does not load velocity labels or the January test
 split.  It measures held-month false alarms and sensitivity to explicitly

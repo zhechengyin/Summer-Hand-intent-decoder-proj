@@ -171,3 +171,110 @@ Evidence:
 - `results/indy/phase3a_drift_detector/phase3a_drift_detector_scores.csv`
 - `results/indy/phase3a_drift_detector/phase3a_drift_detector_figure.png`
 - `results/indy/phase3a_drift_detector/phase3a_drift_detector_reference.npz`
+
+## Phase 3b — Strict leave-one-month-out decoder evaluation
+
+Completed: 2026-07-25.
+
+Five temporary decoders were trained, each excluding one complete pre-January
+month. Architecture, selected channels, session-balanced sampling, seed 43,
+epoch 7, optimizer and scheduler trajectory were fixed before each fold. Held
+velocity remained unloaded until the optimizer had finished.
+
+| Held month | Session-macro R² | Worst session R² |
+| --- | ---: | ---: |
+| 2016-04 | 0.418367 | 0.232095 |
+| 2016-06 | 0.398743 | -0.136478 |
+| 2016-09 | 0.735912 | 0.687347 |
+| 2016-10 | 0.592236 | -0.054134 |
+| 2016-12 | 0.570223 | 0.314350 |
+
+Across all 33 held sessions, macro R² was 0.559710 and pooled R² was 0.526599.
+The two negative sessions were `indy_20160630_01` and
+`indy_20161013_03`. The raw-count detector caught the October failure but
+passed the worse June failure, so its three-level thresholds were not promoted.
+
+Evidence:
+
+- `results/indy/phase3b_leave_one_month_out/phase3b_leave_one_month_out_metrics.json`
+- `results/indy/phase3b_leave_one_month_out/phase3b_leave_one_month_out_sessions.csv`
+- `results/indy/phase3b_leave_one_month_out/phase3b_leave_one_month_out_folds.csv`
+- `results/indy/phase3b_leave_one_month_out/phase3b_leave_one_month_out_figure.png`
+
+## Phase 3c — Frozen-decoder hidden/output compatibility layer
+
+Completed: 2026-07-25.
+
+The second layer runs the frozen outer-fold decoder on only the first 60
+seconds, then compares reference-only distributions of GRU hidden states,
+predicted output and output differences. It accepts no velocity label and
+never creates an optimizer.
+
+The first broad rule allowed warning-level hidden, output-delta and temporal
+evidence to vote. It caught both failures but also abstained
+`indy_20160622_01` and `indy_20161206_02`, while temporal evidence warned three
+additional usable sessions. Those scores remain recorded but cannot veto.
+
+The retained conservative rule requires both:
+
+1. hidden-state KLD above its nested 0.99 severe threshold;
+2. absolute predicted-output KLD above its nested 0.99 severe threshold.
+
+Under this rule both negative-R² sessions abstained and the other 31 sessions
+passed. The result remained unchanged for all nine combinations of hidden PCA
+dimensions 3/5/8 and covariance shrinkage 0.05/0.10/0.20.
+
+Decision: integrate the two-layer wrapper and fitted reference artifacts as a
+development candidate. Do not describe this as independent validation because
+the known Phase-3b outcomes selected the retained rule. January remains
+forbidden; prospective sessions and STM32 equivalence are required before
+deployment freezing.
+
+Evidence:
+
+- `results/indy/phase3c_decoder_state_detector/phase3c_decoder_state_detector_metrics.json`
+- `results/indy/phase3c_decoder_state_detector/phase3c_decoder_state_detector_sessions.csv`
+- `results/indy/phase3c_decoder_state_detector/phase3c_decoder_state_detector_sensitivity.csv`
+- `results/indy/phase3c_decoder_state_detector/phase3c_decoder_state_detector_figure.png`
+- `results/indy/phase3c_decoder_state_detector/phase3c_active_gate_metadata.json`
+
+## Phase 3 integration and archival
+
+Completed: 2026-07-26.
+
+The experimental runners and regression files from Phase 3a--3c were moved to
+`history/phase3/`. They are provenance and are not imported by active code.
+
+`models/indy_32ch/runtime.py` now provides the single integrated execution
+order:
+
+1. receive the frozen 32-channel count mapping;
+2. collect the first 1,500 bins without releasing predictions;
+3. run the raw-count and frozen-decoder-state detector layers;
+4. combine their pass/warning/abstain decisions;
+5. block on abstain, otherwise decode only bins after the 60-second prefix.
+
+The saved detector classes now support non-pickle artifact loading and validate
+reference months, channel mapping, warm-up length and checkpoint compatibility.
+An end-to-end CPU smoke test on `indy_20161207_02` returned pass and released
+9,600 post-warm-up prediction bins. All 13 Phase-3 regression tests passed
+before archival.
+
+The final compatible reference fit excludes the two Phase-3b negative-R²
+sessions, leaving 31 references. A required artifact-level audit exposed a
+scope difference that must remain visible:
+
+| Session | Strict held-month detector | Final active-checkpoint artifact |
+| --- | --- | --- |
+| `indy_20160630_01` | abstain | pass |
+| `indy_20161013_03` | abstain | abstain |
+
+This is not a loader bug. The strict June fold used a decoder trained without
+June, while the retained active checkpoint had already learned from June 30.
+Consequently, the Phase-3c two-failure result remains valid for its strict
+out-of-month protocol, but it cannot be copied directly into a claim about the
+final active artifact.
+
+Decision: keep the integrated runtime as a transparent development candidate.
+Do not tune it with January, do not claim that it catches every incompatible
+session, and require prospective data before deployment freezing.

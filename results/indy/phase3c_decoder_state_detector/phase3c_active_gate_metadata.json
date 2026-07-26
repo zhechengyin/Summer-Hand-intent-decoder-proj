@@ -1,0 +1,369 @@
+{
+  "status": "integrated_runtime_candidate_not_prospectively_frozen",
+  "created_at_utc": "2026-07-26T18:27:05.474741+00:00",
+  "january_loaded": false,
+  "velocity_labels_loaded": false,
+  "weights_updated": false,
+  "checkpoint": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/models/indy_32ch/checkpoint.pt",
+  "reference_sessions": [
+    "indy_20160407_02",
+    "indy_20160411_01",
+    "indy_20160411_02",
+    "indy_20160418_01",
+    "indy_20160419_01",
+    "indy_20160420_01",
+    "indy_20160426_01",
+    "indy_20160622_01",
+    "indy_20160624_03",
+    "indy_20160627_01",
+    "indy_20160915_01",
+    "indy_20160916_01",
+    "indy_20160921_01",
+    "indy_20160927_04",
+    "indy_20160927_06",
+    "indy_20160930_02",
+    "indy_20160930_05",
+    "indy_20161005_06",
+    "indy_20161006_02",
+    "indy_20161007_02",
+    "indy_20161011_03",
+    "indy_20161014_04",
+    "indy_20161017_02",
+    "indy_20161024_03",
+    "indy_20161025_04",
+    "indy_20161026_03",
+    "indy_20161027_03",
+    "indy_20161206_02",
+    "indy_20161207_02",
+    "indy_20161212_02",
+    "indy_20161220_02"
+  ],
+  "excluded_development_failures": [
+    "indy_20160630_01",
+    "indy_20161013_03"
+  ],
+  "reference_selection_note": "Phase-3b label-identified failures are excluded from compatible references; this makes the artifact development-selected.",
+  "active_checkpoint_caveat": "The active decoder was previously trained on both excluded sessions, unlike each strict Phase-3b held-month decoder.",
+  "artifact_level_diagnostic_audit": {
+    "indy_20160407_02": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160411_01": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160411_02": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160418_01": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160419_01": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160420_01": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160426_01": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160622_01": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160624_03": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160627_01": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160630_01": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160915_01": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160916_01": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160921_01": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160927_04": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160927_06": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160930_02": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20160930_05": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20161005_06": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20161006_02": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20161007_02": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20161011_03": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20161013_03": {
+      "decision": "abstain",
+      "layer1_decision": "abstain",
+      "layer2_decision": "pass"
+    },
+    "indy_20161014_04": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20161017_02": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20161024_03": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20161025_04": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20161026_03": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20161027_03": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20161206_02": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20161207_02": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20161212_02": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    },
+    "indy_20161220_02": {
+      "decision": "pass",
+      "layer1_decision": "pass",
+      "layer2_decision": "pass"
+    }
+  },
+  "gate": {
+    "method": "two_layer_count_plus_frozen_decoder_state_gate",
+    "layer1": {
+      "method": "phase3a_multi_reference_rate_plus_low_dimensional_kld",
+      "config": {
+        "observation_bins": 1500,
+        "bin_seconds": 0.04,
+        "n_components": 5,
+        "covariance_shrinkage": 0.1,
+        "covariance_floor": 0.0001,
+        "channel_scale_floor": 0.1,
+        "warning_quantile": 0.99,
+        "silent_rate_hz": 0.05,
+        "expected_active_rate_hz": 0.5,
+        "expected_active_fraction": 0.75
+      },
+      "reference_sessions": [
+        "indy_20160407_02",
+        "indy_20160411_01",
+        "indy_20160411_02",
+        "indy_20160418_01",
+        "indy_20160419_01",
+        "indy_20160420_01",
+        "indy_20160426_01",
+        "indy_20160622_01",
+        "indy_20160624_03",
+        "indy_20160627_01",
+        "indy_20160915_01",
+        "indy_20160916_01",
+        "indy_20160921_01",
+        "indy_20160927_04",
+        "indy_20160927_06",
+        "indy_20160930_02",
+        "indy_20160930_05",
+        "indy_20161005_06",
+        "indy_20161006_02",
+        "indy_20161007_02",
+        "indy_20161011_03",
+        "indy_20161014_04",
+        "indy_20161017_02",
+        "indy_20161024_03",
+        "indy_20161025_04",
+        "indy_20161026_03",
+        "indy_20161027_03",
+        "indy_20161206_02",
+        "indy_20161207_02",
+        "indy_20161212_02",
+        "indy_20161220_02"
+      ],
+      "reference_months": [
+        "2016-04",
+        "2016-06",
+        "2016-09",
+        "2016-10",
+        "2016-12"
+      ],
+      "thresholds": {
+        "pattern_distance": 0.9961910571807051,
+        "robust_rate_distance": 2.85175118657991,
+        "absolute_log_rate_ratio": 1.286710565963243,
+        "unexpected_silent_channels": 5.0,
+        "global_mindful_kld": 8.251878313087218,
+        "multi_reference_mindful_kld": 3.5246398307352833
+      },
+      "threshold_calibration": "nested_leave_one_complete_month_out",
+      "decision_policy": {
+        "warning": "one abnormal evidence family",
+        "abstain": "at least two abnormal evidence families",
+        "mindful_alone_can_abstain": false
+      }
+    },
+    "layer2": {
+      "method": "decoder_hidden_output_multi_reference_gate",
+      "config": {
+        "observation_bins": 1500,
+        "bin_seconds": 0.04,
+        "hidden_components": 5,
+        "chunk_bins": 250,
+        "covariance_shrinkage": 0.1,
+        "covariance_floor": 0.0001,
+        "warning_quantile": 0.95,
+        "severe_quantile": 0.99
+      },
+      "reference_sessions": [
+        "indy_20160407_02",
+        "indy_20160411_01",
+        "indy_20160411_02",
+        "indy_20160418_01",
+        "indy_20160419_01",
+        "indy_20160420_01",
+        "indy_20160426_01",
+        "indy_20160622_01",
+        "indy_20160624_03",
+        "indy_20160627_01",
+        "indy_20160915_01",
+        "indy_20160916_01",
+        "indy_20160921_01",
+        "indy_20160927_04",
+        "indy_20160927_06",
+        "indy_20160930_02",
+        "indy_20160930_05",
+        "indy_20161005_06",
+        "indy_20161006_02",
+        "indy_20161007_02",
+        "indy_20161011_03",
+        "indy_20161014_04",
+        "indy_20161017_02",
+        "indy_20161024_03",
+        "indy_20161025_04",
+        "indy_20161026_03",
+        "indy_20161027_03",
+        "indy_20161206_02",
+        "indy_20161207_02",
+        "indy_20161212_02",
+        "indy_20161220_02"
+      ],
+      "reference_months": [
+        "2016-04",
+        "2016-06",
+        "2016-09",
+        "2016-10",
+        "2016-12"
+      ],
+      "warning_thresholds": {
+        "hidden_state_kld": 1.5164784549302044,
+        "output_state_kld": 0.8952581546202953,
+        "output_delta_kld": 0.6495212274653511,
+        "chunk_hidden_kld_max": 52.57946028523337
+      },
+      "severe_thresholds": {
+        "hidden_state_kld": 2.9356866821432024,
+        "output_state_kld": 1.1820599889562293,
+        "output_delta_kld": 0.7287443390761196,
+        "chunk_hidden_kld_max": 58.969373257161436
+      },
+      "threshold_calibration": "nested_leave_one_complete_month_out_on_frozen_decoder_traces",
+      "decision_policy": {
+        "diagnostic_warning": "one decoder-state evidence family",
+        "diagnostic_abstain": "at least two decoder-state evidence families",
+        "gate_abstain": "hidden-state severe and absolute-output-state severe",
+        "output_delta_and_temporal": "diagnostic_only",
+        "velocity_labels_used": false,
+        "weights_updated": false
+      }
+    },
+    "decision_policy": {
+      "abstain": "either layer independently abstains",
+      "warning": "layer1 warns while neither layer abstains",
+      "layer2_warning_policy": "diagnostic_only"
+    }
+  },
+  "artifacts": {
+    "layer1": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3c_decoder_state_detector/phase3c_active_layer1_reference.npz",
+    "layer2": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3c_decoder_state_detector/phase3c_active_layer2_reference.npz"
+  }
+}

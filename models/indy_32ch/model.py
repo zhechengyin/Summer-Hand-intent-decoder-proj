@@ -77,14 +77,22 @@ def build_net(config: dict, n_channels: int):
             )
             self.head = nn.Linear(config["H"], config.get("n_out", 2))
 
-        def forward(self, values):
+        def _encode(self, values):
             encoded = self.spatial(values)
             for convolution, padding in zip(self.convolutions, self.padding):
                 encoded = self.activation(
                     convolution(encoded)[:, :, :-padding] + encoded
                 )
             encoded, _ = self.gru(self.dropout(encoded).transpose(1, 2))
-            return self.head(encoded)
+            return encoded
+
+        def forward(self, values):
+            return self.head(self._encode(values))
+
+        def forward_with_states(self, values):
+            """Return predictions and GRU states without changing model behavior."""
+            states = self._encode(values)
+            return self.head(states), states
 
     return CausalTCNGRU()
 

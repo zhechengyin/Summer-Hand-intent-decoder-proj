@@ -1,0 +1,1071 @@
+{
+  "phase": "3c",
+  "status": "complete_development_evaluation",
+  "started_at_utc": "2026-07-26T18:26:53.725884+00:00",
+  "completed_at_utc": "2026-07-26T18:27:06.059148+00:00",
+  "elapsed_seconds": 12.333263874053955,
+  "january_loaded": false,
+  "velocity_labels_loaded_by_layer2": false,
+  "phase3b_r2_loaded_after_all_layer2_scores": true,
+  "decoder_weights_updated": false,
+  "decoder": {
+    "seed": 43,
+    "checkpoint_epoch": 7,
+    "outer_fold_checkpoints": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3b_leave_one_month_out/checkpoints"
+  },
+  "config": {
+    "observation_bins": 1500,
+    "bin_seconds": 0.04,
+    "hidden_components": 5,
+    "chunk_bins": 250,
+    "covariance_shrinkage": 0.1,
+    "covariance_floor": 0.0001,
+    "warning_quantile": 0.95,
+    "severe_quantile": 0.99
+  },
+  "folds": [
+    {
+      "held_month": "2016-04",
+      "training_sessions": [
+        "indy_20160622_01",
+        "indy_20160624_03",
+        "indy_20160627_01",
+        "indy_20160630_01",
+        "indy_20160915_01",
+        "indy_20160916_01",
+        "indy_20160921_01",
+        "indy_20160927_04",
+        "indy_20160927_06",
+        "indy_20160930_02",
+        "indy_20160930_05",
+        "indy_20161005_06",
+        "indy_20161006_02",
+        "indy_20161007_02",
+        "indy_20161011_03",
+        "indy_20161013_03",
+        "indy_20161014_04",
+        "indy_20161017_02",
+        "indy_20161024_03",
+        "indy_20161025_04",
+        "indy_20161026_03",
+        "indy_20161027_03",
+        "indy_20161206_02",
+        "indy_20161207_02",
+        "indy_20161212_02",
+        "indy_20161220_02"
+      ],
+      "held_sessions": [
+        "indy_20160407_02",
+        "indy_20160411_01",
+        "indy_20160411_02",
+        "indy_20160418_01",
+        "indy_20160419_01",
+        "indy_20160420_01",
+        "indy_20160426_01"
+      ],
+      "checkpoint": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3b_leave_one_month_out/checkpoints/held_2016-04.pt",
+      "detector": {
+        "method": "decoder_hidden_output_multi_reference_gate",
+        "config": {
+          "observation_bins": 1500,
+          "bin_seconds": 0.04,
+          "hidden_components": 5,
+          "chunk_bins": 250,
+          "covariance_shrinkage": 0.1,
+          "covariance_floor": 0.0001,
+          "warning_quantile": 0.95,
+          "severe_quantile": 0.99
+        },
+        "reference_sessions": [
+          "indy_20160622_01",
+          "indy_20160624_03",
+          "indy_20160627_01",
+          "indy_20160630_01",
+          "indy_20160915_01",
+          "indy_20160916_01",
+          "indy_20160921_01",
+          "indy_20160927_04",
+          "indy_20160927_06",
+          "indy_20160930_02",
+          "indy_20160930_05",
+          "indy_20161005_06",
+          "indy_20161006_02",
+          "indy_20161007_02",
+          "indy_20161011_03",
+          "indy_20161013_03",
+          "indy_20161014_04",
+          "indy_20161017_02",
+          "indy_20161024_03",
+          "indy_20161025_04",
+          "indy_20161026_03",
+          "indy_20161027_03",
+          "indy_20161206_02",
+          "indy_20161207_02",
+          "indy_20161212_02",
+          "indy_20161220_02"
+        ],
+        "reference_months": [
+          "2016-06",
+          "2016-09",
+          "2016-10",
+          "2016-12"
+        ],
+        "warning_thresholds": {
+          "hidden_state_kld": 1.4164932352564268,
+          "output_state_kld": 0.725919985241876,
+          "output_delta_kld": 0.40981244855117693,
+          "chunk_hidden_kld_max": 35.6359678592348
+        },
+        "severe_thresholds": {
+          "hidden_state_kld": 2.347973408967987,
+          "output_state_kld": 1.1084454406016064,
+          "output_delta_kld": 0.7222472898670171,
+          "chunk_hidden_kld_max": 45.567121304645354
+        },
+        "threshold_calibration": "nested_leave_one_complete_month_out_on_frozen_decoder_traces",
+        "decision_policy": {
+          "diagnostic_warning": "one decoder-state evidence family",
+          "diagnostic_abstain": "at least two decoder-state evidence families",
+          "gate_abstain": "hidden-state severe and absolute-output-state severe",
+          "output_delta_and_temporal": "diagnostic_only",
+          "velocity_labels_used": false,
+          "weights_updated": false
+        }
+      },
+      "trace_shape": [
+        1500,
+        64
+      ],
+      "output_shape": [
+        1500,
+        2
+      ]
+    },
+    {
+      "held_month": "2016-06",
+      "training_sessions": [
+        "indy_20160407_02",
+        "indy_20160411_01",
+        "indy_20160411_02",
+        "indy_20160418_01",
+        "indy_20160419_01",
+        "indy_20160420_01",
+        "indy_20160426_01",
+        "indy_20160915_01",
+        "indy_20160916_01",
+        "indy_20160921_01",
+        "indy_20160927_04",
+        "indy_20160927_06",
+        "indy_20160930_02",
+        "indy_20160930_05",
+        "indy_20161005_06",
+        "indy_20161006_02",
+        "indy_20161007_02",
+        "indy_20161011_03",
+        "indy_20161013_03",
+        "indy_20161014_04",
+        "indy_20161017_02",
+        "indy_20161024_03",
+        "indy_20161025_04",
+        "indy_20161026_03",
+        "indy_20161027_03",
+        "indy_20161206_02",
+        "indy_20161207_02",
+        "indy_20161212_02",
+        "indy_20161220_02"
+      ],
+      "held_sessions": [
+        "indy_20160622_01",
+        "indy_20160624_03",
+        "indy_20160627_01",
+        "indy_20160630_01"
+      ],
+      "checkpoint": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3b_leave_one_month_out/checkpoints/held_2016-06.pt",
+      "detector": {
+        "method": "decoder_hidden_output_multi_reference_gate",
+        "config": {
+          "observation_bins": 1500,
+          "bin_seconds": 0.04,
+          "hidden_components": 5,
+          "chunk_bins": 250,
+          "covariance_shrinkage": 0.1,
+          "covariance_floor": 0.0001,
+          "warning_quantile": 0.95,
+          "severe_quantile": 0.99
+        },
+        "reference_sessions": [
+          "indy_20160407_02",
+          "indy_20160411_01",
+          "indy_20160411_02",
+          "indy_20160418_01",
+          "indy_20160419_01",
+          "indy_20160420_01",
+          "indy_20160426_01",
+          "indy_20160915_01",
+          "indy_20160916_01",
+          "indy_20160921_01",
+          "indy_20160927_04",
+          "indy_20160927_06",
+          "indy_20160930_02",
+          "indy_20160930_05",
+          "indy_20161005_06",
+          "indy_20161006_02",
+          "indy_20161007_02",
+          "indy_20161011_03",
+          "indy_20161013_03",
+          "indy_20161014_04",
+          "indy_20161017_02",
+          "indy_20161024_03",
+          "indy_20161025_04",
+          "indy_20161026_03",
+          "indy_20161027_03",
+          "indy_20161206_02",
+          "indy_20161207_02",
+          "indy_20161212_02",
+          "indy_20161220_02"
+        ],
+        "reference_months": [
+          "2016-04",
+          "2016-09",
+          "2016-10",
+          "2016-12"
+        ],
+        "warning_thresholds": {
+          "hidden_state_kld": 1.669748996043651,
+          "output_state_kld": 1.1200364011282518,
+          "output_delta_kld": 0.5280793683131539,
+          "chunk_hidden_kld_max": 79.40797001113988
+        },
+        "severe_thresholds": {
+          "hidden_state_kld": 2.2967069078911555,
+          "output_state_kld": 1.5549934150756866,
+          "output_delta_kld": 0.8455228952539926,
+          "chunk_hidden_kld_max": 104.36542079269866
+        },
+        "threshold_calibration": "nested_leave_one_complete_month_out_on_frozen_decoder_traces",
+        "decision_policy": {
+          "diagnostic_warning": "one decoder-state evidence family",
+          "diagnostic_abstain": "at least two decoder-state evidence families",
+          "gate_abstain": "hidden-state severe and absolute-output-state severe",
+          "output_delta_and_temporal": "diagnostic_only",
+          "velocity_labels_used": false,
+          "weights_updated": false
+        }
+      },
+      "trace_shape": [
+        1500,
+        64
+      ],
+      "output_shape": [
+        1500,
+        2
+      ]
+    },
+    {
+      "held_month": "2016-09",
+      "training_sessions": [
+        "indy_20160407_02",
+        "indy_20160411_01",
+        "indy_20160411_02",
+        "indy_20160418_01",
+        "indy_20160419_01",
+        "indy_20160420_01",
+        "indy_20160426_01",
+        "indy_20160622_01",
+        "indy_20160624_03",
+        "indy_20160627_01",
+        "indy_20160630_01",
+        "indy_20161005_06",
+        "indy_20161006_02",
+        "indy_20161007_02",
+        "indy_20161011_03",
+        "indy_20161013_03",
+        "indy_20161014_04",
+        "indy_20161017_02",
+        "indy_20161024_03",
+        "indy_20161025_04",
+        "indy_20161026_03",
+        "indy_20161027_03",
+        "indy_20161206_02",
+        "indy_20161207_02",
+        "indy_20161212_02",
+        "indy_20161220_02"
+      ],
+      "held_sessions": [
+        "indy_20160915_01",
+        "indy_20160916_01",
+        "indy_20160921_01",
+        "indy_20160927_04",
+        "indy_20160927_06",
+        "indy_20160930_02",
+        "indy_20160930_05"
+      ],
+      "checkpoint": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3b_leave_one_month_out/checkpoints/held_2016-09.pt",
+      "detector": {
+        "method": "decoder_hidden_output_multi_reference_gate",
+        "config": {
+          "observation_bins": 1500,
+          "bin_seconds": 0.04,
+          "hidden_components": 5,
+          "chunk_bins": 250,
+          "covariance_shrinkage": 0.1,
+          "covariance_floor": 0.0001,
+          "warning_quantile": 0.95,
+          "severe_quantile": 0.99
+        },
+        "reference_sessions": [
+          "indy_20160407_02",
+          "indy_20160411_01",
+          "indy_20160411_02",
+          "indy_20160418_01",
+          "indy_20160419_01",
+          "indy_20160420_01",
+          "indy_20160426_01",
+          "indy_20160622_01",
+          "indy_20160624_03",
+          "indy_20160627_01",
+          "indy_20160630_01",
+          "indy_20161005_06",
+          "indy_20161006_02",
+          "indy_20161007_02",
+          "indy_20161011_03",
+          "indy_20161013_03",
+          "indy_20161014_04",
+          "indy_20161017_02",
+          "indy_20161024_03",
+          "indy_20161025_04",
+          "indy_20161026_03",
+          "indy_20161027_03",
+          "indy_20161206_02",
+          "indy_20161207_02",
+          "indy_20161212_02",
+          "indy_20161220_02"
+        ],
+        "reference_months": [
+          "2016-04",
+          "2016-06",
+          "2016-10",
+          "2016-12"
+        ],
+        "warning_thresholds": {
+          "hidden_state_kld": 1.2302523091931334,
+          "output_state_kld": 0.7032784068135087,
+          "output_delta_kld": 0.404702729371377,
+          "chunk_hidden_kld_max": 60.24317151391137
+        },
+        "severe_thresholds": {
+          "hidden_state_kld": 1.5770204195612414,
+          "output_state_kld": 0.9583137255068506,
+          "output_delta_kld": 0.6705920601147652,
+          "chunk_hidden_kld_max": 85.33466652859347
+        },
+        "threshold_calibration": "nested_leave_one_complete_month_out_on_frozen_decoder_traces",
+        "decision_policy": {
+          "diagnostic_warning": "one decoder-state evidence family",
+          "diagnostic_abstain": "at least two decoder-state evidence families",
+          "gate_abstain": "hidden-state severe and absolute-output-state severe",
+          "output_delta_and_temporal": "diagnostic_only",
+          "velocity_labels_used": false,
+          "weights_updated": false
+        }
+      },
+      "trace_shape": [
+        1500,
+        64
+      ],
+      "output_shape": [
+        1500,
+        2
+      ]
+    },
+    {
+      "held_month": "2016-10",
+      "training_sessions": [
+        "indy_20160407_02",
+        "indy_20160411_01",
+        "indy_20160411_02",
+        "indy_20160418_01",
+        "indy_20160419_01",
+        "indy_20160420_01",
+        "indy_20160426_01",
+        "indy_20160622_01",
+        "indy_20160624_03",
+        "indy_20160627_01",
+        "indy_20160630_01",
+        "indy_20160915_01",
+        "indy_20160916_01",
+        "indy_20160921_01",
+        "indy_20160927_04",
+        "indy_20160927_06",
+        "indy_20160930_02",
+        "indy_20160930_05",
+        "indy_20161206_02",
+        "indy_20161207_02",
+        "indy_20161212_02",
+        "indy_20161220_02"
+      ],
+      "held_sessions": [
+        "indy_20161005_06",
+        "indy_20161006_02",
+        "indy_20161007_02",
+        "indy_20161011_03",
+        "indy_20161013_03",
+        "indy_20161014_04",
+        "indy_20161017_02",
+        "indy_20161024_03",
+        "indy_20161025_04",
+        "indy_20161026_03",
+        "indy_20161027_03"
+      ],
+      "checkpoint": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3b_leave_one_month_out/checkpoints/held_2016-10.pt",
+      "detector": {
+        "method": "decoder_hidden_output_multi_reference_gate",
+        "config": {
+          "observation_bins": 1500,
+          "bin_seconds": 0.04,
+          "hidden_components": 5,
+          "chunk_bins": 250,
+          "covariance_shrinkage": 0.1,
+          "covariance_floor": 0.0001,
+          "warning_quantile": 0.95,
+          "severe_quantile": 0.99
+        },
+        "reference_sessions": [
+          "indy_20160407_02",
+          "indy_20160411_01",
+          "indy_20160411_02",
+          "indy_20160418_01",
+          "indy_20160419_01",
+          "indy_20160420_01",
+          "indy_20160426_01",
+          "indy_20160622_01",
+          "indy_20160624_03",
+          "indy_20160627_01",
+          "indy_20160630_01",
+          "indy_20160915_01",
+          "indy_20160916_01",
+          "indy_20160921_01",
+          "indy_20160927_04",
+          "indy_20160927_06",
+          "indy_20160930_02",
+          "indy_20160930_05",
+          "indy_20161206_02",
+          "indy_20161207_02",
+          "indy_20161212_02",
+          "indy_20161220_02"
+        ],
+        "reference_months": [
+          "2016-04",
+          "2016-06",
+          "2016-09",
+          "2016-12"
+        ],
+        "warning_thresholds": {
+          "hidden_state_kld": 0.7921640992278509,
+          "output_state_kld": 0.4273917670782257,
+          "output_delta_kld": 0.26914983132478487,
+          "chunk_hidden_kld_max": 41.28972933306603
+        },
+        "severe_thresholds": {
+          "hidden_state_kld": 2.0845303445507435,
+          "output_state_kld": 1.388640222869288,
+          "output_delta_kld": 0.5448972337072683,
+          "chunk_hidden_kld_max": 44.26913851786655
+        },
+        "threshold_calibration": "nested_leave_one_complete_month_out_on_frozen_decoder_traces",
+        "decision_policy": {
+          "diagnostic_warning": "one decoder-state evidence family",
+          "diagnostic_abstain": "at least two decoder-state evidence families",
+          "gate_abstain": "hidden-state severe and absolute-output-state severe",
+          "output_delta_and_temporal": "diagnostic_only",
+          "velocity_labels_used": false,
+          "weights_updated": false
+        }
+      },
+      "trace_shape": [
+        1500,
+        64
+      ],
+      "output_shape": [
+        1500,
+        2
+      ]
+    },
+    {
+      "held_month": "2016-12",
+      "training_sessions": [
+        "indy_20160407_02",
+        "indy_20160411_01",
+        "indy_20160411_02",
+        "indy_20160418_01",
+        "indy_20160419_01",
+        "indy_20160420_01",
+        "indy_20160426_01",
+        "indy_20160622_01",
+        "indy_20160624_03",
+        "indy_20160627_01",
+        "indy_20160630_01",
+        "indy_20160915_01",
+        "indy_20160916_01",
+        "indy_20160921_01",
+        "indy_20160927_04",
+        "indy_20160927_06",
+        "indy_20160930_02",
+        "indy_20160930_05",
+        "indy_20161005_06",
+        "indy_20161006_02",
+        "indy_20161007_02",
+        "indy_20161011_03",
+        "indy_20161013_03",
+        "indy_20161014_04",
+        "indy_20161017_02",
+        "indy_20161024_03",
+        "indy_20161025_04",
+        "indy_20161026_03",
+        "indy_20161027_03"
+      ],
+      "held_sessions": [
+        "indy_20161206_02",
+        "indy_20161207_02",
+        "indy_20161212_02",
+        "indy_20161220_02"
+      ],
+      "checkpoint": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3b_leave_one_month_out/checkpoints/held_2016-12.pt",
+      "detector": {
+        "method": "decoder_hidden_output_multi_reference_gate",
+        "config": {
+          "observation_bins": 1500,
+          "bin_seconds": 0.04,
+          "hidden_components": 5,
+          "chunk_bins": 250,
+          "covariance_shrinkage": 0.1,
+          "covariance_floor": 0.0001,
+          "warning_quantile": 0.95,
+          "severe_quantile": 0.99
+        },
+        "reference_sessions": [
+          "indy_20160407_02",
+          "indy_20160411_01",
+          "indy_20160411_02",
+          "indy_20160418_01",
+          "indy_20160419_01",
+          "indy_20160420_01",
+          "indy_20160426_01",
+          "indy_20160622_01",
+          "indy_20160624_03",
+          "indy_20160627_01",
+          "indy_20160630_01",
+          "indy_20160915_01",
+          "indy_20160916_01",
+          "indy_20160921_01",
+          "indy_20160927_04",
+          "indy_20160927_06",
+          "indy_20160930_02",
+          "indy_20160930_05",
+          "indy_20161005_06",
+          "indy_20161006_02",
+          "indy_20161007_02",
+          "indy_20161011_03",
+          "indy_20161013_03",
+          "indy_20161014_04",
+          "indy_20161017_02",
+          "indy_20161024_03",
+          "indy_20161025_04",
+          "indy_20161026_03",
+          "indy_20161027_03"
+        ],
+        "reference_months": [
+          "2016-04",
+          "2016-06",
+          "2016-09",
+          "2016-10"
+        ],
+        "warning_thresholds": {
+          "hidden_state_kld": 1.157077736230577,
+          "output_state_kld": 0.5954829327737858,
+          "output_delta_kld": 0.33766287135513834,
+          "chunk_hidden_kld_max": 49.82086390333036
+        },
+        "severe_thresholds": {
+          "hidden_state_kld": 1.904382705361282,
+          "output_state_kld": 1.1493555419063213,
+          "output_delta_kld": 0.4964700835651984,
+          "chunk_hidden_kld_max": 55.37095900464465
+        },
+        "threshold_calibration": "nested_leave_one_complete_month_out_on_frozen_decoder_traces",
+        "decision_policy": {
+          "diagnostic_warning": "one decoder-state evidence family",
+          "diagnostic_abstain": "at least two decoder-state evidence families",
+          "gate_abstain": "hidden-state severe and absolute-output-state severe",
+          "output_delta_and_temporal": "diagnostic_only",
+          "velocity_labels_used": false,
+          "weights_updated": false
+        }
+      },
+      "trace_shape": [
+        1500,
+        64
+      ],
+      "output_shape": [
+        1500,
+        2
+      ]
+    }
+  ],
+  "promotion_audit": {
+    "known_failures": [
+      "indy_20160630_01",
+      "indy_20161013_03"
+    ],
+    "known_failure_decisions": {
+      "indy_20160630_01": "abstain",
+      "indy_20161013_03": "abstain"
+    },
+    "both_known_failures_flagged": true,
+    "both_known_failures_abstained": true,
+    "other_sessions": 31,
+    "other_warnings": 0,
+    "other_abstains": 0,
+    "other_diagnostic_flags": 5,
+    "zero_other_impact": true,
+    "zero_other_abstain": true,
+    "research_candidate_gate_passed": true,
+    "sensitivity_variants": 9,
+    "sensitivity_both_failures_abstained": true,
+    "sensitivity_zero_other_impact": true,
+    "sensitivity_gate_passed": true,
+    "automatic_integration_gate_passed": true,
+    "automatic_integration_rule": "both known failures abstain and every other session remains pass in the default and all 3x3 sensitivity variants"
+  },
+  "correlations": [
+    {
+      "metric": "hidden_state_kld_to_warning",
+      "spearman_rho_vs_decoder_r2": -0.7476604278074866,
+      "p_value_descriptive_only": 5.728662199528756e-07
+    },
+    {
+      "metric": "output_state_kld_to_warning",
+      "spearman_rho_vs_decoder_r2": -0.6119652406417113,
+      "p_value_descriptive_only": 0.0001540656197648115
+    },
+    {
+      "metric": "output_delta_kld_to_warning",
+      "spearman_rho_vs_decoder_r2": -0.5240641711229946,
+      "p_value_descriptive_only": 0.0017461638152539627
+    },
+    {
+      "metric": "chunk_hidden_kld_max_to_warning",
+      "spearman_rho_vs_decoder_r2": -0.5625000000000001,
+      "p_value_descriptive_only": 0.000656153478703886
+    },
+    {
+      "metric": "evidence_count",
+      "spearman_rho_vs_decoder_r2": -0.424959793006305,
+      "p_value_descriptive_only": 0.013693732969478945
+    },
+    {
+      "metric": "severe_evidence_count",
+      "spearman_rho_vs_decoder_r2": -0.43139133608416946,
+      "p_value_descriptive_only": 0.01218985949957023
+    }
+  ],
+  "active_gate": {
+    "status": "integrated_runtime_candidate_not_prospectively_frozen",
+    "created_at_utc": "2026-07-26T18:27:05.474741+00:00",
+    "january_loaded": false,
+    "velocity_labels_loaded": false,
+    "weights_updated": false,
+    "checkpoint": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/models/indy_32ch/checkpoint.pt",
+    "reference_sessions": [
+      "indy_20160407_02",
+      "indy_20160411_01",
+      "indy_20160411_02",
+      "indy_20160418_01",
+      "indy_20160419_01",
+      "indy_20160420_01",
+      "indy_20160426_01",
+      "indy_20160622_01",
+      "indy_20160624_03",
+      "indy_20160627_01",
+      "indy_20160915_01",
+      "indy_20160916_01",
+      "indy_20160921_01",
+      "indy_20160927_04",
+      "indy_20160927_06",
+      "indy_20160930_02",
+      "indy_20160930_05",
+      "indy_20161005_06",
+      "indy_20161006_02",
+      "indy_20161007_02",
+      "indy_20161011_03",
+      "indy_20161014_04",
+      "indy_20161017_02",
+      "indy_20161024_03",
+      "indy_20161025_04",
+      "indy_20161026_03",
+      "indy_20161027_03",
+      "indy_20161206_02",
+      "indy_20161207_02",
+      "indy_20161212_02",
+      "indy_20161220_02"
+    ],
+    "excluded_development_failures": [
+      "indy_20160630_01",
+      "indy_20161013_03"
+    ],
+    "reference_selection_note": "Phase-3b label-identified failures are excluded from compatible references; this makes the artifact development-selected.",
+    "active_checkpoint_caveat": "The active decoder was previously trained on both excluded sessions, unlike each strict Phase-3b held-month decoder.",
+    "artifact_level_diagnostic_audit": {
+      "indy_20160407_02": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160411_01": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160411_02": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160418_01": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160419_01": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160420_01": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160426_01": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160622_01": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160624_03": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160627_01": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160630_01": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160915_01": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160916_01": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160921_01": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160927_04": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160927_06": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160930_02": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20160930_05": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20161005_06": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20161006_02": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20161007_02": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20161011_03": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20161013_03": {
+        "decision": "abstain",
+        "layer1_decision": "abstain",
+        "layer2_decision": "pass"
+      },
+      "indy_20161014_04": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20161017_02": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20161024_03": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20161025_04": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20161026_03": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20161027_03": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20161206_02": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20161207_02": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20161212_02": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      },
+      "indy_20161220_02": {
+        "decision": "pass",
+        "layer1_decision": "pass",
+        "layer2_decision": "pass"
+      }
+    },
+    "gate": {
+      "method": "two_layer_count_plus_frozen_decoder_state_gate",
+      "layer1": {
+        "method": "phase3a_multi_reference_rate_plus_low_dimensional_kld",
+        "config": {
+          "observation_bins": 1500,
+          "bin_seconds": 0.04,
+          "n_components": 5,
+          "covariance_shrinkage": 0.1,
+          "covariance_floor": 0.0001,
+          "channel_scale_floor": 0.1,
+          "warning_quantile": 0.99,
+          "silent_rate_hz": 0.05,
+          "expected_active_rate_hz": 0.5,
+          "expected_active_fraction": 0.75
+        },
+        "reference_sessions": [
+          "indy_20160407_02",
+          "indy_20160411_01",
+          "indy_20160411_02",
+          "indy_20160418_01",
+          "indy_20160419_01",
+          "indy_20160420_01",
+          "indy_20160426_01",
+          "indy_20160622_01",
+          "indy_20160624_03",
+          "indy_20160627_01",
+          "indy_20160915_01",
+          "indy_20160916_01",
+          "indy_20160921_01",
+          "indy_20160927_04",
+          "indy_20160927_06",
+          "indy_20160930_02",
+          "indy_20160930_05",
+          "indy_20161005_06",
+          "indy_20161006_02",
+          "indy_20161007_02",
+          "indy_20161011_03",
+          "indy_20161014_04",
+          "indy_20161017_02",
+          "indy_20161024_03",
+          "indy_20161025_04",
+          "indy_20161026_03",
+          "indy_20161027_03",
+          "indy_20161206_02",
+          "indy_20161207_02",
+          "indy_20161212_02",
+          "indy_20161220_02"
+        ],
+        "reference_months": [
+          "2016-04",
+          "2016-06",
+          "2016-09",
+          "2016-10",
+          "2016-12"
+        ],
+        "thresholds": {
+          "pattern_distance": 0.9961910571807051,
+          "robust_rate_distance": 2.85175118657991,
+          "absolute_log_rate_ratio": 1.286710565963243,
+          "unexpected_silent_channels": 5.0,
+          "global_mindful_kld": 8.251878313087218,
+          "multi_reference_mindful_kld": 3.5246398307352833
+        },
+        "threshold_calibration": "nested_leave_one_complete_month_out",
+        "decision_policy": {
+          "warning": "one abnormal evidence family",
+          "abstain": "at least two abnormal evidence families",
+          "mindful_alone_can_abstain": false
+        }
+      },
+      "layer2": {
+        "method": "decoder_hidden_output_multi_reference_gate",
+        "config": {
+          "observation_bins": 1500,
+          "bin_seconds": 0.04,
+          "hidden_components": 5,
+          "chunk_bins": 250,
+          "covariance_shrinkage": 0.1,
+          "covariance_floor": 0.0001,
+          "warning_quantile": 0.95,
+          "severe_quantile": 0.99
+        },
+        "reference_sessions": [
+          "indy_20160407_02",
+          "indy_20160411_01",
+          "indy_20160411_02",
+          "indy_20160418_01",
+          "indy_20160419_01",
+          "indy_20160420_01",
+          "indy_20160426_01",
+          "indy_20160622_01",
+          "indy_20160624_03",
+          "indy_20160627_01",
+          "indy_20160915_01",
+          "indy_20160916_01",
+          "indy_20160921_01",
+          "indy_20160927_04",
+          "indy_20160927_06",
+          "indy_20160930_02",
+          "indy_20160930_05",
+          "indy_20161005_06",
+          "indy_20161006_02",
+          "indy_20161007_02",
+          "indy_20161011_03",
+          "indy_20161014_04",
+          "indy_20161017_02",
+          "indy_20161024_03",
+          "indy_20161025_04",
+          "indy_20161026_03",
+          "indy_20161027_03",
+          "indy_20161206_02",
+          "indy_20161207_02",
+          "indy_20161212_02",
+          "indy_20161220_02"
+        ],
+        "reference_months": [
+          "2016-04",
+          "2016-06",
+          "2016-09",
+          "2016-10",
+          "2016-12"
+        ],
+        "warning_thresholds": {
+          "hidden_state_kld": 1.5164784549302044,
+          "output_state_kld": 0.8952581546202953,
+          "output_delta_kld": 0.6495212274653511,
+          "chunk_hidden_kld_max": 52.57946028523337
+        },
+        "severe_thresholds": {
+          "hidden_state_kld": 2.9356866821432024,
+          "output_state_kld": 1.1820599889562293,
+          "output_delta_kld": 0.7287443390761196,
+          "chunk_hidden_kld_max": 58.969373257161436
+        },
+        "threshold_calibration": "nested_leave_one_complete_month_out_on_frozen_decoder_traces",
+        "decision_policy": {
+          "diagnostic_warning": "one decoder-state evidence family",
+          "diagnostic_abstain": "at least two decoder-state evidence families",
+          "gate_abstain": "hidden-state severe and absolute-output-state severe",
+          "output_delta_and_temporal": "diagnostic_only",
+          "velocity_labels_used": false,
+          "weights_updated": false
+        }
+      },
+      "decision_policy": {
+        "abstain": "either layer independently abstains",
+        "warning": "layer1 warns while neither layer abstains",
+        "layer2_warning_policy": "diagnostic_only"
+      }
+    },
+    "artifacts": {
+      "layer1": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3c_decoder_state_detector/phase3c_active_layer1_reference.npz",
+      "layer2": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3c_decoder_state_detector/phase3c_active_layer2_reference.npz"
+    }
+  },
+  "decision_summary": [
+    {
+      "decision": "pass",
+      "sessions": 31,
+      "mean_r2": 0.6019687431473886,
+      "worst_r2": 0.232095181941986
+    },
+    {
+      "decision": "abstain",
+      "sessions": 2,
+      "mean_r2": -0.09530615806579584,
+      "worst_r2": -0.1364778876304626
+    }
+  ],
+  "interpretation_guardrails": [
+    "The two failures and all other Phase-3b R\u00b2 values are now development outcomes.",
+    "Passing the development gate does not constitute independent validation.",
+    "January did not participate and must not be used to tune these metrics.",
+    "A pure intent-mapping change can remain invisible to every label-free signal.",
+    "Automatic source integration is allowed only by the recorded strict gate."
+  ],
+  "artifacts": {
+    "metrics": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3c_decoder_state_detector/phase3c_decoder_state_detector_metrics.json",
+    "session_csv": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3c_decoder_state_detector/phase3c_decoder_state_detector_sessions.csv",
+    "sensitivity_csv": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3c_decoder_state_detector/phase3c_decoder_state_detector_sensitivity.csv",
+    "figure": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3c_decoder_state_detector/phase3c_decoder_state_detector_figure.png",
+    "active_layer1_reference": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3c_decoder_state_detector/phase3c_active_layer1_reference.npz",
+    "active_layer2_reference": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3c_decoder_state_detector/phase3c_active_layer2_reference.npz",
+    "active_gate_metadata": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/results/indy/phase3c_decoder_state_detector/phase3c_active_gate_metadata.json"
+  }
+}
