@@ -27,6 +27,7 @@ data/processed/**/manifest.json
 results/**/*.png
 results/**/*.pt
 results/**/*.db
+results/**/.cache/
 results/*.log
 
 # OS

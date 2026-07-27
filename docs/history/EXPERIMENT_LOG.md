@@ -278,3 +278,47 @@ final active artifact.
 Decision: keep the integrated runtime as a transparent development candidate.
 Do not tune it with January, do not claim that it catches every incompatible
 session, and require prospective data before deployment freezing.
+
+## Phase 4a — Architecture-only sweep protocol
+
+Registered: 2026-07-26. Status: implemented, not yet run.
+
+The current 78,786-parameter checkpoint remains the protected baseline and
+cannot be overwritten. Phase 4a contains an independent model copy and changes
+only five architecture fields:
+
+| Field | Search values |
+| --- | --- |
+| TCN filters | 32, 48, 64, 96 |
+| GRU hidden width | 32, 48, 64, 96 |
+| TCN blocks | 2, 3, 4; dilations are powers of two |
+| Kernel size | 2, 3, 4 |
+| GRU layers | 1, 2 |
+
+The baseline architecture 64/64/4/3/1 is enqueued as trial 0. Candidates above
+twice the baseline parameter count are pruned by default.
+
+Frozen for every trial:
+
+- seed 43 and session-balanced sampling;
+- learning rate 0.0009, weight decay 0.060 and dropout 0.025;
+- batch size 32 and gradient clipping 1.0;
+- seven trained epochs following the original 20-epoch cosine schedule;
+- fixed 32 channels, raw-count plus causal-EWMA inputs;
+- 60-second past-only normalization and 50-bin windows;
+- five deterministic complete-month folds over the 33 pre-January sessions.
+
+January is forbidden at the processed-file loader. Held labels are not opened
+until that fold has finished optimization, and they never select an epoch or
+update a weight. The preregistered selection score is:
+
+`0.75 × session-macro R² + 0.25 × session 10th-percentile R²`.
+
+Worst-session R², parameter count and receptive field remain explicit
+guardrails. Optuna pruning occurs only after complete held-month folds. The
+study is resumable through SQLite and saves metrics, a ranked CSV and a figure,
+but intentionally saves no model weight. A Phase 4a winner is only eligible
+for a later multi-seed confirmation.
+
+Runner:
+`experiments/active/phase4a_architecture_sweep.py`.

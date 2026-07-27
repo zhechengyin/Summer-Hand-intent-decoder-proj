@@ -116,6 +116,36 @@ but it is not a demonstrated universal failure detector. January remains
 forbidden, and final detector claims require prospective sessions. STM32
 memory, timing and fixed-point equivalence are also pending.
 
+## Active experiment
+
+Phase 4a is implemented in
+`experiments/active/phase4a_architecture_sweep.py` and is awaiting execution.
+It is an architecture-only Optuna study with the current model enqueued as
+trial 0. The protected baseline checkpoint is never loaded or written by the
+script; its SHA-256 is checked before preparation, after every completed trial,
+and at shutdown.
+
+Exactly five fields vary:
+
+- TCN filters: 32, 48, 64 or 96;
+- GRU hidden width: 32, 48, 64 or 96;
+- power-of-two TCN dilation blocks: 2, 3 or 4;
+- temporal kernel size: 2, 3 or 4;
+- GRU layers: 1 or 2.
+
+Learning rate 0.0009, weight decay 0.060, dropout 0.025, seed 43,
+session-balanced sampling, 32 channels, causal features, 60-second
+normalization, 50-bin windows, seven trained epochs on the frozen 20-epoch
+cosine trajectory, and all data rules remain fixed. Each trial uses five
+complete pre-January held-month folds. January is rejected before any array is
+opened.
+
+Selection score is 75% held-session macro R² plus 25% held-session 10th
+percentile R². Worst-session R² and parameter count are retained as guardrails.
+Pruning can happen only after complete folds, never inside an epoch. No Phase
+4a model weight is saved; the result only nominates architectures for later
+multi-seed confirmation.
+
 ## Supported files
 
 - `data/processing/indy_loco/indy/causal_targets.py`
@@ -129,6 +159,7 @@ memory, timing and fixed-point equivalence are also pending.
 - `models/indy_32ch/sampling.py`
 - `experiments/active/phase0a_data_audit.py`
 - `experiments/active/phase0a_data_audit.ipynb`
+- `experiments/active/phase4a_architecture_sweep.py`
 - `models/indy_32ch/checkpoint.pt`
 
 Everything under `history/` is provenance only and must not be imported.

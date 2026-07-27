@@ -23,6 +23,8 @@ dataset, with STM32 deployment constraints.
   the 60-second two-layer gate first and releases only later decoder output.
 - January remains hard-forbidden for detector development. The runtime is not
   prospectively or deployment-frozen.
+- Phase 4a architecture-only sweeping is implemented but has not been run. The
+  frozen baseline remains read-only and is never overwritten by the sweep.
 
 ## Read these files
 
@@ -42,7 +44,7 @@ data/
   processed/             generated model-ready arrays
   processing/            Indy conversion notebook and causal target transforms
 models/indy_32ch/        decoder, detector, input pipeline, sampler and checkpoint
-experiments/active/      reproducible Phase-0a data audit only
+experiments/active/      Phase-0a audit and Phase-4a candidate sweep
 results/indy/            phase-aligned Indy metrics and figures
 docs/                    current status and concise experiment log
 history/                 completed Phase-1, Phase-2 and Phase-3 evidence
@@ -64,3 +66,7 @@ explicitly until future prospective sessions are available.
 
 Do not rerun model selection or compare another checkpoint on the consumed
 January test split.
+
+Phase 4a may use only the 33 pre-January sessions through complete held-month
+folds. It creates no checkpoint; a winning architecture must first pass a later
+multi-seed confirmation.

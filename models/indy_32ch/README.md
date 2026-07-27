@@ -70,3 +70,12 @@ python models/indy_32ch/runtime.py \
 The first 60 seconds are diagnostic warm-up only. `abstain` blocks output;
 `warning` releases output by default and can be made blocking with
 `--block-on-warning`.
+
+## Baseline protection during Phase 4
+
+Phase 4a does not modify this directory. Its candidate architecture is an
+independent copy contained entirely in
+`experiments/active/phase4a_architecture_sweep.py`. The script compares the
+copied baseline as trial 0, saves no candidate weights, and repeatedly verifies
+the SHA-256 of `checkpoint.pt`. Any future winner must be saved under a separate
+candidate name only after multi-seed confirmation.

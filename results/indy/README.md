@@ -13,6 +13,7 @@ experiment stay together.
 | `phase3a_drift_detector/` | Pre-January label-free detector baseline | Held-month scores, synthetic stress-test summary, figure and fitted reference artifact |
 | `phase3b_leave_one_month_out/` | Strict out-of-month decoder evaluation | Five fold checkpoints, fold/session metrics and figure |
 | `phase3c_decoder_state_detector/` | Decoder-derived second-layer gate | Session and sensitivity metrics, figure and active two-layer reference artifacts |
+| `phase4a_architecture_sweep/` | Architecture-only pre-January Optuna study | Created when Phase 4a runs: study DB, ranked CSV, metrics, figure and disposable fold cache; no checkpoint |
 
 ## Phase mapping
 
@@ -30,6 +31,8 @@ experiment stay together.
   `history/phase3/phase3b_leave_one_month_out.py`
 - Phase 3c runner:
   `history/phase3/phase3c_decoder_state_detector.py`
+- Phase 4a runner:
+  `experiments/active/phase4a_architecture_sweep.py`
 
 Phase 1a--1d intermediate databases, figures, metrics, and non-selected
 checkpoints were intentionally deleted. The retained Phase 1e metrics and
@@ -40,3 +43,6 @@ The January split is consumed. Do not use Phase 2 results to select another
 model, feature set, detector threshold, or hyperparameter configuration.
 Phase 3 is also development-selected and archived; the active execution path is
 `models/indy_32ch/runtime.py`.
+
+Phase 4a must not write a checkpoint. Its result is a shortlist for later
+multi-seed confirmation, not a replacement for the frozen baseline.
