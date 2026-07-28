@@ -1,6 +1,10 @@
-# Frozen Indy 32-channel model
+# Indy 32-channel model
 
-`checkpoint.pt` is the only retained model checkpoint.
+Two checkpoints are retained. `64x64checkpoint.pt` is the protected,
+detector-compatible baseline used by `runtime.py`.
+`48x48checkpoint.pt` is the completed firmware candidate; it must not replace
+the integrated baseline until its 48-state Layer-2 detector is refitted and
+validated.
 
 The active code beside it is intentionally model-specific:
 
@@ -13,17 +17,21 @@ The active code beside it is intentionally model-specific:
 - `runtime.py`: the only integrated gate-then-decode execution path;
 - `sampling.py`: frozen session-balanced sampling rule.
 
-| Item | Value |
-| --- | --- |
-| SHA-256 | `2ee52c426ee43ba88cebe7c85dd8392f40f9e75748abe9bbf4e94093556363a5` |
-| Size | 324,237 bytes |
-| Parameters | 78,786 |
-| Seed / epoch | 43 / 7 |
-| Input | 32 counts + 32 causal-EWMA features |
-| Sampling | session-balanced |
-| Learning rate | 0.0009 |
-| Weight decay | 0.060 |
-| Dropout | 0.025 |
+| Item | Integrated 64/64 | Firmware candidate 48/48 |
+| --- | --- | --- |
+| File | `64x64checkpoint.pt` | `48x48checkpoint.pt` |
+| SHA-256 | `2ee52c…56363a5` | `5c8b375…368319ef` |
+| Size | 324,237 bytes | 199,733 bytes |
+| Parameters | 78,786 | 45,266 |
+| Seed / selected epoch | 43 / 7 | 43 / 10 |
+| Training budget | 20 epochs | 20 epochs |
+| December pooled loss | 0.480166 | 0.470492 |
+| December pooled R² | 0.560362 | 0.565134 |
+| December macro R² | 0.570223 | 0.575004 |
+| December worst-session R² | 0.314350 | 0.346125 |
+
+Both use 32 counts plus 32 causal-EWMA features, session-balanced sampling,
+learning rate 0.0009, weight decay 0.060 and dropout 0.025.
 
 The checkpoint contains model weights, selected channels, target normalization,
 training-derived feature variance floor, training/validation session lists and
@@ -37,9 +45,9 @@ Evidence:
 - January session-macro R²: 0.504789.
 - January worst-session R²: -0.052402.
 
-This is the frozen research candidate, not yet a deployment release. Promotion
-still requires a validated label-free drift gate, int8 accuracy comparison and
-measured STM32 memory/timing.
+Neither file is yet a deployment release. Promotion still requires a validated
+48-state label-free drift gate, streaming/int8 equivalence and measured STM32
+memory and timing.
 
 The detector never changes decoder weights. Layer 1 combines multi-month rate
 references with a five-dimensional, full-covariance Gaussian KLD inspired by
@@ -73,9 +81,20 @@ The first 60 seconds are diagnostic warm-up only. `abstain` blocks output;
 
 ## Baseline protection during Phase 4
 
-Phase 4a does not modify this directory. Its candidate architecture is an
-independent copy contained entirely in
-`experiments/active/phase4a_architecture_sweep.py`. The script compares the
-copied baseline as trial 0, saves no candidate weights, and repeatedly verifies
-the SHA-256 of `checkpoint.pt`. Any future winner must be saved under a separate
-candidate name only after multi-seed confirmation.
+Phase 4a nominated a 48-TCN-filter/48-GRU-hidden architecture with 45,266
+parameters, versus 78,786 for the baseline. Phase 4b then completed five seeds
+and five held-month folds per architecture. The 48/48 architecture passed all
+four predeclared non-inferiority checks:
+
+- mean session-macro R² delta: -0.005919, limit -0.010;
+- mean session-q10 R² delta: +0.003694, limit -0.020;
+- mean worst-session R² delta: -0.014631, limit -0.020;
+- worst held-month macro R² delta: -0.018616, limit -0.020.
+
+It is therefore a valid firmware architecture candidate, not a five-seed
+accuracy winner. The subsequent fixed build completed on 2026-07-28: seed 43,
+20 training epochs and minimum December validation loss selected epoch 10.
+Only the 29 training sessions updated weights; December was inference-only and
+January was never opened. Its epoch-7 CPU result reproduced the matching
+Phase-4b cell exactly. The completed builder is archived at
+`history/phase4/train_48x48_checkpoint.py`.

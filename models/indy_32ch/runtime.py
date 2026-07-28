@@ -32,7 +32,7 @@ from models.indy_32ch.input_pipeline import (
 from models.indy_32ch.model import build_net
 
 
-CHECKPOINT_PATH = ROOT / "models" / "indy_32ch" / "checkpoint.pt"
+CHECKPOINT_PATH = ROOT / "models" / "indy_32ch" / "64x64checkpoint.pt"
 DETECTOR_DIR = ROOT / "results" / "indy" / "phase3c_decoder_state_detector"
 LAYER1_PATH = DETECTOR_DIR / "phase3c_active_layer1_reference.npz"
 LAYER2_PATH = DETECTOR_DIR / "phase3c_active_layer2_reference.npz"

@@ -2,7 +2,7 @@ name: indy_32ch_frozen
 status: frozen_candidate_locked_test_complete
 dataset: indy_loco
 artifact:
-  checkpoint: models/indy_32ch/checkpoint.pt
+  checkpoint: models/indy_32ch/64x64checkpoint.pt
   sha256: 2ee52c426ee43ba88cebe7c85dd8392f40f9e75748abe9bbf4e94093556363a5
 input:
   channels: 32
@@ -46,3 +46,15 @@ deployment:
   observation_seconds: 60
   drift_threshold: null
   note: Threshold must be selected only from pre-January nested month validation.
+firmware_candidate:
+  checkpoint: models/indy_32ch/48x48checkpoint.pt
+  sha256: 5c8b375787ff93f90006df5f0cfea07303660928c7b69a84d4d75e1a368319ef
+  status: trained_detector_refit_pending
+  filters: 48
+  gru_hidden: 48
+  parameters: 45266
+  seed: 43
+  training_epochs: 20
+  checkpoint_epoch: 10
+  selection: minimum_pooled_december_validation_loss
+  december_validation_r2: 0.565134

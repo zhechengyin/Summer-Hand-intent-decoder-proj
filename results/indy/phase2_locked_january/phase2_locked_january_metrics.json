@@ -3,7 +3,7 @@
   "generated_at_utc": "2026-07-22T20:38:30.344563+00:00",
   "locked_test_opened": true,
   "model_selection_complete_before_test": true,
-  "frozen_checkpoint": "models/indy_32ch/checkpoint.pt",
+  "frozen_checkpoint": "models/indy_32ch/64x64checkpoint.pt",
   "frozen_protocol": {
     "seed": 43,
     "learning_rate": 0.0009,

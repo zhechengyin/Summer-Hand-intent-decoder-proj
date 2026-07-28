@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Phase 4a: protected architecture-only sweep for the Indy decoder.
 
-This file is deliberately self-contained. It does not import the frozen model,
-training helpers, sampler, or archived experiments. The retained baseline
-checkpoint is read only through a SHA-256 integrity check and is never loaded
-or written.
+This completed runner is deliberately self-contained. It does not import the
+frozen model, training helpers, sampler, or other archived experiments. The
+retained baseline checkpoint is read only through a SHA-256 integrity check and
+is never loaded or written.
 
 Every candidate keeps the data, causal preprocessing and optimization protocol
 fixed. Optuna changes exactly five architecture fields:
@@ -49,6 +49,12 @@ CACHE_DIR = RESULT_DIR / ".cache"
 STORAGE_PATH = RESULT_DIR / "phase4a_architecture_sweep.db"
 METRICS_PATH = RESULT_DIR / "phase4a_architecture_sweep_metrics.json"
 TRIALS_PATH = RESULT_DIR / "phase4a_architecture_sweep_trials.csv"
+UNIQUE_ARCHITECTURES_PATH = (
+    RESULT_DIR / "phase4a_architecture_sweep_unique_architectures.csv"
+)
+BASELINE_COMPARISON_PATH = (
+    RESULT_DIR / "phase4a_baseline_vs_candidate_sessions.csv"
+)
 FIGURE_PATH = RESULT_DIR / "phase4a_architecture_sweep_figure.png"
 
 MODEL_READY_SCHEMA = "indy_counts_velocity_v2"
@@ -955,6 +961,278 @@ def completed_trials(study) -> list:
     ]
 
 
+def architecture_key(params: dict) -> tuple[int, ...]:
+    return tuple(int(params[name]) for name in SEARCH_SPACE)
+
+
+def unique_architecture_rows(study) -> list[dict]:
+    """Collapse deterministic duplicate trials into auditable architectures."""
+    groups: dict[tuple[int, ...], list] = {}
+    for trial in study.trials:
+        if set(trial.params) != set(SEARCH_SPACE):
+            continue
+        groups.setdefault(architecture_key(trial.params), []).append(trial)
+
+    rows = []
+    for key, trials in groups.items():
+        complete = [
+            trial
+            for trial in trials
+            if trial.state.name == "COMPLETE" and trial.value is not None
+        ]
+        representative = (
+            min(complete, key=lambda trial: trial.number)
+            if complete
+            else max(
+                trials,
+                key=lambda trial: (
+                    int(trial.user_attrs.get("folds_completed", 0)),
+                    -trial.number,
+                ),
+            )
+        )
+        attrs = representative.user_attrs
+        rows.append(
+            {
+                "first_trial": min(trial.number for trial in trials),
+                "trial_numbers": [trial.number for trial in trials],
+                "repeat_count": len(trials),
+                "complete_repeats": len(complete),
+                "state": "COMPLETE" if complete else "PRUNED",
+                **{
+                    name: value
+                    for name, value in zip(SEARCH_SPACE, key)
+                },
+                "selection_score": (
+                    float(representative.value)
+                    if representative.value is not None
+                    else None
+                ),
+                "parameter_count": attrs.get("parameter_count"),
+                "parameter_multiplier": attrs.get("parameter_multiplier"),
+                "receptive_field_bins": attrs.get("receptive_field_bins"),
+                "session_macro_r2": attrs.get("session_macro_r2"),
+                "session_q10_r2": attrs.get("session_q10_r2"),
+                "worst_session_r2": attrs.get("worst_session_r2"),
+                "folds_completed": attrs.get("folds_completed", 0),
+                "prune_reason": attrs.get("prune_reason"),
+            }
+        )
+    return sorted(
+        rows,
+        key=lambda row: (
+            row["state"] != "COMPLETE",
+            -(
+                row["selection_score"]
+                if row["selection_score"] is not None
+                else -math.inf
+            ),
+            row["first_trial"],
+        ),
+    )
+
+
+def approximate_window_multiplies(architecture: dict) -> int:
+    """Approximate one 50-bin forward pass; biases/activations are excluded."""
+    filters = int(architecture["tcn_filters"])
+    hidden = int(architecture["gru_hidden"])
+    blocks = int(architecture["tcn_blocks"])
+    kernel = int(architecture["kernel_size"])
+    layers = int(architecture["gru_layers"])
+    spatial = WINDOW_BINS * 64 * filters
+    tcn = WINDOW_BINS * blocks * filters * filters * kernel
+    gru = WINDOW_BINS * 3 * (filters * hidden + hidden * hidden)
+    if layers > 1:
+        gru += (
+            WINDOW_BINS
+            * (layers - 1)
+            * 3
+            * (hidden * hidden + hidden * hidden)
+        )
+    head = WINDOW_BINS * hidden * 2
+    return int(spatial + tcn + gru + head)
+
+
+def baseline_candidate_analysis(study, best) -> dict | None:
+    baseline = next(
+        (
+            trial
+            for trial in completed_trials(study)
+            if trial.params == BASELINE_ARCHITECTURE
+        ),
+        None,
+    )
+    if baseline is None or best is None:
+        return None
+
+    baseline_sessions = {
+        row["session"]: row for row in baseline.user_attrs["sessions"]
+    }
+    candidate_sessions = {
+        row["session"]: row for row in best.user_attrs["sessions"]
+    }
+    if set(baseline_sessions) != set(candidate_sessions):
+        raise ValueError("Baseline and candidate held-session sets differ")
+
+    session_rows = []
+    for name in sorted(baseline_sessions):
+        baseline_row = baseline_sessions[name]
+        candidate_row = candidate_sessions[name]
+        session_rows.append(
+            {
+                "session": name,
+                "held_month": baseline_row["held_month"],
+                "baseline_r2": float(baseline_row["r2_mean"]),
+                "candidate_r2": float(candidate_row["r2_mean"]),
+                "candidate_minus_baseline_r2": float(
+                    candidate_row["r2_mean"] - baseline_row["r2_mean"]
+                ),
+            }
+        )
+    deltas = np.asarray(
+        [row["candidate_minus_baseline_r2"] for row in session_rows],
+        dtype=np.float64,
+    )
+    month_rows = []
+    for month in sorted({row["held_month"] for row in session_rows}):
+        selected = [row for row in session_rows if row["held_month"] == month]
+        month_rows.append(
+            {
+                "held_month": month,
+                "sessions": len(selected),
+                "baseline_macro_r2": float(
+                    np.mean([row["baseline_r2"] for row in selected])
+                ),
+                "candidate_macro_r2": float(
+                    np.mean([row["candidate_r2"] for row in selected])
+                ),
+                "candidate_minus_baseline_macro_r2": float(
+                    np.mean(
+                        [
+                            row["candidate_minus_baseline_r2"]
+                            for row in selected
+                        ]
+                    )
+                ),
+            }
+        )
+
+    baseline_parameters = int(baseline.user_attrs["parameter_count"])
+    candidate_parameters = int(best.user_attrs["parameter_count"])
+    baseline_multiplies = approximate_window_multiplies(baseline.params)
+    candidate_multiplies = approximate_window_multiplies(best.params)
+    return {
+        "baseline_trial": baseline.number,
+        "candidate_trial": best.number,
+        "baseline_architecture": dict(baseline.params),
+        "candidate_architecture": dict(best.params),
+        "metric_deltas": {
+            "selection_score": float(best.value - baseline.value),
+            "session_macro_r2": float(
+                best.user_attrs["session_macro_r2"]
+                - baseline.user_attrs["session_macro_r2"]
+            ),
+            "session_q10_r2": float(
+                best.user_attrs["session_q10_r2"]
+                - baseline.user_attrs["session_q10_r2"]
+            ),
+            "worst_session_r2": float(
+                best.user_attrs["worst_session_r2"]
+                - baseline.user_attrs["worst_session_r2"]
+            ),
+        },
+        "paired_sessions": {
+            "sessions": len(session_rows),
+            "candidate_wins": int(np.sum(deltas > 0)),
+            "candidate_losses": int(np.sum(deltas < 0)),
+            "ties": int(np.sum(deltas == 0)),
+            "mean_delta_r2": float(deltas.mean()),
+            "median_delta_r2": float(np.median(deltas)),
+            "minimum_delta_r2": float(deltas.min()),
+            "maximum_delta_r2": float(deltas.max()),
+        },
+        "deployment_estimates": {
+            "baseline_parameters": baseline_parameters,
+            "candidate_parameters": candidate_parameters,
+            "parameter_reduction_fraction": float(
+                1.0 - candidate_parameters / baseline_parameters
+            ),
+            "baseline_weight_bytes_float32": baseline_parameters * 4,
+            "candidate_weight_bytes_float32": candidate_parameters * 4,
+            "baseline_weight_bytes_int8": baseline_parameters,
+            "candidate_weight_bytes_int8": candidate_parameters,
+            "baseline_approximate_multiplies_per_50_bin_window": (
+                baseline_multiplies
+            ),
+            "candidate_approximate_multiplies_per_50_bin_window": (
+                candidate_multiplies
+            ),
+            "multiply_reduction_fraction": float(
+                1.0 - candidate_multiplies / baseline_multiplies
+            ),
+            "estimate_caveat": (
+                "Bias, activation, memory-transfer and detector costs are "
+                "excluded; measure the real target before deployment claims."
+            ),
+        },
+        "month_comparison": month_rows,
+        "session_comparison": session_rows,
+    }
+
+
+def write_unique_architectures_csv(study) -> None:
+    rows = unique_architecture_rows(study)
+    fields = [
+        "first_trial",
+        "trial_numbers",
+        "repeat_count",
+        "complete_repeats",
+        "state",
+        *SEARCH_SPACE,
+        "selection_score",
+        "parameter_count",
+        "parameter_multiplier",
+        "receptive_field_bins",
+        "session_macro_r2",
+        "session_q10_r2",
+        "worst_session_r2",
+        "folds_completed",
+        "prune_reason",
+    ]
+    temporary = UNIQUE_ARCHITECTURES_PATH.with_suffix(".csv.tmp")
+    with temporary.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(
+                {
+                    **row,
+                    "trial_numbers": ",".join(
+                        str(value) for value in row["trial_numbers"]
+                    ),
+                }
+            )
+    temporary.replace(UNIQUE_ARCHITECTURES_PATH)
+
+
+def write_baseline_comparison_csv(analysis: dict | None) -> None:
+    if analysis is None:
+        return
+    fields = [
+        "session",
+        "held_month",
+        "baseline_r2",
+        "candidate_r2",
+        "candidate_minus_baseline_r2",
+    ]
+    temporary = BASELINE_COMPARISON_PATH.with_suffix(".csv.tmp")
+    with temporary.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(analysis["session_comparison"])
+    temporary.replace(BASELINE_COMPARISON_PATH)
+
+
 def write_trials_csv(study) -> None:
     fields = [
         "trial",
@@ -1000,9 +1278,13 @@ def write_trials_csv(study) -> None:
     temporary.replace(TRIALS_PATH)
 
 
-def plot_trials(study) -> None:
-    complete = sorted(completed_trials(study), key=lambda trial: trial.number)
-    if not complete:
+def plot_trials(study, analysis: dict | None) -> None:
+    unique = [
+        row
+        for row in unique_architecture_rows(study)
+        if row["state"] == "COMPLETE"
+    ]
+    if not unique or analysis is None:
         return
     cache = Path(tempfile.gettempdir()) / "indy_phase4a_matplotlib"
     cache.mkdir(parents=True, exist_ok=True)
@@ -1012,65 +1294,219 @@ def plot_trials(study) -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    figure, axes = plt.subplots(2, 3, figsize=(16, 9), dpi=170)
-    fields = list(SEARCH_SPACE)
-    scores = np.asarray([trial.value for trial in complete])
-    numbers = np.asarray([trial.number for trial in complete])
-    baseline_numbers = [
-        trial.number
-        for trial in complete
-        if trial.params == BASELINE_ARCHITECTURE
-    ]
-    for axis, field in zip(axes.flat[:5], fields):
-        values = np.asarray([trial.params[field] for trial in complete])
-        points = axis.scatter(
-            values,
-            scores,
-            c=numbers,
-            cmap="viridis",
-            edgecolor="#263238",
-            linewidth=0.4,
+    ink = "#263238"
+    grid = "#D9DEE3"
+    baseline_color = "#2368A2"
+    candidate_color = "#C58B18"
+    neutral = "#9AA5AF"
+    light_candidate = "#F4E7BE"
+    figure, axes = plt.subplots(2, 2, figsize=(14, 10), dpi=180)
+
+    baseline_architecture = analysis["baseline_architecture"]
+    candidate_architecture = analysis["candidate_architecture"]
+    for row in unique:
+        params = {name: row[name] for name in SEARCH_SPACE}
+        if params == baseline_architecture:
+            color, marker, label, size = (
+                baseline_color,
+                "s",
+                "Baseline 64/64",
+                115,
+            )
+        elif params == candidate_architecture:
+            color, marker, label, size = (
+                candidate_color,
+                "D",
+                "Candidate 48/48",
+                125,
+            )
+        else:
+            color, marker, label, size = neutral, "o", None, 58
+        axes[0, 0].scatter(
+            row["parameter_count"],
+            row["selection_score"],
+            color=color,
+            marker=marker,
+            s=size,
+            edgecolor=ink,
+            linewidth=0.6,
+            label=label,
+            zorder=3,
         )
-        axis.set(
-            xlabel=field.replace("_", " ").title(),
-            ylabel="Selection score",
-            title=f"Score vs {field.replace('_', ' ')}",
+        axes[0, 0].annotate(
+            f"T{row['first_trial']}",
+            (row["parameter_count"], row["selection_score"]),
+            xytext=(4, 4),
+            textcoords="offset points",
+            fontsize=8,
+            color=ink,
         )
-        figure.colorbar(points, ax=axis, label="Trial")
-    parameters = np.asarray(
-        [trial.user_attrs["parameter_count"] for trial in complete]
-    )
-    axes[1, 2].scatter(
-        parameters,
-        scores,
-        c=numbers,
-        cmap="viridis",
-        edgecolor="#263238",
-        linewidth=0.4,
-    )
-    if baseline_numbers:
-        baseline = next(
-            trial for trial in complete if trial.number == baseline_numbers[0]
-        )
-        axes[1, 2].scatter(
-            [baseline.user_attrs["parameter_count"]],
-            [baseline.value],
-            marker="*",
-            s=180,
-            color="#D62728",
-            label="Protected baseline copy",
-        )
-        axes[1, 2].legend(frameon=False)
-    axes[1, 2].set(
+    axes[0, 0].set(
         xlabel="Parameters",
         ylabel="Selection score",
-        title="Accuracy–size trade-off",
+        title="Unique completed architectures",
     )
+    handles, labels = axes[0, 0].get_legend_handles_labels()
+    axes[0, 0].legend(
+        dict(zip(labels, handles)).values(),
+        dict(zip(labels, handles)).keys(),
+        frameon=False,
+    )
+
+    metrics = ["selection_score", "session_macro_r2", "session_q10_r2", "worst_session_r2"]
+    display = ["Score", "Macro R²", "Q10 R²", "Worst R²"]
+    baseline_trial = next(
+        trial
+        for trial in completed_trials(study)
+        if trial.params == BASELINE_ARCHITECTURE
+    )
+    candidate_trial = max(
+        completed_trials(study), key=lambda trial: trial.value
+    )
+    baseline_values = [
+        baseline_trial.value,
+        baseline_trial.user_attrs["session_macro_r2"],
+        baseline_trial.user_attrs["session_q10_r2"],
+        baseline_trial.user_attrs["worst_session_r2"],
+    ]
+    candidate_values = [
+        candidate_trial.value,
+        candidate_trial.user_attrs["session_macro_r2"],
+        candidate_trial.user_attrs["session_q10_r2"],
+        candidate_trial.user_attrs["worst_session_r2"],
+    ]
+    positions = np.arange(len(metrics))
+    width = 0.36
+    axes[0, 1].bar(
+        positions - width / 2,
+        baseline_values,
+        width,
+        color=baseline_color,
+        edgecolor=ink,
+        linewidth=0.5,
+        label="Baseline 64/64",
+    )
+    axes[0, 1].bar(
+        positions + width / 2,
+        candidate_values,
+        width,
+        color=candidate_color,
+        edgecolor=ink,
+        linewidth=0.5,
+        label="Candidate 48/48",
+    )
+    axes[0, 1].axhline(0, color=ink, linewidth=0.8)
+    axes[0, 1].set_xticks(positions, display)
+    axes[0, 1].set(
+        ylabel="R² / selection score",
+        title="Aggregate held-session metrics",
+    )
+    axes[0, 1].legend(frameon=False)
+
+    month_rows = analysis["month_comparison"]
+    month_values = [
+        row["candidate_minus_baseline_macro_r2"] for row in month_rows
+    ]
+    month_colors = [
+        candidate_color if value >= 0 else light_candidate
+        for value in month_values
+    ]
+    axes[1, 0].bar(
+        [row["held_month"] for row in month_rows],
+        month_values,
+        color=month_colors,
+        edgecolor=ink,
+        linewidth=0.6,
+    )
+    axes[1, 0].axhline(0, color=ink, linewidth=0.8)
+    for index, value in enumerate(month_values):
+        axes[1, 0].text(
+            index,
+            value + (0.001 if value >= 0 else -0.001),
+            f"{value:+.3f}",
+            ha="center",
+            va="bottom" if value >= 0 else "top",
+            fontsize=8,
+            color=ink,
+        )
+    axes[1, 0].set(
+        xlabel="Held month",
+        ylabel="Candidate − baseline macro R²",
+        title="Held-month macro R² differences",
+    )
+
+    session_rows = analysis["session_comparison"]
+    baseline_session = np.asarray(
+        [row["baseline_r2"] for row in session_rows]
+    )
+    candidate_session = np.asarray(
+        [row["candidate_r2"] for row in session_rows]
+    )
+    lower = min(baseline_session.min(), candidate_session.min()) - 0.04
+    upper = max(baseline_session.max(), candidate_session.max()) + 0.04
+    axes[1, 1].plot(
+        [lower, upper],
+        [lower, upper],
+        color=ink,
+        linestyle="--",
+        linewidth=1,
+        label="Equal performance",
+    )
+    axes[1, 1].scatter(
+        baseline_session,
+        candidate_session,
+        color=candidate_color,
+        edgecolor=ink,
+        linewidth=0.5,
+        s=48,
+        alpha=0.9,
+    )
+    largest = sorted(
+        session_rows,
+        key=lambda row: abs(row["candidate_minus_baseline_r2"]),
+        reverse=True,
+    )[:3]
+    for row in largest:
+        axes[1, 1].annotate(
+            row["session"].replace("indy_", ""),
+            (row["baseline_r2"], row["candidate_r2"]),
+            xytext=(5, 4),
+            textcoords="offset points",
+            fontsize=7,
+            color=ink,
+        )
+    axes[1, 1].set_xlim(lower, upper)
+    axes[1, 1].set_ylim(lower, upper)
+    axes[1, 1].set_aspect("equal", adjustable="box")
+    axes[1, 1].set(
+        xlabel="Baseline session R²",
+        ylabel="Candidate session R²",
+        title="Paired held-session R²",
+    )
+    axes[1, 1].legend(frameon=False)
+
+    for axis in axes.flat:
+        axis.grid(axis="y", color=grid, linewidth=0.7, alpha=0.7)
+        axis.set_axisbelow(True)
+        axis.spines["top"].set_visible(False)
+        axis.spines["right"].set_visible(False)
     figure.suptitle(
-        "Phase 4a architecture-only sweep "
-        "(75% macro R² + 25% session-q10 R²)"
+        "Phase 4a architecture comparison",
+        fontsize=16,
     )
-    figure.tight_layout()
+    figure.text(
+        0.5,
+        0.955,
+        (
+            f"{len(study.trials)} trial records, "
+            f"{len(unique_architecture_rows(study))} unique architectures, "
+            "five pre-January held-month folds, seed 43"
+        ),
+        ha="center",
+        color=ink,
+        fontsize=10,
+    )
+    figure.tight_layout(rect=(0, 0, 1, 0.93))
     FIGURE_PATH.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(FIGURE_PATH, bbox_inches="tight")
     plt.close(figure)
@@ -1109,6 +1545,8 @@ def write_outputs(
     assert_baseline_untouched(context["baseline_checkpoint_sha256"])
     complete = completed_trials(study)
     best = max(complete, key=lambda trial: trial.value) if complete else None
+    unique_rows = unique_architecture_rows(study)
+    comparison = baseline_candidate_analysis(study, best)
     payload = {
         "phase": "4a",
         "purpose": "architecture_only_sweep_protected_baseline",
@@ -1159,6 +1597,31 @@ def write_outputs(
             "candidate_checkpoint_saved": False,
         },
         "best_trial": trial_record(best) if best is not None else None,
+        "post_analysis": {
+            "trial_records": len(study.trials),
+            "unique_architectures": len(unique_rows),
+            "unique_completed_architectures": sum(
+                row["state"] == "COMPLETE" for row in unique_rows
+            ),
+            "unique_pruned_architectures": sum(
+                row["state"] == "PRUNED" for row in unique_rows
+            ),
+            "best_architecture_repeat_count": (
+                next(
+                    row["repeat_count"]
+                    for row in unique_rows
+                    if best is not None
+                    and all(
+                        row[name] == best.params[name]
+                        for name in SEARCH_SPACE
+                    )
+                )
+                if best is not None
+                else None
+            ),
+            "duplicate_trials_are_independent_evidence": False,
+            "baseline_vs_candidate": comparison,
+        },
         "trials": [trial_record(trial) for trial in study.trials],
         "trial_counts": {
             state: sum(trial.state.name == state for trial in study.trials)
@@ -1171,6 +1634,12 @@ def write_outputs(
                 else str(context["storage_path"])
             ),
             "trial_table": str(TRIALS_PATH.relative_to(ROOT)),
+            "unique_architecture_table": str(
+                UNIQUE_ARCHITECTURES_PATH.relative_to(ROOT)
+            ),
+            "baseline_candidate_session_table": str(
+                BASELINE_COMPARISON_PATH.relative_to(ROOT)
+            ),
             "figure": str(FIGURE_PATH.relative_to(ROOT)),
             "fold_cache": str(CACHE_DIR.relative_to(ROOT)),
             "checkpoint": None,
@@ -1182,7 +1651,9 @@ def write_outputs(
     }
     write_json_atomic(payload, METRICS_PATH)
     write_trials_csv(study)
-    plot_trials(study)
+    write_unique_architectures_csv(study)
+    write_baseline_comparison_csv(comparison)
+    plot_trials(study, comparison)
 
 
 def validate_study_protocol(study, signature: str) -> None:

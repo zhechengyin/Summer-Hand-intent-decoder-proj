@@ -77,8 +77,8 @@ loss and pooled R² among the frozen-candidate checkpoints.
 
 The completed scripts and final five-seed JSON are under `history/phase1/`.
 Intermediate databases, figures, checkpoints and duplicate JSON files were
-deleted. The only retained model artifact is
-`models/indy_32ch/checkpoint.pt`.
+deleted. The selected Phase-1 model artifact is retained as
+`models/indy_32ch/64x64checkpoint.pt`.
 
 ## Phase 2 — Locked January evaluation
 
@@ -279,9 +279,9 @@ Decision: keep the integrated runtime as a transparent development candidate.
 Do not tune it with January, do not claim that it catches every incompatible
 session, and require prospective data before deployment freezing.
 
-## Phase 4a — Architecture-only sweep protocol
+## Phase 4a — Architecture-only sweep
 
-Registered: 2026-07-26. Status: implemented, not yet run.
+Registered: 2026-07-26. Completed: 2026-07-27.
 
 The current 78,786-parameter checkpoint remains the protected baseline and
 cannot be overwritten. Phase 4a contains an independent model copy and changes
@@ -316,9 +316,159 @@ update a weight. The preregistered selection score is:
 
 Worst-session R², parameter count and receptive field remain explicit
 guardrails. Optuna pruning occurs only after complete held-month folds. The
-study is resumable through SQLite and saves metrics, a ranked CSV and a figure,
-but intentionally saves no model weight. A Phase 4a winner is only eligible
-for a later multi-seed confirmation.
+study is resumable through SQLite and saves metrics, tables and a figure, but
+intentionally saves no model weight.
+
+The run took approximately 5.36 hours and ended with 20 complete trials, 10
+pruned trials, no failures and no unfinished trial. Independent database and
+JSON counts agreed. The protected checkpoint SHA-256 was unchanged:
+`2ee52c426ee43ba88cebe7c85dd8392f40f9e75748abe9bbf4e94093556363a5`.
+
+The copied baseline trial reproduced the Phase-3b held-month metrics, providing
+a protocol cross-check. The highest-scoring candidate changed only model
+width: 48 TCN filters and 48 GRU hidden units instead of 64/64. Both use four
+TCN blocks, kernel size 3, one GRU layer and a 31-bin receptive field.
+
+| Metric | 64/64 baseline | 48/48 candidate | Difference |
+| --- | ---: | ---: | ---: |
+| Selection score | 0.499329 | 0.503833 | +0.004505 |
+| Session-macro R² | 0.559710 | 0.561457 | +0.001747 |
+| Session-q10 R² | 0.318187 | 0.330963 | +0.012777 |
+| Worst-session R² | -0.136478 | -0.200013 | -0.063535 |
+| Parameters | 78,786 | 45,266 | -42.5% |
+| Approximate multiplies / 50-bin window | 3,897,600 | 2,232,000 | -42.7% |
+
+On the 33 paired held sessions, the candidate won 16 and lost 17. Mean R²
+changed by +0.001747 and median R² changed by -0.000657. Held-month macro R²
+deltas were April +0.0171, June -0.0215, September -0.0013, October +0.0050
+and December -0.0055. The June 30 session declined from -0.136478 to
+-0.200013.
+
+An important search-quality caveat was found during post-run review. The 30
+trial records represent only 18 unique architectures out of the 288-value
+grid: nine unique architectures completed and nine were pruned. The
+deterministic 48/48 candidate appeared in 12 identical completed trials due to
+TPE exploitation of a discrete space. These repeats are not independent
+evidence and must not inflate confidence.
+
+Decision: retain the protected 64/64 checkpoint as the active model. Nominate
+48/48 as a deployment-efficient non-inferiority candidate, not as an accuracy
+winner. The structural evidence favors keeping four blocks, kernel size 3 and
+one GRU layer; deeper/larger models do not merit further broad sweeping.
+Phase 4b should compare 64/64 and 48/48 over seeds 42--46 under the same five
+held-month folds, optionally adding the untested 48-TCN/64-GRU combination.
+Selection must enforce month- and worst-session guardrails. January remains
+forbidden.
+
+Evidence:
+
+- `results/indy/phase4a_architecture_sweep/phase4a_architecture_sweep_metrics.json`
+- `results/indy/phase4a_architecture_sweep/phase4a_architecture_sweep_trials.csv`
+- `results/indy/phase4a_architecture_sweep/phase4a_architecture_sweep_unique_architectures.csv`
+- `results/indy/phase4a_architecture_sweep/phase4a_baseline_vs_candidate_sessions.csv`
+- `results/indy/phase4a_architecture_sweep/phase4a_architecture_sweep_figure.png`
 
 Runner:
-`experiments/active/phase4a_architecture_sweep.py`.
+`history/phase4/phase4a_architecture_sweep.py`.
+
+## Phase 4b — Five-seed architecture confirmation protocol
+
+Registered and completed: 2026-07-28.
+
+Phase 4b is a narrow confirmation, not another broad architecture or optimizer
+sweep. It compares only the protected 64/64 baseline and Phase-4a 48/48
+firmware candidate across seeds 42--46. Every seed uses all five complete
+pre-January held-month folds, producing 50 fold fits.
+
+Learning rate 0.0009, weight decay 0.060, dropout 0.025, session-balanced
+sampling, the 32 channels, causal feature pipeline, 60-second normalization,
+50-bin windows and fixed epoch 7 remain unchanged. January arrays are rejected,
+held labels are loaded only after fold optimization and neither architecture
+writes a checkpoint.
+
+Because the candidate is 42.5% smaller, Phase 4b uses predeclared
+deployment-oriented non-inferiority checks. Candidate-minus-baseline mean macro
+R² must be at least -0.010, q10 R² at least -0.020, mean worst-session R² at
+least -0.020, and the worst held-month mean macro R² at least -0.020. The 48/48
+candidate is nominated only if all four pass; otherwise the protected 64/64
+baseline remains selected.
+
+Runner:
+`history/phase4/phase4b_five_seed_architecture_confirmation.py`.
+
+### Phase 4b result
+
+All 50 planned fits completed: two architectures crossed with seeds 42--46
+and five complete pre-January held-month folds. January was not loaded, held
+labels did not update weights or select epochs, and the protected baseline
+checksum remained
+`2ee52c426ee43ba88cebe7c85dd8392f40f9e75748abe9bbf4e94093556363a5`.
+
+| Five-seed metric | 64/64 | 48/48 | 48/48 minus 64/64 |
+| --- | ---: | ---: | ---: |
+| Selection score | 0.477283 | 0.473767 | -0.003516 |
+| Session-macro R² | 0.549975 | 0.544056 | -0.005919 |
+| Session-q10 R² | 0.259207 | 0.262901 | +0.003694 |
+| Worst-session R² | -0.159978 | -0.174609 | -0.014631 |
+| Parameters | 78,786 | 45,266 | -42.5% |
+| Estimated multiplies / 50 bins | 3,897,600 | 2,232,000 | -42.7% |
+
+Every predeclared non-inferiority check passed. The narrowest margin was the
+worst held-month check: June changed by -0.018616 against a -0.020 limit.
+Across five seeds the 48/48 macro R² was higher only for seed 43; its mean
+macro R² was 0.005919 lower and its seed standard deviation was larger. The
+candidate therefore qualifies as a firmware-efficiency architecture, not as
+an accuracy improvement.
+
+Phase 4b intentionally saved no weights. After result review, the existing
+baseline file was renamed from `checkpoint.pt` to `64x64checkpoint.pt` without
+changing its bytes or SHA-256. Materializing 48/48 therefore remained a
+separate, explicitly authorized build.
+
+After explicit authorization, a fixed one-run builder was added at
+`history/phase4/train_48x48_checkpoint.py`. It is not a new sweep: it fixes
+the confirmed 48/48 architecture and seed 43, runs the same full 20-epoch
+cosine schedule used for 64/64, and selects the minimum pooled December
+validation loss. Only the 29 training sessions update weights; December is
+inference-only and January is never opened. The script writes
+`models/indy_32ch/48x48checkpoint.pt`.
+
+### Final 48/48 checkpoint build
+
+Completed: 2026-07-28.
+
+The full 20-epoch build completed successfully. Minimum pooled December
+validation loss selected epoch 10; epoch 7 was used only as a reproducibility
+check and matched the corresponding Phase-4b CPU cell exactly.
+
+| Metric | Final 48/48 |
+| --- | ---: |
+| Parameters | 45,266 |
+| Checkpoint size | 199,733 bytes |
+| Train pooled loss / R² | 0.236827 / 0.763162 |
+| December pooled loss / R² | 0.470492 / 0.565134 |
+| December session-macro R² | 0.575004 |
+| December worst-session R² | 0.346125 |
+| Selected epoch | 10 |
+
+The saved SHA-256 is
+`5c8b375787ff93f90006df5f0cfea07303660928c7b69a84d4d75e1a368319ef`.
+The protected 64/64 SHA-256 remained
+`2ee52c426ee43ba88cebe7c85dd8392f40f9e75748abe9bbf4e94093556363a5`.
+All 29 train sessions could update weights, all four December sessions were
+inference-only, and January was not loaded.
+
+Decision: retain both checkpoints. The 48/48 model is the preferred standalone
+firmware candidate because it is 42.5% smaller and its direct December pooled
+R² is 0.004772 above 64/64. The integrated runtime remains on 64/64 until the
+Layer-2 detector reference is refitted for 48 hidden states. Both completed
+Phase-4 scripts have been moved to `history/phase4/`.
+
+Evidence:
+
+- `results/indy/phase4b_five_seed_confirmation/phase4b_five_seed_confirmation_metrics.json`
+- `results/indy/phase4b_five_seed_confirmation/phase4b_five_seed_confirmation_cells.csv`
+- `results/indy/phase4b_five_seed_confirmation/phase4b_five_seed_confirmation_folds.csv`
+- `results/indy/phase4b_five_seed_confirmation/phase4b_five_seed_confirmation_sessions.csv`
+- `results/indy/phase4b_five_seed_confirmation/phase4b_five_seed_confirmation_figure.png`
+- `results/indy/phase4b_five_seed_confirmation/48x48checkpoint_build_metrics.json`

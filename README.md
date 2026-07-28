@@ -9,7 +9,9 @@ dataset, with STM32 deployment constraints.
 - Input is 32-channel spike counts plus causal EWMA at 40 ms resolution.
 - Every session uses a 60-second past-only normalization prefix; warm-up outputs
   are invalid.
-- The frozen model is `models/indy_32ch/checkpoint.pt`.
+- Two model weights are retained: the detector-compatible
+  `models/indy_32ch/64x64checkpoint.pt` baseline and the completed
+  `models/indy_32ch/48x48checkpoint.pt` firmware candidate.
 - Frozen hyperparameters are recorded in `configs/indy_32ch.yaml`.
 - Locked January pooled R² is 0.5511. Three sessions scored about 0.68--0.70;
   one drifted session scored -0.0524.
@@ -23,8 +25,14 @@ dataset, with STM32 deployment constraints.
   the 60-second two-layer gate first and releases only later decoder output.
 - January remains hard-forbidden for detector development. The runtime is not
   prospectively or deployment-frozen.
-- Phase 4a architecture-only sweeping is implemented but has not been run. The
-  frozen baseline remains read-only and is never overwritten by the sweep.
+- Phase 4b completed all 50 pre-January fold fits. The 48/48 architecture
+  passed all four predeclared non-inferiority guardrails while reducing
+  parameters and estimated multiplies by about 42%.
+- The fixed Phase-4 checkpoint build completed after Phase 4b. The 48/48
+  candidate selected epoch 10 from a full 20-epoch run and reached December
+  pooled R² 0.5651 with 45,266 parameters. It is the preferred standalone
+  firmware candidate. The 64/64 checkpoint remains the integrated runtime
+  default only because the active detector is tied to 64-dimensional GRU state.
 
 ## Read these files
 
@@ -43,11 +51,11 @@ data/
   raw/                   immutable source recordings
   processed/             generated model-ready arrays
   processing/            Indy conversion notebook and causal target transforms
-models/indy_32ch/        decoder, detector, input pipeline, sampler and checkpoint
-experiments/active/      Phase-0a audit and Phase-4a candidate sweep
+models/indy_32ch/        active decoder, detector, runtime and retained checkpoints
+experiments/active/      repeatable Phase-0a data audit only
 results/indy/            phase-aligned Indy metrics and figures
 docs/                    current status and concise experiment log
-history/                 completed Phase-1, Phase-2 and Phase-3 evidence
+history/                 completed Phase-1 through Phase-4 evidence
 ```
 
 There is no generic `src/` layer. Dataset-generation code lives with
@@ -67,6 +75,8 @@ explicitly until future prospective sessions are available.
 Do not rerun model selection or compare another checkpoint on the consumed
 January test split.
 
-Phase 4a may use only the 33 pre-January sessions through complete held-month
-folds. It creates no checkpoint; a winning architecture must first pass a later
-multi-seed confirmation.
+Phase 4a and Phase 4b used only the 33 pre-January sessions. Phase 4b confirmed
+48/48 as a firmware-efficiency candidate rather than an average-accuracy
+winner. A subsequent fixed build created `48x48checkpoint.pt` without loading
+January or changing `64x64checkpoint.pt`. All completed Phase-4 code is now
+under `history/phase4/`.

@@ -2608,7 +2608,7 @@
   "test_policy": "January test is locked and was not loaded.",
   "artifacts": {
     "metrics": "results/indy/phase1e_seed_crosscheck/phase1e_seed_crosscheck_metrics.json",
-    "selected_checkpoint": "models/indy_32ch/checkpoint.pt",
+    "selected_checkpoint": "models/indy_32ch/64x64checkpoint.pt",
     "intermediate_study_database": null,
     "intermediate_checkpoints": null,
     "figure": null

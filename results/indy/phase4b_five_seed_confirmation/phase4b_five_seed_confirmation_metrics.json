@@ -1,0 +1,635 @@
+{
+  "phase": "4b",
+  "purpose": "five_seed_architecture_noninferiority_confirmation",
+  "updated_at_utc": "2026-07-28T20:45:19.520990+00:00",
+  "study_started_at_utc": "2026-07-28T19:55:54.328074+00:00",
+  "duration_seconds_this_invocation": 2954.934077978134,
+  "protocol_signature": "7f1b9b5e67128d8ea4646edcbc8d2339b833b6bea4ea07702d7afe50d76bbc02",
+  "architectures": {
+    "baseline_64x64": {
+      "tcn_filters": 64,
+      "gru_hidden": 64,
+      "tcn_blocks": 4,
+      "kernel_size": 3,
+      "gru_layers": 1
+    },
+    "candidate_48x48": {
+      "tcn_filters": 48,
+      "gru_hidden": 48,
+      "tcn_blocks": 4,
+      "kernel_size": 3,
+      "gru_layers": 1
+    }
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "fixed_protocol": {
+    "fold_order": [
+      "2016-06",
+      "2016-10",
+      "2016-12",
+      "2016-04",
+      "2016-09"
+    ],
+    "train_epochs": 7,
+    "scheduler_epoch_budget": 20,
+    "learning_rate": 0.0009,
+    "weight_decay": 0.06,
+    "dropout": 0.025,
+    "batch_size": 32,
+    "gradient_clip": 1.0,
+    "sampler": "session_balanced",
+    "channels": [
+      1,
+      3,
+      6,
+      18,
+      20,
+      22,
+      24,
+      26,
+      32,
+      36,
+      38,
+      43,
+      49,
+      50,
+      51,
+      53,
+      55,
+      59,
+      61,
+      63,
+      65,
+      66,
+      67,
+      69,
+      70,
+      71,
+      72,
+      73,
+      75,
+      79,
+      87,
+      94
+    ],
+    "observation_seconds": 60,
+    "window_bins": 50,
+    "selection_weights": {
+      "session_macro_r2": 0.75,
+      "session_q10_r2": 0.25
+    },
+    "noninferiority_limits": {
+      "session_macro_r2_mean_delta_min": -0.01,
+      "session_q10_r2_mean_delta_min": -0.02,
+      "worst_session_r2_mean_delta_min": -0.02,
+      "worst_month_macro_r2_mean_delta_min": -0.02
+    }
+  },
+  "runtime": {
+    "device": "cpu",
+    "threads": 4,
+    "python": "3.12.10"
+  },
+  "data_policy": {
+    "development_sessions": 33,
+    "complete_held_month_folds": 5,
+    "january_loaded": false,
+    "locked_test_used_for_selection": false,
+    "held_labels_available_to_optimizer": false,
+    "held_metric_selected_epoch": false
+  },
+  "baseline_protection": {
+    "path": "models/indy_32ch/64x64checkpoint.pt",
+    "expected_sha256": "2ee52c426ee43ba88cebe7c85dd8392f40f9e75748abe9bbf4e94093556363a5",
+    "current_sha256": "2ee52c426ee43ba88cebe7c85dd8392f40f9e75748abe9bbf4e94093556363a5",
+    "checkpoint_written_by_phase4b": false,
+    "candidate_checkpoint_saved": false
+  },
+  "aggregate": {
+    "architecture_summary": {
+      "baseline_64x64": {
+        "architecture": {
+          "tcn_filters": 64,
+          "gru_hidden": 64,
+          "tcn_blocks": 4,
+          "kernel_size": 3,
+          "gru_layers": 1
+        },
+        "parameter_count": 78786,
+        "receptive_field_bins": 31,
+        "approximate_multiplies_per_50_bin_window": 3897600,
+        "metrics_across_seeds": {
+          "selection_score": {
+            "mean": 0.47728333540938117,
+            "sd": 0.012525058017813964,
+            "minimum": 0.46867163790897887,
+            "maximum": 0.4993288870562207
+          },
+          "session_macro_r2": {
+            "mean": 0.549975358356129,
+            "sd": 0.007541594637879764,
+            "minimum": 0.5391555952303337,
+            "maximum": 0.559709653709874
+          },
+          "session_q10_r2": {
+            "mean": 0.2592072665691376,
+            "sd": 0.03701998005126736,
+            "minimum": 0.21925746202468874,
+            "maximum": 0.3181865870952606
+          },
+          "worst_session_r2": {
+            "mean": -0.15997804403305055,
+            "sd": 0.028547223862841663,
+            "minimum": -0.1906093955039978,
+            "maximum": -0.12907761335372925
+          }
+        },
+        "held_months": [
+          {
+            "held_month": "2016-04",
+            "macro_r2_across_seeds": {
+              "mean": 0.39522309899330144,
+              "sd": 0.02350545535976575,
+              "minimum": 0.36006379553249906,
+              "maximum": 0.41836686219487873
+            },
+            "per_seed": {
+              "42": 0.36006379553249906,
+              "43": 0.41836686219487873,
+              "44": 0.40531374726976666,
+              "45": 0.3832522247518812,
+              "46": 0.40911886521748136
+            }
+          },
+          {
+            "held_month": "2016-06",
+            "macro_r2_across_seeds": {
+              "mean": 0.3797126665711403,
+              "sd": 0.01908232196976037,
+              "minimum": 0.35969989001750946,
+              "maximum": 0.3987434282898903
+            },
+            "per_seed": {
+              "42": 0.3598097190260887,
+              "43": 0.3987434282898903,
+              "44": 0.3838448077440262,
+              "45": 0.3964654877781868,
+              "46": 0.35969989001750946
+            }
+          },
+          {
+            "held_month": "2016-09",
+            "macro_r2_across_seeds": {
+              "mean": 0.7329527003424509,
+              "sd": 0.00917664098445803,
+              "minimum": 0.7213657328060695,
+              "maximum": 0.7457854407174247
+            },
+            "per_seed": {
+              "42": 0.7213657328060695,
+              "43": 0.7359117354665484,
+              "44": 0.7276636191776821,
+              "45": 0.7457854407174247,
+              "46": 0.7340369735445295
+            }
+          },
+          {
+            "held_month": "2016-10",
+            "macro_r2_across_seeds": {
+              "mean": 0.5941377645189111,
+              "sd": 0.005809668879841957,
+              "minimum": 0.5865321999246423,
+              "maximum": 0.6016354154456746
+            },
+            "per_seed": {
+              "42": 0.5923750536008314,
+              "43": 0.5922364538366144,
+              "44": 0.6016354154456746,
+              "45": 0.5979096997867931,
+              "46": 0.5865321999246423
+            }
+          },
+          {
+            "held_month": "2016-12",
+            "macro_r2_across_seeds": {
+              "mean": 0.5493975386023522,
+              "sd": 0.01777369999542711,
+              "minimum": 0.5313774049282074,
+              "maximum": 0.5702234208583832
+            },
+            "per_seed": {
+              "42": 0.5666908696293831,
+              "43": 0.5702234208583832,
+              "44": 0.5313774049282074,
+              "45": 0.5379111170768738,
+              "46": 0.5407848805189133
+            }
+          }
+        ]
+      },
+      "candidate_48x48": {
+        "architecture": {
+          "tcn_filters": 48,
+          "gru_hidden": 48,
+          "tcn_blocks": 4,
+          "kernel_size": 3,
+          "gru_layers": 1
+        },
+        "parameter_count": 45266,
+        "receptive_field_bins": 31,
+        "approximate_multiplies_per_50_bin_window": 2232000,
+        "metrics_across_seeds": {
+          "selection_score": {
+            "mean": 0.4737673933397639,
+            "sd": 0.019643329476839628,
+            "minimum": 0.4492741869254545,
+            "maximum": 0.5038334499705922
+          },
+          "session_macro_r2": {
+            "mean": 0.5440561756943212,
+            "sd": 0.01229668472232679,
+            "minimum": 0.5279890181440295,
+            "maximum": 0.5614567949916377
+          },
+          "session_q10_r2": {
+            "mean": 0.26290104627609256,
+            "sd": 0.04255173912764692,
+            "minimum": 0.21312969326972964,
+            "maximum": 0.33096341490745546
+          },
+          "worst_session_r2": {
+            "mean": -0.174609375,
+            "sd": 0.014326034807471796,
+            "minimum": -0.20001262426376343,
+            "maximum": -0.16561871767044067
+          }
+        },
+        "held_months": [
+          {
+            "held_month": "2016-04",
+            "macro_r2_across_seeds": {
+              "mean": 0.394999908549445,
+              "sd": 0.036574561601830445,
+              "minimum": 0.3491439478737967,
+              "maximum": 0.43545991608074736
+            },
+            "per_seed": {
+              "42": 0.3491439478737967,
+              "43": 0.43545991608074736,
+              "44": 0.42285249488694326,
+              "45": 0.36669681327683584,
+              "46": 0.4008463706289019
+            }
+          },
+          {
+            "held_month": "2016-06",
+            "macro_r2_across_seeds": {
+              "mean": 0.36109686344861985,
+              "sd": 0.016304414833694218,
+              "minimum": 0.3424823731184006,
+              "maximum": 0.37728045135736465
+            },
+            "per_seed": {
+              "42": 0.3655741736292839,
+              "43": 0.37728045135736465,
+              "44": 0.3453633263707161,
+              "45": 0.374783992767334,
+              "46": 0.3424823731184006
+            }
+          },
+          {
+            "held_month": "2016-09",
+            "macro_r2_across_seeds": {
+              "mean": 0.7300877605165754,
+              "sd": 0.00582391251877314,
+              "minimum": 0.7209152579307556,
+              "maximum": 0.7353410465376717
+            },
+            "per_seed": {
+              "42": 0.7209152579307556,
+              "43": 0.7346475209508624,
+              "44": 0.730980634689331,
+              "45": 0.7353410465376717,
+              "46": 0.7285543424742562
+            }
+          },
+          {
+            "held_month": "2016-10",
+            "macro_r2_across_seeds": {
+              "mean": 0.5858278968117454,
+              "sd": 0.009370418563706965,
+              "minimum": 0.5749486170031808,
+              "maximum": 0.597203021699732
+            },
+            "per_seed": {
+              "42": 0.5749486170031808,
+              "43": 0.597203021699732,
+              "44": 0.5860064110972665,
+              "45": 0.5926742933013223,
+              "46": 0.5783071409572255
+            }
+          },
+          {
+            "held_month": "2016-12",
+            "macro_r2_across_seeds": {
+              "mean": 0.5474364489316941,
+              "sd": 0.01135170369841992,
+              "minimum": 0.5366229191422462,
+              "maximum": 0.5647417828440666
+            },
+            "per_seed": {
+              "42": 0.5366229191422462,
+              "43": 0.5647417828440666,
+              "44": 0.5477969124913216,
+              "45": 0.5501516088843346,
+              "46": 0.5378690212965012
+            }
+          }
+        ]
+      }
+    },
+    "paired_seed_deltas": [
+      {
+        "seed": 42,
+        "selection_score_delta": -0.021556951511989997,
+        "session_macro_r2_delta": -0.011166577086304197,
+        "session_q10_r2_delta": -0.05272807478904723,
+        "worst_session_r2_delta": 0.02078169584274292
+      },
+      {
+        "seed": 43,
+        "selection_score_delta": 0.004504562914371513,
+        "session_macro_r2_delta": 0.0017471412817636756,
+        "session_q10_r2_delta": 0.012776827812194858,
+        "worst_session_r2_delta": -0.06353473663330078
+      },
+      {
+        "seed": 44,
+        "selection_score_delta": 0.0074713853272525554,
+        "session_macro_r2_delta": -0.003459897005196666,
+        "session_q10_r2_delta": 0.04026523232460019,
+        "worst_session_r2_delta": -0.014907419681549072
+      },
+      {
+        "seed": 45,
+        "selection_score_delta": -0.0037393536080013723,
+        "session_macro_r2_delta": -0.008616731022343505,
+        "session_q10_r2_delta": 0.010892778635025052,
+        "worst_session_r2_delta": -0.036541104316711426
+      },
+      {
+        "seed": 46,
+        "selection_score_delta": -0.004259353469718619,
+        "session_macro_r2_delta": -0.008099849476958743,
+        "session_q10_r2_delta": 0.00726213455200192,
+        "worst_session_r2_delta": 0.021044909954071045
+      }
+    ],
+    "paired_mean_deltas": {
+      "selection_score": -0.0035159420696171837,
+      "session_macro_r2": -0.0059191826618078865,
+      "session_q10_r2": 0.0036937797069549584,
+      "worst_session_r2": -0.014631330966949463
+    },
+    "held_month_deltas": [
+      {
+        "held_month": "2016-04",
+        "candidate_minus_baseline_macro_r2": {
+          "mean": -0.00022319044385639143,
+          "sd": 0.016288722923916487,
+          "minimum": -0.016555411475045356,
+          "maximum": 0.01753874761717661
+        },
+        "per_seed": {
+          "42": -0.010919847658702353,
+          "43": 0.017093053885868625,
+          "44": 0.01753874761717661,
+          "45": -0.016555411475045356,
+          "46": -0.008272494588579482
+        }
+      },
+      {
+        "held_month": "2016-06",
+        "candidate_minus_baseline_macro_r2": {
+          "mean": -0.018615803122520445,
+          "sd": 0.015878461897782813,
+          "minimum": -0.03848148137331009,
+          "maximum": 0.00576445460319519
+        },
+        "per_seed": {
+          "42": 0.00576445460319519,
+          "43": -0.021462976932525635,
+          "44": -0.03848148137331009,
+          "45": -0.021681495010852814,
+          "46": -0.017217516899108887
+        }
+      },
+      {
+        "held_month": "2016-09",
+        "candidate_minus_baseline_macro_r2": {
+          "mean": -0.0028649398258754344,
+          "sd": 0.005265666388616628,
+          "minimum": -0.010444394179752958,
+          "maximum": 0.0033170155116489797
+        },
+        "per_seed": {
+          "42": -0.00045047487531391095,
+          "43": -0.0012642145156860352,
+          "44": 0.0033170155116489797,
+          "45": -0.010444394179752958,
+          "46": -0.005482631070273247
+        }
+      },
+      {
+        "held_month": "2016-10",
+        "candidate_minus_baseline_macro_r2": {
+          "mean": -0.008309867707165752,
+          "sd": 0.008977817597919656,
+          "minimum": -0.01742643659765064,
+          "maximum": 0.004966567863117666
+        },
+        "per_seed": {
+          "42": -0.01742643659765064,
+          "43": 0.004966567863117666,
+          "44": -0.015629004348408082,
+          "45": -0.005235406485470828,
+          "46": -0.008225058967416876
+        }
+      },
+      {
+        "held_month": "2016-12",
+        "candidate_minus_baseline_macro_r2": {
+          "mean": -0.0019610896706581116,
+          "sd": 0.018322341155292538,
+          "minimum": -0.03006795048713684,
+          "maximum": 0.016419507563114166
+        },
+        "per_seed": {
+          "42": -0.03006795048713684,
+          "43": -0.005481638014316559,
+          "44": 0.016419507563114166,
+          "45": 0.012240491807460785,
+          "46": -0.0029158592224121094
+        }
+      }
+    ],
+    "noninferiority": {
+      "purpose": "Promote the smaller candidate only when all predeclared accuracy and tail guardrails pass.",
+      "checks": {
+        "session_macro_r2": {
+          "observed": -0.0059191826618078865,
+          "minimum": -0.01,
+          "passed": true
+        },
+        "session_q10_r2": {
+          "observed": 0.0036937797069549584,
+          "minimum": -0.02,
+          "passed": true
+        },
+        "worst_session_r2": {
+          "observed": -0.014631330966949463,
+          "minimum": -0.02,
+          "passed": true
+        },
+        "worst_month_macro_r2": {
+          "observed": -0.018615803122520445,
+          "minimum": -0.02,
+          "passed": true
+        }
+      },
+      "all_checks_passed": true
+    },
+    "recommendation": {
+      "architecture_name": "candidate_48x48",
+      "reason": "48/48 passed every predeclared non-inferiority guardrail and is preferred for firmware efficiency.",
+      "checkpoint_promoted": false,
+      "january_used": false
+    },
+    "deployment_comparison": {
+      "baseline_parameters": 78786,
+      "candidate_parameters": 45266,
+      "parameter_reduction_fraction": 0.4254562993425228,
+      "baseline_approximate_multiplies_per_50_bin_window": 3897600,
+      "candidate_approximate_multiplies_per_50_bin_window": 2232000,
+      "multiply_reduction_fraction": 0.4273399014778325,
+      "estimate_caveat": "Bias, activation, memory-transfer and detector costs are excluded; measure the actual firmware target."
+    }
+  },
+  "cells": [
+    {
+      "architecture_name": "baseline_64x64",
+      "seed": 42,
+      "parameter_count": 78786,
+      "receptive_field_bins": 31,
+      "selection_score": 0.4708311384374445,
+      "session_macro_r2": 0.5391555952303337,
+      "session_q10_r2": 0.26585776805877687,
+      "worst_session_r2": -0.18817085027694702
+    },
+    {
+      "architecture_name": "candidate_48x48",
+      "seed": 42,
+      "parameter_count": 45266,
+      "receptive_field_bins": 31,
+      "selection_score": 0.4492741869254545,
+      "session_macro_r2": 0.5279890181440295,
+      "session_q10_r2": 0.21312969326972964,
+      "worst_session_r2": -0.1673891544342041
+    },
+    {
+      "architecture_name": "baseline_64x64",
+      "seed": 43,
+      "parameter_count": 78786,
+      "receptive_field_bins": 31,
+      "selection_score": 0.4993288870562207,
+      "session_macro_r2": 0.559709653709874,
+      "session_q10_r2": 0.3181865870952606,
+      "worst_session_r2": -0.13647788763046265
+    },
+    {
+      "architecture_name": "candidate_48x48",
+      "seed": 43,
+      "parameter_count": 45266,
+      "receptive_field_bins": 31,
+      "selection_score": 0.5038334499705922,
+      "session_macro_r2": 0.5614567949916377,
+      "session_q10_r2": 0.33096341490745546,
+      "worst_session_r2": -0.20001262426376343
+    },
+    {
+      "architecture_name": "baseline_64x64",
+      "seed": 44,
+      "parameter_count": 78786,
+      "receptive_field_bins": 31,
+      "selection_score": 0.46867163790897887,
+      "session_macro_r2": 0.5518096965370756,
+      "session_q10_r2": 0.21925746202468874,
+      "worst_session_r2": -0.15555447340011597
+    },
+    {
+      "architecture_name": "candidate_48x48",
+      "seed": 44,
+      "parameter_count": 45266,
+      "receptive_field_bins": 31,
+      "selection_score": 0.4761430232362314,
+      "session_macro_r2": 0.5483497995318789,
+      "session_q10_r2": 0.25952269434928893,
+      "worst_session_r2": -0.17046189308166504
+    },
+    {
+      "architecture_name": "baseline_64x64",
+      "seed": 45,
+      "parameter_count": 78786,
+      "receptive_field_bins": 31,
+      "selection_score": 0.4746104365045374,
+      "session_macro_r2": 0.552053841677579,
+      "session_q10_r2": 0.2422802209854126,
+      "worst_session_r2": -0.12907761335372925
+    },
+    {
+      "architecture_name": "candidate_48x48",
+      "seed": 45,
+      "parameter_count": 45266,
+      "receptive_field_bins": 31,
+      "selection_score": 0.470871082896536,
+      "session_macro_r2": 0.5434371106552355,
+      "session_q10_r2": 0.25317299962043766,
+      "worst_session_r2": -0.16561871767044067
+    },
+    {
+      "architecture_name": "baseline_64x64",
+      "seed": 46,
+      "parameter_count": 78786,
+      "receptive_field_bins": 31,
+      "selection_score": 0.4729745771397244,
+      "session_macro_r2": 0.5471480046257828,
+      "session_q10_r2": 0.2504542946815491,
+      "worst_session_r2": -0.1906093955039978
+    },
+    {
+      "architecture_name": "candidate_48x48",
+      "seed": 46,
+      "parameter_count": 45266,
+      "receptive_field_bins": 31,
+      "selection_score": 0.4687152236700058,
+      "session_macro_r2": 0.5390481551488241,
+      "session_q10_r2": 0.25771642923355104,
+      "worst_session_r2": -0.16956448554992676
+    }
+  ],
+  "artifacts": {
+    "cell_table": "results/indy/phase4b_five_seed_confirmation/phase4b_five_seed_confirmation_cells.csv",
+    "fold_table": "results/indy/phase4b_five_seed_confirmation/phase4b_five_seed_confirmation_folds.csv",
+    "session_table": "results/indy/phase4b_five_seed_confirmation/phase4b_five_seed_confirmation_sessions.csv",
+    "figure": "results/indy/phase4b_five_seed_confirmation/phase4b_five_seed_confirmation_figure.png",
+    "resume_cache": "results/indy/phase4b_five_seed_confirmation/.cache/progress",
+    "checkpoint": null
+  },
+  "next_gate": "Review all non-inferiority checks before creating any candidate checkpoint. January remains unavailable."
+}

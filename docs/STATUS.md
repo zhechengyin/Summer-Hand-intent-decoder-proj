@@ -1,6 +1,6 @@
 # Current Status
 
-Last audited: 2026-07-26.
+Last audited: 2026-07-28.
 
 ## Objective
 
@@ -19,11 +19,11 @@ STM32-class target. The complete pipeline must remain causal.
 - The existing audit found no checksum, schema, shape or non-finite-value
   failures. Neural channel statistics nevertheless drift materially by month.
 
-## Frozen model
+## Retained checkpoints
 
 | Item | Value |
 | --- | --- |
-| Checkpoint | `models/indy_32ch/checkpoint.pt` |
+| Integrated baseline | `models/indy_32ch/64x64checkpoint.pt` |
 | SHA-256 | `2ee52c426ee43ba88cebe7c85dd8392f40f9e75748abe9bbf4e94093556363a5` |
 | Parameters | 78,786 |
 | Input | 32 counts + 32 causal-EWMA features |
@@ -38,6 +38,29 @@ STM32-class target. The complete pipeline must remain causal.
 | Dropout | 0.025 |
 
 The exact channels and remaining settings are in `configs/indy_32ch.yaml`.
+
+The completed Phase-4 candidate is
+`models/indy_32ch/48x48checkpoint.pt`:
+
+| Item | 48/48 firmware candidate |
+| --- | --- |
+| SHA-256 | `5c8b375787ff93f90006df5f0cfea07303660928c7b69a84d4d75e1a368319ef` |
+| Size | 199,733 bytes |
+| Parameters | 45,266 |
+| Seed / training budget | 43 / 20 epochs |
+| Selected checkpoint epoch | 10 |
+| Selection rule | Minimum pooled December validation loss |
+| Train pooled R² | 0.763162 |
+| December pooled R² | 0.565134 |
+| December session-macro R² | 0.575004 |
+| December worst-session R² | 0.346125 |
+
+Only the 29 training sessions updated its weights. December was inference-only
+and selected the checkpoint epoch; January was never loaded. The 48/48 file is
+the preferred standalone firmware candidate because it is 42.5% smaller and
+its direct December pooled R² is 0.004772 higher than the 64/64 checkpoint.
+The integrated runtime still defaults to 64/64 because the saved Layer-2 drift
+reference was fitted to 64-dimensional GRU states.
 
 ## Final evidence
 
@@ -116,14 +139,13 @@ but it is not a demonstrated universal failure detector. January remains
 forbidden, and final detector claims require prospective sessions. STM32
 memory, timing and fixed-point equivalence are also pending.
 
-## Active experiment
+## Completed Phase 4a architecture sweep
 
-Phase 4a is implemented in
-`experiments/active/phase4a_architecture_sweep.py` and is awaiting execution.
-It is an architecture-only Optuna study with the current model enqueued as
-trial 0. The protected baseline checkpoint is never loaded or written by the
-script; its SHA-256 is checked before preparation, after every completed trial,
-and at shutdown.
+Phase 4a completed on 2026-07-27 and its runner is archived at
+`history/phase4/phase4a_architecture_sweep.py`. The architecture-only
+Optuna study created 30 trial records: 20 complete and 10 pruned, with no
+failed or unfinished trials. The protected baseline checksum remained
+unchanged and no candidate checkpoint was written.
 
 Exactly five fields vary:
 
@@ -143,8 +165,75 @@ opened.
 Selection score is 75% held-session macro R² plus 25% held-session 10th
 percentile R². Worst-session R² and parameter count are retained as guardrails.
 Pruning can happen only after complete folds, never inside an epoch. No Phase
-4a model weight is saved; the result only nominates architectures for later
-multi-seed confirmation.
+4a model weight was saved.
+
+The highest-scoring unique candidate was 48 TCN filters, 48 GRU hidden units,
+four TCN blocks, kernel size 3 and one GRU layer. It retains the baseline's
+31-bin receptive field and temporal structure while reducing parameters from
+78,786 to 45,266.
+
+| Metric | Frozen 64/64 baseline | 48/48 candidate | Candidate minus baseline |
+| --- | ---: | ---: | ---: |
+| Selection score | 0.499329 | 0.503833 | +0.004505 |
+| Session-macro R² | 0.559710 | 0.561457 | +0.001747 |
+| Session-q10 R² | 0.318187 | 0.330963 | +0.012777 |
+| Worst-session R² | -0.136478 | -0.200013 | -0.063535 |
+| Parameters | 78,786 | 45,266 | -42.5% |
+
+The candidate won 16 of 33 paired held sessions and lost 17; its median
+session delta was -0.000657. April improved by 0.0171 macro R², but June
+declined by 0.0215 and the known June 30 failure worsened. The result therefore
+does not establish an accuracy improvement. It nominates a much smaller
+non-inferiority candidate.
+
+The search covered only 18 unique architectures out of 288 possible
+combinations. Nine completed and nine were pruned. The deterministic 48/48
+architecture was repeated in 12 trial records, which are duplicates rather
+than independent confirmations. The sweep's strongest structural indication
+is to retain four blocks, kernel size 3 and one GRU layer; larger/deeper
+variants did not justify their cost.
+
+## Completed Phase 4b five-seed confirmation
+
+Phase 4b completed on 2026-07-28. All 50 planned fits finished: two
+architectures, seeds 42--46 and five complete pre-January held-month folds.
+January was never loaded, held labels never updated weights or selected an
+epoch, and the protected checkpoint checksum remained unchanged.
+
+| Five-seed metric | 64/64 baseline | 48/48 candidate | Candidate minus baseline |
+| --- | ---: | ---: | ---: |
+| Selection score | 0.477283 | 0.473767 | -0.003516 |
+| Session-macro R² | 0.549975 | 0.544056 | -0.005919 |
+| Session-q10 R² | 0.259207 | 0.262901 | +0.003694 |
+| Worst-session R² | -0.159978 | -0.174609 | -0.014631 |
+| Parameters | 78,786 | 45,266 | -42.5% |
+| Estimated multiplies / 50 bins | 3,897,600 | 2,232,000 | -42.7% |
+
+All four predeclared non-inferiority checks passed:
+
+- macro R² delta -0.005919, limit -0.010;
+- q10 R² delta +0.003694, limit -0.020;
+- worst-session R² delta -0.014631, limit -0.020;
+- worst-month macro R² delta -0.018616, limit -0.020.
+
+The result nominates 48/48 for firmware efficiency; it does not establish
+higher accuracy. The candidate lost a mean 0.0059 macro R², had greater
+seed-to-seed variation, and was weakest relative to baseline in June.
+
+Phase 4b itself intentionally wrote no weight. The subsequent fixed builder
+completed on 2026-07-28 and produced `models/indy_32ch/48x48checkpoint.pt`.
+It used the confirmed architecture, seed 43, the full 20-epoch cosine schedule
+and minimum December validation loss. Its epoch-7 CPU metrics reproduced the
+corresponding Phase-4b cell exactly, providing an additional protocol check.
+The build script and Phase-4b runner are now archived under `history/phase4/`.
+
+## Next gate
+
+Refit and validate Layer 2 for the 48-dimensional hidden state without touching
+January, then switch the integrated runtime only if the detector checks pass.
+After that, profile 48/48 on the target for streaming latency, peak RAM, Flash,
+power and numerical equivalence. A true generalization claim still requires
+future, prospectively collected sessions.
 
 ## Supported files
 
@@ -159,8 +248,10 @@ multi-seed confirmation.
 - `models/indy_32ch/sampling.py`
 - `experiments/active/phase0a_data_audit.py`
 - `experiments/active/phase0a_data_audit.ipynb`
-- `experiments/active/phase4a_architecture_sweep.py`
-- `models/indy_32ch/checkpoint.pt`
+- `models/indy_32ch/64x64checkpoint.pt`
+- `models/indy_32ch/48x48checkpoint.pt`
 
 Everything under `history/` is provenance only and must not be imported.
-Completed detector runners and regression checks are in `history/phase3/`.
+Completed detector runners and regression checks are in `history/phase3/`;
+all completed architecture studies and the one-run 48/48 builder are in
+`history/phase4/`.

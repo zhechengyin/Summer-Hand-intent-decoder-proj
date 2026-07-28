@@ -1,7 +1,7 @@
 {
   "phase": "4a",
   "purpose": "architecture_only_sweep_protected_baseline",
-  "updated_at_utc": "2026-07-27T01:05:45.874813+00:00",
+  "updated_at_utc": "2026-07-28T19:39:49.369678+00:00",
   "study_started_at_utc": "2026-07-26T19:43:57.600108+00:00",
   "study_name": "phase4a_architecture_sweep",
   "direction": "maximize",
@@ -119,7 +119,7 @@
     "held_metric_selects_epoch": false
   },
   "baseline_protection": {
-    "path": "models/indy_32ch/checkpoint.pt",
+    "path": "models/indy_32ch/64x64checkpoint.pt",
     "expected_sha256": "2ee52c426ee43ba88cebe7c85dd8392f40f9e75748abe9bbf4e94093556363a5",
     "current_sha256": "2ee52c426ee43ba88cebe7c85dd8392f40f9e75748abe9bbf4e94093556363a5",
     "checkpoint_written_by_phase4a": false,
@@ -1011,6 +1011,331 @@
     "datetime_start": "2026-07-26T18:48:46.177225",
     "datetime_complete": "2026-07-26T18:52:59.811888",
     "duration_seconds": 253.634663
+  },
+  "post_analysis": {
+    "trial_records": 30,
+    "unique_architectures": 18,
+    "unique_completed_architectures": 9,
+    "unique_pruned_architectures": 9,
+    "best_architecture_repeat_count": 12,
+    "duplicate_trials_are_independent_evidence": false,
+    "baseline_vs_candidate": {
+      "baseline_trial": 0,
+      "candidate_trial": 10,
+      "baseline_architecture": {
+        "tcn_filters": 64,
+        "gru_hidden": 64,
+        "tcn_blocks": 4,
+        "kernel_size": 3,
+        "gru_layers": 1
+      },
+      "candidate_architecture": {
+        "tcn_filters": 48,
+        "gru_hidden": 48,
+        "tcn_blocks": 4,
+        "kernel_size": 3,
+        "gru_layers": 1
+      },
+      "metric_deltas": {
+        "selection_score": 0.004504562914371513,
+        "session_macro_r2": 0.0017471412817636756,
+        "session_q10_r2": 0.012776827812194858,
+        "worst_session_r2": -0.06353473663330078
+      },
+      "paired_sessions": {
+        "sessions": 33,
+        "candidate_wins": 16,
+        "candidate_losses": 17,
+        "ties": 0,
+        "mean_delta_r2": 0.0017471412817637126,
+        "median_delta_r2": -0.0006574392318725586,
+        "minimum_delta_r2": -0.06353473663330078,
+        "maximum_delta_r2": 0.04971271753311157
+      },
+      "deployment_estimates": {
+        "baseline_parameters": 78786,
+        "candidate_parameters": 45266,
+        "parameter_reduction_fraction": 0.4254562993425228,
+        "baseline_weight_bytes_float32": 315144,
+        "candidate_weight_bytes_float32": 181064,
+        "baseline_weight_bytes_int8": 78786,
+        "candidate_weight_bytes_int8": 45266,
+        "baseline_approximate_multiplies_per_50_bin_window": 3897600,
+        "candidate_approximate_multiplies_per_50_bin_window": 2232000,
+        "multiply_reduction_fraction": 0.4273399014778325,
+        "estimate_caveat": "Bias, activation, memory-transfer and detector costs are excluded; measure the real target before deployment claims."
+      },
+      "month_comparison": [
+        {
+          "held_month": "2016-04",
+          "sessions": 7,
+          "baseline_macro_r2": 0.41836686219487873,
+          "candidate_macro_r2": 0.43545991608074736,
+          "candidate_minus_baseline_macro_r2": 0.01709305388586862
+        },
+        {
+          "held_month": "2016-06",
+          "sessions": 4,
+          "baseline_macro_r2": 0.3987434282898903,
+          "candidate_macro_r2": 0.37728045135736465,
+          "candidate_minus_baseline_macro_r2": -0.021462976932525635
+        },
+        {
+          "held_month": "2016-09",
+          "sessions": 7,
+          "baseline_macro_r2": 0.7359117354665484,
+          "candidate_macro_r2": 0.7346475209508624,
+          "candidate_minus_baseline_macro_r2": -0.0012642145156860352
+        },
+        {
+          "held_month": "2016-10",
+          "sessions": 11,
+          "baseline_macro_r2": 0.5922364538366144,
+          "candidate_macro_r2": 0.597203021699732,
+          "candidate_minus_baseline_macro_r2": 0.004966567863117565
+        },
+        {
+          "held_month": "2016-12",
+          "sessions": 4,
+          "baseline_macro_r2": 0.5702234208583832,
+          "candidate_macro_r2": 0.5647417828440666,
+          "candidate_minus_baseline_macro_r2": -0.005481638014316559
+        }
+      ],
+      "session_comparison": [
+        {
+          "session": "indy_20160407_02",
+          "held_month": "2016-04",
+          "baseline_r2": 0.23209518194198608,
+          "candidate_r2": 0.2490534782409668,
+          "candidate_minus_baseline_r2": 0.016958296298980713
+        },
+        {
+          "session": "indy_20160411_01",
+          "held_month": "2016-04",
+          "baseline_r2": 0.45759668946266174,
+          "candidate_r2": 0.4707006514072418,
+          "candidate_minus_baseline_r2": 0.013103961944580078
+        },
+        {
+          "session": "indy_20160411_02",
+          "held_month": "2016-04",
+          "baseline_r2": 0.4106753170490265,
+          "candidate_r2": 0.40673547983169556,
+          "candidate_minus_baseline_r2": -0.003939837217330933
+        },
+        {
+          "session": "indy_20160418_01",
+          "held_month": "2016-04",
+          "baseline_r2": 0.45357537269592285,
+          "candidate_r2": 0.4915485680103302,
+          "candidate_minus_baseline_r2": 0.03797319531440735
+        },
+        {
+          "session": "indy_20160419_01",
+          "held_month": "2016-04",
+          "baseline_r2": 0.3335324227809906,
+          "candidate_r2": 0.3797689378261566,
+          "candidate_minus_baseline_r2": 0.046236515045166016
+        },
+        {
+          "session": "indy_20160420_01",
+          "held_month": "2016-04",
+          "baseline_r2": 0.5221825838088989,
+          "candidate_r2": 0.5352860689163208,
+          "candidate_minus_baseline_r2": 0.013103485107421875
+        },
+        {
+          "session": "indy_20160426_01",
+          "held_month": "2016-04",
+          "baseline_r2": 0.5189104676246643,
+          "candidate_r2": 0.5151262283325195,
+          "candidate_minus_baseline_r2": -0.0037842392921447754
+        },
+        {
+          "session": "indy_20160622_01",
+          "held_month": "2016-06",
+          "baseline_r2": 0.4641483724117279,
+          "candidate_r2": 0.42992231249809265,
+          "candidate_minus_baseline_r2": -0.034226059913635254
+        },
+        {
+          "session": "indy_20160624_03",
+          "held_month": "2016-06",
+          "baseline_r2": 0.6239808797836304,
+          "candidate_r2": 0.6328974962234497,
+          "candidate_minus_baseline_r2": 0.008916616439819336
+        },
+        {
+          "session": "indy_20160627_01",
+          "held_month": "2016-06",
+          "baseline_r2": 0.6433223485946655,
+          "candidate_r2": 0.6463146209716797,
+          "candidate_minus_baseline_r2": 0.00299227237701416
+        },
+        {
+          "session": "indy_20160630_01",
+          "held_month": "2016-06",
+          "baseline_r2": -0.13647788763046265,
+          "candidate_r2": -0.20001262426376343,
+          "candidate_minus_baseline_r2": -0.06353473663330078
+        },
+        {
+          "session": "indy_20160915_01",
+          "held_month": "2016-09",
+          "baseline_r2": 0.7473778128623962,
+          "candidate_r2": 0.7546535730361938,
+          "candidate_minus_baseline_r2": 0.007275760173797607
+        },
+        {
+          "session": "indy_20160916_01",
+          "held_month": "2016-09",
+          "baseline_r2": 0.7651617527008057,
+          "candidate_r2": 0.7538802623748779,
+          "candidate_minus_baseline_r2": -0.011281490325927734
+        },
+        {
+          "session": "indy_20160921_01",
+          "held_month": "2016-09",
+          "baseline_r2": 0.7606106996536255,
+          "candidate_r2": 0.7569260597229004,
+          "candidate_minus_baseline_r2": -0.0036846399307250977
+        },
+        {
+          "session": "indy_20160927_04",
+          "held_month": "2016-09",
+          "baseline_r2": 0.7542126178741455,
+          "candidate_r2": 0.7584363222122192,
+          "candidate_minus_baseline_r2": 0.0042237043380737305
+        },
+        {
+          "session": "indy_20160927_06",
+          "held_month": "2016-09",
+          "baseline_r2": 0.687347412109375,
+          "candidate_r2": 0.6866565942764282,
+          "candidate_minus_baseline_r2": -0.0006908178329467773
+        },
+        {
+          "session": "indy_20160930_02",
+          "held_month": "2016-09",
+          "baseline_r2": 0.7104288935661316,
+          "candidate_r2": 0.7122324109077454,
+          "candidate_minus_baseline_r2": 0.0018035173416137695
+        },
+        {
+          "session": "indy_20160930_05",
+          "held_month": "2016-09",
+          "baseline_r2": 0.7262429594993591,
+          "candidate_r2": 0.7197474241256714,
+          "candidate_minus_baseline_r2": -0.006495535373687744
+        },
+        {
+          "session": "indy_20161005_06",
+          "held_month": "2016-10",
+          "baseline_r2": 0.708014190196991,
+          "candidate_r2": 0.7021472454071045,
+          "candidate_minus_baseline_r2": -0.005866944789886475
+        },
+        {
+          "session": "indy_20161006_02",
+          "held_month": "2016-10",
+          "baseline_r2": 0.7040852308273315,
+          "candidate_r2": 0.7169334888458252,
+          "candidate_minus_baseline_r2": 0.012848258018493652
+        },
+        {
+          "session": "indy_20161007_02",
+          "held_month": "2016-10",
+          "baseline_r2": 0.6680434942245483,
+          "candidate_r2": 0.6778022050857544,
+          "candidate_minus_baseline_r2": 0.009758710861206055
+        },
+        {
+          "session": "indy_20161011_03",
+          "held_month": "2016-10",
+          "baseline_r2": 0.5855263471603394,
+          "candidate_r2": 0.6282482147216797,
+          "candidate_minus_baseline_r2": 0.04272186756134033
+        },
+        {
+          "session": "indy_20161013_03",
+          "held_month": "2016-10",
+          "baseline_r2": -0.05413442850112915,
+          "candidate_r2": -0.05728667974472046,
+          "candidate_minus_baseline_r2": -0.0031522512435913086
+        },
+        {
+          "session": "indy_20161014_04",
+          "held_month": "2016-10",
+          "baseline_r2": 0.7163400053977966,
+          "candidate_r2": 0.7061758041381836,
+          "candidate_minus_baseline_r2": -0.010164201259613037
+        },
+        {
+          "session": "indy_20161017_02",
+          "held_month": "2016-10",
+          "baseline_r2": 0.6396390199661255,
+          "candidate_r2": 0.644496738910675,
+          "candidate_minus_baseline_r2": 0.0048577189445495605
+        },
+        {
+          "session": "indy_20161024_03",
+          "held_month": "2016-10",
+          "baseline_r2": 0.500157356262207,
+          "candidate_r2": 0.45639026165008545,
+          "candidate_minus_baseline_r2": -0.04376709461212158
+        },
+        {
+          "session": "indy_20161025_04",
+          "held_month": "2016-10",
+          "baseline_r2": 0.7629802227020264,
+          "candidate_r2": 0.7623227834701538,
+          "candidate_minus_baseline_r2": -0.0006574392318725586
+        },
+        {
+          "session": "indy_20161026_03",
+          "held_month": "2016-10",
+          "baseline_r2": 0.7185219526290894,
+          "candidate_r2": 0.7168628573417664,
+          "candidate_minus_baseline_r2": -0.001659095287322998
+        },
+        {
+          "session": "indy_20161027_03",
+          "held_month": "2016-10",
+          "baseline_r2": 0.5654276013374329,
+          "candidate_r2": 0.6151403188705444,
+          "candidate_minus_baseline_r2": 0.04971271753311157
+        },
+        {
+          "session": "indy_20161206_02",
+          "held_month": "2016-12",
+          "baseline_r2": 0.3143501281738281,
+          "candidate_r2": 0.31876203417778015,
+          "candidate_minus_baseline_r2": 0.004411906003952026
+        },
+        {
+          "session": "indy_20161207_02",
+          "held_month": "2016-12",
+          "baseline_r2": 0.7235143184661865,
+          "candidate_r2": 0.7182542085647583,
+          "candidate_minus_baseline_r2": -0.005260109901428223
+        },
+        {
+          "session": "indy_20161212_02",
+          "held_month": "2016-12",
+          "baseline_r2": 0.6763588190078735,
+          "candidate_r2": 0.667789101600647,
+          "candidate_minus_baseline_r2": -0.008569717407226562
+        },
+        {
+          "session": "indy_20161220_02",
+          "held_month": "2016-12",
+          "baseline_r2": 0.5666704177856445,
+          "candidate_r2": 0.554161787033081,
+          "candidate_minus_baseline_r2": -0.012508630752563477
+        }
+      ]
+    }
   },
   "trials": [
     {
@@ -22688,6 +23013,8 @@
   "artifacts": {
     "study_database": "results/indy/phase4a_architecture_sweep/phase4a_architecture_sweep.db",
     "trial_table": "results/indy/phase4a_architecture_sweep/phase4a_architecture_sweep_trials.csv",
+    "unique_architecture_table": "results/indy/phase4a_architecture_sweep/phase4a_architecture_sweep_unique_architectures.csv",
+    "baseline_candidate_session_table": "results/indy/phase4a_architecture_sweep/phase4a_baseline_vs_candidate_sessions.csv",
     "figure": "results/indy/phase4a_architecture_sweep/phase4a_architecture_sweep_figure.png",
     "fold_cache": "results/indy/phase4a_architecture_sweep/.cache",
     "checkpoint": null

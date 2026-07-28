@@ -4,7 +4,7 @@
   "january_loaded": false,
   "velocity_labels_loaded": false,
   "weights_updated": false,
-  "checkpoint": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/models/indy_32ch/checkpoint.pt",
+  "checkpoint": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/models/indy_32ch/64x64checkpoint.pt",
   "reference_sessions": [
     "indy_20160407_02",
     "indy_20160411_01",

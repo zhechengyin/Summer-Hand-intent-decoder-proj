@@ -1,0 +1,74 @@
+{
+  "purpose": "48x48_firmware_checkpoint_build",
+  "created_at_utc": "2026-07-28T21:19:31.169338+00:00",
+  "checkpoint": "models/indy_32ch/48x48checkpoint.pt",
+  "sha256": "5c8b375787ff93f90006df5f0cfea07303660928c7b69a84d4d75e1a368319ef",
+  "size_bytes": 199733,
+  "parameter_count": 45266,
+  "seed": 43,
+  "training_epochs": 20,
+  "checkpoint_epoch": 10,
+  "selection_policy": "minimum_pooled_validation_normalized_mse",
+  "best_validation_loss": 0.4704917371273041,
+  "train_metrics": {
+    "windows": 11175,
+    "loss": 0.23682650923728943,
+    "r2_x": 0.7372303605079651,
+    "r2_y": 0.7890937328338623,
+    "r2_mean": 0.7631620168685913
+  },
+  "validation_metrics": {
+    "windows": 1038,
+    "loss": 0.4704917371273041,
+    "r2_x": 0.5361190438270569,
+    "r2_y": 0.5941492319107056,
+    "r2_mean": 0.5651341676712036
+  },
+  "validation_macro_r2_mean": 0.5750042423605919,
+  "validation_worst_session_r2_mean": 0.3461250960826874,
+  "validation_by_session": {
+    "indy_20161206_02": {
+      "windows": 338,
+      "loss": 0.6185781955718994,
+      "r2_x": 0.35154515504837036,
+      "r2_y": 0.3407050371170044,
+      "r2_mean": 0.3461250960826874
+    },
+    "indy_20161207_02": {
+      "windows": 192,
+      "loss": 0.3531484007835388,
+      "r2_x": 0.6706975698471069,
+      "r2_y": 0.7784417867660522,
+      "r2_mean": 0.7245696783065796
+    },
+    "indy_20161212_02": {
+      "windows": 250,
+      "loss": 0.37886539101600647,
+      "r2_x": 0.6290420293807983,
+      "r2_y": 0.7042914628982544,
+      "r2_mean": 0.6666667461395264
+    },
+    "indy_20161220_02": {
+      "windows": 258,
+      "loss": 0.4525974988937378,
+      "r2_x": 0.546235978603363,
+      "r2_y": 0.5790749192237854,
+      "r2_mean": 0.5626554489135742
+    }
+  },
+  "phase4b_epoch7_cpu_reproduction_deltas": {
+    "pooled_loss_delta": 0.0,
+    "pooled_r2_delta": 0.0
+  },
+  "data_policy": {
+    "train_sessions_updated_weights": 29,
+    "validation_sessions_updated_weights": 0,
+    "january_loaded": false,
+    "validation_selected_epoch": true
+  },
+  "baseline_protection": {
+    "checkpoint": "models/indy_32ch/64x64checkpoint.pt",
+    "sha256": "2ee52c426ee43ba88cebe7c85dd8392f40f9e75748abe9bbf4e94093556363a5",
+    "unchanged": true
+  }
+}
