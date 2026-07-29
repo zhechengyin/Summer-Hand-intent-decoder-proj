@@ -30,6 +30,14 @@ results/**/*.db
 results/**/.cache/
 results/*.log
 
+# Retired Indy payloads remain on disk but are not recommitted as generated data.
+history/indy/data/processed/**/*.npz
+history/indy/data/processed/**/manifest.json
+history/indy/results/**/*.png
+history/indy/results/**/*.pt
+history/indy/results/**/*.db
+history/indy/results/**/.cache/
+
 # OS
 .DS_Store
 Thumbs.db

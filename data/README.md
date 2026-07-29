@@ -1,37 +1,23 @@
 # Data
 
-The active project uses one dataset: Indy.
+There is currently no active dataset.
 
 ```text
 data/
-  raw/indy_loco/indy/                 37 immutable Zenodo MAT files
-  processed/indy_loco/indy/
-    train/                            29 sessions
-    validation/                        4 sessions
-    test/                              4 consumed January sessions
-  processing/indy_loco/indy/
-    prepare_indy_model_ready.ipynb    supported conversion notebook
-    causal_targets.py                 causal sample-hold and target velocity
+  raw/          immutable source files
+  processed/    generated model-ready files
+  processing/   supported inspection and conversion code
 ```
 
 Rules:
 
-1. Never modify files under `raw/`.
-2. Preserve session boundaries.
-3. Generate processed data only through the supported notebook.
-4. Do not convert MAT to CSV for model training.
-5. Do not use January for future model or detector selection.
+1. Never modify source files under `raw/`.
+2. Preserve subject, session, trial, and time boundaries supplied by the source.
+3. Define train, validation, and locked test splits before model tuning.
+4. Keep processing code under `processing/`, not beside generated arrays.
+5. Document every processed schema and unit conversion.
+6. Store only inputs that can be reproduced by the intended firmware unless a
+   field is explicitly marked as an offline label or audit field.
 
-To rebuild the model-ready data, open
-`processing/indy_loco/indy/prepare_indy_model_ready.ipynb` with the project
-virtual environment and run it from top to bottom.
-
-Neural EWMA features and normalization are not preprocessing outputs; they are
-computed at model time under `models/indy_32ch/`.
-
-The canonical checksum/split manifest is
-`configs/datasets/indy_sessions.yaml`. The model-ready schema is documented in
-`processed/indy_loco/indy/README.md`.
-
-Any inactive U-M/Deep Blue files already present under raw or processed storage
-are left untouched, but no active code in this repository consumes them.
+The retired Indy data and its original data README are under
+`history/indy/data/`.

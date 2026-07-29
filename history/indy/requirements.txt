@@ -3,13 +3,11 @@ numpy>=1.24
 scipy>=1.10
 PyYAML>=6.0
 h5py>=3.8
+matplotlib>=3.6
 pandas>=2.0
 scikit-learn>=1.2
-
-# Modelling and evaluation
-torch>=2.0
-matplotlib>=3.6
-optuna>=4.0
-
-# Reproducible data inspection
 ipykernel>=6.0
+
+# Frozen causal TCN+GRU model
+torch>=2.0
+optuna>=4.0
