@@ -1,12 +1,12 @@
 # Data
 
-There is currently no active dataset.
+FingerMovements is the active dataset.
 
 ```text
 data/
-  raw/          immutable source files
-  processed/    generated model-ready files
-  processing/   supported inspection and conversion code
+  raw/FingerMovements/                    immutable downloaded archive
+  processed/finger_movements/             train.npz, test.npz, and schema README
+  processing/finger_movements/            supported conversion code
 ```
 
 Rules:
@@ -19,5 +19,8 @@ Rules:
 6. Store only inputs that can be reproduced by the intended firmware unless a
    field is explicitly marked as an offline label or audit field.
 
-The retired Indy data and its original data README are under
-`history/indy/data/`.
+The FingerMovements converter preserves the official train/test split and does
+not normalize, filter, or augment the EEG. See
+`processed/finger_movements/README.md` for the exact NPZ schema.
+
+The retired Indy data and its original data README are under `history/indy/data/`.
