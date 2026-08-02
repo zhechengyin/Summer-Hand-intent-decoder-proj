@@ -1,16 +1,25 @@
 # Project Status
 
-Updated: 2026-07-29
+Updated: 2026-07-30
 
 ## Current state
 
-The repository has been reset for a new deployment-first research direction.
-There is no active dataset, model, checkpoint, frozen hyperparameter set, or
-experiment result.
+FingerMovements is the active dataset. The processed input contains 316
+official training cases and 100 locked test cases, each with 28 EEG channels
+and 50 samples. The task is binary prediction of left- versus right-hand finger
+movement.
 
-The goal is to build several small, independent models for different neural
-signal prediction or classification tasks. Each candidate must provide useful
-task performance while remaining practical for low-latency firmware inference.
+Phase 1b is complete. It compared a feature-linear classifier, Tiny MLP, Tiny
+EEGNet, and Tiny multi-scale CNN using seeds 42, 43, and 44 with stratified
+five-fold cross-validation. All 60 fits completed, each fold learned
+normalization from its training subset only, and the official test file was not
+loaded.
+
+Feature + Linear is the frozen Phase-1b baseline: 58.65% mean out-of-fold
+accuracy, 1.56 percentage-point seed standard deviation, and 394 trainable
+parameters. Tiny EEGNet is retained as the neural firmware candidate: 56.96%
+mean accuracy, the lowest seed standard deviation at 0.84 points, and 1,050
+parameters. No checkpoint has been selected or trained on all 316 cases.
 
 ## Indy archive
 
@@ -30,17 +39,11 @@ provenance only and must not be imported by new active code.
 
 ## Next gate
 
-Before training begins, write one task contract containing:
-
-1. signal modality, channels, sampling rate, and firmware availability;
-2. exact label meaning and output shape;
-3. dataset unit of independence, split policy, and locked test policy;
-4. baseline metrics for the task;
-5. firmware budgets for parameters, RAM, Flash, and per-sample latency.
-
-The first experiment should compare a linear baseline and one or two tiny
-nonlinear models under the same split. Architecture sweeps start only after
-that baseline is reproducible.
+Keep the official test split locked. Before broad architecture sweeping, define
+a small Phase 1c comparison of the current feature-linear pipeline, Tiny
+EEGNet, and one firmware-compatible spatial feature/classifier such as a
+fold-trained CSP- or Fisher-style projection. Any epoch or hyperparameter
+selection must use inner validation rather than the outer reporting fold.
 
 ## Supported active files
 

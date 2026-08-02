@@ -5,7 +5,8 @@ small set of simple models for separate neural-signal prediction or
 classification tasks, then measure whether each model is accurate and cheap
 enough to run at low latency on firmware.
 
-There is currently no active dataset, model, checkpoint, or experiment. The
+FingerMovements is now the active dataset, and Phase 1b is the first active
+model-family comparison. There is not yet a selected model or checkpoint. The
 completed Indy Loco program has been preserved under
 [`history/indy/`](history/indy/README.md) and is no longer an active dependency.
 
@@ -40,12 +41,7 @@ history/
 
 ## Next gate
 
-Define the first new task before implementing a model:
-
-- firmware input signal and sampling rate;
-- prediction or classification label;
-- dataset and split policy;
-- latency, RAM, Flash, and minimum-performance targets.
-
-After that, establish simple baselines before considering a larger
-architecture.
+Run the registered Phase 1b experiment on the official FingerMovements training
+split. Compare repeated cross-validation accuracy, seed stability, and parameter
+count for the four lightweight baselines. Keep the official 100-case test split
+locked until a model family and training policy have been frozen.

@@ -1,13 +1,11 @@
 # Results
 
-No result is currently active.
-
-Store future outputs as:
+The first active result target is:
 
 ```text
-results/<task>/<experiment>/
+results/finger_movements/phase1b_baseline_comparison/
 ```
 
-Keep metrics, figures, checkpoints, and a short README for one experiment
-together. Retired Indy results are preserved under
-`history/indy/results/indy/`.
+Phase 1b writes reproducible JSON/CSV metrics and a generated comparison figure
+there. It does not save fold checkpoints. Retired Indy results are preserved
+under `history/indy/results/indy/`.

@@ -1,0 +1,358 @@
+{
+  "experiment": "phase1b_finger_movements_baseline_comparison",
+  "created_utc": "2026-07-30T19:38:43.531032+00:00",
+  "data": {
+    "path": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/data/processed/finger_movements/train.npz",
+    "shape": [
+      316,
+      28,
+      50
+    ],
+    "class_counts": {
+      "0": 159,
+      "1": 157
+    },
+    "test_policy": "locked and not loaded"
+  },
+  "protocol": {
+    "models": [
+      "feature_linear",
+      "tiny_mlp",
+      "tiny_eegnet",
+      "tiny_multiscale_cnn"
+    ],
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "folds": 5,
+    "epochs": 20,
+    "batch_size": 32,
+    "optimizer": "AdamW",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "dropout": 0.25,
+    "normalization": "fit on each fold training subset only",
+    "checkpoint": "none; fixed final epoch",
+    "augmentation": "none",
+    "device": "cpu"
+  },
+  "seed_results": [
+    {
+      "accuracy": 0.5791139240506329,
+      "balanced_accuracy": 0.5793574490245563,
+      "macro_f1": 0.5786032987416655,
+      "confusion_matrix": [
+        [
+          86,
+          73
+        ],
+        [
+          60,
+          97
+        ]
+      ],
+      "model": "feature_linear",
+      "seed": 42,
+      "folds": 5,
+      "parameters": 394
+    },
+    {
+      "accuracy": 0.6044303797468354,
+      "balanced_accuracy": 0.6048351560309257,
+      "macro_f1": 0.6029951253831851,
+      "confusion_matrix": [
+        [
+          86,
+          73
+        ],
+        [
+          52,
+          105
+        ]
+      ],
+      "model": "feature_linear",
+      "seed": 43,
+      "folds": 5,
+      "parameters": 394
+    },
+    {
+      "accuracy": 0.5759493670886076,
+      "balanced_accuracy": 0.5760926170732684,
+      "macro_f1": 0.5757964335804449,
+      "confusion_matrix": [
+        [
+          88,
+          71
+        ],
+        [
+          63,
+          94
+        ]
+      ],
+      "model": "feature_linear",
+      "seed": 44,
+      "folds": 5,
+      "parameters": 394
+    },
+    {
+      "accuracy": 0.5886075949367089,
+      "balanced_accuracy": 0.5884308776989945,
+      "macro_f1": 0.5881951962789206,
+      "confusion_matrix": [
+        [
+          98,
+          61
+        ],
+        [
+          69,
+          88
+        ]
+      ],
+      "model": "tiny_mlp",
+      "seed": 42,
+      "folds": 5,
+      "parameters": 9554
+    },
+    {
+      "accuracy": 0.5727848101265823,
+      "balanced_accuracy": 0.5726675479709971,
+      "macro_f1": 0.5725750698848777,
+      "confusion_matrix": [
+        [
+          94,
+          65
+        ],
+        [
+          70,
+          87
+        ]
+      ],
+      "model": "tiny_mlp",
+      "seed": 43,
+      "folds": 5,
+      "parameters": 9554
+    },
+    {
+      "accuracy": 0.5664556962025317,
+      "balanced_accuracy": 0.5663782397948964,
+      "macro_f1": 0.5663471266440284,
+      "confusion_matrix": [
+        [
+          92,
+          67
+        ],
+        [
+          70,
+          87
+        ]
+      ],
+      "model": "tiny_mlp",
+      "seed": 44,
+      "folds": 5,
+      "parameters": 9554
+    },
+    {
+      "accuracy": 0.560126582278481,
+      "balanced_accuracy": 0.5604895244962544,
+      "macro_f1": 0.558849819719385,
+      "confusion_matrix": [
+        [
+          80,
+          79
+        ],
+        [
+          60,
+          97
+        ]
+      ],
+      "model": "tiny_eegnet",
+      "seed": 42,
+      "folds": 5,
+      "parameters": 1050
+    },
+    {
+      "accuracy": 0.5759493670886076,
+      "balanced_accuracy": 0.5758923206345391,
+      "macro_f1": 0.5758814102564103,
+      "confusion_matrix": [
+        [
+          93,
+          66
+        ],
+        [
+          68,
+          89
+        ]
+      ],
+      "model": "tiny_eegnet",
+      "seed": 43,
+      "folds": 5,
+      "parameters": 1050
+    },
+    {
+      "accuracy": 0.5727848101265823,
+      "balanced_accuracy": 0.572387132956776,
+      "macro_f1": 0.5708897047729216,
+      "confusion_matrix": [
+        [
+          101,
+          58
+        ],
+        [
+          77,
+          80
+        ]
+      ],
+      "model": "tiny_eegnet",
+      "seed": 44,
+      "folds": 5,
+      "parameters": 1050
+    },
+    {
+      "accuracy": 0.5443037974683544,
+      "balanced_accuracy": 0.5439650683010856,
+      "macro_f1": 0.5428203994695173,
+      "confusion_matrix": [
+        [
+          95,
+          64
+        ],
+        [
+          80,
+          77
+        ]
+      ],
+      "model": "tiny_multiscale_cnn",
+      "seed": 42,
+      "folds": 5,
+      "parameters": 6434
+    },
+    {
+      "accuracy": 0.5854430379746836,
+      "balanced_accuracy": 0.585646757200657,
+      "macro_f1": 0.5851064896016036,
+      "confusion_matrix": [
+        [
+          88,
+          71
+        ],
+        [
+          60,
+          97
+        ]
+      ],
+      "model": "tiny_multiscale_cnn",
+      "seed": 43,
+      "folds": 5,
+      "parameters": 6434
+    },
+    {
+      "accuracy": 0.5854430379746836,
+      "balanced_accuracy": 0.5846853342947562,
+      "macro_f1": 0.579030863883663,
+      "confusion_matrix": [
+        [
+          112,
+          47
+        ],
+        [
+          84,
+          73
+        ]
+      ],
+      "model": "tiny_multiscale_cnn",
+      "seed": 44,
+      "folds": 5,
+      "parameters": 6434
+    }
+  ],
+  "summary": [
+    {
+      "model": "feature_linear",
+      "parameters": 394,
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "accuracy_mean": 0.5864978902953587,
+      "accuracy_std": 0.01561038880479827,
+      "accuracy_min": 0.5759493670886076,
+      "accuracy_max": 0.6044303797468354,
+      "balanced_accuracy_mean": 0.5867617407095835,
+      "balanced_accuracy_std": 0.015736932291613704,
+      "balanced_accuracy_min": 0.5760926170732684,
+      "balanced_accuracy_max": 0.6048351560309257,
+      "macro_f1_mean": 0.5857982859017651,
+      "macro_f1_std": 0.014958879942048194,
+      "macro_f1_min": 0.5757964335804449,
+      "macro_f1_max": 0.6029951253831851
+    },
+    {
+      "model": "tiny_mlp",
+      "parameters": 9554,
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "accuracy_mean": 0.5759493670886076,
+      "accuracy_std": 0.011409972390708826,
+      "accuracy_min": 0.5664556962025317,
+      "accuracy_max": 0.5886075949367089,
+      "balanced_accuracy_mean": 0.5758255551549627,
+      "balanced_accuracy_std": 0.011360434263829855,
+      "balanced_accuracy_min": 0.5663782397948964,
+      "balanced_accuracy_max": 0.5884308776989945,
+      "macro_f1_mean": 0.575705797602609,
+      "macro_f1_std": 0.01125547105743256,
+      "macro_f1_min": 0.5663471266440284,
+      "macro_f1_max": 0.5881951962789206
+    },
+    {
+      "model": "tiny_eegnet",
+      "parameters": 1050,
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "accuracy_mean": 0.5696202531645569,
+      "accuracy_std": 0.008372630731217062,
+      "accuracy_min": 0.560126582278481,
+      "accuracy_max": 0.5759493670886076,
+      "balanced_accuracy_mean": 0.5695896593625231,
+      "balanced_accuracy_std": 0.008073470511638448,
+      "balanced_accuracy_min": 0.5604895244962544,
+      "balanced_accuracy_max": 0.5758923206345391,
+      "macro_f1_mean": 0.5685403115829056,
+      "macro_f1_std": 0.008755484299922674,
+      "macro_f1_min": 0.558849819719385,
+      "macro_f1_max": 0.5758814102564103
+    },
+    {
+      "model": "tiny_multiscale_cnn",
+      "parameters": 6434,
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "accuracy_mean": 0.5717299578059072,
+      "accuracy_std": 0.02375175158058587,
+      "accuracy_min": 0.5443037974683544,
+      "accuracy_max": 0.5854430379746836,
+      "balanced_accuracy_mean": 0.571432386598833,
+      "balanced_accuracy_std": 0.023792252191697227,
+      "balanced_accuracy_min": 0.5439650683010856,
+      "balanced_accuracy_max": 0.585646757200657,
+      "macro_f1_mean": 0.5689859176515947,
+      "macro_f1_std": 0.02286272213164017,
+      "macro_f1_min": 0.5428203994695173,
+      "macro_f1_max": 0.5851064896016036
+    }
+  ],
+  "elapsed_seconds": 371.54131295799743
+}
