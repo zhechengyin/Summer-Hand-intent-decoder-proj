@@ -1,14 +1,12 @@
 # Models
 
-No model is currently active.
+There is one active model:
 
-Each new model directory should be self-contained and should declare:
+```text
+models/finger_movements/feature_linear/
+```
 
-- input and output contracts;
-- preprocessing performed online;
-- architecture and parameter count;
-- training entry point;
-- checkpoint format;
-- streaming state and firmware constraints.
-
-Active models must not import code from `history/`.
+It contains the frozen Feature + Linear definition, preprocessing contract,
+and final all-training-data entry point. It does not import experiment or
+history code. See its [README](finger_movements/feature_linear/README.md) for
+the exact input, output, training, and checkpoint contracts.

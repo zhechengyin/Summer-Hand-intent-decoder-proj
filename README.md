@@ -1,47 +1,49 @@
 # Embedded Neural Signal Models
 
-This repository is being restarted around a deployment-first goal: train a
-small set of simple models for separate neural-signal prediction or
-classification tasks, then measure whether each model is accurate and cheap
-enough to run at low latency on firmware.
+This repository develops small neural-signal models that can later run at low
+latency on firmware.
 
-FingerMovements is now the active dataset, and Phase 1b is the first active
-model-family comparison. There is not yet a selected model or checkpoint. The
-completed Indy Loco program has been preserved under
-[`history/indy/`](history/indy/README.md) and is no longer an active dependency.
+FingerMovements is the active task: classify left- versus right-hand movement
+from a 28-channel, 500 ms EEG segment. Phase 1 model selection is complete.
+Feature + Linear at 50 epochs is the sole active pipeline; no final checkpoint
+has been trained yet.
+
+Completed research is preserved under `history/` and is never imported by
+active code.
 
 ## Project rules
 
-1. Each model must have one explicit input contract and one explicit target.
-2. Datasets with different label meanings are not merged into one supervised
-   task merely because they share a signal modality.
-3. Train, validation, and test boundaries are defined before tuning.
-4. Accuracy and firmware cost are evaluated together: parameters, peak RAM,
-   Flash, latency, and numerical equivalence all matter.
+1. Every model has one explicit input contract and one explicit target.
+2. Datasets with different labels are not merged merely because they share a
+   signal modality.
+3. Train, validation, and test boundaries are fixed before tuning.
+4. The official test remains locked until the model and training policy are
+   frozen.
 5. Active code must not import from `history/`.
 
 ## Active repository layout
 
 ```text
-configs/             active dataset and model configurations
 data/
-  raw/               immutable source datasets
-  processed/         generated model-ready data
-  processing/        supported conversion and inspection code
-models/              one self-contained directory per active model
-experiments/active/  current controlled experiments only
-results/             results grouped by task and experiment
-docs/
-  STATUS.md          current project truth and next gate
-  history/
-    EXPERIMENT_LOG.md
-history/
-  indy/              complete read-only Indy project archive
+  raw/                                      immutable source dataset
+  processed/finger_movements/               model-ready official splits
+  processing/finger_movements/              supported conversion code
+models/finger_movements/feature_linear/      sole active model
+experiments/active/                          empty until a new experiment starts
+results/                                     active results only
+docs/STATUS.md                               current truth and next gate
+history/finger_movements/                    completed EEG experiments/results
+history/indy/                                completed Indy project
 ```
 
 ## Next gate
 
-Run the registered Phase 1b experiment on the official FingerMovements training
-split. Compare repeated cross-validation accuracy, seed stability, and parameter
-count for the four lightweight baselines. Keep the official 100-case test split
-locked until a model family and training policy have been frozen.
+Train the frozen Feature + Linear pipeline once on all 316 official training
+cases using:
+
+```bash
+python models/finger_movements/feature_linear/train_final.py
+```
+
+This produces the final checkpoint without loading the 100-case official test
+split. Locked-test evaluation is a separate later step.

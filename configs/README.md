@@ -1,7 +1,8 @@
 # Configs
 
-No dataset or model configuration is active yet.
+There is no separate active configuration file. The frozen FingerMovements
+Feature + Linear training and input contracts live beside the model under
+[`models/finger_movements/feature_linear/`](../models/finger_movements/feature_linear/README.md),
+so there is only one active source of truth.
 
-Add configurations only after the corresponding task contract, dataset split,
-and firmware input have been defined. Retired Indy configurations are preserved
-under `history/indy/configs/`.
+Retired Indy configurations are preserved under `history/indy/configs/`.
