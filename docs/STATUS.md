@@ -1,6 +1,6 @@
 # Project Status
 
-Updated: 2026-08-03
+Updated: 2026-08-04
 
 ## Active task
 
@@ -8,49 +8,48 @@ FingerMovements binary left/right classification is active. Each case contains
 28 EEG channels and 50 samples at 100 Hz. The processed data preserves the
 official 316-case train and 100-case test split.
 
-Phase 1d is complete. The processed/source, duplicate, fold-integrity,
-shuffled-label, and small-subset checks found no explicit pipeline failure. On
-identical features and folds, L2 Logistic Regression outperformed the former
-AdamW linear training path, Ridge Classifier, and Linear SVM.
+Phase 1b through Phase 1f are complete and archived. The official test split
+has never been loaded by the experiment scripts.
 
 ## Active model candidate
 
-Feature + Logistic is the sole active candidate:
+Terminal Low-pass + Logistic is the sole frozen active model:
 
-- seven deterministic features per channel, producing 196 inputs;
+- second-order causal 5 Hz low-pass filtering;
+- five terminal samples, three terminal-window means, and one terminal slope
+  per channel, producing 252 inputs;
 - training-derived channel and feature normalization;
-- one binary linear decision score with 196 weights and one bias;
+- one binary linear decision score with 252 weights and one bias;
 - L2 Logistic Regression with `liblinear`;
-- current candidate regularization `C=1`.
+- frozen regularization: `C=1`.
 
-Phase 1d measured 64.37% mean OOF balanced accuracy across seeds 42, 43,
-and 44. Seed standard deviation was 1.50 percentage points and worst-seed
-balanced accuracy was 62.68%. The retired AdamW + dropout linear path reached
-60.05%, with a 59.84% worst-seed result.
-
-All three seeds favored Logistic Regression, although only one per-seed paired
-comparison reached p<0.05. The result selects the classifier family as the
-active engineering candidate; it does not yet freeze `C`. The official test
-was never loaded.
+Phase 1f measured 68.89% mean OOF balanced accuracy across seeds 42, 43, and
+44. Seed standard deviation was 0.92 percentage points and worst-seed balanced
+accuracy was 68.35%. The retired 196-feature Logistic baseline reached 64.37%,
+1.50 percentage points, and 62.68%, respectively. Terminal Logistic improved
+all three seeds. Only the seed-43 paired comparison reached p<0.05, so the
+selection is an engineering decision rather than a strong independent-session
+significance claim.
 
 ## Artifact state
 
 - Final all-training-data checkpoint: not yet trained.
 - Official test evaluation: locked and not run.
-- Active experiments: none; Phase 1e is not yet implemented.
-- Phase 1d audit: passed with the structural limitation that trial-level
-  recording-session IDs are unavailable.
-- Completed FingerMovements experiments and results:
+- Active experiment: none.
+- Frozen implementation:
+  `models/finger_movements/terminal_logistic/`.
+- Phase 1b–1f scripts, results, and retired models:
   `history/finger_movements/`.
+- Structural limitation: trial-level recording-session IDs are unavailable, so
+  random-fold results do not establish new-session generalization.
 - Completed Indy project: `history/indy/`.
 
 ## Next gate
 
-Implement Phase 1e nested cross-validation over Logistic Regression `C`, using
-only each outer fold's training cases for inner selection. Freeze `C` only
-after reviewing mean balanced accuracy, outer-fold stability, worst-seed
-behavior, and the remaining recording-session limitation. Do not train the
-final checkpoint or load the official test before that decision.
+Commit the frozen model state. After explicit authorization, fit one final
+model on all 316 training cases, save its preprocessing parameters and linear
+weights, then evaluate the locked official test once. Do not use test results
+to revise the frozen model.
 
 ## Supported active files
 
@@ -58,7 +57,7 @@ final checkpoint or load the official test before that decision.
 - `docs/STATUS.md`
 - `data/README.md`
 - `data/processing/finger_movements/prepare_finger_movements.py`
-- `models/finger_movements/feature_logistic/`
+- `models/finger_movements/terminal_logistic/`
 - `experiments/active/README.md`
 - `results/README.md`
 - `history/README.md`

@@ -8,5 +8,8 @@
 | `phase1c_feature_linear_50epoch_check.py` | Extended Feature + Linear to 50 epochs and made the equal-duration final comparison |
 | `phase1d_data_sanity_checks.py` | Audited TRAIN.ts/NPZ agreement, labels, duplicates, folds, shuffled labels, and small-subset fitting |
 | `phase1d_classifier_comparison.py` | Compared AdamW Linear, L2 Logistic Regression, Ridge, and Linear SVM on identical features/folds |
+| `phase1e_logistic_regularization_sweep.py` | Used nested CV to test broad Logistic regularization selection on the 196-feature representation |
+| `phase1e_logistic_upper_regularization_sweep.py` | Refined fixed `C=1` through `C=5` and retained `C=1` |
+| `phase1f_low_frequency_factorial.py` | Crossed four EEG representations with Logistic and shrinkage Fisher, selecting terminal low-pass + Logistic |
 
 These files are frozen provenance. Active code must not import them.

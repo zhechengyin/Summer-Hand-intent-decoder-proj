@@ -126,3 +126,49 @@ active candidate. `C=1` is provisional: Phase 1e must use training-only nested
 cross-validation to freeze regularization before final all-training-data
 training or official-test evaluation. Phase 1d code, results, and the retired
 AdamW implementation were archived after review.
+
+## 2026-08-04 — Phase 1e Logistic regularization
+
+Phase 1e kept the 196-feature representation and evaluated Logistic
+regularization without opening the official test. Seeds 42, 43, and 44 used
+five stratified outer folds, and every learned preprocessing operation used
+only the relevant training subset.
+
+The broad nested-CV sweep selected different `C` values across outer folds and
+reached 62.16% mean outer OOF balanced accuracy, below the fixed `C=1`
+reference at 64.37%. A reporting-only `selected_count` aggregation bug was
+corrected; it did not change training or predictions.
+
+A fixed-C upper refinement compared `C=1, 1.25, 1.5, 2, 2.5, 3, 4, 5` on
+identical folds. `C=1.5` ranked first at 64.47%, only 0.10 percentage points
+above `C=1`; seed-level changes were inconsistent and no paired comparison was
+significant. Values at or above `C=2` did not improve mean performance. Phase
+1e retained `C=1`.
+
+## 2026-08-04 — Phase 1f representation × classifier comparison
+
+Phase 1f crossed four training-fold-only representations with Logistic
+Regression and automatic-shrinkage Fisher/LDA:
+
+| Representation + classifier | Features | Mean OOF BA | Seed SD | Worst seed |
+|---|---:|---:|---:|---:|
+| Terminal low-pass + Logistic | 252 | 68.89% | 0.92 pp | 68.35% |
+| Current + terminal + Logistic | 448 | 68.16% | 0.64 pp | 67.43% |
+| Terminal low-pass + Fisher | 252 | 68.04% | 1.45 pp | 66.78% |
+| Current + terminal + Fisher | 448 | 67.20% | 1.02 pp | 66.47% |
+| Current 196 + Logistic | 196 | 64.37% | 1.50 pp | 62.68% |
+| Current 196 + Fisher | 196 | 61.43% | 1.89 pp | 59.54% |
+| Fourier + PCA + Fisher | 20 | 58.02% | 0.18 pp | 57.92% |
+| Fourier + PCA + Logistic | 20 | 57.92% | 0.63 pp | 57.28% |
+
+Terminal Logistic improved all three seeds over the 196-feature Logistic
+baseline. The accuracy gains were 3.48, 7.28, and 2.85 percentage points for
+seeds 42, 43, and 44. Only seed 43 reached p<0.05 in its individual paired
+comparison, so the result supports an engineering selection rather than a
+strong independent-session significance claim.
+
+Adding all 196 former features to the terminal representation did not improve
+the mean or worst-seed result. Fourier + 20-component PCA was substantially
+worse. Phase 1f therefore froze the second-order causal 5 Hz low-pass, 252
+terminal features, Logistic Regression, and `C=1`. The official test remained
+locked, and no final all-training-data checkpoint was created.

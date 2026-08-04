@@ -1,8 +1,8 @@
-# FingerMovements Feature + Logistic
+# Archived FingerMovements Feature + Logistic
 
-This is the sole active model candidate after Phase 1d. It retains the selected
-196-dimensional handcrafted EEG representation and replaces stochastic AdamW
-+ dropout training with deterministic L2 Logistic Regression.
+This retired model was active after Phase 1d. Phase 1f replaced it with the
+terminal low-pass representation. It is preserved only for provenance and must
+not be imported by active code.
 
 ## Contract
 
@@ -26,16 +26,14 @@ Phase 1d evaluated `C=1` with the `liblinear` solver. Across seeds 42, 43, and
 64.37%, seed standard deviation was 1.50 percentage points, and worst-seed
 balanced accuracy was 62.68%.
 
-## Freeze state
+## Archive state
 
-`C=1` is the current best candidate, not the final frozen regularization value.
-Phase 1e must select `C` using training-only nested cross-validation. Therefore:
+`C=1` is frozen for the current feature representation. Phase 1e found that
+per-fold nested selection underperformed it, and the fixed-C upper refinement
+found no meaningful, consistent improvement over it. Therefore:
 
-- no final all-training-data checkpoint exists;
-- there is intentionally no active final-training script yet;
-- the official test split must remain locked;
-- the archived AdamW implementation must not be restored as an active
-  dependency.
+- no final all-training-data checkpoint was created for this representation;
+- the official test split was not evaluated with it.
 
 `model.py` includes framework-independent linear inference so the eventual
 weights can be used without PyTorch or scikit-learn at runtime. Scikit-learn is

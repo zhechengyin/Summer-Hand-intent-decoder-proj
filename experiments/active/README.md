@@ -1,13 +1,10 @@
 # Active Experiments
 
-No experiment is currently active.
+There is no active experiment. Phase 1b through Phase 1f are complete and
+archived under
+[`history/finger_movements/`](../../history/finger_movements/README.md).
 
-Phase 1d is complete and archived under
-[`history/finger_movements/`](../../history/finger_movements/README.md). The
-next experiment will be Phase 1e: training-only nested cross-validation of the
-L2 Logistic Regression regularization value `C`.
-
-The current model candidate is maintained under
-[`models/finger_movements/feature_logistic/`](../../models/finger_movements/feature_logistic/README.md).
-Do not create a final checkpoint or load the official test split before Phase
-1e freezes the regularization value.
+The frozen model is maintained under
+[`models/finger_movements/terminal_logistic/`](../../models/finger_movements/terminal_logistic/README.md).
+Do not add another experiment or open the official test without explicit
+direction.

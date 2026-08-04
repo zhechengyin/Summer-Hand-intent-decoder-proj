@@ -5,5 +5,5 @@ import from this directory.
 
 | Archive | Description |
 |---|---|
-| [`finger_movements/`](finger_movements/README.md) | Phase 1b–1d model/representation/classifier comparisons, data audit, retired AdamW model, and results captured through 2026-08-03 |
+| [`finger_movements/`](finger_movements/README.md) | Phase 1b–1f model, representation, classifier, regularization, and low-frequency comparisons captured through 2026-08-04 |
 | [`indy/`](indy/README.md) | Complete Indy Loco decoder, detector, architecture, data, checkpoint, and result archive captured on 2026-07-29 |

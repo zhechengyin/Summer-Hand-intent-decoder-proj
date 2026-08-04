@@ -1,4 +1,4 @@
-"""Active FingerMovements handcrafted-feature Logistic Regression model."""
+"""Archived FingerMovements handcrafted-feature Logistic Regression model."""
 
 from __future__ import annotations
 
@@ -161,9 +161,8 @@ def fit_logistic(
 ) -> tuple[FeatureLogistic, dict[str, np.ndarray]]:
     """Fit the current candidate with training-only preprocessing.
 
-    C=1 is the Phase 1d candidate value, not yet a final frozen value. Phase 1e
-    must confirm regularization before a final all-training-data checkpoint is
-    created.
+    C=1 was retained and frozen for the current feature representation by the
+    Phase 1e broad and upper-refinement regularization checks.
     """
     if c <= 0:
         raise ValueError("Logistic C must be positive")

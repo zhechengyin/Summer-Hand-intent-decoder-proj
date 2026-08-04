@@ -1,15 +1,15 @@
 # FingerMovements Experiment Archive
 
-This archive preserves the completed Phase 1b–1d research program. Nothing
+This archive preserves the completed Phase 1b–1f research program. Nothing
 under this directory is an active Python dependency.
 
 ## Contents
 
 ```text
 EXPERIMENT_LOG.md   chronological protocol, results, and decisions
-STATUS.md           state at the end of Phase 1d
-experiments/        exact Phase 1b/1c/1d experiment scripts
-models/             retired AdamW + dropout Feature + Linear implementation
+STATUS.md           state at the end of Phase 1f
+experiments/        exact Phase 1b–1f experiment scripts
+models/             retired AdamW and 196-feature Logistic implementations
 results/            metrics, OOF predictions, learning curves, and figures
 ```
 
@@ -18,13 +18,11 @@ provenance, not as supported active entry points.
 
 ## Final decision
 
-Phase 1c initially selected Feature + Linear trained with AdamW and dropout at
-60.05% mean OOF balanced accuracy. Phase 1d found no explicit processed-data,
-label-transcription, duplicate, or fold-overlap failure, then compared
-classifiers on the same 196 features. L2 Logistic Regression with `C=1` reached
-64.37%, with 1.50 percentage-point seed standard deviation and a 62.68%
-worst-seed result. It replaced AdamW training as the active candidate.
+Phase 1d selected the 196-feature Logistic baseline at 64.37% mean OOF balanced
+accuracy. Phase 1e retained `C=1`. Phase 1f then found that causal terminal
+low-frequency features were more informative than the 196 whole-window
+statistics. Terminal Low-pass + Logistic reached 68.89%, with 0.92
+percentage-point seed standard deviation and a 68.35% worst-seed result.
 
 The supported implementation is now under
-[`models/finger_movements/feature_logistic/`](../../models/finger_movements/feature_logistic/README.md).
-Its regularization value remains provisional until Phase 1e nested-CV.
+[`models/finger_movements/terminal_logistic/`](../../models/finger_movements/terminal_logistic/README.md).

@@ -1,0 +1,185 @@
+{
+  "phase": "1e",
+  "created_utc": "2026-08-04T18:55:40.267627+00:00",
+  "scope": "official TRAIN split only; official TEST not opened",
+  "protocol": {
+    "cases": 316,
+    "outer_seeds": [
+      42,
+      43,
+      44
+    ],
+    "outer_folds": 5,
+    "inner_folds": 4,
+    "c_values": [
+      0.001,
+      0.003,
+      0.01,
+      0.03,
+      0.1,
+      0.3,
+      1.0,
+      3.0,
+      10.0
+    ],
+    "selection_metric": "inner OOF balanced accuracy",
+    "tie_policy": "smaller C (stronger regularization)",
+    "fold_training_only_preprocessing": true,
+    "fixed_baseline_c": 1.0
+  },
+  "selected_c_counts": {
+    "0.01": 2,
+    "0.03": 2,
+    "0.3": 4,
+    "1.0": 3,
+    "3.0": 2,
+    "10.0": 2
+  },
+  "candidate_summary": [
+    {
+      "c": 0.001,
+      "outer_contexts": 15,
+      "inner_oof_balanced_accuracy_mean": 0.549350392398867,
+      "inner_oof_balanced_accuracy_std": 0.02410125153420368,
+      "inner_oof_balanced_accuracy_min": 0.5120944881889764,
+      "inner_oof_balanced_accuracy_max": 0.5831473214285714,
+      "selected_count": 0
+    },
+    {
+      "c": 0.003,
+      "outer_contexts": 15,
+      "inner_oof_balanced_accuracy_mean": 0.5540269182498022,
+      "inner_oof_balanced_accuracy_std": 0.027458672652502947,
+      "inner_oof_balanced_accuracy_min": 0.5081574803149607,
+      "inner_oof_balanced_accuracy_max": 0.6026785714285714,
+      "selected_count": 0
+    },
+    {
+      "c": 0.01,
+      "outer_contexts": 15,
+      "inner_oof_balanced_accuracy_mean": 0.5642634681081533,
+      "inner_oof_balanced_accuracy_std": 0.030188039375756943,
+      "inner_oof_balanced_accuracy_min": 0.5042834645669292,
+      "inner_oof_balanced_accuracy_max": 0.6184895833333333,
+      "selected_count": 2
+    },
+    {
+      "c": 0.03,
+      "outer_contexts": 15,
+      "inner_oof_balanced_accuracy_mean": 0.5739370240178311,
+      "inner_oof_balanced_accuracy_std": 0.023953769574855573,
+      "inner_oof_balanced_accuracy_min": 0.5239055118110236,
+      "inner_oof_balanced_accuracy_max": 0.6032125984251968,
+      "selected_count": 2
+    },
+    {
+      "c": 0.1,
+      "outer_contexts": 15,
+      "inner_oof_balanced_accuracy_mean": 0.583400985553889,
+      "inner_oof_balanced_accuracy_std": 0.020890697320219666,
+      "inner_oof_balanced_accuracy_min": 0.5337457817772778,
+      "inner_oof_balanced_accuracy_max": 0.6063988095238095,
+      "selected_count": 0
+    },
+    {
+      "c": 0.3,
+      "outer_contexts": 15,
+      "inner_oof_balanced_accuracy_mean": 0.591008267195767,
+      "inner_oof_balanced_accuracy_std": 0.011701319302914546,
+      "inner_oof_balanced_accuracy_min": 0.5714645669291338,
+      "inner_oof_balanced_accuracy_max": 0.6108346456692912,
+      "selected_count": 4
+    },
+    {
+      "c": 1.0,
+      "outer_contexts": 15,
+      "inner_oof_balanced_accuracy_mean": 0.5947121716556263,
+      "inner_oof_balanced_accuracy_std": 0.023026289317625296,
+      "inner_oof_balanced_accuracy_min": 0.5535558055243095,
+      "inner_oof_balanced_accuracy_max": 0.6268346456692913,
+      "selected_count": 3
+    },
+    {
+      "c": 3.0,
+      "outer_contexts": 15,
+      "inner_oof_balanced_accuracy_mean": 0.5976141922363871,
+      "inner_oof_balanced_accuracy_std": 0.02699358639326923,
+      "inner_oof_balanced_accuracy_min": 0.5613985751781028,
+      "inner_oof_balanced_accuracy_max": 0.6363267091613548,
+      "selected_count": 2
+    },
+    {
+      "c": 10.0,
+      "outer_contexts": 15,
+      "inner_oof_balanced_accuracy_mean": 0.5957247752885056,
+      "inner_oof_balanced_accuracy_std": 0.026822998899213222,
+      "inner_oof_balanced_accuracy_min": 0.5613673290838646,
+      "inner_oof_balanced_accuracy_max": 0.6506456692913386,
+      "selected_count": 2
+    }
+  ],
+  "best_mean_inner_cv_c": 3.0,
+  "one_standard_error_c": 0.3,
+  "outer_policy_summary": [
+    {
+      "pipeline": "nested_selected",
+      "accuracy_mean": 0.6213080168776371,
+      "accuracy_std": 0.011980819294937287,
+      "accuracy_min": 0.6075949367088608,
+      "accuracy_max": 0.629746835443038,
+      "balanced_accuracy_mean": 0.6215932914046122,
+      "balanced_accuracy_std": 0.012076668323221048,
+      "balanced_accuracy_min": 0.6077795136802467,
+      "balanced_accuracy_max": 0.6301526258863117,
+      "macro_f1_mean": 0.6205965717398977,
+      "macro_f1_std": 0.011538212041953377,
+      "macro_f1_min": 0.6073432740099407,
+      "macro_f1_max": 0.6284034373586613
+    },
+    {
+      "pipeline": "fixed_c_1",
+      "accuracy_mean": 0.6434599156118144,
+      "accuracy_std": 0.01495511274130574,
+      "accuracy_min": 0.6265822784810127,
+      "accuracy_max": 0.6550632911392406,
+      "balanced_accuracy_mean": 0.643685988596456,
+      "balanced_accuracy_std": 0.014951486301578313,
+      "balanced_accuracy_min": 0.6268076753595321,
+      "balanced_accuracy_max": 0.6552697993029684,
+      "macro_f1_mean": 0.6430997419916484,
+      "macro_f1_std": 0.014982714927931524,
+      "macro_f1_min": 0.6262079473916357,
+      "macro_f1_max": 0.6547832623402656
+    }
+  ],
+  "paired_comparisons": [
+    {
+      "seed": 42,
+      "nested_minus_fixed_accuracy": -0.01898734177215189,
+      "fixed_only_correct": 16,
+      "nested_only_correct": 10,
+      "both_correct": 189,
+      "both_wrong": 101,
+      "mcnemar_exact_p": 0.32693958282470703
+    },
+    {
+      "seed": 43,
+      "nested_minus_fixed_accuracy": -0.01898734177215189,
+      "fixed_only_correct": 19,
+      "nested_only_correct": 13,
+      "both_correct": 179,
+      "both_wrong": 105,
+      "mcnemar_exact_p": 0.37708558747544885
+    },
+    {
+      "seed": 44,
+      "nested_minus_fixed_accuracy": -0.02848101265822789,
+      "fixed_only_correct": 31,
+      "nested_only_correct": 22,
+      "both_correct": 176,
+      "both_wrong": 87,
+      "mcnemar_exact_p": 0.27167916606550335
+    }
+  ],
+  "decision_policy": "Do not freeze C from the inner profile alone. Confirm that the nested-selected policy is not worse than fixed C=1 on untouched outer folds, then review selection frequency, stability, and regularization strength."
+}

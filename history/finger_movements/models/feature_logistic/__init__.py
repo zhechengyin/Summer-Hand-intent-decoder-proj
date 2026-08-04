@@ -1,4 +1,4 @@
-"""Active FingerMovements Feature + Logistic model."""
+"""Archived FingerMovements Feature + Logistic model."""
 
 from .model import (
     CURRENT_C,
