@@ -1,14 +1,15 @@
 # FingerMovements Experiment Archive
 
-This archive preserves the completed Phase 1 model-selection program. Nothing
+This archive preserves the completed Phase 1b–1d research program. Nothing
 under this directory is an active Python dependency.
 
 ## Contents
 
 ```text
 EXPERIMENT_LOG.md   chronological protocol, results, and decisions
-STATUS.md           state at the end of Phase 1c
-experiments/        exact Phase 1b/1c experiment scripts
+STATUS.md           state at the end of Phase 1d
+experiments/        exact Phase 1b/1c/1d experiment scripts
+models/             retired AdamW + dropout Feature + Linear implementation
 results/            metrics, OOF predictions, learning curves, and figures
 ```
 
@@ -17,11 +18,13 @@ provenance, not as supported active entry points.
 
 ## Final decision
 
-Feature + Linear at 50 epochs was selected. Its mean OOF balanced accuracy was
-60.05% across seeds 42, 43, and 44, with 0.36 percentage-point seed standard
-deviation and a 59.84% worst-seed result. At the same duration, Tiny EEGNet
-reached 59.18% with 3.01-point seed standard deviation and a 56.03% worst-seed
-result. Regularized CSP + LDA was not retained.
+Phase 1c initially selected Feature + Linear trained with AdamW and dropout at
+60.05% mean OOF balanced accuracy. Phase 1d found no explicit processed-data,
+label-transcription, duplicate, or fold-overlap failure, then compared
+classifiers on the same 196 features. L2 Logistic Regression with `C=1` reached
+64.37%, with 1.50 percentage-point seed standard deviation and a 62.68%
+worst-seed result. It replaced AdamW training as the active candidate.
 
 The supported implementation is now under
-[`models/finger_movements/feature_linear/`](../../models/finger_movements/feature_linear/README.md).
+[`models/finger_movements/feature_logistic/`](../../models/finger_movements/feature_logistic/README.md).
+Its regularization value remains provisional until Phase 1e nested-CV.

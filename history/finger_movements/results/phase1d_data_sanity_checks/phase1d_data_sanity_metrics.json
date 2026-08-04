@@ -1,0 +1,131 @@
+{
+  "phase": "1d-A",
+  "created_utc": "2026-08-03T18:41:15.954383+00:00",
+  "scope": "official TRAIN split only; official TEST not opened",
+  "dataset": {
+    "cases": 316,
+    "shape": [
+      316,
+      28,
+      50
+    ],
+    "dtypes": {
+      "x": "float32",
+      "y": "uint8",
+      "source_index": "int32",
+      "channel_names": "<U3"
+    },
+    "class_counts": {
+      "0": 159,
+      "1": 157
+    },
+    "channel_names": [
+      "F3",
+      "F1",
+      "Fz",
+      "F2",
+      "F4",
+      "FC5",
+      "FC3",
+      "FC1",
+      "FCz",
+      "FC2",
+      "FC4",
+      "FC6",
+      "C5",
+      "C3",
+      "C1",
+      "Cz",
+      "C2",
+      "C4",
+      "C6",
+      "CP5",
+      "CP3",
+      "CP1",
+      "CPz",
+      "CP2",
+      "CP4",
+      "CP6",
+      "O1",
+      "O2"
+    ],
+    "source_index_min": 0,
+    "source_index_max": 315,
+    "signal_min": -178.60000610351562,
+    "signal_max": 205.10000610351562,
+    "signal_mean": 29.617798371589448,
+    "signal_std": 44.112716027739
+  },
+  "checks": {
+    "raw_signal_exact_match": true,
+    "raw_labels_exact_match": true,
+    "finite_values": true,
+    "exact_duplicate_groups": 0,
+    "conflicting_duplicate_groups": 0,
+    "zero_variance_trials": 0,
+    "zero_variance_channels": 0,
+    "fold_audits": 15,
+    "fold_index_or_signal_overlap": 0,
+    "high_similarity_pairs_among_top20_at_least_0_999": 0
+  },
+  "shuffled_label_control": {
+    "observed_balanced_accuracy_mean": 0.643685988596456,
+    "observed_balanced_accuracy_by_seed": [
+      0.6489804911268677,
+      0.6268076753595321,
+      0.6552697993029684
+    ],
+    "shuffled_balanced_accuracy_mean": 0.5082108186783105,
+    "shuffled_balanced_accuracy_std": 0.029077733875156234,
+    "shuffled_balanced_accuracy_min": 0.45260986259664304,
+    "shuffled_balanced_accuracy_max": 0.5633537635700837,
+    "empirical_one_sided_p": 0.03225806451612903,
+    "interpretation": "PASS: labels contain signal above the shuffled-label control"
+  },
+  "small_subset_fit": {
+    "cases": 32,
+    "cases_per_class": 16,
+    "source_indices": [
+      86,
+      174,
+      18,
+      162,
+      97,
+      246,
+      102,
+      128,
+      234,
+      214,
+      171,
+      95,
+      278,
+      211,
+      242,
+      309,
+      204,
+      13,
+      109,
+      157,
+      255,
+      56,
+      79,
+      191,
+      265,
+      1,
+      289,
+      228,
+      261,
+      244,
+      67,
+      120
+    ],
+    "training_accuracy": 1.0,
+    "interpretation": "PASS: the feature/classification path can fit the small subset"
+  },
+  "limitations": [
+    "The archive states that one subject completed three sessions, but trial-level session IDs are absent. Trial-stratified folds may therefore mix trials from the same session.",
+    "Exact agreement with TRAIN.ts verifies conversion and label transcription, but cannot independently prove that the source authors assigned every left/right semantic label correctly.",
+    "The official test split remains locked, so this audit intentionally does not repeat a train/test overlap check."
+  ],
+  "verdict": "PASS_WITH_STRUCTURAL_LIMITATION"
+}

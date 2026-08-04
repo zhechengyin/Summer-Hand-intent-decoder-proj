@@ -1,0 +1,103 @@
+{
+  "phase": "1d-B",
+  "created_utc": "2026-08-03T18:41:32.517353+00:00",
+  "scope": "official TRAIN split only; official TEST not opened",
+  "protocol": {
+    "cases": 316,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "folds": 5,
+    "features": "196D active handcrafted Feature + Linear representation",
+    "fold_training_only_preprocessing": true,
+    "adamw_linear": {
+      "epochs": 50,
+      "batch_size": 32,
+      "learning_rate": 0.001,
+      "weight_decay": 0.0001,
+      "dropout": 0.25
+    },
+    "logistic_l2": {
+      "C": 1.0,
+      "solver": "liblinear"
+    },
+    "ridge": {
+      "alpha": 1.0
+    },
+    "linear_svm": {
+      "C": 1.0,
+      "dual": false
+    }
+  },
+  "aggregate_results": [
+    {
+      "model": "adamw_linear",
+      "accuracy_mean": 0.600210970464135,
+      "accuracy_std": 0.003654115627782461,
+      "accuracy_min": 0.5981012658227848,
+      "accuracy_max": 0.6044303797468354,
+      "balanced_accuracy_mean": 0.600535459146203,
+      "balanced_accuracy_std": 0.00361962506688893,
+      "balanced_accuracy_min": 0.5984256699915875,
+      "balanced_accuracy_max": 0.6047149781676882,
+      "macro_f1_mean": 0.5992960466639884,
+      "macro_f1_std": 0.003867863253335966,
+      "macro_f1_min": 0.59693472736951,
+      "macro_f1_max": 0.6037597680740718
+    },
+    {
+      "model": "logistic_l2",
+      "accuracy_mean": 0.6434599156118144,
+      "accuracy_std": 0.01495511274130574,
+      "accuracy_min": 0.6265822784810127,
+      "accuracy_max": 0.6550632911392406,
+      "balanced_accuracy_mean": 0.643685988596456,
+      "balanced_accuracy_std": 0.014951486301578313,
+      "balanced_accuracy_min": 0.6268076753595321,
+      "balanced_accuracy_max": 0.6552697993029684,
+      "macro_f1_mean": 0.6430997419916484,
+      "macro_f1_std": 0.014982714927931524,
+      "macro_f1_min": 0.6262079473916357,
+      "macro_f1_max": 0.6547832623402656
+    },
+    {
+      "model": "ridge",
+      "accuracy_mean": 0.6191983122362869,
+      "accuracy_std": 0.020589895881796556,
+      "accuracy_min": 0.5981012658227848,
+      "accuracy_max": 0.6392405063291139,
+      "balanced_accuracy_mean": 0.6193900305785895,
+      "balanced_accuracy_std": 0.020528834649352967,
+      "balanced_accuracy_min": 0.5982654328406041,
+      "balanced_accuracy_max": 0.6392661138484957,
+      "macro_f1_mean": 0.6187204868398286,
+      "macro_f1_std": 0.020669870981380862,
+      "macro_f1_min": 0.5979039546324407,
+      "macro_f1_max": 0.6392405063291139
+    },
+    {
+      "model": "linear_svm",
+      "accuracy_mean": 0.6234177215189874,
+      "accuracy_std": 0.019249248513601935,
+      "accuracy_min": 0.6107594936708861,
+      "accuracy_max": 0.6455696202531646,
+      "balanced_accuracy_mean": 0.6235695496000747,
+      "balanced_accuracy_std": 0.01924675080839855,
+      "balanced_accuracy_min": 0.6108841084805512,
+      "balanced_accuracy_max": 0.6457156591755798,
+      "macro_f1_mean": 0.6232600870176629,
+      "macro_f1_std": 0.019268960241805515,
+      "macro_f1_min": 0.6106620188117919,
+      "macro_f1_max": 0.6454417952314164
+    }
+  ],
+  "ranking": [
+    "logistic_l2",
+    "linear_svm",
+    "ridge",
+    "adamw_linear"
+  ],
+  "selection_policy": "Do not select from mean alone. Review seed stability, worst seed, paired disagreements, and Phase 1d-A sanity results first."
+}

@@ -89,3 +89,40 @@ Phase 1c froze Feature + Linear, 50 epochs, seed 42, AdamW, learning rate
 0.001, weight decay 0.0001, dropout 0.25, and batch size 32. The official test
 remained locked. No cross-validation checkpoint was promoted as a final model;
 the final checkpoint must be trained once on all 316 official training cases.
+
+## 2026-08-03 — Phase 1d data audit and classifier comparison
+
+Phase 1d first audited the 316-case official training split without opening the
+official test. Processed signals and labels matched the canonical TRAIN.ts
+exactly. No non-finite values, zero-variance trials/channels, exact duplicate
+trials, conflicting duplicate labels, or train/validation index/signal overlap
+were found. A balanced 32-case subset reached 100% training accuracy. The
+archive does not provide trial-level IDs for its three recording sessions, so
+same-session mixing across random folds remains untestable.
+
+The true-label L2 Logistic Regression control reached 64.37% mean OOF balanced
+accuracy. Shuffled labels averaged 50.82% and ranged from 45.26% to 56.34%,
+supporting the presence of real label-associated signal. The initially saved
+empirical p-value compared a three-seed observed mean with individual-seed null
+scores and is therefore not treated as a formal calibrated p-value.
+
+Phase 1d then compared four classifiers on exactly the same 196 handcrafted
+features and training-only preprocessing:
+
+| Classifier | Mean OOF balanced accuracy | Seed SD | Worst seed |
+|---|---:|---:|---:|
+| L2 Logistic Regression | 64.37% | 1.50 pp | 62.68% |
+| Linear SVM | 62.36% | 1.92 pp | 61.09% |
+| Ridge Classifier | 61.94% | 2.05 pp | 59.83% |
+| AdamW + dropout Linear | 60.05% | 0.36 pp | 59.84% |
+
+All three seeds favored Logistic Regression over the AdamW baseline by 2.85 to
+5.70 percentage points. Only one individual-seed paired comparison reached
+p<0.05, so this is an engineering model-family decision rather than a strong
+scientific significance claim.
+
+The 196-feature L2 Logistic Regression pipeline replaced AdamW + dropout as the
+active candidate. `C=1` is provisional: Phase 1e must use training-only nested
+cross-validation to freeze regularization before final all-training-data
+training or official-test evaluation. Phase 1d code, results, and the retired
+AdamW implementation were archived after review.
