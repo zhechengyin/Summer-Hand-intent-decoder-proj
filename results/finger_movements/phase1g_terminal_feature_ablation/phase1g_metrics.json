@@ -1,0 +1,270 @@
+{
+  "phase": "1g",
+  "created_utc": "2026-08-04T21:20:04.133904+00:00",
+  "scope": "official TRAIN split only; official TEST not opened",
+  "question": "Which frozen terminal feature group contributes most?",
+  "protocol": {
+    "cases": 316,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "folds": 5,
+    "classifier": "L2 Logistic Regression with liblinear",
+    "logistic_c": 1.0,
+    "subsets": {
+      "none": [],
+      "A": [
+        "A"
+      ],
+      "B": [
+        "B"
+      ],
+      "C": [
+        "C"
+      ],
+      "AB": [
+        "A",
+        "B"
+      ],
+      "AC": [
+        "A",
+        "C"
+      ],
+      "BC": [
+        "B",
+        "C"
+      ],
+      "ABC": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    "fold_training_only_preprocessing": true,
+    "empty_subset": "training-fold majority-class intercept-only reference",
+    "primary_contribution_method": "exact three-player Shapley value on OOF balanced accuracy",
+    "secondary_checks": [
+      "standalone group OOF balanced accuracy",
+      "full-model OOF balanced-accuracy drop after removing one group"
+    ]
+  },
+  "feature_groups": {
+    "A": {
+      "description": "five final causal-low-pass samples per channel",
+      "feature_count": 140
+    },
+    "B": {
+      "description": "causal-low-pass means over the final 50, 100, and 200 ms",
+      "feature_count": 84
+    },
+    "C": {
+      "description": "causal-low-pass least-squares slope over the final 200 ms",
+      "feature_count": 28
+    }
+  },
+  "subset_summary": [
+    {
+      "subset": "none",
+      "groups": "none",
+      "feature_count": 0,
+      "seeds": 3,
+      "accuracy_mean": 0.5031645569620253,
+      "accuracy_std": 0.0,
+      "accuracy_min": 0.5031645569620253,
+      "accuracy_max": 0.5031645569620253,
+      "balanced_accuracy_mean": 0.5,
+      "balanced_accuracy_std": 0.0,
+      "balanced_accuracy_min": 0.5,
+      "balanced_accuracy_max": 0.5,
+      "macro_f1_mean": 0.33473684210526317,
+      "macro_f1_std": 0.0,
+      "macro_f1_min": 0.33473684210526317,
+      "macro_f1_max": 0.33473684210526317
+    },
+    {
+      "subset": "A",
+      "groups": "A",
+      "feature_count": 140,
+      "seeds": 3,
+      "accuracy_mean": 0.649789029535865,
+      "accuracy_std": 0.026914242240871442,
+      "accuracy_min": 0.6234177215189873,
+      "accuracy_max": 0.6772151898734177,
+      "balanced_accuracy_mean": 0.6497482941419968,
+      "balanced_accuracy_std": 0.026923986566365684,
+      "balanced_accuracy_min": 0.6233425469695149,
+      "balanced_accuracy_max": 0.677162200056083,
+      "macro_f1_mean": 0.6497391791895609,
+      "macro_f1_std": 0.0269341872809067,
+      "macro_f1_min": 0.62332341657401,
+      "macro_f1_max": 0.6771634615384615
+    },
+    {
+      "subset": "B",
+      "groups": "B",
+      "feature_count": 84,
+      "seeds": 3,
+      "accuracy_mean": 0.6424050632911392,
+      "accuracy_std": 0.008372630731217103,
+      "accuracy_min": 0.6360759493670886,
+      "accuracy_max": 0.6518987341772152,
+      "balanced_accuracy_mean": 0.6424241210324614,
+      "balanced_accuracy_std": 0.008410836772778256,
+      "balanced_accuracy_min": 0.6360814004726996,
+      "balanced_accuracy_max": 0.6519649080639346,
+      "macro_f1_mean": 0.642394382963738,
+      "macro_f1_std": 0.00836883482482584,
+      "macro_f1_min": 0.6360723048420209,
+      "macro_f1_max": 0.6518847894884429
+    },
+    {
+      "subset": "C",
+      "groups": "C",
+      "feature_count": 28,
+      "seeds": 3,
+      "accuracy_mean": 0.619198312236287,
+      "accuracy_std": 0.02871446748695399,
+      "accuracy_min": 0.5886075949367089,
+      "accuracy_max": 0.6455696202531646,
+      "balanced_accuracy_mean": 0.6192164403316909,
+      "balanced_accuracy_std": 0.02868331022480041,
+      "balanced_accuracy_min": 0.5886311741377238,
+      "balanced_accuracy_max": 0.6455153627368505,
+      "macro_f1_mean": 0.6191680642095377,
+      "macro_f1_std": 0.028685891154855817,
+      "macro_f1_min": 0.5886075949367089,
+      "macro_f1_max": 0.6455128205128204
+    },
+    {
+      "subset": "AB",
+      "groups": "A+B",
+      "feature_count": 224,
+      "seeds": 3,
+      "accuracy_mean": 0.6592827004219409,
+      "accuracy_std": 0.020589895881796556,
+      "accuracy_min": 0.6392405063291139,
+      "accuracy_max": 0.680379746835443,
+      "balanced_accuracy_mean": 0.6592757280775547,
+      "balanced_accuracy_std": 0.020539430513749304,
+      "balanced_accuracy_min": 0.6392661138484957,
+      "balanced_accuracy_max": 0.6803068541441333,
+      "macro_f1_mean": 0.6592560203114571,
+      "macro_f1_std": 0.02054890102464192,
+      "macro_f1_min": 0.6392405063291139,
+      "macro_f1_max": 0.6802997065039917
+    },
+    {
+      "subset": "AC",
+      "groups": "A+C",
+      "feature_count": 168,
+      "seeds": 3,
+      "accuracy_mean": 0.6824894514767933,
+      "accuracy_std": 0.010172627385013656,
+      "accuracy_min": 0.6708860759493671,
+      "accuracy_max": 0.689873417721519,
+      "balanced_accuracy_mean": 0.682523468066071,
+      "balanced_accuracy_std": 0.010189879955646665,
+      "balanced_accuracy_min": 0.6709129511677282,
+      "balanced_accuracy_max": 0.6899811721347594,
+      "macro_f1_mean": 0.6824634717495838,
+      "macro_f1_std": 0.010148735595744307,
+      "macro_f1_min": 0.6708860759493671,
+      "macro_f1_max": 0.6898237179487179
+    },
+    {
+      "subset": "BC",
+      "groups": "B+C",
+      "feature_count": 112,
+      "seeds": 3,
+      "accuracy_mean": 0.6729957805907173,
+      "accuracy_std": 0.013175101262443886,
+      "accuracy_min": 0.6582278481012658,
+      "accuracy_max": 0.6835443037974683,
+      "balanced_accuracy_mean": 0.6730093872264283,
+      "balanced_accuracy_std": 0.013217521369863797,
+      "balanced_accuracy_min": 0.6582141569522894,
+      "balanced_accuracy_max": 0.6836518046709129,
+      "macro_f1_mean": 0.6729570694114467,
+      "macro_f1_std": 0.013154190648121436,
+      "macro_f1_min": 0.6582141569522894,
+      "macro_f1_max": 0.6834935897435896
+    },
+    {
+      "subset": "ABC",
+      "groups": "A+B+C",
+      "feature_count": 252,
+      "seeds": 3,
+      "accuracy_mean": 0.6888185654008439,
+      "accuracy_std": 0.009135289069456088,
+      "accuracy_min": 0.6835443037974683,
+      "accuracy_max": 0.6993670886075949,
+      "balanced_accuracy_mean": 0.6888528355299176,
+      "balanced_accuracy_std": 0.009216603864602244,
+      "balanced_accuracy_min": 0.6835316268076753,
+      "balanced_accuracy_max": 0.6994952529744021,
+      "macro_f1_mean": 0.6887850189208898,
+      "macro_f1_std": 0.009099142052169175,
+      "macro_f1_min": 0.6835316268076753,
+      "macro_f1_max": 0.6992918031473189
+    }
+  ],
+  "subset_ranking": [
+    "ABC",
+    "AC",
+    "BC",
+    "AB",
+    "A",
+    "B",
+    "C",
+    "none"
+  ],
+  "group_contribution_summary": [
+    {
+      "group": "A",
+      "description": "five final causal-low-pass samples per channel",
+      "feature_count": 140,
+      "standalone_balanced_accuracy_mean": 0.6497482941419968,
+      "standalone_balanced_accuracy_std": 0.026923986566365684,
+      "leave_one_out_drop_mean": 0.01584344830348916,
+      "leave_one_out_drop_std": 0.009474021551896805,
+      "shapley_mean": 0.06855701994507424,
+      "shapley_std": 0.009218599519297148,
+      "shapley_percentage_points_mean": 6.855701994507424,
+      "shapley_percentage_points_std": 0.9218599519297148
+    },
+    {
+      "group": "B",
+      "description": "causal-low-pass means over the final 50, 100, and 200 ms",
+      "feature_count": 84,
+      "standalone_balanced_accuracy_mean": 0.6424241210324614,
+      "standalone_balanced_accuracy_std": 0.008410836772778256,
+      "leave_one_out_drop_mean": 0.006329367463846491,
+      "leave_one_out_drop_std": 0.008350295832656063,
+      "shapley_mean": 0.0601378929704852,
+      "shapley_std": 0.006085454936506056,
+      "shapley_percentage_points_mean": 6.01378929704852,
+      "shapley_percentage_points_std": 0.6085454936506056
+    },
+    {
+      "group": "C",
+      "description": "causal-low-pass least-squares slope over the final 200 ms",
+      "feature_count": 28,
+      "standalone_balanced_accuracy_mean": 0.6192164403316909,
+      "standalone_balanced_accuracy_std": 0.02868331022480041,
+      "leave_one_out_drop_mean": 0.029577107452362823,
+      "leave_one_out_drop_std": 0.02287183914173027,
+      "shapley_mean": 0.06015792261435813,
+      "shapley_std": 0.006487251884354509,
+      "shapley_percentage_points_mean": 6.015792261435813,
+      "shapley_percentage_points_std": 0.6487251884354509
+    }
+  ],
+  "group_contribution_ranking": [
+    "A",
+    "C",
+    "B"
+  ],
+  "decision_policy": "Do not change the frozen model from this diagnostic alone. Review mean, seed variability, redundancy, and interactions before proposing a smaller feature set."
+}
