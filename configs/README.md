@@ -1,8 +1,11 @@
 # Configs
 
-There is no separate active configuration file. The frozen FingerMovements
-Terminal Low-pass + Logistic contract lives beside the model under
-[`models/finger_movements/terminal_logistic/`](../models/finger_movements/terminal_logistic/README.md),
-so there is only one active source of truth.
+There is currently no active experiment configuration.
+
+The completed FingerMovements terminal low-pass + Logistic contract is
+preserved with its checkpoint under
+`history/finger_movements/models/terminal_logistic/`. A new configuration
+should be added here only after the next experiment question and validation
+policy are registered.
 
 Retired Indy configurations are preserved under `history/indy/configs/`.

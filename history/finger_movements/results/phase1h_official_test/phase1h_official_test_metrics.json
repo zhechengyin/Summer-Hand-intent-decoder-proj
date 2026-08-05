@@ -1,0 +1,98 @@
+{
+  "phase": "1h",
+  "created_utc": "2026-08-05T20:42:13.002535+00:00",
+  "scope": "one-time pure inference on the 100-case official TEST split",
+  "checkpoint": {
+    "path": "models/finger_movements/terminal_logistic/checkpoints/finger_movements_terminal_logistic_phase1h.npz",
+    "sha256": "f8fca725c3b638219bbd734257cd958779e595add2fe1118e1e78689bc120047",
+    "version": "phase1h_terminal_logistic_v1"
+  },
+  "test_data": {
+    "path": "data/processed/finger_movements/test.npz",
+    "cases": 100,
+    "class_counts": {
+      "0": 49,
+      "1": 51
+    },
+    "input_shape": [
+      100,
+      28,
+      50
+    ],
+    "channel_names": [
+      "F3",
+      "F1",
+      "Fz",
+      "F2",
+      "F4",
+      "FC5",
+      "FC3",
+      "FC1",
+      "FCz",
+      "FC2",
+      "FC4",
+      "FC6",
+      "C5",
+      "C3",
+      "C1",
+      "Cz",
+      "C2",
+      "C4",
+      "C6",
+      "CP5",
+      "CP3",
+      "CP1",
+      "CPz",
+      "CP2",
+      "CP4",
+      "CP6",
+      "O1",
+      "O2"
+    ]
+  },
+  "inference_policy": {
+    "training_operations": "none",
+    "normalization": "loaded unchanged from frozen checkpoint",
+    "filter_coefficients": "loaded unchanged from frozen checkpoint",
+    "decision_threshold": 0.0,
+    "parameter_selection": "none"
+  },
+  "development_reference": {
+    "metric": "mean OOF balanced accuracy across seeds 42/43/44",
+    "value": 0.6888528355299176
+  },
+  "official_test_metrics": {
+    "accuracy": 0.62,
+    "accuracy_wilson_95": [
+      0.5220975529551107,
+      0.7090240074752127
+    ],
+    "balanced_accuracy": 0.621048419367747,
+    "macro_f1": 0.6193910256410255,
+    "left_recall": 0.673469387755102,
+    "left_recall_wilson_95": [
+      0.5337920531457014,
+      0.7879250299818812
+    ],
+    "right_recall": 0.5686274509803921,
+    "right_recall_wilson_95": [
+      0.43265302109302245,
+      0.6949876389209046
+    ],
+    "mean_log_loss": 0.6537300089467233,
+    "confusion_matrix": [
+      [
+        33,
+        16
+      ],
+      [
+        22,
+        29
+      ]
+    ],
+    "correct_cases": 62,
+    "total_cases": 100
+  },
+  "test_minus_development_oof_balanced_accuracy": -0.06780441616217059,
+  "post_test_policy": "Report this result as final locked-test evidence. Do not tune the frozen pipeline, threshold, or preprocessing from this test result."
+}

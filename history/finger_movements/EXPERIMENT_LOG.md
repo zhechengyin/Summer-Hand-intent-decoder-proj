@@ -172,3 +172,85 @@ the mean or worst-seed result. Fourier + 20-component PCA was substantially
 worse. Phase 1f therefore froze the second-order causal 5 Hz low-pass, 252
 terminal features, Logistic Regression, and `C=1`. The official test remained
 locked, and no final all-training-data checkpoint was created.
+
+## 2026-08-04 — Phase 1g terminal feature contribution
+
+Phase 1g decomposed the frozen 252-dimensional representation into A (five
+terminal samples, 140 features), B (50/100/200 ms terminal means, 84
+features), and C (200 ms terminal slope, 28 features). All eight subsets were
+evaluated using the same seeds 42/43/44, stratified five-fold partitions,
+training-fold-only preprocessing, and Logistic Regression with `C=1`. The
+official test was not loaded.
+
+The complete ABC representation remained best at 68.89% mean OOF balanced
+accuracy. AC reached 68.25%, BC reached 67.30%, and AB reached 65.93%. Exact
+Shapley contributions were 6.86, 6.01, and 6.02 balanced-accuracy percentage
+points for A, B, and C, respectively. B had the smallest full-model marginal
+contribution: removing it reduced mean balanced accuracy by 0.63 percentage
+points. Because project priority is maximum accuracy rather than feature
+reduction, the full ABC representation remained frozen.
+
+## 2026-08-05 — Phase 1h final all-training-data fit
+
+Phase 1h fitted the frozen ABC terminal Logistic Regression pipeline once on
+all 316 official training cases. This was final checkpoint training, not a new
+model-selection experiment. Liblinear used `C=1`, `max_iter=100000`, and
+`tol=1e-10`. Convex optimization converged after eight solver iterations, so
+the final converged solution was saved without epoch or early-stopping
+selection.
+
+The apparent training mean log loss was 0.447477, balanced accuracy was
+78.49%, and the confusion matrix was `[[123, 36], [32, 125]]`. These are fit
+diagnostics and are not held-out generalization estimates. The checkpoint was
+reloaded and reproduced every training decision score and prediction exactly.
+
+Checkpoint:
+
+```text
+models/finger_movements/terminal_logistic/checkpoints/finger_movements_terminal_logistic_phase1h.npz
+```
+
+At the 2026-08-05 direction closeout, the unchanged checkpoint was moved to:
+
+```text
+history/finger_movements/models/terminal_logistic/checkpoints/finger_movements_terminal_logistic_phase1h.npz
+```
+
+SHA-256:
+
+```text
+f8fca725c3b638219bbd734257cd958779e595add2fe1118e1e78689bc120047
+```
+
+The official 100-case test split remained locked during fitting and was not
+loaded by the training script.
+
+## 2026-08-05 — Phase 1h official-test inference and direction closeout
+
+After the model, preprocessing, decision threshold, and checkpoint hash were
+frozen, the official 100-case test was opened once for pure inference. The
+evaluation script contained no fitting operation and loaded channel
+normalization, feature normalization, filter coefficients, weights, and bias
+unchanged from the verified checkpoint.
+
+| Metric | Result |
+|---|---:|
+| Accuracy | 62.00% |
+| Balanced accuracy | 62.10% |
+| Macro-F1 | 61.94% |
+| Left recall | 67.35% |
+| Right recall | 56.86% |
+| Mean log loss | 0.653730 |
+
+The confusion matrix was `[[33, 16], [22, 29]]`. Official-test balanced
+accuracy was 6.78 percentage points below the 68.89% development OOF mean. The
+checkpoint remained unchanged after evaluation.
+
+Decision: close and archive the terminal-feature Logistic direction. It
+remains a reproducible above-chance baseline, but 62% official-test accuracy is
+not sufficient for final firmware promotion. Further small changes to
+Logistic regularization or training duration are not justified. The next
+experiment should change the EEG representation and must select all design
+choices using only the 316 official training cases. The already-opened test may
+be reported only as a post-hoc comparison; it is no longer a pristine model
+selection gate.

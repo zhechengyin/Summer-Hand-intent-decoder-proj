@@ -10,7 +10,8 @@ FingerMovements split from the UEA multivariate time-series archive.
 - Sampling rate: 100 Hz after the dataset authors' downsampling.
 - Case duration: 500 ms, represented by 50 timepoints at 10 ms intervals.
 - Timing: each case ends approximately 130 ms before the key press.
-- Official split: 316 training cases and 100 locked test cases.
+- Official split: 316 training cases and 100 test cases. The test was opened
+  once for the frozen Phase 1h checkpoint on 2026-08-05.
 - Labels: `left = 0`, `right = 1`.
 
 The archive does not retain subject, recording-session, trial-time, or
@@ -51,9 +52,10 @@ The converter reads only `FingerMovements_TRAIN.ts` and
 redundant representations and are not inputs to this conversion.
 
 No normalization, filtering, feature extraction, augmentation, shuffling, or
-split reassignment is applied. Normalization parameters must later be learned
-from a training subset only. The official test file must remain locked until
-the model and hyperparameters are frozen.
+split reassignment is applied. Normalization parameters must be learned from a
+training subset only. The official test was opened once after the Phase 1h
+model and hyperparameters were frozen. Future model selection must not use its
+labels or metrics; use the 316-case training split for cross-validation.
 
 The raw source files under `data/raw/` are never modified.
 

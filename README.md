@@ -3,42 +3,47 @@
 This repository develops small neural-signal models that can later run at low
 latency on firmware.
 
-FingerMovements is the active task: classify left- versus right-hand movement
-from a 28-channel, 500 ms EEG segment. Phase 1d selected the current Feature +
-Logistic candidate over the former AdamW + dropout linear training path. Its
-`C=1` regularization value still requires Phase 1e nested-CV confirmation. No
-final checkpoint has been trained yet.
+The first FingerMovements research direction is complete and archived. It
+classified left- versus right-hand movement from a 28-channel, 500 ms EEG
+segment sampled at 100 Hz. Its frozen terminal low-pass + Logistic Regression
+pipeline achieved 68.89% mean out-of-fold balanced accuracy and 62.10%
+balanced accuracy on the one-time official 100-case test.
 
-Completed research is preserved under `history/` and is never imported by
-active code.
+There is currently no active experiment or promoted model. The repository is
+at a clean direction-change boundary. The FingerMovements raw and processed
+data remain available for the next experiment; completed code, results, model,
+and checkpoint are preserved under `history/finger_movements/`.
 
 ## Project rules
 
 1. Every model has one explicit input contract and one explicit target.
 2. Datasets with different labels are not merged merely because they share a
    signal modality.
-3. Train, validation, and test boundaries are fixed before tuning.
-4. The official test remains locked until the model and training policy are
-   frozen.
-5. Active code must not import from `history/`.
+3. Learned preprocessing is fitted from training folds only.
+4. Active code must not import from `history/`.
+5. The FingerMovements official test has been opened once. Future model
+   selection must use only the 316-case training split; official-test results
+   are post-hoc comparisons, not a new tuning signal.
 
-## Active repository layout
+## Repository layout
 
 ```text
 data/
   raw/                                      immutable source dataset
   processed/finger_movements/               model-ready official splits
   processing/finger_movements/              supported conversion code
-models/finger_movements/feature_logistic/    sole active model candidate
-experiments/active/                          Phase 1e/1f regularization work
-results/                                     active regularization results
-docs/STATUS.md                               current truth and next gate
-history/finger_movements/                    completed EEG experiments/results
+experiments/active/                          empty until a new experiment is registered
+models/                                      empty of promoted candidates
+results/                                     empty of active experiment results
+docs/STATUS.md                               current truth and next decision gate
+history/finger_movements/                    completed EEG direction and checkpoint
 history/indy/                                completed Indy project
 ```
 
 ## Next gate
 
-Run Phase 1f to compare fixed Logistic Regression values from `C=1` through
-`C=5`. Keep the official 100-case test split locked and do not train the
-all-training-data checkpoint until its result is reviewed and `C` is frozen.
+Define and register the next representation experiment before adding code. The
+current candidate direction is to compare the archived terminal-feature
+baseline with physiologically motivated low-frequency potential, ERD, and
+training-fold-only spatial features inspired by CSSD/FDA. No new phase name or
+configuration has been frozen yet.

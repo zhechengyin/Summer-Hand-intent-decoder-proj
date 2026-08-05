@@ -1,0 +1,61 @@
+{
+  "phase": "1h",
+  "created_utc": "2026-08-05T20:28:45.671672+00:00",
+  "scope": "final fit on all 316 official TRAIN cases; TEST not opened",
+  "checkpoint": {
+    "path": "models/finger_movements/terminal_logistic/checkpoints/finger_movements_terminal_logistic_phase1h.npz",
+    "sha256": "f8fca725c3b638219bbd734257cd958779e595add2fe1118e1e78689bc120047",
+    "version": "phase1h_terminal_logistic_v1",
+    "verified_after_reload": true
+  },
+  "model": {
+    "input_shape": [
+      28,
+      50
+    ],
+    "sampling_rate_hz": 100.0,
+    "feature_representation": "ABC terminal low-pass features",
+    "feature_count": 252,
+    "classifier": "L2 Logistic Regression",
+    "logistic_c": 1.0,
+    "class_mapping": {
+      "0": "left",
+      "1": "right"
+    }
+  },
+  "optimization": {
+    "solver": "liblinear",
+    "max_iter": 100000,
+    "tol": 1e-10,
+    "random_state": 42,
+    "iterations_to_convergence": 8,
+    "selection": "none; saved the final converged convex solution"
+  },
+  "training_data": {
+    "path": "data/processed/finger_movements/train.npz",
+    "cases": 316,
+    "class_counts": {
+      "0": 159,
+      "1": 157
+    }
+  },
+  "apparent_training_metrics_not_generalization_estimates": {
+    "accuracy": 0.7848101265822784,
+    "balanced_accuracy": 0.784881624804711,
+    "macro_f1": 0.7848015062292193,
+    "left_recall": 0.7735849056603774,
+    "right_recall": 0.7961783439490446,
+    "mean_log_loss": 0.4474769364631876,
+    "confusion_matrix": [
+      [
+        123,
+        36
+      ],
+      [
+        32,
+        125
+      ]
+    ]
+  },
+  "test_policy": "official TEST remained locked and was not loaded"
+}

@@ -1,28 +1,31 @@
 # FingerMovements Experiment Archive
 
-This archive preserves the completed Phase 1b–1f research program. Nothing
-under this directory is an active Python dependency.
+This archive preserves the complete first FingerMovements research direction,
+Phase 1b through Phase 1h. Nothing under this directory is an active Python
+dependency.
 
 ## Contents
 
 ```text
 EXPERIMENT_LOG.md   chronological protocol, results, and decisions
-STATUS.md           state at the end of Phase 1f
-experiments/        exact Phase 1b–1f experiment scripts
-models/             retired AdamW and 196-feature Logistic implementations
-results/            metrics, OOF predictions, learning curves, and figures
+STATUS.md           final state at the 2026-08-05 archive boundary
+experiments/        exact Phase 1b–1h experiment and inference scripts
+models/             retired implementations and frozen final checkpoint
+results/            metrics, predictions, learning curves, and figures
 ```
 
-The scripts retain the paths they used while active. They are preserved for
-provenance, not as supported active entry points.
+The scripts retain the paths used while they were active. They are preserved
+for provenance and are not supported active entry points.
 
-## Final decision
+## Final outcome
 
-Phase 1d selected the 196-feature Logistic baseline at 64.37% mean OOF balanced
-accuracy. Phase 1e retained `C=1`. Phase 1f then found that causal terminal
-low-frequency features were more informative than the 196 whole-window
-statistics. Terminal Low-pass + Logistic reached 68.89%, with 0.92
-percentage-point seed standard deviation and a 68.35% worst-seed result.
+The selected pipeline was a causal 5 Hz low-pass, 252 terminal ABC features,
+and L2 Logistic Regression with `C=1`. It achieved 68.89% mean OOF balanced
+accuracy during model selection. The exact all-training-data checkpoint then
+reached 62.00% accuracy and 62.10% balanced accuracy on the one-time official
+100-case test.
 
-The supported implementation is now under
-[`models/finger_movements/terminal_logistic/`](../../models/finger_movements/terminal_logistic/README.md).
+This is retained as a reproducible baseline, not promoted as the final
+firmware model. The 6.78 percentage-point OOF-to-test balanced-accuracy drop
+and the published headroom on this dataset motivate a change in EEG feature
+representation rather than further tuning of the same terminal features.

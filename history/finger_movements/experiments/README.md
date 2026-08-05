@@ -11,5 +11,8 @@
 | `phase1e_logistic_regularization_sweep.py` | Used nested CV to test broad Logistic regularization selection on the 196-feature representation |
 | `phase1e_logistic_upper_regularization_sweep.py` | Refined fixed `C=1` through `C=5` and retained `C=1` |
 | `phase1f_low_frequency_factorial.py` | Crossed four EEG representations with Logistic and shrinkage Fisher, selecting terminal low-pass + Logistic |
+| `phase1g_terminal_feature_ablation.py` | Measured the standalone and joint contribution of terminal feature groups A, B, and C |
+| `phase1h_train_final_checkpoint.py` | Fitted and verified the frozen pipeline once on all 316 official training cases |
+| `phase1h_evaluate_locked_test.py` | Performed the authorized one-time pure inference on the 100-case official test |
 
 These files are frozen provenance. Active code must not import them.

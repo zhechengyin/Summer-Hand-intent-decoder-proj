@@ -1,9 +1,13 @@
 # Results
 
-There are no active experiment results. Completed FingerMovements Phase 1b–1f
-results are archived under
-[`history/finger_movements/results/`](../history/finger_movements/results/).
-Completed Indy results remain under `history/indy/results/`.
+There are currently no active experiment results.
 
-The official FingerMovements test has not been evaluated, and no final
-checkpoint result exists.
+The complete FingerMovements Phase 1b–1h results, including the Phase 1g
+feature ablation, Phase 1h final fit, and one-time official-test inference, are
+archived under:
+
+```text
+history/finger_movements/results/
+```
+
+Completed Indy results remain under `history/indy/results/`.
