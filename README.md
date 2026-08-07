@@ -9,10 +9,10 @@ segment sampled at 100 Hz. Its frozen terminal low-pass + Logistic Regression
 pipeline achieved 68.89% mean out-of-fold balanced accuracy and 62.10%
 balanced accuracy on the one-time official 100-case test.
 
-There is currently no active experiment or promoted model. The repository is
-at a clean direction-change boundary. The FingerMovements raw and processed
-data remain available for the next experiment; completed code, results, model,
-and checkpoint are preserved under `history/finger_movements/`.
+Phase A2 is the active experiment. It evaluates a paper-style CSSD +
+hierarchical LDA representation using low-frequency BP, 10--33 Hz ERD, and BP
+trend features. The archived terminal Logistic model remains the comparison
+baseline; there is not yet a promoted model for the new direction.
 
 ## Project rules
 
@@ -32,9 +32,9 @@ data/
   raw/                                      immutable source dataset
   processed/finger_movements/               model-ready official splits
   processing/finger_movements/              supported conversion code
-experiments/active/                          empty until a new experiment is registered
+experiments/active/phasea2_cssd_lda.py       active TRAIN-only experiment
 models/                                      empty of promoted candidates
-results/                                     empty of active experiment results
+results/finger_movements/phasea2_cssd_lda/   active Phase A2 results
 docs/STATUS.md                               current truth and next decision gate
 history/finger_movements/                    completed EEG direction and checkpoint
 history/indy/                                completed Indy project
@@ -42,8 +42,7 @@ history/indy/                                completed Indy project
 
 ## Next gate
 
-Define and register the next representation experiment before adding code. The
-current candidate direction is to compare the archived terminal-feature
-baseline with physiologically motivated low-frequency potential, ERD, and
-training-fold-only spatial features inspired by CSSD/FDA. No new phase name or
-configuration has been frozen yet.
+Phase A2's generalization diagnosis identifies unstable, overfitted CSSD
+spatial filters as the main limitation. The next useful check is TRAIN-only
+covariance stabilization for CSSD, evaluated by held-out balanced accuracy and
+cross-fold subspace stability. The official test must remain untouched.

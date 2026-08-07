@@ -1,0 +1,432 @@
+{
+  "phase": "a2",
+  "created_utc": "2026-08-05T23:34:48.635586+00:00",
+  "scope": "paper-style CSSD + hierarchical LDA on official TRAIN only",
+  "article": {
+    "title": "BCI Competition 2003--Data Set IV: An Algorithm Based on CSSD and FDA for Classifying Single-Trial EEG",
+    "doi_url": "https://doi.org/10.1109/TBME.2004.826697",
+    "published_test_accuracy_reference": 0.84
+  },
+  "data": {
+    "path": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/data/processed/finger_movements/train.npz",
+    "cases": 316,
+    "shape": [
+      316,
+      28,
+      50
+    ],
+    "test_policy": "official TEST refused and not loaded"
+  },
+  "validation": {
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "folds": 5,
+    "split": "repeated stratified cross-validation",
+    "learned_operations": "CSSD, scaling, branch LDA, and fusion LDA fit on training fold only"
+  },
+  "implementation": {
+    "temporal_filter": "fourth-order zero-phase Butterworth",
+    "bp_band_hz": [
+      0.0,
+      7.0
+    ],
+    "bp_window_one_based_inclusive": [
+      44,
+      47
+    ],
+    "bp_patterns_per_class": 1,
+    "erd_band_hz": [
+      10.0,
+      33.0
+    ],
+    "erd_window_one_based_inclusive": [
+      19,
+      50
+    ],
+    "erd_patterns_per_class": 3,
+    "erd_absolute_pool_samples": 8,
+    "trend_windows_one_based_inclusive": [
+      [
+        1,
+        8
+      ],
+      [
+        41,
+        50
+      ]
+    ],
+    "rejected_trend_channels": [
+      "F3",
+      "F1",
+      "F4",
+      "FC5",
+      "FC3",
+      "C5",
+      "C3",
+      "CP5",
+      "CP3"
+    ],
+    "cssd": "regularized two-condition simultaneous covariance diagonalization",
+    "cssd_ridge": 1e-06,
+    "branch_classifier": "standardized Fisher/LDA (svd)",
+    "fusion_classifier": "standardized Fisher/LDA (svd)",
+    "feature_contract": {
+      "feature_shapes": {
+        "f1_bp_cssd": 8,
+        "f2_erd_cssd": 24,
+        "f3_bp_trend": 38,
+        "fusion": 3
+      },
+      "retained_trend_channels": [
+        "Fz",
+        "F2",
+        "FC1",
+        "FCz",
+        "FC2",
+        "FC4",
+        "FC6",
+        "C1",
+        "Cz",
+        "C2",
+        "C4",
+        "C6",
+        "CP1",
+        "CPz",
+        "CP2",
+        "CP4",
+        "CP6",
+        "O1",
+        "O2"
+      ]
+    },
+    "paper_difference": "paper uses a perceptron for final fusion; Phase A2 uses LDA",
+    "causality": "zero-phase filtering is an offline reference and is not a causal firmware pipeline"
+  },
+  "archived_baseline_reference": {
+    "name": "terminal low-pass + Logistic",
+    "mean_oof_balanced_accuracy": 0.6888528355299176
+  },
+  "seed_results": [
+    {
+      "seed": 42,
+      "evaluated_cases": 316,
+      "accuracy": 0.5791139240506329,
+      "balanced_accuracy": 0.5790369747225894,
+      "macro_f1": 0.5790085244062466,
+      "mean_log_loss": 0.8820787629003667,
+      "confusion_matrix": [
+        [
+          94,
+          65
+        ],
+        [
+          68,
+          89
+        ]
+      ]
+    },
+    {
+      "seed": 43,
+      "evaluated_cases": 316,
+      "accuracy": 0.6234177215189873,
+      "balanced_accuracy": 0.6234627248327524,
+      "macro_f1": 0.6234139502278304,
+      "mean_log_loss": 0.756955839258584,
+      "confusion_matrix": [
+        [
+          98,
+          61
+        ],
+        [
+          58,
+          99
+        ]
+      ]
+    },
+    {
+      "seed": 44,
+      "evaluated_cases": 316,
+      "accuracy": 0.5917721518987342,
+      "balanced_accuracy": 0.5918960060890117,
+      "macro_f1": 0.5916699221684647,
+      "mean_log_loss": 0.7652292953799092,
+      "confusion_matrix": [
+        [
+          91,
+          68
+        ],
+        [
+          61,
+          96
+        ]
+      ]
+    }
+  ],
+  "aggregate": {
+    "mean_accuracy": 0.5981012658227848,
+    "mean_balanced_accuracy": 0.5981319018814512,
+    "balanced_accuracy_seed_sd": 0.018665058540193687,
+    "worst_seed_balanced_accuracy": 0.5790369747225894,
+    "mean_macro_f1": 0.5980307989341805,
+    "mean_ba_minus_archived_baseline": -0.09072093364846645,
+    "aggregate_confusion_matrix": [
+      [
+        283,
+        194
+      ],
+      [
+        187,
+        284
+      ]
+    ]
+  },
+  "diagnostics": {
+    "purpose": "locate Phase A2 cross-fold generalization failure without changing model hyperparameters",
+    "fusion_protocols": {
+      "in_sample": "fusion LDA trained on branch scores from branch models fitted on the same outer-training cases",
+      "inner_oof": "fusion LDA trained on five-fold inner-OOF branch scores inside each outer-training fold"
+    },
+    "layer_summary": [
+      {
+        "layer": "f1_bp_cssd",
+        "split": "training",
+        "mean_accuracy": 0.584915611814346,
+        "mean_balanced_accuracy": 0.584824523823779,
+        "mean_macro_f1": 0.5844937590651214,
+        "mean_roc_auc": 0.6177092449805687
+      },
+      {
+        "layer": "f1_bp_cssd",
+        "split": "validation",
+        "mean_accuracy": 0.5242616033755274,
+        "mean_balanced_accuracy": 0.5243812312848781,
+        "mean_macro_f1": 0.5218178886792313,
+        "mean_roc_auc": 0.525922570436913
+      },
+      {
+        "layer": "f2_erd_cssd",
+        "split": "training",
+        "mean_accuracy": 0.7563291139240507,
+        "mean_balanced_accuracy": 0.7564830660754036,
+        "mean_macro_f1": 0.7561803610560901,
+        "mean_roc_auc": 0.8318282185075626
+      },
+      {
+        "layer": "f2_erd_cssd",
+        "split": "validation",
+        "mean_accuracy": 0.5411392405063291,
+        "mean_balanced_accuracy": 0.5412264359602558,
+        "mean_macro_f1": 0.5400729465957228,
+        "mean_roc_auc": 0.5579062882809309
+      },
+      {
+        "layer": "f3_bp_trend",
+        "split": "training",
+        "mean_accuracy": 0.7286392405063291,
+        "mean_balanced_accuracy": 0.728706743999349,
+        "mean_macro_f1": 0.7285462568957326,
+        "mean_roc_auc": 0.7953635842102181
+      },
+      {
+        "layer": "f3_bp_trend",
+        "split": "validation",
+        "mean_accuracy": 0.620253164556962,
+        "mean_balanced_accuracy": 0.6203159027494215,
+        "mean_macro_f1": 0.6179755954963229,
+        "mean_roc_auc": 0.6583033466040562
+      },
+      {
+        "layer": "final_in_sample_fusion",
+        "split": "training",
+        "mean_accuracy": 0.804324894514768,
+        "mean_balanced_accuracy": 0.8043849985482763,
+        "mean_macro_f1": 0.8042893947241598,
+        "mean_roc_auc": 0.8869437557428707
+      },
+      {
+        "layer": "final_in_sample_fusion",
+        "split": "validation",
+        "mean_accuracy": 0.5981012658227848,
+        "mean_balanced_accuracy": 0.5981273181230434,
+        "mean_macro_f1": 0.5969447975126143,
+        "mean_roc_auc": 0.6394382911392407
+      }
+    ],
+    "ablation_summary": [
+      {
+        "fusion_training": "in_sample",
+        "subset": "f1",
+        "mean_accuracy": 0.5242616033755274,
+        "mean_balanced_accuracy": 0.5243560469494852,
+        "balanced_accuracy_seed_sd": 0.024463272597952623,
+        "worst_seed_balanced_accuracy": 0.49050594880423026,
+        "mean_macro_f1": 0.5239955121922083
+      },
+      {
+        "fusion_training": "in_sample",
+        "subset": "f2",
+        "mean_accuracy": 0.541139240506329,
+        "mean_balanced_accuracy": 0.5410607699395105,
+        "balanced_accuracy_seed_sd": 0.04751529989820859,
+        "worst_seed_balanced_accuracy": 0.47450226334975765,
+        "mean_macro_f1": 0.5408871796749647
+      },
+      {
+        "fusion_training": "in_sample",
+        "subset": "f3",
+        "mean_accuracy": 0.620253164556962,
+        "mean_balanced_accuracy": 0.6204516017038549,
+        "balanced_accuracy_seed_sd": 0.0025022540269717198,
+        "worst_seed_balanced_accuracy": 0.6173737130953811,
+        "mean_macro_f1": 0.6198985738492118
+      },
+      {
+        "fusion_training": "in_sample",
+        "subset": "f1_f2",
+        "mean_accuracy": 0.5421940928270043,
+        "mean_balanced_accuracy": 0.5421490472566064,
+        "balanced_accuracy_seed_sd": 0.03496482221508469,
+        "worst_seed_balanced_accuracy": 0.4998597924928895,
+        "mean_macro_f1": 0.5420720330513172
+      },
+      {
+        "fusion_training": "in_sample",
+        "subset": "f1_f3",
+        "mean_accuracy": 0.6128691983122362,
+        "mean_balanced_accuracy": 0.6130339569229125,
+        "balanced_accuracy_seed_sd": 0.008250695247694095,
+        "worst_seed_balanced_accuracy": 0.6014902055041461,
+        "mean_macro_f1": 0.612581110538624
+      },
+      {
+        "fusion_training": "in_sample",
+        "subset": "f2_f3",
+        "mean_accuracy": 0.5981012658227848,
+        "mean_balanced_accuracy": 0.5981586080732818,
+        "balanced_accuracy_seed_sd": 0.015520146620819849,
+        "worst_seed_balanced_accuracy": 0.5791170932980811,
+        "mean_macro_f1": 0.5980650343494908
+      },
+      {
+        "fusion_training": "in_sample",
+        "subset": "f1_f2_f3",
+        "mean_accuracy": 0.5981012658227848,
+        "mean_balanced_accuracy": 0.5981319018814512,
+        "balanced_accuracy_seed_sd": 0.018665058540193687,
+        "worst_seed_balanced_accuracy": 0.5790369747225894,
+        "mean_macro_f1": 0.5980307989341805
+      },
+      {
+        "fusion_training": "inner_oof",
+        "subset": "f1",
+        "mean_accuracy": 0.5021097046413502,
+        "mean_balanced_accuracy": 0.5016758135373686,
+        "balanced_accuracy_seed_sd": 0.005401479973125289,
+        "worst_seed_balanced_accuracy": 0.49651484196610984,
+        "mean_macro_f1": 0.4993028069245374
+      },
+      {
+        "fusion_training": "inner_oof",
+        "subset": "f2",
+        "mean_accuracy": 0.5348101265822786,
+        "mean_balanced_accuracy": 0.5343575157900359,
+        "balanced_accuracy_seed_sd": 0.042796065161216375,
+        "worst_seed_balanced_accuracy": 0.474101670472299,
+        "mean_macro_f1": 0.5317649929738716
+      },
+      {
+        "fusion_training": "inner_oof",
+        "subset": "f3",
+        "mean_accuracy": 0.6223628691983122,
+        "mean_balanced_accuracy": 0.6224679191870636,
+        "balanced_accuracy_seed_sd": 0.0014638854777369822,
+        "worst_seed_balanced_accuracy": 0.6203981893201939,
+        "mean_macro_f1": 0.6222845253261194
+      },
+      {
+        "fusion_training": "inner_oof",
+        "subset": "f1_f2",
+        "mean_accuracy": 0.541139240506329,
+        "mean_balanced_accuracy": 0.5409539451721882,
+        "balanced_accuracy_seed_sd": 0.038747860169296454,
+        "worst_seed_balanced_accuracy": 0.4869607018387213,
+        "mean_macro_f1": 0.540098178183306
+      },
+      {
+        "fusion_training": "inner_oof",
+        "subset": "f1_f3",
+        "mean_accuracy": 0.5938818565400844,
+        "mean_balanced_accuracy": 0.5939256766681354,
+        "balanced_accuracy_seed_sd": 0.008199513098660974,
+        "worst_seed_balanced_accuracy": 0.5824620438248608,
+        "mean_macro_f1": 0.5937432808817915
+      },
+      {
+        "fusion_training": "inner_oof",
+        "subset": "f2_f3",
+        "mean_accuracy": 0.6170886075949367,
+        "mean_balanced_accuracy": 0.6170799449852448,
+        "balanced_accuracy_seed_sd": 0.0051687693815960865,
+        "worst_seed_balanced_accuracy": 0.6106838120418219,
+        "mean_macro_f1": 0.616992717692901
+      },
+      {
+        "fusion_training": "inner_oof",
+        "subset": "f1_f2_f3",
+        "mean_accuracy": 0.6107594936708861,
+        "mean_balanced_accuracy": 0.6107639306173135,
+        "balanced_accuracy_seed_sd": 0.0144164187934995,
+        "worst_seed_balanced_accuracy": 0.5948403637383327,
+        "mean_macro_f1": 0.6106886006461986
+      }
+    ],
+    "filter_stability_summary": [
+      {
+        "branch": "bp",
+        "class_specific_side": "left",
+        "comparisons": 30,
+        "mean_abs_cosine": 0.6932747360614603,
+        "minimum_abs_cosine": 0.322968595961394,
+        "mean_principal_angle_deg": 44.77362879636603,
+        "maximum_principal_angle_deg": 71.15745167511555
+      },
+      {
+        "branch": "bp",
+        "class_specific_side": "right",
+        "comparisons": 30,
+        "mean_abs_cosine": 0.48008571625066515,
+        "minimum_abs_cosine": 0.033082313681271396,
+        "mean_principal_angle_deg": 59.830543296439764,
+        "maximum_principal_angle_deg": 88.10417713167685
+      },
+      {
+        "branch": "erd",
+        "class_specific_side": "left",
+        "comparisons": 30,
+        "mean_abs_cosine": 0.7578055600187686,
+        "minimum_abs_cosine": 0.005768384924808197,
+        "mean_principal_angle_deg": 34.81271514505392,
+        "maximum_principal_angle_deg": 89.66949405629396
+      },
+      {
+        "branch": "erd",
+        "class_specific_side": "right",
+        "comparisons": 30,
+        "mean_abs_cosine": 0.6114912694464116,
+        "minimum_abs_cosine": 0.006232827355440012,
+        "mean_principal_angle_deg": 48.7384734056739,
+        "maximum_principal_angle_deg": 89.64288298585238
+      }
+    ],
+    "case_stability_summary": {
+      "unanimous_prediction_cases": 214,
+      "always_correct_cases": 139,
+      "always_wrong_cases": 75,
+      "seed_sensitive_cases": 102
+    },
+    "test_policy": "official TEST refused and not loaded"
+  }
+}

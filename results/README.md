@@ -1,13 +1,18 @@
 # Results
 
-There are currently no active experiment results.
-
-The complete FingerMovements Phase 1b–1h results, including the Phase 1g
-feature ablation, Phase 1h final fit, and one-time official-test inference, are
-archived under:
+The active FingerMovements result is:
 
 ```text
-history/finger_movements/results/
+results/finger_movements/phasea2_cssd_lda/
 ```
 
-Completed Indy results remain under `history/indy/results/`.
+It contains fold metrics, seed-level OOF metrics, per-case OOF predictions,
+three branch scores, and the original summary figure. The `phasea2_diagnostic`
+files add train-versus-validation layer metrics, all seven branch ablations,
+inner-OOF fusion, cross-fold CSSD subspace stability, per-case seed stability,
+and a generalization-diagnostic figure. The official test is not loaded by
+Phase A2.
+
+The complete earlier FingerMovements direction, including its official-test
+result, remains under `history/finger_movements/results/`. Completed Indy
+results remain under `history/indy/results/`.
