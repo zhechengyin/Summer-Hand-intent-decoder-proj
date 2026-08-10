@@ -1,20 +1,22 @@
-"""Convert the canonical FingerMovements .ts files into model-ready NPZ files.
+"""Convert the official FingerMovements MATLAB release to model-ready NPZ.
 
-The converter is intentionally lossless apart from converting the source
-decimal values to float32. It does not normalize, filter, augment, shuffle, or
-change the dataset's official train/test split.
+The source is BCI Competition II, Data Set IV, 100 Hz (`sp1s_aa.mat`).
+Conversion is lossless apart from storing EEG samples as float32. It does not
+normalize, filter, augment, shuffle, or alter the official train/test split.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 from collections import Counter
 from pathlib import Path
 
 import numpy as np
+from scipy.io import loadmat
 
 
-CHANNEL_NAMES = np.asarray(
+EXPECTED_CHANNEL_NAMES = np.asarray(
     [
         "F3",
         "F1",
@@ -46,94 +48,81 @@ CHANNEL_NAMES = np.asarray(
         "O2",
     ]
 )
-LABEL_TO_ID = {"left": 0, "right": 1}
 EXPECTED_CHANNELS = 28
 EXPECTED_TIMEPOINTS = 50
 EXPECTED_CASES = {"train": 316, "test": 100}
+EXPECTED_CLASS_COUNTS = {"train": {0: 159, 1: 157}, "test": {0: 49, 1: 51}}
+EXPECTED_SHA256 = {
+    "sp1s_aa.mat": "4ecb9f7bce25a67d71ade1bca68a103ba93f4173fc6e8426bc14aa1dade69f5c",
+    "labels_data_set_iv.txt": "9ae9c41f237c9445ad749fc5539c2861c21a14195ecf308c8ccfdeb92f296c65",
+}
 
 
-def parse_ts(path: Path) -> tuple[np.ndarray, np.ndarray]:
-    """Parse one equal-length, multivariate UEA .ts file."""
-    metadata: dict[str, str] = {}
-    samples: list[list[list[float]]] = []
-    labels: list[int] = []
-    in_data = False
+def sha256(path: Path) -> str:
+    """Return the SHA-256 digest of a source file."""
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
-    with path.open("r", encoding="utf-8-sig") as source:
-        for line_number, raw_line in enumerate(source, start=1):
-            line = raw_line.strip()
-            if not line:
-                continue
 
-            if not in_data:
-                if not line.startswith("@"):
-                    raise ValueError(
-                        f"{path}:{line_number}: expected metadata before @data"
-                    )
-                key, _, value = line[1:].partition(" ")
-                metadata[key.lower()] = value.strip()
-                if key.lower() == "data":
-                    in_data = True
-                continue
+def validate_source_hash(path: Path) -> None:
+    """Reject files that differ from the verified official downloads."""
+    expected = EXPECTED_SHA256[path.name]
+    actual = sha256(path)
+    if actual != expected:
+        raise ValueError(
+            f"Unexpected SHA-256 for {path}: {actual}; expected {expected}"
+        )
 
-            fields = line.split(":")
-            if len(fields) != EXPECTED_CHANNELS + 1:
-                raise ValueError(
-                    f"{path}:{line_number}: expected {EXPECTED_CHANNELS} "
-                    f"channels plus one label, found {len(fields)} fields"
-                )
 
-            label_text = fields[-1].strip().lower()
-            if label_text not in LABEL_TO_ID:
-                raise ValueError(
-                    f"{path}:{line_number}: unsupported label {label_text!r}"
-                )
+def matlab_channel_names(raw: np.ndarray) -> np.ndarray:
+    """Convert scipy's MATLAB cell-array representation to Unicode names."""
+    names: list[str] = []
+    for cell in np.asarray(raw).reshape(-1):
+        value = np.asarray(cell).squeeze()
+        names.append(str(value.item() if value.ndim == 0 else value))
+    return np.asarray(names)
 
-            channels: list[list[float]] = []
-            for channel_index, field in enumerate(fields[:-1]):
-                values = [float(value) for value in field.split(",")]
-                if len(values) != EXPECTED_TIMEPOINTS:
-                    raise ValueError(
-                        f"{path}:{line_number}: channel {channel_index} has "
-                        f"{len(values)} values, expected {EXPECTED_TIMEPOINTS}"
-                    )
-                channels.append(values)
 
-            samples.append(channels)
-            labels.append(LABEL_TO_ID[label_text])
+def load_official_sources(
+    mat_path: Path, test_label_path: Path
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Load and transpose official time-channel-trial arrays."""
+    for path in (mat_path, test_label_path):
+        if not path.is_file():
+            raise FileNotFoundError(f"Required official source not found: {path}")
+        validate_source_hash(path)
 
-    if not in_data:
-        raise ValueError(f"{path}: missing @data marker")
+    matlab = loadmat(
+        mat_path,
+        variable_names=["clab", "x_train", "y_train", "x_test"],
+    )
+    required = {"clab", "x_train", "y_train", "x_test"}
+    missing = required - set(matlab)
+    if missing:
+        raise KeyError(f"Official MATLAB file is missing variables: {sorted(missing)}")
 
-    expected_metadata = {
-        "timestamps": "false",
-        "missing": "false",
-        "univariate": "false",
-        "dimensions": str(EXPECTED_CHANNELS),
-        "equallength": "true",
-        "serieslength": str(EXPECTED_TIMEPOINTS),
-    }
-    for key, expected in expected_metadata.items():
-        actual = metadata.get(key, "").lower()
-        if actual != expected:
-            raise ValueError(
-                f"{path}: @{key} is {actual!r}, expected {expected!r}"
-            )
-
-    x = np.asarray(samples, dtype=np.float32)
-    y = np.asarray(labels, dtype=np.uint8)
-    expected_shape = (len(samples), EXPECTED_CHANNELS, EXPECTED_TIMEPOINTS)
-    if x.shape != expected_shape:
-        raise ValueError(f"{path}: parsed shape {x.shape}, expected {expected_shape}")
-    if not np.isfinite(x).all():
-        raise ValueError(f"{path}: non-finite EEG values found")
-    return x, y
+    # Official layout is time x channels x trials. Models use
+    # trials x channels x time.
+    train_x = np.asarray(matlab["x_train"]).transpose(2, 1, 0).astype(np.float32)
+    test_x = np.asarray(matlab["x_test"]).transpose(2, 1, 0).astype(np.float32)
+    train_y = np.asarray(matlab["y_train"]).reshape(-1).astype(np.uint8)
+    test_y = np.loadtxt(test_label_path, dtype=np.uint8).reshape(-1)
+    channel_names = matlab_channel_names(matlab["clab"])
+    return train_x, train_y, test_x, test_y, channel_names
 
 
 def sample_keys(x: np.ndarray) -> set[bytes]:
-    """Return exact float32 byte representations for duplicate checks."""
+    """Return exact float32 trial representations for duplicate checks."""
     contiguous = np.ascontiguousarray(x)
     return {sample.tobytes() for sample in contiguous}
+
+
+def has_uea_sliding_channel_error(x: np.ndarray) -> bool:
+    """Detect the deterministic 22-sample overlap in the retired UEA files."""
+    return bool(np.all(x[:, :-1, 28:] == x[:, 1:, :22]))
 
 
 def validate_dataset(
@@ -141,58 +130,73 @@ def validate_dataset(
     train_y: np.ndarray,
     test_x: np.ndarray,
     test_y: np.ndarray,
+    channel_names: np.ndarray,
 ) -> None:
-    """Fail fast if the source archive violates the expected fixed schema."""
+    """Fail fast if the official source violates the expected schema."""
+    if not np.array_equal(channel_names, EXPECTED_CHANNEL_NAMES):
+        raise ValueError(
+            "Unexpected channel order: "
+            f"{channel_names.tolist()}"
+        )
+
     for split, x, y in (
         ("train", train_x, train_y),
         ("test", test_x, test_y),
     ):
         expected_cases = EXPECTED_CASES[split]
-        if x.shape != (
-            expected_cases,
-            EXPECTED_CHANNELS,
-            EXPECTED_TIMEPOINTS,
-        ):
-            raise ValueError(f"{split}: unexpected x shape {x.shape}")
+        expected_shape = (expected_cases, EXPECTED_CHANNELS, EXPECTED_TIMEPOINTS)
+        if x.shape != expected_shape:
+            raise ValueError(f"{split}: x shape {x.shape}, expected {expected_shape}")
         if y.shape != (expected_cases,):
             raise ValueError(f"{split}: unexpected y shape {y.shape}")
-        if set(np.unique(y).tolist()) != set(LABEL_TO_ID.values()):
-            raise ValueError(f"{split}: expected both left and right labels")
+        if not np.isfinite(x).all():
+            raise ValueError(f"{split}: non-finite EEG values found")
+        counts = Counter(y.tolist())
+        if dict(counts) != EXPECTED_CLASS_COUNTS[split]:
+            raise ValueError(f"{split}: unexpected class counts {dict(counts)}")
         if len(sample_keys(x)) != len(x):
-            raise ValueError(f"{split}: exact duplicate samples found")
+            raise ValueError(f"{split}: exact duplicate trials found")
+        if has_uea_sliding_channel_error(x):
+            raise ValueError(
+                f"{split}: detected the retired UEA sliding-channel layout error"
+            )
 
     overlap = sample_keys(train_x) & sample_keys(test_x)
     if overlap:
-        raise ValueError(f"train/test leakage: {len(overlap)} exact samples overlap")
+        raise ValueError(f"train/test leakage: {len(overlap)} exact trials overlap")
 
 
-def save_split(path: Path, x: np.ndarray, y: np.ndarray) -> None:
+def save_split(
+    path: Path,
+    x: np.ndarray,
+    y: np.ndarray,
+    channel_names: np.ndarray,
+) -> None:
     """Write one self-describing split without pickle-backed objects."""
     np.savez_compressed(
         path,
         x=x,
         y=y,
         source_index=np.arange(len(y), dtype=np.int32),
-        channel_names=CHANNEL_NAMES,
+        channel_names=channel_names,
     )
 
 
 def prepare(raw_dir: Path, output_dir: Path) -> None:
-    train_source = raw_dir / "FingerMovements_TRAIN.ts"
-    test_source = raw_dir / "FingerMovements_TEST.ts"
-    for source in (train_source, test_source):
-        if not source.is_file():
-            raise FileNotFoundError(f"Required source file not found: {source}")
-
-    train_x, train_y = parse_ts(train_source)
-    test_x, test_y = parse_ts(test_source)
-    validate_dataset(train_x, train_y, test_x, test_y)
+    mat_source = raw_dir / "sp1s_aa.mat"
+    test_label_source = raw_dir / "labels_data_set_iv.txt"
+    train_x, train_y, test_x, test_y, channel_names = load_official_sources(
+        mat_source,
+        test_label_source,
+    )
+    validate_dataset(train_x, train_y, test_x, test_y, channel_names)
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    save_split(output_dir / "train.npz", train_x, train_y)
-    save_split(output_dir / "test.npz", test_x, test_y)
+    save_split(output_dir / "train.npz", train_x, train_y, channel_names)
+    save_split(output_dir / "test.npz", test_x, test_y, channel_names)
 
-    print("FingerMovements conversion complete")
+    print("FingerMovements official MATLAB conversion complete")
+    print(f"source SHA-256: {sha256(mat_source)}")
     for split, x, y in (
         ("train", train_x, train_y),
         ("test", test_x, test_y),
@@ -202,6 +206,7 @@ def prepare(raw_dir: Path, output_dir: Path) -> None:
             f"{split:>5}: x={x.shape} {x.dtype} | y={y.shape} {y.dtype} | "
             f"left={counts[0]} right={counts[1]}"
         )
+    print("channel-layout integrity: PASS")
     print(f"output: {output_dir}")
 
 
@@ -212,7 +217,7 @@ def parse_args() -> argparse.Namespace:
         "--raw-dir",
         type=Path,
         default=repo_root / "data" / "raw" / "FingerMovements",
-        help="Directory containing the canonical TRAIN.ts and TEST.ts files.",
+        help="Directory containing sp1s_aa.mat and official test labels.",
     )
     parser.add_argument(
         "--output-dir",

@@ -1,7 +1,7 @@
 # FingerMovements processed data
 
 This directory contains a direct, model-ready conversion of the official
-FingerMovements split from the UEA multivariate time-series archive.
+BCI Competition II Data Set IV 100 Hz MATLAB release.
 
 ## Dataset
 
@@ -14,8 +14,8 @@ FingerMovements split from the UEA multivariate time-series archive.
   once for the frozen Phase 1h checkpoint on 2026-08-05.
 - Labels: `left = 0`, `right = 1`.
 
-The archive does not retain subject, recording-session, trial-time, or
-train/validation grouping metadata. Do not infer those boundaries from
+The release describes three same-day recording sessions but does not provide a
+session identifier for each epoch. Do not infer session boundaries from
 `source_index`.
 
 ## Files and schema
@@ -47,9 +47,10 @@ Class counts:
 
 ## Processing policy
 
-The converter reads only `FingerMovements_TRAIN.ts` and
-`FingerMovements_TEST.ts`. The ARFF files in the downloaded archive are
-redundant representations and are not inputs to this conversion.
+The converter reads `sp1s_aa.mat` and the separately published official
+`labels_data_set_iv.txt`. It transposes EEG from the official
+`time x channels x trials` layout to `trials x channels x time` and rejects the
+deterministic adjacent-channel overlap found in the retired UEA conversion.
 
 No normalization, filtering, feature extraction, augmentation, shuffling, or
 split reassignment is applied. Normalization parameters must be learned from a
@@ -57,7 +58,7 @@ training subset only. The official test was opened once after the Phase 1h
 model and hyperparameters were frozen. Future model selection must not use its
 labels or metrics; use the 316-case training split for cross-validation.
 
-The raw source files under `data/raw/` are never modified.
+The raw source files under `data/raw/` are never modified by the converter.
 
 ## Rebuild
 

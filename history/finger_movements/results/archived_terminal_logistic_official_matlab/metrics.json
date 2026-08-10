@@ -1,0 +1,103 @@
+{
+  "experiment": "archived_terminal_logistic_official_matlab",
+  "created_utc": "2026-08-10T19:19:30.919967+00:00",
+  "scope": "frozen Phase 1 model on corrected official TRAIN only",
+  "data": {
+    "path": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/data/processed/finger_movements/train.npz",
+    "sha256": "a2025f277b5351839554e0ecf3398f1f4fd5151a4fc90f0e25c873734f5a91d1",
+    "shape": [
+      316,
+      28,
+      50
+    ],
+    "test_policy": "official TEST refused and not loaded"
+  },
+  "pipeline": {
+    "channel_normalization": "fold-training-only",
+    "lowpass_hz": 5.0,
+    "lowpass_order": 2,
+    "filter": "causal SOS initialized from each trial's first sample",
+    "terminal_samples": 5,
+    "terminal_mean_windows_samples": [
+      5,
+      10,
+      20
+    ],
+    "terminal_slope_window_samples": 20,
+    "feature_count": 252,
+    "feature_standardization": "fold-training-only",
+    "classifier": "L2 Logistic Regression",
+    "c": 1.0,
+    "solver": "liblinear"
+  },
+  "validation": {
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "folds": 5,
+    "split": "repeated stratified cross-validation"
+  },
+  "summary": {
+    "mean_oof_balanced_accuracy": 0.7858230180667388,
+    "balanced_accuracy_seed_sd": 0.01039167316995615,
+    "worst_seed_balanced_accuracy": 0.7721828305892722
+  },
+  "seed_results": [
+    {
+      "seed": 42,
+      "evaluated_cases": 316,
+      "accuracy": 0.7974683544303798,
+      "balanced_accuracy": 0.7973801225814205,
+      "macro_f1": 0.7973953115608094,
+      "mean_log_loss": 0.4489908228216751,
+      "confusion_matrix": [
+        [
+          129,
+          30
+        ],
+        [
+          34,
+          123
+        ]
+      ]
+    },
+    {
+      "seed": 43,
+      "evaluated_cases": 316,
+      "accuracy": 0.7721518987341772,
+      "balanced_accuracy": 0.7721828305892722,
+      "macro_f1": 0.7721518987341772,
+      "mean_log_loss": 0.44953740463637376,
+      "confusion_matrix": [
+        [
+          122,
+          37
+        ],
+        [
+          35,
+          122
+        ]
+      ]
+    },
+    {
+      "seed": 44,
+      "evaluated_cases": 316,
+      "accuracy": 0.7879746835443038,
+      "balanced_accuracy": 0.7879061010295237,
+      "macro_f1": 0.787921587482846,
+      "mean_log_loss": 0.4573416204557854,
+      "confusion_matrix": [
+        [
+          127,
+          32
+        ],
+        [
+          35,
+          122
+        ]
+      ]
+    }
+  ]
+}

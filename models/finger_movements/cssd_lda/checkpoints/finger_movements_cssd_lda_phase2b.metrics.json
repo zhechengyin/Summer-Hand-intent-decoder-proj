@@ -1,0 +1,49 @@
+{
+  "created_utc": "2026-08-10T19:32:41.821840+00:00",
+  "checkpoint": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/models/finger_movements/cssd_lda/checkpoints/finger_movements_cssd_lda_phase2b.npz",
+  "checkpoint_sha256": "1e95b1ab5eaf7277cadd658578ef343f67923fc2b197aec8e1231735163bbfa2",
+  "training_data": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/data/processed/finger_movements/train.npz",
+  "training_data_sha256": "a2025f277b5351839554e0ecf3398f1f4fd5151a4fc90f0e25c873734f5a91d1",
+  "configuration": {
+    "covariance": "empirical",
+    "trial_trace_normalization": true,
+    "bp_patterns_per_class": 1,
+    "f2_patterns_per_class": 1,
+    "fusion": "LDA",
+    "temporal_filters": "fourth-order zero-phase Butterworth"
+  },
+  "selection_evidence": {
+    "mean_oof_balanced_accuracy": 0.8672168142183766,
+    "seed_balanced_accuracy_sd": 0.0068365438619155,
+    "worst_seed_balanced_accuracy": 0.8609141529463606,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "folds_per_seed": 5
+  },
+  "apparent_full_training_metrics": {
+    "accuracy": 0.9082278481012658,
+    "balanced_accuracy": 0.9084044385690823,
+    "macro_f1": 0.9081827927900848,
+    "mean_log_loss": 0.21221459328969292,
+    "confusion_matrix": [
+      [
+        140,
+        19
+      ],
+      [
+        10,
+        147
+      ]
+    ]
+  },
+  "reload_verification": {
+    "predictions_exact": true,
+    "maximum_score_absolute_error": 0.0,
+    "maximum_probability_absolute_error": 0.0
+  },
+  "test_policy": "official TEST refused and not loaded",
+  "deployment_status": "research checkpoint only; sosfiltfilt is non-causal and must be redesigned before firmware deployment"
+}

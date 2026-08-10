@@ -1,15 +1,20 @@
 # Models
 
-There is currently no promoted active model.
-
-The completed FingerMovements terminal low-pass + Logistic Regression model
-and its exact Phase 1h checkpoint are archived under:
+The active model is:
 
 ```text
-history/finger_movements/models/terminal_logistic/
+models/finger_movements/cssd_lda/
 ```
 
-It remains the reproducible baseline for future training-only comparisons,
-but its 62.00% official-test accuracy was not strong enough for final firmware
-promotion. New active implementations must be self-contained and must not
-import code from `history/`.
+It is the Phase 2b winner on corrected official MATLAB TRAIN data: empirical
+CSSD covariance, per-trial trace normalization, one BP and one ERD/F2 spatial
+pattern per class, three branch LDAs, and final LDA fusion. Its mean OOF
+balanced accuracy was 86.72% across seeds 42/43/44 with five folds per seed.
+
+The directory contains a self-contained implementation, an all-TRAIN fitting
+entry point, a verified NPZ checkpoint, and machine-readable checkpoint
+metrics. Active code does not import from `history/`.
+
+This is an offline research model. Its zero-phase temporal filters are
+non-causal, so it is not yet the firmware model. Retired models and their old
+checkpoints remain under `history/finger_movements/models/`.

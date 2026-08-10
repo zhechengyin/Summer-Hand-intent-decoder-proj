@@ -3,6 +3,13 @@
 This is the frozen model completed in Phase 1h. It is preserved for
 reproducibility and comparison; active code must not import it.
 
+> Data-validity notice: this checkpoint and the 68.89%/62.10% metrics below
+> were produced from the retired UEA conversion with deterministic
+> adjacent-channel overlap. They are historical provenance, not valid current
+> evidence. The same frozen representation reached 78.58% mean OOF balanced
+> accuracy when re-evaluated on corrected official MATLAB TRAIN data; no new
+> Logistic checkpoint was promoted.
+
 ## Input and target
 
 - Input: `float32` EEG with shape `(cases, 28, 50)`.

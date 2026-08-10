@@ -50,7 +50,9 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 
-ROOT = Path(__file__).resolve().parents[2]
+# This experiment is archived three directories below the repository root:
+# history/finger_movements/experiments/phasea2_cssd_lda.py.
+ROOT = Path(__file__).resolve().parents[3]
 
 CASES = 316
 CHANNELS = 28

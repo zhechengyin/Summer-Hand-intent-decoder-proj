@@ -19,8 +19,9 @@ Rules:
 6. Store only inputs that can be reproduced by the intended firmware unless a
    field is explicitly marked as an offline label or audit field.
 
-The FingerMovements converter preserves the official train/test split and does
-not normalize, filter, or augment the EEG. See
+The FingerMovements converter reads the official BCI Competition II 100 Hz
+MATLAB release, preserves its train/test split, and does not normalize, filter,
+or augment the EEG. See
 `processed/finger_movements/README.md` for the exact NPZ schema.
 
 The retired Indy data and its original data README are under `history/indy/data/`.

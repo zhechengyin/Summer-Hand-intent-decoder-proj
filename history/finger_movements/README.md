@@ -1,31 +1,50 @@
 # FingerMovements Experiment Archive
 
-This archive preserves the complete first FingerMovements research direction,
-Phase 1b through Phase 1h. Nothing under this directory is an active Python
-dependency.
+This directory preserves completed FingerMovements experiments. Nothing under
+it is an active Python dependency.
+
+## Data-validity boundary
+
+The experiments through 2026-08-07 used a retired UEA conversion later found
+to contain deterministic adjacent-channel overlap. Their scripts, metrics,
+and the one-time official-test result are preserved for provenance, but those
+numbers are invalid for comparison with the corrected official MATLAB data.
+
+On 2026-08-10 the official MATLAB TRAIN data was converted directly and the
+relevant models were rerun. Corrected-data evidence is explicitly identified
+by its directory name or creation date.
 
 ## Contents
 
 ```text
-EXPERIMENT_LOG.md   chronological protocol, results, and decisions
-STATUS.md           final state at the 2026-08-05 archive boundary
-experiments/        exact Phase 1b–1h experiment and inference scripts
-models/             retired implementations and frozen final checkpoint
-results/            metrics, predictions, learning curves, and figures
+EXPERIMENT_LOG.md   chronological protocol, invalidations, results, decisions
+STATUS.md           archive snapshot and validity boundary
+experiments/        completed Phase 1, Phase A2, and Phase 2b runners
+models/             retired implementations and invalid-source checkpoints
+results/            old provenance plus corrected-data completed evidence
 ```
 
-The scripts retain the paths used while they were active. They are preserved
-for provenance and are not supported active entry points.
+Important corrected-data result directories:
 
-## Final outcome
+```text
+results/phasea2_cssd_lda_official_matlab/
+results/phase2b_combination_ablation/
+results/archived_terminal_logistic_official_matlab/
+```
 
-The selected pipeline was a causal 5 Hz low-pass, 252 terminal ABC features,
-and L2 Logistic Regression with `C=1`. It achieved 68.89% mean OOF balanced
-accuracy during model selection. The exact all-training-data checkpoint then
-reached 62.00% accuracy and 62.10% balanced accuracy on the one-time official
-100-case test.
+`results/phase2b_cssd_stabilization_retired_uea/` is explicitly retained as an
+invalid-source result and must not be mixed with the corrected combination
+ablation. Likewise, `results/phasea2_cssd_lda/` is the retired UEA result;
+`results/phasea2_cssd_lda_official_matlab/` is the corrected rerun.
 
-This is retained as a reproducible baseline, not promoted as the final
-firmware model. The 6.78 percentage-point OOF-to-test balanced-accuracy drop
-and the published headroom on this dataset motivate a change in EEG feature
-representation rather than further tuning of the same terminal features.
+## Final archived outcome
+
+On corrected official TRAIN data:
+
+- terminal features + Logistic: 78.58% mean OOF balanced accuracy;
+- Phase A2 CSSD + hierarchical LDA: 85.03%;
+- Phase 2b winner: 86.72%.
+
+The Phase 2b winner was promoted out of the archive to
+`models/finger_movements/cssd_lda/`. All experimental runners and comparison
+results remain here as immutable provenance.

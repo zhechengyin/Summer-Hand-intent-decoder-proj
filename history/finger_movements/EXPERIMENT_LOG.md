@@ -1,5 +1,12 @@
 # Experiment Log
 
+> Validity notice added 2026-08-10: entries through 2026-08-07 used a retired
+> UEA conversion later shown to contain deterministic adjacent-channel
+> overlap. Those entries remain intact as historical provenance, but their
+> scores and checkpoints are invalid for comparison with the corrected direct
+> conversion of the official MATLAB release. Corrected evidence begins with
+> the entries dated 2026-08-10 below.
+
 ## 2026-07-29 — Repository reset
 
 The completed Indy Loco research program was retired from the active project
@@ -254,3 +261,210 @@ experiment should change the EEG representation and must select all design
 choices using only the 316 official training cases. The already-opened test may
 be reported only as a post-hoc comparison; it is no longer a pristine model
 selection gate.
+
+## 2026-08-05 — Phase A2 paper-style CSSD + hierarchical LDA
+
+Phase A2 implemented the three branches described by Wang et al. for BCI
+Competition 2003 Data Set IV: low-frequency BP-CSSD, 10--33 Hz ERD-CSSD, and a
+19-channel BP trend representation. Each branch was reduced to one Fisher/LDA
+score and a final LDA combined the three scores. The implementation used
+fourth-order zero-phase Butterworth filters and a `1e-6` CSSD covariance ridge.
+Every CSSD projection, scaler, and LDA was fitted from the current training
+fold only. Official TEST was refused.
+
+Seeds 42, 43, and 44 with stratified five-fold cross-validation produced
+59.81% mean OOF balanced accuracy, 1.87-point seed SD, and 57.90% worst-seed
+balanced accuracy. This was 9.07 points below the archived 68.89% terminal
+Logistic OOF baseline.
+
+The TRAIN-only diagnosis found the following outer-fold train-to-validation
+AUC changes:
+
+- BP CSSD: 61.77% to 52.59%;
+- ERD CSSD: 83.18% to 55.79%;
+- BP trend: 79.54% to 65.83%;
+- final fusion: 88.69% to 63.94%.
+
+Inner-OOF fusion improved the complete three-branch model from 59.81% to
+61.08%, but BP trend alone remained better at 62.25%. Cross-fold CSSD subspace
+similarity was particularly weak for the BP-right and ERD-right directions,
+and some fold pairs were nearly orthogonal. The result identified unstable,
+overfitted spatial filters rather than missing fold coverage or final fusion
+as the primary limitation.
+
+Decision: archive Phase A2 as the immutable reference for Phase 2b. Its source
+is preserved at `experiments/phasea2_cssd_lda.py` and its complete metrics,
+predictions, diagnostic tables, and figures at `results/phasea2_cssd_lda/`
+inside this archive. Phase 2b must remain self-contained and must not import
+from these archived files.
+
+## 2026-08-07 — Phase 2b isolated CSSD stabilization
+
+Phase 2b first tested each proposed CSSD remedy separately against the exact
+Phase A2 reference. The experiment compared empirical covariance with a
+stronger fixed ridge, Ledoit-Wolf, and OAS; trial trace normalization; F2
+component counts of three, two, or one per class; and hard or soft branch
+voting. Seeds 42, 43, and 44 used paired five-fold OOF evaluation on all 316
+official TRAIN cases. Every learned operation was fitted within the current
+outer-training fold, and official TEST was refused.
+
+The unchanged Phase A2 reference reproduced at 59.81% mean OOF balanced
+accuracy. Reducing F2 from three to one component per class was the strongest
+isolated change: 63.41% mean OOF balanced accuracy, 1.04-point seed SD, 62.04%
+worst-seed accuracy, and a +3.59-point gain with all three seeds improving.
+Two F2 components reached 61.40%, Ledoit-Wolf reached 60.87%, trial
+normalization reached 60.55%, OAS reached 60.45%, and soft voting was
+effectively neutral at 59.83%. Hard voting and the stronger fixed ridge were
+harmful.
+
+Decision: retain one F2 component per class as the only strong candidate, but
+do not promote a model until the individually positive techniques have been
+tested in controlled combinations.
+
+## 2026-08-07 — Phase 2b full combination ablation
+
+The follow-up crossed all compatible levels associated with the isolated
+above-baseline techniques: empirical/Ledoit-Wolf/OAS covariance, trial trace
+normalization off/on, three/two/one F2 components per class, and LDA/soft-vote
+fusion. The complete `3 x 2 x 3 x 2` factorial design contained 36
+combinations, 108 combination-seed groups, and 34,128 paired OOF predictions.
+Every group covered the same 316 TRAIN cases exactly once. The seven matching
+single-factor cells reproduced the isolated experiment numerically, and
+official TEST was not loaded.
+
+The best setting was empirical covariance, no trial normalization, one F2
+component per class, and LDA fusion. It reproduced the isolated winner at
+63.41% mean OOF balanced accuracy, 1.04-point seed SD, and 62.04% worst-seed
+accuracy. Adding OAS reduced the mean to 62.88%; adding Ledoit-Wolf reduced it
+to 62.77%; the best soft-vote combination reached 61.83%.
+
+Matched effects across the factorial grid were +0.25 points for Ledoit-Wolf,
++0.34 for OAS, -0.50 for trial normalization, +0.61 for two F2 components
+versus three, +1.13 for one F2 component versus three, and -0.97 for soft
+voting. The important interactions were negative: trial normalization reduced
+the one-component F2 benefit by 1.61 points, while Ledoit-Wolf reduced it by
+0.61 points.
+
+Decision: keep only the one-component F2 reduction. Retain empirical
+covariance, no trial normalization, and LDA fusion. No combination exceeds the
+archived terminal-feature Logistic representation's 68.89% OOF result, so no
+CSSD model or checkpoint is promoted.
+
+## 2026-08-10 — Official MATLAB data correction and evidence invalidation
+
+The raw FingerMovements release was reacquired from the official BCI
+Competition II Data Set IV source. Direct inspection showed the MATLAB signal
+layout is `time x channels x trials`. The former UEA conversion contained a
+deterministic sliding overlap between adjacent channel dimensions and was
+retired.
+
+The supported converter now produces official TRAIN as `(316, 28, 50)` with
+class counts left 159/right 157 and canonical source indices 0--315. It applies
+no filtering, normalization, feature extraction, or split reassignment. The
+processed TRAIN SHA-256 is:
+
+```text
+a2025f277b5351839554e0ecf3398f1f4fd5151a4fc90f0e25c873734f5a91d1
+```
+
+Consequences:
+
+- all Phase 1b--1h development metrics from the UEA conversion are invalid;
+- the old Phase 1h checkpoint and 62.10% official-test result are retained only
+  as provenance;
+- the initial 59.81% Phase A2 and 63.41% Phase 2b results are invalid;
+- official TEST was already exposed and cannot become pristine again;
+- all corrected model choices must be based on official TRAIN-only validation.
+
+The pre-correction isolated Phase 2b output was moved to
+`results/phase2b_cssd_stabilization_retired_uea/` inside this archive so its
+validity cannot be confused with corrected evidence.
+
+## 2026-08-10 — Corrected Phase A2 baseline
+
+The paper-style BP-CSSD, ERD-CSSD, BP-trend, and hierarchical LDA pipeline was
+rerun on the corrected official MATLAB TRAIN data. Seeds 42, 43, and 44 each
+used five stratified folds. Every CSSD filter, scaler, branch LDA, and fusion
+LDA was fitted using only its outer-training fold. Official TEST was refused.
+
+The corrected Phase A2 result was 85.03% mean OOF balanced accuracy, 1.27
+percentage-point seed standard deviation, and 83.25% worst-seed balanced
+accuracy. This replaces 59.81% as the valid Phase A2 reference. Results are
+archived under `results/phasea2_cssd_lda_official_matlab/`.
+
+## 2026-08-10 — Corrected Phase 2b combination ablation
+
+All 36 combinations of empirical/Ledoit-Wolf/OAS covariance, trial trace
+normalization off/on, F2 component counts three/two/one per class, and
+LDA/soft-vote fusion were evaluated on the corrected official MATLAB TRAIN
+data. The protocol produced 34,128 paired OOF predictions across 108
+variant-seed groups. Every group contained all 316 cases exactly once and
+official TEST was not loaded.
+
+The best configuration was:
+
+```text
+covariance=empirical
+trial trace normalization=on
+F2 components per class=1
+fusion=LDA
+```
+
+It achieved 86.72% mean OOF balanced accuracy, 0.68 percentage-point seed
+standard deviation, and 86.09% worst-seed balanced accuracy. The individual
+seed balanced accuracies were 86.40%, 87.67%, and 86.09% for seeds 42, 43, and
+44. It improved all three seeds over the corrected 85.03% Phase A2 reference.
+
+Decision: promote this configuration as the active offline research model.
+This corrected result supersedes the old invalid-source conclusion that trial
+normalization should be disabled. Complete evidence is archived under
+`results/phase2b_combination_ablation/`.
+
+## 2026-08-10 — Corrected terminal-Logistic control
+
+The frozen Phase 1 terminal representation was re-evaluated, without changing
+features or `C`, on the corrected official MATLAB TRAIN data. The exact
+pipeline remained a second-order causal 5 Hz low-pass, 252 terminal ABC
+features, fold-training-only channel and feature normalization, and L2
+Logistic Regression with `C=1`.
+
+Across seeds 42/43/44 and five folds per seed it reached 78.58% mean OOF
+balanced accuracy, 1.04 percentage-point seed standard deviation, and 77.22%
+worst-seed balanced accuracy. This is 6.45 points below corrected Phase A2 and
+8.14 points below the Phase 2b winner. Official TEST was refused.
+
+Decision: retain the result only as the corrected simple linear control; do
+not promote or retrain a Logistic checkpoint. Code and evidence are archived
+as `evaluate_archived_terminal_logistic_phase1.py` and
+`results/archived_terminal_logistic_official_matlab/`.
+
+## 2026-08-10 — Phase 2b closeout and active checkpoint
+
+A self-contained active model was created under
+`models/finger_movements/cssd_lda/`; it imports no archived experiment code.
+The frozen winner was fitted once on all 316 corrected official TRAIN cases.
+The checkpoint contains temporal filter coefficients, channel order, BP/ERD
+CSSD filters, all branch/fusion scaler parameters, LDA coefficients, and
+training metadata.
+
+Checkpoint:
+
+```text
+models/finger_movements/cssd_lda/checkpoints/finger_movements_cssd_lda_phase2b.npz
+```
+
+SHA-256:
+
+```text
+1e95b1ab5eaf7277cadd658578ef343f67923fc2b197aec8e1231735163bbfa2
+```
+
+The apparent all-TRAIN accuracy and balanced accuracy were 90.82% and 90.84%,
+respectively; they are fit diagnostics, not generalization estimates. After
+saving, the checkpoint reproduced predictions exactly with zero decision-score
+and probability error. Official TEST was refused and not loaded.
+
+Deployment decision: this is the active offline research checkpoint, not a
+firmware checkpoint. Its fourth-order zero-phase filters use future samples
+inside each 500 ms trial. A future phase must replace them with causal
+preprocessing and repeat TRAIN-only validation before real-time deployment.

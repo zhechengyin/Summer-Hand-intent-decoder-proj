@@ -1,18 +1,17 @@
 # Results
 
-The active FingerMovements result is:
+There are no active experiment results at the Phase 2b closeout boundary.
+
+Completed FingerMovements evidence has been moved to:
 
 ```text
-results/finger_movements/phasea2_cssd_lda/
+history/finger_movements/results/
 ```
 
-It contains fold metrics, seed-level OOF metrics, per-case OOF predictions,
-three branch scores, and the original summary figure. The `phasea2_diagnostic`
-files add train-versus-validation layer metrics, all seven branch ablations,
-inner-OOF fusion, cross-fold CSSD subspace stability, per-case seed stability,
-and a generalization-diagnostic figure. The official test is not loaded by
-Phase A2.
+The active model's checkpoint and final-fit verification live with the model:
 
-The complete earlier FingerMovements direction, including its official-test
-result, remains under `history/finger_movements/results/`. Completed Indy
-results remain under `history/indy/results/`.
+```text
+models/finger_movements/cssd_lda/checkpoints/
+```
+
+Retired Indy results remain under `history/indy/results/`.

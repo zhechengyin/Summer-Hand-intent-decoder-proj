@@ -1,48 +1,57 @@
 # Embedded Neural Signal Models
 
-This repository develops small neural-signal models that can later run at low
-latency on firmware.
+This repository develops compact neural-signal models intended for eventual
+low-latency firmware deployment.
 
-The first FingerMovements research direction is complete and archived. It
-classified left- versus right-hand movement from a 28-channel, 500 ms EEG
-segment sampled at 100 Hz. Its frozen terminal low-pass + Logistic Regression
-pipeline achieved 68.89% mean out-of-fold balanced accuracy and 62.10%
-balanced accuracy on the one-time official 100-case test.
+The current task is FingerMovements left/right EEG classification from 28
+channels and 50 samples at 100 Hz. The active offline research model is the
+Phase 2b CSSD + hierarchical LDA winner, selected entirely from corrected
+official MATLAB TRAIN data.
 
-Phase A2 is the active experiment. It evaluates a paper-style CSSD +
-hierarchical LDA representation using low-frequency BP, 10--33 Hz ERD, and BP
-trend features. The archived terminal Logistic model remains the comparison
-baseline; there is not yet a promoted model for the new direction.
+## Current result
+
+| Model | Mean OOF balanced accuracy |
+|---|---:|
+| Terminal features + Logistic reproduction | 78.58% |
+| Paper-style CSSD + hierarchical LDA | 85.03% |
+| **Selected Phase 2b CSSD + hierarchical LDA** | **86.72%** |
+
+The selected configuration uses empirical covariance, per-trial trace
+normalization, one BP and one ERD/F2 spatial pattern per class, and LDA fusion.
+Its seed standard deviation was 0.68 percentage points and its worst-seed OOF
+balanced accuracy was 86.09% across seeds 42/43/44.
+
+The active implementation and verified all-TRAIN checkpoint are under
+`models/finger_movements/cssd_lda/`. All completed experimental code and
+results are archived under `history/finger_movements/`.
+
+## Important limitation
+
+The current model uses zero-phase temporal filtering. It is therefore an
+offline reference, not yet a causal streaming firmware model. The next model
+phase must replace that preprocessing with a causal implementation and repeat
+TRAIN-only validation before deployment.
 
 ## Project rules
 
 1. Every model has one explicit input contract and one explicit target.
-2. Datasets with different labels are not merged merely because they share a
-   signal modality.
-3. Learned preprocessing is fitted from training folds only.
-4. Active code must not import from `history/`.
-5. The FingerMovements official test has been opened once. Future model
-   selection must use only the 316-case training split; official-test results
-   are post-hoc comparisons, not a new tuning signal.
+2. Learned preprocessing is fitted from training folds only.
+3. Active code does not import from `history/`.
+4. Results produced from the retired UEA sliding-channel conversion are
+   historical provenance only and are not comparable with corrected results.
+5. The official TEST has already been exposed and must not be used for model
+   selection; a new external holdout is needed for independent final evidence.
 
 ## Repository layout
 
 ```text
-data/
-  raw/                                      immutable source dataset
-  processed/finger_movements/               model-ready official splits
-  processing/finger_movements/              supported conversion code
-experiments/active/phasea2_cssd_lda.py       active TRAIN-only experiment
-models/                                      empty of promoted candidates
-results/finger_movements/phasea2_cssd_lda/   active Phase A2 results
-docs/STATUS.md                               current truth and next decision gate
-history/finger_movements/                    completed EEG direction and checkpoint
-history/indy/                                completed Indy project
+data/raw/FingerMovements/               immutable official source files
+data/processed/finger_movements/        model-ready official splits
+data/processing/finger_movements/       supported conversion code
+models/finger_movements/cssd_lda/       active model and checkpoint
+experiments/active/                     empty experiment boundary + README
+results/                                no active experiment results
+docs/STATUS.md                          current source of truth
+history/finger_movements/               completed EEG experiments/results
+history/indy/                           completed Indy project
 ```
-
-## Next gate
-
-Phase A2's generalization diagnosis identifies unstable, overfitted CSSD
-spatial filters as the main limitation. The next useful check is TRAIN-only
-covariance stabilization for CSSD, evaluated by held-out balanced accuracy and
-cross-fold subspace stability. The official test must remain untouched.

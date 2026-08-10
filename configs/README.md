@@ -1,12 +1,9 @@
 # Configs
 
-Phase A2 is self-contained in `experiments/active/phasea2_cssd_lda.py`. Its
-published frequency bands, time windows, CSSD component counts, numerical
-ridge, cross-validation seeds, and LDA choices are declared as named constants
-in that file; there is no separate configuration file.
+There is no separate active configuration file. The frozen FingerMovements
+configuration is declared beside the self-contained model under
+`models/finger_movements/cssd_lda/` and recorded in its checkpoint metadata.
 
-The completed FingerMovements terminal low-pass + Logistic contract is
-preserved with its checkpoint under
-`history/finger_movements/models/terminal_logistic/`.
-
-Retired Indy configurations are preserved under `history/indy/configs/`.
+Completed experiment grids and their constants are preserved with their
+scripts under `history/finger_movements/experiments/`. Retired Indy
+configurations remain under `history/indy/configs/`.

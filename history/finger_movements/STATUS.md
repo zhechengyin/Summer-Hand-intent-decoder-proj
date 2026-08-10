@@ -1,26 +1,26 @@
-# FingerMovements Status at Phase 1h Completion
+# FingerMovements Archive Status
 
-Archived: 2026-08-05
+Updated: 2026-08-10
 
-- Dataset: FingerMovements, 28 EEG channels, 50 samples per case at 100 Hz.
-- Development data: 316 official training cases.
-- Validation: seeds 42, 43, and 44 with stratified five-fold cross-validation.
-- Selected representation: 252 terminal causal low-pass ABC features.
-- Selected classifier: L2 Logistic Regression with `C=1`.
-- Mean OOF balanced accuracy: 68.89%.
-- Seed standard deviation: 0.92 percentage points.
-- Worst-seed balanced accuracy: 68.35%.
-- Final checkpoint: trained on all 316 official training cases and verified
-  after reload.
-- Checkpoint SHA-256:
-  `f8fca725c3b638219bbd734257cd958779e595add2fe1118e1e78689bc120047`.
-- Official test: opened once for pure inference on 2026-08-05.
-- Official-test accuracy: 62.00%.
-- Official-test balanced accuracy: 62.10%.
-- Official-test macro-F1: 61.94%.
-- Official-test confusion matrix: `[[33, 16], [22, 29]]`.
+The Phase 1h snapshot and the initial Phase A2/Phase 2b experiments were based
+on a retired UEA conversion with deterministic adjacent-channel overlap. The
+old 68.89% development score, 62.10% one-time test score, 59.81% Phase A2
+score, and 63.41% Phase 2b score are preserved in this archive only to explain
+the project history. They are not valid evidence for the corrected dataset.
 
-The pipeline is a completed reproducible baseline, not an active final model.
-Future work must not tune from the opened official-test result. The next
-candidate direction should be selected entirely on the 316-case training
-split and should focus on EEG temporal-frequency and spatial representation.
+After direct conversion of the official MATLAB release, TRAIN-only reruns
+produced:
+
+| Completed model | Mean OOF BA | Seed SD | Worst seed |
+|---|---:|---:|---:|
+| Terminal features + Logistic | 78.58% | 1.04 pp | 77.22% |
+| Phase A2 CSSD + hierarchical LDA | 85.03% | 1.27 pp | 83.25% |
+| Phase 2b winner | 86.72% | 0.68 pp | 86.09% |
+
+The Phase 2b winner uses empirical covariance, per-trial trace normalization,
+one F2 component per class, and LDA fusion. Its active implementation and new
+all-TRAIN checkpoint are outside the archive under
+`models/finger_movements/cssd_lda/`.
+
+No archived code is an active dependency. The official TEST was not rerun
+after the data correction and cannot be treated as a pristine final gate.
