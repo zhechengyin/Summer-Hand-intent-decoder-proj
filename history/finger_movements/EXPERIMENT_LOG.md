@@ -468,3 +468,148 @@ Deployment decision: this is the active offline research checkpoint, not a
 firmware checkpoint. Its fourth-order zero-phase filters use future samples
 inside each 500 ms trial. A future phase must replace them with causal
 preprocessing and repeat TRAIN-only validation before real-time deployment.
+
+## 2026-08-10 — Phase 2c initial causal horizon diagnostic
+
+This initial Phase 2c diagnostic kept the frozen 86.72% zero-phase model and
+checkpoint unchanged. It tested a self-contained strictly causal version of
+the same empirical covariance, trial trace normalization, one-component BP/F2,
+and hierarchical LDA family.
+
+The bin length was frozen at 50 ms, equal to five samples at 100 Hz. Ten
+horizon-specific models produced predictions at 50, 100, ..., 500 ms. Each
+horizon's causal temporal signals, CSSD filters, branch scalers/LDAs, and
+fusion LDA used only samples available by that horizon. All learned quantities
+were fitted from outer-training trials only; whole cases remained the fold
+unit. Seeds 42/43/44 used five stratified folds and official TEST was refused.
+
+Forbidden operations included `sosfiltfilt`, `filtfilt`, centered windows,
+whole-trial inference normalization, and any feature ending after the current
+horizon. Filtering used left-to-right `sosfilt` initialized from the first
+current sample. As an executable causality audit, all future samples after
+each horizon were replaced by extreme synthetic values for held-out cases.
+Current decision scores and probabilities changed by exactly zero at every
+horizon.
+
+| Prediction horizon | Mean OOF BA | Seed SD | Worst seed |
+|---:|---:|---:|---:|
+| 50 ms | 50.62% | 2.99 pp | 46.50% |
+| 100 ms | 51.27% | 1.02 pp | 50.01% |
+| 150 ms | 55.16% | 1.06 pp | 53.76% |
+| 200 ms | 56.33% | 0.26 pp | 56.02% |
+| 250 ms | 62.97% | 0.90 pp | 61.70% |
+| 300 ms | 68.97% | 0.94 pp | 67.70% |
+| 350 ms | 72.89% | 1.98 pp | 70.25% |
+| 400 ms | 77.22% | 1.86 pp | 74.68% |
+| 450 ms | 79.65% | 0.79 pp | 78.80% |
+| 500 ms | 82.93% | 1.03 pp | 81.67% |
+
+The 500 ms seed results were 84.20%, 82.92%, and 81.67%. Relative to the
+paired zero-phase model, the causal deltas were -2.20, -4.75, and -4.42 points
+for seeds 42, 43, and 44. Exact paired tests were not significant for seed 42
+(`p=0.371`) and favored the zero-phase model for seeds 43 and 44 (`p=0.0315`
+and `p=0.0336`). The mean causal cost was 3.79 points.
+
+Decision: strict causality is feasible with a moderate rather than
+catastrophic performance cost. Do not overwrite the offline baseline or its
+checkpoint yet. The next decision is the required prediction horizon: 500 ms
+maximizes observed accuracy, while 400/450 ms provide lower latency at 77.22%
+and 79.65% mean BA. After that requirement is frozen, train and verify only the
+chosen causal all-TRAIN checkpoint.
+
+## 2026-08-10 — Phase 2c past-only rolling streaming correction
+
+Phase 2c corrected the deployment interpretation of the 500 ms endpoint. The
+prediction point is A and the model input is `[A-500 ms, A]`; no sample after A
+is consumed. Thus 500 ms is historical context rather than a delay after A.
+The design receives five samples per 50 ms update, carries causal SOS filter
+state between bins, and maintains a 500 ms filtered ring buffer. Ten bins are
+needed only for the first startup warm-up; the intended steady-state output
+interval is then 50 ms.
+
+The same seeds 42/43/44 and five fold partitions were used. All CSSD filters,
+branch models, and fusion models were fitted from outer-training trials only.
+Official TEST was refused. The endpoint OOF predictions and probabilities
+exactly reproduced the initial Phase 2c 500 ms horizon endpoint:
+
+| Metric | Phase 2c |
+|---|---:|
+| Mean OOF balanced accuracy | 82.93% |
+| Seed SD | 1.03 pp |
+| Worst-seed balanced accuracy | 81.67% |
+| Delta versus zero-phase reference | -3.79 pp |
+| Delta versus initial Phase 2c horizon endpoint | 0.00 pp |
+
+Two implementation checks ran on all 64 validation cases in the first fold.
+Processing the same history as ten stateful 50 ms calls exactly reproduced a
+single full causal call: filtered samples, decision scores, probabilities, and
+predictions all had zero error. The rolling implementation emitted first after
+ten startup bins and emitted again after only one additional 50 ms bin.
+Appending ten extreme synthetic samples after A also caused exactly zero
+change to inference at A.
+
+Decision: Phase 2c is the correct timing and streaming specification. It does
+not create or replace a checkpoint yet. The official dataset contains isolated
+500 ms epochs, so it cannot test persistent filter state across successive
+overlapping windows or always-on behavior. Continuous recordings, including a
+rest/no-intent condition, are required before claiming a complete real-time
+decoder.
+
+## 2026-08-10 — Phase 2c causal checkpoint promotion and sweep handoff
+
+The completed horizon diagnostic and rolling-streaming evaluation were
+archived without changing their metrics. The Phase 2b zero-phase model,
+training entry point, checkpoint, and metadata were moved together to
+`history/finger_movements/models/cssd_lda_offline_phase2b/` so the 86.72%
+offline reference remains reproducible.
+
+The active model was replaced by a self-contained strictly causal Phase 2c
+implementation. It retains the selected empirical covariance, per-trial trace
+normalization, one BP/F2 pattern per class, and hierarchical LDA structure,
+but uses left-to-right SOS filtering and exposes persistent IIR plus 500 ms
+ring-buffer state. It was fitted once on all 316 official TRAIN cases after
+the TRAIN-only 82.93% OOF result had been frozen. Official TEST was refused.
+
+Active checkpoint:
+
+```text
+models/finger_movements/cssd_lda/checkpoints/finger_movements_cssd_lda_phase2c_causal.npz
+```
+
+SHA-256:
+
+```text
+d92c23f7e6f8722d568d1b31963eab1328d5367ba32764b676d1ae0d73aaefd4
+```
+
+The apparent all-TRAIN balanced accuracy was 88.30%; this is a fitting
+diagnostic, not a generalization estimate. Save/reload predictions were exact.
+Ten stateful 50 ms updates reproduced batch endpoint inference on all 316
+cases, with maximum score error `7.11e-15` and probability error `1.11e-15`.
+
+The next active Phase 2c runner performs a predeclared 4 x 4 comparison:
+
+- past-context windows: 200, 300, 400, and 500 ms;
+- streaming bins: 10, 20, 50, and 100 ms;
+- seeds 42/43/44, five whole-case folds, TRAIN only.
+
+Window size changes the classifier input and is refitted independently. Bin
+size only changes causal chunking for an identical endpoint, so the script
+requires exact filtering equivalence and does not use duplicated accuracy to
+claim that one bin is statistically better.
+
+The complete sweep produced:
+
+| Window | Mean OOF BA | Seed SD | Worst seed |
+|---:|---:|---:|---:|
+| 200 ms | 80.17% | 1.56 pp | 78.17% |
+| 300 ms | 82.81% | 1.30 pp | 81.33% |
+| **400 ms** | **83.45%** | **1.07 pp** | **81.98%** |
+| 500 ms | 82.93% | 1.03 pp | 81.67% |
+
+The predeclared rule provisionally selects 400 ms, which improved mean BA by
+0.52 points and worst-seed BA by 0.31 points relative to 500 ms. The effect was
+not uniform: seed 42 decreased from 84.20% to 81.98%, while seeds 43 and 44
+increased from 82.92%/81.67% to 84.50%/83.87%. Therefore the active 500 ms /
+50 ms checkpoint remains unchanged pending a focused confirmation. All four
+bin sizes had exactly zero causal-filter discrepancy.

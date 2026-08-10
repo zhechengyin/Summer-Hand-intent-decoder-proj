@@ -1,0 +1,110 @@
+{
+  "phase": "2c",
+  "created_utc": "2026-08-10T20:03:26.901589+00:00",
+  "scope": "500 ms past-only rolling context with 50 ms streaming updates",
+  "data": {
+    "path": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/data/processed/finger_movements/train.npz",
+    "sha256": "a2025f277b5351839554e0ecf3398f1f4fd5151a4fc90f0e25c873734f5a91d1",
+    "cases": 316,
+    "shape": [
+      316,
+      28,
+      50
+    ],
+    "test_policy": "official TEST refused and not loaded"
+  },
+  "timing_contract": {
+    "prediction_point": "A",
+    "input_interval": "[A-500 ms, A]",
+    "future_after_a_consumed": false,
+    "history_ms": 500,
+    "update_ms": 50,
+    "samples_per_update": 5,
+    "startup_warmup_bins": 10,
+    "steady_state_output": "one update every 50 ms after warm-up"
+  },
+  "filter_state": {
+    "implementation": "causal SOS IIR state carried across 50 ms bins",
+    "evaluation_initialization": "first sample of each isolated official epoch; the dataset does not include preceding continuous EEG",
+    "deployment_requirement": "carry state continuously; validate with continuous recordings"
+  },
+  "validation": {
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "folds": 5,
+    "split_unit": "whole trial/case",
+    "all_learned_operations": "outer-training-fold only"
+  },
+  "model": {
+    "covariance": "empirical",
+    "trial_trace_normalization": true,
+    "bp_patterns_per_class": 1,
+    "erd_patterns_per_class": 1,
+    "fusion": "hierarchical LDA"
+  },
+  "streaming_equivalence_check": {
+    "checked_cases": 64,
+    "bins_per_window": 10,
+    "maximum_filtered_signal_error": 0.0,
+    "maximum_decision_score_error": 0.0,
+    "maximum_probability_error": 0.0,
+    "maximum_ring_buffer_error": 0.0,
+    "predictions_exact": true,
+    "first_output_after_bins": 10,
+    "next_output_after_one_more_bin": true,
+    "passed": true
+  },
+  "post_a_future_invariance_check": {
+    "checked_cases": 64,
+    "synthetic_future_samples_after_a": 10,
+    "maximum_filtered_signal_error": 0.0,
+    "maximum_decision_score_error": 0.0,
+    "maximum_probability_error": 0.0,
+    "predictions_exact": true,
+    "passed": true
+  },
+  "offline_reference_mean_oof_balanced_accuracy": 0.8672168142183766,
+  "phase2c_horizon_endpoint_mean_oof_balanced_accuracy": 0.8293073749148739,
+  "seed_results": [
+    {
+      "seed": 42,
+      "evaluated_cases": 316,
+      "accuracy": 0.8417721518987342,
+      "balanced_accuracy": 0.8420061691303129,
+      "macro_f1": 0.8416135370303541,
+      "mean_log_loss": 0.3645428323828415,
+      "confusion_matrix": "[[128, 31], [19, 138]]"
+    },
+    {
+      "seed": 43,
+      "evaluated_cases": 316,
+      "accuracy": 0.8291139240506329,
+      "balanced_accuracy": 0.8291871970516365,
+      "macro_f1": 0.8291070784761447,
+      "mean_log_loss": 0.35871208745921657,
+      "confusion_matrix": "[[130, 29], [25, 132]]"
+    },
+    {
+      "seed": 44,
+      "evaluated_cases": 316,
+      "accuracy": 0.8164556962025317,
+      "balanced_accuracy": 0.8167287585626728,
+      "macro_f1": 0.8161906290115533,
+      "mean_log_loss": 0.3997603026449152,
+      "confusion_matrix": "[[123, 36], [22, 135]]"
+    }
+  ],
+  "summary": {
+    "mean_accuracy": 0.8291139240506329,
+    "mean_balanced_accuracy": 0.8293073749148739,
+    "balanced_accuracy_seed_sd": 0.010319809536045069,
+    "worst_seed_balanced_accuracy": 0.8167287585626728,
+    "best_seed_balanced_accuracy": 0.8420061691303129,
+    "mean_macro_f1": 0.8289704148393507,
+    "delta_vs_offline_reference": -0.03790943930350266,
+    "delta_vs_phase2c_horizon_endpoint": 0.0
+  }
+}

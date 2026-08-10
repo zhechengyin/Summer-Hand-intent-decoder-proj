@@ -1,5 +1,5 @@
-"""Active FingerMovements models."""
+"""Active causal FingerMovements model."""
 
-from .cssd_lda import FingerMovementsCssdLda
+from .cssd_lda import CausalStreamingState, FingerMovementsCausalCssdLda
 
-__all__ = ["FingerMovementsCssdLda"]
+__all__ = ["CausalStreamingState", "FingerMovementsCausalCssdLda"]

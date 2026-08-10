@@ -1,0 +1,11 @@
+bin_number,prediction_time_ms,future_samples_replaced,checked_cases,maximum_score_or_probability_error,passed
+1,50,45,64,0.0,True
+2,100,40,64,0.0,True
+3,150,35,64,0.0,True
+4,200,30,64,0.0,True
+5,250,25,64,0.0,True
+6,300,20,64,0.0,True
+7,350,15,64,0.0,True
+8,400,10,64,0.0,True
+9,450,5,64,0.0,True
+10,500,0,64,0.0,True

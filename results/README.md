@@ -1,17 +1,29 @@
 # Results
 
-There are no active experiment results at the Phase 2b closeout boundary.
-
-Completed FingerMovements evidence has been moved to:
+The active Phase 2c bin/window sweep results are stored at:
 
 ```text
-history/finger_movements/results/
+results/finger_movements/phase2c_bin_window_sweep/
 ```
 
-The active model's checkpoint and final-fit verification live with the model:
+The provisional best window is 400 ms at 83.45% mean OOF balanced accuracy,
+compared with 82.93% for the frozen 500 ms baseline. The directory contains
+fold, seed, and aggregate metrics; OOF predictions; exact bin-equivalence
+checks; a JSON protocol record; and a summary heatmap.
+
+The completed Phase 2c horizon and rolling-streaming evidence is archived at:
 
 ```text
-models/finger_movements/cssd_lda/checkpoints/
+history/finger_movements/results/phase2c_horizon_diagnostic/
+history/finger_movements/results/phase2c_streaming_causal/
 ```
 
-Retired Indy results remain under `history/indy/results/`.
+They include fold metrics, seed-level OOF metrics, all per-case predictions at
+ten 50 ms horizons, the accuracy-versus-latency summary, explicit
+future-replacement invariance checks, a JSON protocol record, and a summary
+figure. Official TEST was refused.
+
+The corresponding completed runners are archived under
+`history/finger_movements/experiments/`. The active causal checkpoint and fit
+verification are under `models/finger_movements/cssd_lda/checkpoints/`; the
+former zero-phase Phase 2b checkpoint is archived with its model.

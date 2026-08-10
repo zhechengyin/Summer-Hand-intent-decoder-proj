@@ -1,0 +1,286 @@
+{
+  "phase": "2c",
+  "created_utc": "2026-08-10T20:31:00.840856+00:00",
+  "scope": "causal past-context window and streaming-bin sweep",
+  "data": {
+    "path": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/data/processed/finger_movements/train.npz",
+    "sha256": "a2025f277b5351839554e0ecf3398f1f4fd5151a4fc90f0e25c873734f5a91d1",
+    "cases": 316,
+    "shape": [
+      316,
+      28,
+      50
+    ],
+    "test_policy": "official TEST refused and not loaded"
+  },
+  "sweep": {
+    "bins_ms": [
+      10,
+      20,
+      50,
+      100
+    ],
+    "windows_ms": [
+      200,
+      300,
+      400,
+      500
+    ],
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "folds": 5,
+    "bin_interpretation": "streaming chunk size only; endpoint features and predictions must remain identical for a fixed window",
+    "window_interpretation": "past context ending at current point A"
+  },
+  "feature_policy": {
+    "bp_recent_ms": 40,
+    "erd_recent_ms": "min(320 ms, selected history window), split into four pools",
+    "trend": "oldest 80 ms and newest 100 ms inside selected window",
+    "causal_filter_state": "carried from all available past samples; BP is causally re-referenced to the oldest sample in the selected ring"
+  },
+  "bin_equivalence_checks": [
+    {
+      "bin_ms": 10,
+      "samples_per_bin": 1,
+      "checked_cases": 64,
+      "maximum_filtered_signal_error": 0.0,
+      "passed": true
+    },
+    {
+      "bin_ms": 20,
+      "samples_per_bin": 2,
+      "checked_cases": 64,
+      "maximum_filtered_signal_error": 0.0,
+      "passed": true
+    },
+    {
+      "bin_ms": 50,
+      "samples_per_bin": 5,
+      "checked_cases": 64,
+      "maximum_filtered_signal_error": 0.0,
+      "passed": true
+    },
+    {
+      "bin_ms": 100,
+      "samples_per_bin": 10,
+      "checked_cases": 64,
+      "maximum_filtered_signal_error": 0.0,
+      "passed": true
+    }
+  ],
+  "selection_rule": "select history window by mean BA, then worst-seed BA, then shorter window; select bin separately from firmware latency constraints",
+  "provisional_best_window_ms": 400,
+  "summary": [
+    {
+      "bin_ms": 10,
+      "window_ms": 200,
+      "samples_per_bin": 1,
+      "bins_per_window": 20,
+      "mean_accuracy": 0.7964135021097046,
+      "mean_balanced_accuracy": 0.796171667401087,
+      "balanced_accuracy_seed_sd": 0.012269050225347236,
+      "worst_seed_balanced_accuracy": 0.7845611505027441,
+      "best_seed_balanced_accuracy": 0.813143452309418,
+      "mean_macro_f1": 0.7959952764295494,
+      "mean_log_loss": 0.45608259465569234
+    },
+    {
+      "bin_ms": 10,
+      "window_ms": 300,
+      "samples_per_bin": 1,
+      "bins_per_window": 30,
+      "mean_accuracy": 0.7943037974683543,
+      "mean_balanced_accuracy": 0.7942755277811161,
+      "balanced_accuracy_seed_sd": 0.0025526600447716074,
+      "worst_seed_balanced_accuracy": 0.7910908144053199,
+      "best_seed_balanced_accuracy": 0.7973400632936747,
+      "mean_macro_f1": 0.7942431632260855,
+      "mean_log_loss": 0.40154423395802336
+    },
+    {
+      "bin_ms": 10,
+      "window_ms": 400,
+      "samples_per_bin": 1,
+      "bins_per_window": 40,
+      "mean_accuracy": 0.839662447257384,
+      "mean_balanced_accuracy": 0.8398563206879515,
+      "balanced_accuracy_seed_sd": 0.005394642486715603,
+      "worst_seed_balanced_accuracy": 0.8324520290029244,
+      "best_seed_balanced_accuracy": 0.8451508232183632,
+      "mean_macro_f1": 0.8395592126354009,
+      "mean_log_loss": 0.3705033515555345
+    },
+    {
+      "bin_ms": 10,
+      "window_ms": 500,
+      "samples_per_bin": 1,
+      "bins_per_window": 50,
+      "mean_accuracy": 0.8291139240506329,
+      "mean_balanced_accuracy": 0.8293073749148739,
+      "balanced_accuracy_seed_sd": 0.010319809536045069,
+      "worst_seed_balanced_accuracy": 0.8167287585626728,
+      "best_seed_balanced_accuracy": 0.8420061691303129,
+      "mean_macro_f1": 0.8289704148393507,
+      "mean_log_loss": 0.3743384074956578
+    },
+    {
+      "bin_ms": 20,
+      "window_ms": 200,
+      "samples_per_bin": 2,
+      "bins_per_window": 10,
+      "mean_accuracy": 0.7964135021097046,
+      "mean_balanced_accuracy": 0.796171667401087,
+      "balanced_accuracy_seed_sd": 0.012269050225347236,
+      "worst_seed_balanced_accuracy": 0.7845611505027441,
+      "best_seed_balanced_accuracy": 0.813143452309418,
+      "mean_macro_f1": 0.7959952764295494,
+      "mean_log_loss": 0.45608259465569234
+    },
+    {
+      "bin_ms": 20,
+      "window_ms": 300,
+      "samples_per_bin": 2,
+      "bins_per_window": 15,
+      "mean_accuracy": 0.7943037974683543,
+      "mean_balanced_accuracy": 0.7942755277811161,
+      "balanced_accuracy_seed_sd": 0.0025526600447716074,
+      "worst_seed_balanced_accuracy": 0.7910908144053199,
+      "best_seed_balanced_accuracy": 0.7973400632936747,
+      "mean_macro_f1": 0.7942431632260855,
+      "mean_log_loss": 0.40154423395802336
+    },
+    {
+      "bin_ms": 20,
+      "window_ms": 400,
+      "samples_per_bin": 2,
+      "bins_per_window": 20,
+      "mean_accuracy": 0.839662447257384,
+      "mean_balanced_accuracy": 0.8398563206879515,
+      "balanced_accuracy_seed_sd": 0.005394642486715603,
+      "worst_seed_balanced_accuracy": 0.8324520290029244,
+      "best_seed_balanced_accuracy": 0.8451508232183632,
+      "mean_macro_f1": 0.8395592126354009,
+      "mean_log_loss": 0.3705033515555345
+    },
+    {
+      "bin_ms": 20,
+      "window_ms": 500,
+      "samples_per_bin": 2,
+      "bins_per_window": 25,
+      "mean_accuracy": 0.8291139240506329,
+      "mean_balanced_accuracy": 0.8293073749148739,
+      "balanced_accuracy_seed_sd": 0.010319809536045069,
+      "worst_seed_balanced_accuracy": 0.8167287585626728,
+      "best_seed_balanced_accuracy": 0.8420061691303129,
+      "mean_macro_f1": 0.8289704148393507,
+      "mean_log_loss": 0.3743384074956578
+    },
+    {
+      "bin_ms": 50,
+      "window_ms": 200,
+      "samples_per_bin": 5,
+      "bins_per_window": 4,
+      "mean_accuracy": 0.7964135021097046,
+      "mean_balanced_accuracy": 0.796171667401087,
+      "balanced_accuracy_seed_sd": 0.012269050225347236,
+      "worst_seed_balanced_accuracy": 0.7845611505027441,
+      "best_seed_balanced_accuracy": 0.813143452309418,
+      "mean_macro_f1": 0.7959952764295494,
+      "mean_log_loss": 0.45608259465569234
+    },
+    {
+      "bin_ms": 50,
+      "window_ms": 300,
+      "samples_per_bin": 5,
+      "bins_per_window": 6,
+      "mean_accuracy": 0.7943037974683543,
+      "mean_balanced_accuracy": 0.7942755277811161,
+      "balanced_accuracy_seed_sd": 0.0025526600447716074,
+      "worst_seed_balanced_accuracy": 0.7910908144053199,
+      "best_seed_balanced_accuracy": 0.7973400632936747,
+      "mean_macro_f1": 0.7942431632260855,
+      "mean_log_loss": 0.40154423395802336
+    },
+    {
+      "bin_ms": 50,
+      "window_ms": 400,
+      "samples_per_bin": 5,
+      "bins_per_window": 8,
+      "mean_accuracy": 0.839662447257384,
+      "mean_balanced_accuracy": 0.8398563206879515,
+      "balanced_accuracy_seed_sd": 0.005394642486715603,
+      "worst_seed_balanced_accuracy": 0.8324520290029244,
+      "best_seed_balanced_accuracy": 0.8451508232183632,
+      "mean_macro_f1": 0.8395592126354009,
+      "mean_log_loss": 0.3705033515555345
+    },
+    {
+      "bin_ms": 50,
+      "window_ms": 500,
+      "samples_per_bin": 5,
+      "bins_per_window": 10,
+      "mean_accuracy": 0.8291139240506329,
+      "mean_balanced_accuracy": 0.8293073749148739,
+      "balanced_accuracy_seed_sd": 0.010319809536045069,
+      "worst_seed_balanced_accuracy": 0.8167287585626728,
+      "best_seed_balanced_accuracy": 0.8420061691303129,
+      "mean_macro_f1": 0.8289704148393507,
+      "mean_log_loss": 0.3743384074956578
+    },
+    {
+      "bin_ms": 100,
+      "window_ms": 200,
+      "samples_per_bin": 10,
+      "bins_per_window": 2,
+      "mean_accuracy": 0.7964135021097046,
+      "mean_balanced_accuracy": 0.796171667401087,
+      "balanced_accuracy_seed_sd": 0.012269050225347236,
+      "worst_seed_balanced_accuracy": 0.7845611505027441,
+      "best_seed_balanced_accuracy": 0.813143452309418,
+      "mean_macro_f1": 0.7959952764295494,
+      "mean_log_loss": 0.45608259465569234
+    },
+    {
+      "bin_ms": 100,
+      "window_ms": 300,
+      "samples_per_bin": 10,
+      "bins_per_window": 3,
+      "mean_accuracy": 0.7943037974683543,
+      "mean_balanced_accuracy": 0.7942755277811161,
+      "balanced_accuracy_seed_sd": 0.0025526600447716074,
+      "worst_seed_balanced_accuracy": 0.7910908144053199,
+      "best_seed_balanced_accuracy": 0.7973400632936747,
+      "mean_macro_f1": 0.7942431632260855,
+      "mean_log_loss": 0.40154423395802336
+    },
+    {
+      "bin_ms": 100,
+      "window_ms": 400,
+      "samples_per_bin": 10,
+      "bins_per_window": 4,
+      "mean_accuracy": 0.839662447257384,
+      "mean_balanced_accuracy": 0.8398563206879515,
+      "balanced_accuracy_seed_sd": 0.005394642486715603,
+      "worst_seed_balanced_accuracy": 0.8324520290029244,
+      "best_seed_balanced_accuracy": 0.8451508232183632,
+      "mean_macro_f1": 0.8395592126354009,
+      "mean_log_loss": 0.3705033515555345
+    },
+    {
+      "bin_ms": 100,
+      "window_ms": 500,
+      "samples_per_bin": 10,
+      "bins_per_window": 5,
+      "mean_accuracy": 0.8291139240506329,
+      "mean_balanced_accuracy": 0.8293073749148739,
+      "balanced_accuracy_seed_sd": 0.010319809536045069,
+      "worst_seed_balanced_accuracy": 0.8167287585626728,
+      "best_seed_balanced_accuracy": 0.8420061691303129,
+      "mean_macro_f1": 0.8289704148393507,
+      "mean_log_loss": 0.3743384074956578
+    }
+  ]
+}

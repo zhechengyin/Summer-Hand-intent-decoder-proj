@@ -1,4 +1,4 @@
-"""Fit and verify the frozen Phase 2c causal model on all official TRAIN cases."""
+"""Fit and verify the frozen Phase 2b model on all official TRAIN cases."""
 
 from __future__ import annotations
 
@@ -13,11 +13,8 @@ import numpy as np
 from model import (
     CHANNELS,
     CLASS_COUNTS,
-    HISTORY_MS,
-    HISTORY_SAMPLES,
-    UPDATE_MS,
-    UPDATE_SAMPLES,
-    FingerMovementsCausalCssdLda,
+    TIMEPOINTS,
+    FingerMovementsCssdLda,
 )
 from sklearn.metrics import (
     accuracy_score,
@@ -27,15 +24,15 @@ from sklearn.metrics import (
     log_loss,
 )
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_DATA = ROOT / "data/processed/finger_movements/train.npz"
 DEFAULT_CHECKPOINT = (
     Path(__file__).resolve().parent
-    / "checkpoints/finger_movements_cssd_lda_phase2c_causal.npz"
+    / "checkpoints/finger_movements_cssd_lda_phase2b.npz"
 )
-DEVELOPMENT_MEAN_OOF_BA = 0.8293073749148739
-DEVELOPMENT_SEED_BA_SD = 0.010319809536045069
-DEVELOPMENT_WORST_SEED_BA = 0.8167287585626728
+DEVELOPMENT_MEAN_OOF_BA = 0.8672168142183766
+DEVELOPMENT_SEED_BA_SD = 0.0068365438619155
+DEVELOPMENT_WORST_SEED_BA = 0.8609141529463606
 
 
 def parse_args() -> argparse.Namespace:
@@ -70,7 +67,7 @@ def load_training_data(
         y = data["y"].astype(np.int64, copy=True)
         source_index = data["source_index"].astype(np.int64, copy=True)
         channel_names = data["channel_names"].astype(str, copy=True)
-    if x.shape != (316, CHANNELS, HISTORY_SAMPLES):
+    if x.shape != (316, CHANNELS, TIMEPOINTS):
         raise ValueError(f"Unexpected x shape: {x.shape}")
     if dict(Counter(y.tolist())) != CLASS_COUNTS:
         raise ValueError(f"Unexpected class counts: {dict(Counter(y.tolist()))}")
@@ -95,49 +92,6 @@ def metric_bundle(
     }
 
 
-def verify_streaming(
-    model: FingerMovementsCausalCssdLda,
-    x: np.ndarray,
-    channel_names: np.ndarray,
-) -> dict[str, object]:
-    batch_score = model.decision_function(x, channel_names)
-    batch_probability = model.predict_proba(x, channel_names)
-    batch_prediction = model.predict(x, channel_names)
-    stream_scores: list[float] = []
-    stream_probabilities: list[np.ndarray] = []
-    stream_predictions: list[int] = []
-    for case in x:
-        state = model.new_stream(case[:, 0])
-        result = None
-        for start in range(0, HISTORY_SAMPLES, UPDATE_SAMPLES):
-            result = state.push(case[:, start : start + UPDATE_SAMPLES])
-        if result is None:
-            raise RuntimeError("Streaming state did not emit after 500 ms")
-        prediction, probability, score = result
-        stream_predictions.append(prediction)
-        stream_probabilities.append(probability)
-        stream_scores.append(score)
-    prediction_array = np.asarray(stream_predictions)
-    probability_array = np.stack(stream_probabilities)
-    score_array = np.asarray(stream_scores)
-    score_error = float(np.max(np.abs(batch_score - score_array)))
-    probability_error = float(
-        np.max(np.abs(batch_probability - probability_array))
-    )
-    if not np.array_equal(batch_prediction, prediction_array):
-        raise RuntimeError("Streaming checkpoint changed predictions")
-    if max(score_error, probability_error) > 1e-12:
-        raise RuntimeError("Streaming checkpoint is not numerically equivalent")
-    return {
-        "cases": len(x),
-        "update_ms": UPDATE_MS,
-        "updates_before_first_output": HISTORY_SAMPLES // UPDATE_SAMPLES,
-        "predictions_exact": True,
-        "maximum_score_absolute_error": score_error,
-        "maximum_probability_absolute_error": probability_error,
-    }
-
-
 def main() -> None:
     args = parse_args()
     data_path = args.data.resolve()
@@ -146,46 +100,40 @@ def main() -> None:
     data_hash = sha256(data_path)
     created_utc = datetime.now(timezone.utc).isoformat()
 
-    print("=== FingerMovements Phase 2c causal full-TRAIN fit ===")
+    print("=== FingerMovements frozen Phase 2b full-TRAIN fit ===")
     print(f"data={data_path}")
-    print(f"cases={len(y)} | input={CHANNELS}x{HISTORY_SAMPLES} | test=REFUSED")
-    print(f"history={HISTORY_MS} ms | streaming update={UPDATE_MS} ms")
-    print("filter=left-to-right causal SOS; future samples forbidden")
+    print(f"cases={len(y)} | input={CHANNELS}x{TIMEPOINTS} | test=REFUSED")
+    print("configuration=empirical covariance + trial normalization + F2=1 + LDA")
 
     metadata = {
         "created_utc": created_utc,
-        "model": "FingerMovements causal CSSD + hierarchical LDA",
-        "selection": "Phase 2c official-TRAIN-only repeated stratified CV",
-        "selected_variant": "causal__window_500ms__bin_50ms",
+        "model": "FingerMovements CSSD + hierarchical LDA",
+        "selection": "Phase 2b official-TRAIN-only repeated stratified CV",
+        "selected_variant": "cov_empirical__trial_on__f2_1__fusion_lda",
         "development_mean_oof_balanced_accuracy": DEVELOPMENT_MEAN_OOF_BA,
         "training_data_path": str(data_path),
         "training_data_sha256": data_hash,
         "training_cases": len(y),
         "official_test_loaded": False,
-        "deployment_status": "causal candidate; continuous-stream validation pending",
+        "deployment_status": "offline research checkpoint; zero-phase filters are non-causal",
     }
-    model = FingerMovementsCausalCssdLda.fit(
-        x, y, channel_names, metadata=metadata
-    )
+    model = FingerMovementsCssdLda.fit(x, y, channel_names, metadata=metadata)
     score_before = model.decision_function(x, channel_names)
     probability_before = model.predict_proba(x, channel_names)
     prediction_before = model.predict(x, channel_names)
     training_metrics = metric_bundle(y, prediction_before, probability_before)
 
     model.save(checkpoint_path)
-    restored = FingerMovementsCausalCssdLda.load(checkpoint_path)
+    restored = FingerMovementsCssdLda.load(checkpoint_path)
     score_after = restored.decision_function(x, channel_names)
     probability_after = restored.predict_proba(x, channel_names)
     prediction_after = restored.predict(x, channel_names)
     if not np.array_equal(prediction_before, prediction_after):
         raise RuntimeError("Reloaded checkpoint changed training predictions")
-    score_reload_error = float(np.max(np.abs(score_before - score_after)))
-    probability_reload_error = float(
-        np.max(np.abs(probability_before - probability_after))
-    )
-    if max(score_reload_error, probability_reload_error) > 1e-12:
-        raise RuntimeError("Reloaded checkpoint changed scores or probabilities")
-    streaming = verify_streaming(restored, x, channel_names)
+    if not np.allclose(score_before, score_after, rtol=0.0, atol=1e-12):
+        raise RuntimeError("Reloaded checkpoint changed decision scores")
+    if not np.allclose(probability_before, probability_after, rtol=0.0, atol=1e-12):
+        raise RuntimeError("Reloaded checkpoint changed probabilities")
 
     checkpoint_hash = sha256(checkpoint_path)
     record = {
@@ -200,9 +148,7 @@ def main() -> None:
             "bp_patterns_per_class": 1,
             "f2_patterns_per_class": 1,
             "fusion": "LDA",
-            "temporal_filters": "fourth-order causal Butterworth SOS",
-            "history_ms": HISTORY_MS,
-            "streaming_update_ms": UPDATE_MS,
+            "temporal_filters": "fourth-order zero-phase Butterworth",
         },
         "selection_evidence": {
             "mean_oof_balanced_accuracy": DEVELOPMENT_MEAN_OOF_BA,
@@ -214,14 +160,17 @@ def main() -> None:
         "apparent_full_training_metrics": training_metrics,
         "reload_verification": {
             "predictions_exact": True,
-            "maximum_score_absolute_error": score_reload_error,
-            "maximum_probability_absolute_error": probability_reload_error,
+            "maximum_score_absolute_error": float(
+                np.max(np.abs(score_before - score_after))
+            ),
+            "maximum_probability_absolute_error": float(
+                np.max(np.abs(probability_before - probability_after))
+            ),
         },
-        "streaming_equivalence": streaming,
         "test_policy": "official TEST refused and not loaded",
         "deployment_status": (
-            "causal firmware candidate; continuous EEG and rest/no-intent "
-            "validation are still required"
+            "research checkpoint only; sosfiltfilt is non-causal and must be "
+            "redesigned before firmware deployment"
         ),
     }
     metrics_path = checkpoint_path.with_suffix(".metrics.json")
@@ -234,7 +183,7 @@ def main() -> None:
         f"BA={training_metrics['balanced_accuracy']:.4f} | "
         f"macro-F1={training_metrics['macro_f1']:.4f}"
     )
-    print("reload verification=PASS | streaming equivalence=PASS")
+    print("reload verification=PASS")
     print(f"checkpoint={checkpoint_path}")
     print(f"checkpoint SHA-256={checkpoint_hash}")
     print(f"metrics={metrics_path}")

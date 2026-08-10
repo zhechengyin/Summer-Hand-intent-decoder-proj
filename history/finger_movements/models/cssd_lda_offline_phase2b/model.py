@@ -1,8 +1,8 @@
-"""Strictly causal FingerMovements CSSD + hierarchical LDA model.
+"""Frozen FingerMovements CSSD + hierarchical LDA model.
 
-Each prediction uses the 500 ms interval ending at the current point. Temporal
-filters run left-to-right and the streaming interface carries both IIR state
-and a rolling history buffer between updates.
+The active configuration was selected by Phase 2b using official-TRAIN-only
+cross-validation.  This module is self-contained and never imports archived
+experiment code.
 """
 
 from __future__ import annotations
@@ -14,17 +14,14 @@ from typing import Any
 
 import numpy as np
 from scipy.linalg import eigh
-from scipy.signal import butter, sosfilt, sosfilt_zi
+from scipy.signal import butter, sosfiltfilt
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 CHANNELS = 28
-HISTORY_SAMPLES = 50
+TIMEPOINTS = 50
 SAMPLING_RATE_HZ = 100.0
-HISTORY_MS = 500
-UPDATE_SAMPLES = 5
-UPDATE_MS = 50
 CLASS_COUNTS = {0: 159, 1: 157}
 
 FILTER_ORDER = 4
@@ -34,11 +31,11 @@ CSSD_RIDGE = 1e-6
 BP_PATTERNS_PER_CLASS = 1
 ERD_PATTERNS_PER_CLASS = 1
 
-BP_RECENT_SAMPLES = 4
-ERD_RECENT_SAMPLES = 32
+BP_WINDOW = slice(43, 47)
+ERD_WINDOW = slice(18, 50)
+TREND_START_WINDOW = slice(0, 8)
+TREND_END_WINDOW = slice(40, 50)
 ERD_POOL_SAMPLES = 8
-TREND_OLDEST_SAMPLES = 8
-TREND_RECENT_SAMPLES = 10
 
 REJECTED_TREND_CHANNELS = (
     "F3",
@@ -81,6 +78,12 @@ class LinearDiscriminantState:
         standardized = (features - self.mean) / self.scale
         return standardized @ self.coefficient + self.intercept
 
+    def predict_proba_right(self, features: np.ndarray) -> np.ndarray:
+        return _sigmoid(self.decision_function(features))
+
+    def predict(self, features: np.ndarray) -> np.ndarray:
+        return (self.decision_function(features) >= 0.0).astype(np.int64)
+
 
 def _fit_lda(features: np.ndarray, labels: np.ndarray) -> LinearDiscriminantState:
     pipeline = make_pipeline(StandardScaler(), LinearDiscriminantAnalysis(solver="svd"))
@@ -100,17 +103,6 @@ def _fit_lda(features: np.ndarray, labels: np.ndarray) -> LinearDiscriminantStat
     return state
 
 
-def _initial_filter_state(x: np.ndarray, sos: np.ndarray) -> np.ndarray:
-    return sosfilt_zi(sos)[:, None, None, :] * x[None, :, :, 0, None]
-
-
-def _causal_filter(x: np.ndarray, sos: np.ndarray) -> np.ndarray:
-    filtered, _ = sosfilt(sos, x, axis=-1, zi=_initial_filter_state(x, sos))
-    if not np.isfinite(filtered).all():
-        raise FloatingPointError("Causal filtering produced non-finite values")
-    return filtered
-
-
 def _trace_normalize(matrix: np.ndarray) -> np.ndarray:
     matrix = 0.5 * (matrix + matrix.T)
     trace = float(np.trace(matrix))
@@ -120,10 +112,13 @@ def _trace_normalize(matrix: np.ndarray) -> np.ndarray:
 
 
 def _class_spatial_matrix(class_x: np.ndarray) -> np.ndarray:
+    """Empirical class matrix with frozen per-trial trace normalization."""
+    if class_x.ndim != 3 or class_x.shape[1] != CHANNELS:
+        raise ValueError(f"Expected (trials, {CHANNELS}, samples), got {class_x.shape}")
     moments = np.einsum("nct,ndt->ncd", class_x, class_x, optimize=True)
     traces = np.trace(moments, axis1=1, axis2=2)
     if not np.isfinite(traces).all() or np.any(traces <= 1e-12):
-        raise ValueError("Trial normalization received a degenerate window")
+        raise ValueError("Trial normalization received a degenerate trial")
     normalized = class_x / np.sqrt(traces)[:, None, None]
     samples = normalized.transpose(0, 2, 1).reshape(-1, CHANNELS)
     matrix = _trace_normalize(samples.T @ samples / len(samples))
@@ -162,20 +157,20 @@ def _project(x: np.ndarray, filters: np.ndarray) -> np.ndarray:
 
 
 def _bp_features(bp: np.ndarray, filters: np.ndarray) -> np.ndarray:
-    features = _project(bp[..., -BP_RECENT_SAMPLES:], filters).reshape(len(bp), -1)
+    features = _project(bp[..., BP_WINDOW], filters).reshape(len(bp), -1)
     if features.shape != (len(bp), 8):
         raise RuntimeError(f"Unexpected BP feature shape: {features.shape}")
     return features
 
 
 def _erd_features(erd: np.ndarray, filters: np.ndarray) -> np.ndarray:
-    projected = _project(erd[..., -ERD_RECENT_SAMPLES:], filters)
+    projected = _project(erd[..., ERD_WINDOW], filters)
     pooled = (
         np.abs(projected)
         .reshape(
             len(erd),
             projected.shape[1],
-            ERD_RECENT_SAMPLES // ERD_POOL_SAMPLES,
+            projected.shape[2] // ERD_POOL_SAMPLES,
             ERD_POOL_SAMPLES,
         )
         .mean(axis=-1)
@@ -188,17 +183,17 @@ def _erd_features(erd: np.ndarray, filters: np.ndarray) -> np.ndarray:
 
 def _trend_features(bp: np.ndarray, retained_indices: np.ndarray) -> np.ndarray:
     selected = bp[:, retained_indices]
-    oldest = selected[..., :TREND_OLDEST_SAMPLES].mean(axis=-1)
-    recent = selected[..., -TREND_RECENT_SAMPLES:].mean(axis=-1)
-    features = np.stack([oldest, recent], axis=-1).reshape(len(bp), -1)
+    start = selected[..., TREND_START_WINDOW].mean(axis=-1)
+    end = selected[..., TREND_END_WINDOW].mean(axis=-1)
+    features = np.stack([start, end], axis=-1).reshape(len(bp), -1)
     if features.shape != (len(bp), 38):
         raise RuntimeError(f"Unexpected trend feature shape: {features.shape}")
     return features
 
 
 @dataclass(frozen=True)
-class FingerMovementsCausalCssdLda:
-    """Frozen Phase 2c causal model for 500 ms past-context windows."""
+class FingerMovementsCssdLda:
+    """Active offline research model selected by Phase 2b."""
 
     channel_names: np.ndarray
     trend_indices: np.ndarray
@@ -219,7 +214,7 @@ class FingerMovementsCausalCssdLda:
         labels: np.ndarray,
         channel_names: np.ndarray,
         metadata: dict[str, Any] | None = None,
-    ) -> FingerMovementsCausalCssdLda:
+    ) -> FingerMovementsCssdLda:
         x, labels, channel_names = _validate_inputs(x, labels, channel_names)
         bp_sos = butter(
             FILTER_ORDER,
@@ -235,38 +230,35 @@ class FingerMovementsCausalCssdLda:
             fs=SAMPLING_RATE_HZ,
             output="sos",
         )
-        bp = _causal_filter(x, bp_sos)
+        bp = sosfiltfilt(bp_sos, x, axis=-1)
         bp = bp - bp[..., :1]
-        erd = _causal_filter(x, erd_sos)
+        erd = sosfiltfilt(erd_sos, x, axis=-1)
         bp_filters = _fit_cssd_filters(
-            bp[..., -BP_RECENT_SAMPLES:], labels, BP_PATTERNS_PER_CLASS
+            bp[..., BP_WINDOW], labels, BP_PATTERNS_PER_CLASS
         )
         erd_filters = _fit_cssd_filters(
-            erd[..., -ERD_RECENT_SAMPLES:], labels, ERD_PATTERNS_PER_CLASS
+            erd[..., ERD_WINDOW], labels, ERD_PATTERNS_PER_CLASS
         )
         rejected = set(REJECTED_TREND_CHANNELS)
         trend_indices = np.asarray(
-            [
-                index
-                for index, name in enumerate(channel_names)
-                if name not in rejected
-            ],
+            [index for index, name in enumerate(channel_names) if name not in rejected],
             dtype=np.int64,
         )
         if trend_indices.size != 19:
             raise ValueError(
                 f"Expected 19 retained trend channels, got {trend_indices.size}"
             )
+
         features = (
             _bp_features(bp, bp_filters),
             _erd_features(erd, erd_filters),
             _trend_features(bp, trend_indices),
         )
-        branches = tuple(_fit_lda(values, labels) for values in features)
+        branches = tuple(_fit_lda(feature, labels) for feature in features)
         branch_scores = np.column_stack(
             [
-                branch.decision_function(values)
-                for branch, values in zip(branches, features)
+                branch.decision_function(feature)
+                for branch, feature in zip(branches, features)
             ]
         )
         fusion = _fit_lda(branch_scores, labels)
@@ -284,44 +276,38 @@ class FingerMovementsCausalCssdLda:
             metadata=dict(metadata or {}),
         )
 
-    def _scores_from_filtered(
-        self, bp: np.ndarray, erd: np.ndarray
-    ) -> np.ndarray:
-        features = (
-            _bp_features(bp, self.bp_filters),
-            _erd_features(erd, self.erd_filters),
-            _trend_features(bp, self.trend_indices),
-        )
-        branches = (self.bp_branch, self.erd_branch, self.trend_branch)
-        branch_scores = np.column_stack(
-            [
-                branch.decision_function(values)
-                for branch, values in zip(branches, features)
-            ]
-        )
-        return self.fusion.decision_function(branch_scores)
-
-    def _filtered_windows(
+    def _features(
         self, x: np.ndarray, channel_names: np.ndarray
-    ) -> tuple[np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         x = np.asarray(x, dtype=np.float64)
         channel_names = np.asarray(channel_names).astype(str)
-        if x.ndim != 3 or x.shape[1:] != (CHANNELS, HISTORY_SAMPLES):
+        if x.ndim != 3 or x.shape[1:] != (CHANNELS, TIMEPOINTS):
             raise ValueError(
-                f"Expected (cases, {CHANNELS}, {HISTORY_SAMPLES}), got {x.shape}"
+                f"Expected (cases, {CHANNELS}, {TIMEPOINTS}), got {x.shape}"
             )
         if not np.isfinite(x).all():
             raise ValueError("Input contains non-finite values")
         if not np.array_equal(channel_names, self.channel_names):
             raise ValueError("Channel names/order differ from the frozen checkpoint")
-        bp = _causal_filter(x, self.bp_sos)
+        bp = sosfiltfilt(self.bp_sos, x, axis=-1)
         bp = bp - bp[..., :1]
-        erd = _causal_filter(x, self.erd_sos)
-        return bp, erd
+        erd = sosfiltfilt(self.erd_sos, x, axis=-1)
+        return (
+            _bp_features(bp, self.bp_filters),
+            _erd_features(erd, self.erd_filters),
+            _trend_features(bp, self.trend_indices),
+        )
 
     def decision_function(self, x: np.ndarray, channel_names: np.ndarray) -> np.ndarray:
-        bp, erd = self._filtered_windows(x, channel_names)
-        return self._scores_from_filtered(bp, erd)
+        features = self._features(x, channel_names)
+        branches = (self.bp_branch, self.erd_branch, self.trend_branch)
+        scores = np.column_stack(
+            [
+                branch.decision_function(feature)
+                for branch, feature in zip(branches, features)
+            ]
+        )
+        return self.fusion.decision_function(scores)
 
     def predict_proba(self, x: np.ndarray, channel_names: np.ndarray) -> np.ndarray:
         right = _sigmoid(self.decision_function(x, channel_names))
@@ -330,14 +316,11 @@ class FingerMovementsCausalCssdLda:
     def predict(self, x: np.ndarray, channel_names: np.ndarray) -> np.ndarray:
         return (self.decision_function(x, channel_names) >= 0.0).astype(np.int64)
 
-    def new_stream(self, first_sample: np.ndarray) -> CausalStreamingState:
-        return CausalStreamingState(self, first_sample)
-
     def save(self, path: Path) -> None:
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         arrays: dict[str, Any] = {
-            "format_version": np.asarray("finger_movements_causal_cssd_lda_v2"),
+            "format_version": np.asarray("finger_movements_cssd_lda_v1"),
             "metadata_json": np.asarray(json.dumps(self.metadata, sort_keys=True)),
             "channel_names": self.channel_names,
             "trend_indices": self.trend_indices,
@@ -359,12 +342,10 @@ class FingerMovementsCausalCssdLda:
         np.savez_compressed(path, **arrays)
 
     @classmethod
-    def load(cls, path: Path) -> FingerMovementsCausalCssdLda:
+    def load(cls, path: Path) -> FingerMovementsCssdLda:
         path = Path(path)
         with np.load(path, allow_pickle=False) as checkpoint:
-            if str(checkpoint["format_version"]) != (
-                "finger_movements_causal_cssd_lda_v2"
-            ):
+            if str(checkpoint["format_version"]) != "finger_movements_cssd_lda_v1":
                 raise ValueError("Unsupported checkpoint format")
 
             def state(prefix: str) -> LinearDiscriminantState:
@@ -390,66 +371,14 @@ class FingerMovementsCausalCssdLda:
             )
 
 
-class CausalStreamingState:
-    """Mutable IIR and 500 ms ring state for one continuous EEG stream."""
-
-    def __init__(
-        self, model: FingerMovementsCausalCssdLda, first_sample: np.ndarray
-    ) -> None:
-        first_sample = np.asarray(first_sample, dtype=np.float64)
-        if first_sample.shape != (CHANNELS,) or not np.isfinite(first_sample).all():
-            raise ValueError(f"Expected one finite ({CHANNELS},) sample")
-        self.model = model
-        self.bp_state = (
-            sosfilt_zi(model.bp_sos)[:, None, :] * first_sample[None, :, None]
-        )
-        self.erd_state = (
-            sosfilt_zi(model.erd_sos)[:, None, :] * first_sample[None, :, None]
-        )
-        self.bp_ring = np.empty((CHANNELS, 0), dtype=np.float64)
-        self.erd_ring = np.empty((CHANNELS, 0), dtype=np.float64)
-
-    def push(
-        self, samples: np.ndarray
-    ) -> tuple[int, np.ndarray, float] | None:
-        """Consume one causal chunk and return prediction/probability/score when warm."""
-        samples = np.asarray(samples, dtype=np.float64)
-        if samples.ndim != 2 or samples.shape[0] != CHANNELS or samples.shape[1] < 1:
-            raise ValueError(f"Expected ({CHANNELS}, positive samples), got {samples.shape}")
-        if not np.isfinite(samples).all():
-            raise ValueError("Streaming input contains non-finite values")
-        bp, self.bp_state = sosfilt(
-            self.model.bp_sos, samples, axis=-1, zi=self.bp_state
-        )
-        erd, self.erd_state = sosfilt(
-            self.model.erd_sos, samples, axis=-1, zi=self.erd_state
-        )
-        self.bp_ring = np.concatenate([self.bp_ring, bp], axis=-1)[
-            ..., -HISTORY_SAMPLES:
-        ]
-        self.erd_ring = np.concatenate([self.erd_ring, erd], axis=-1)[
-            ..., -HISTORY_SAMPLES:
-        ]
-        if self.bp_ring.shape[-1] < HISTORY_SAMPLES:
-            return None
-        bp_window = self.bp_ring[None] - self.bp_ring[None, ..., :1]
-        erd_window = self.erd_ring[None]
-        score = float(self.model._scores_from_filtered(bp_window, erd_window)[0])
-        probability_right = float(_sigmoid(np.asarray([score]))[0])
-        probability = np.asarray([1.0 - probability_right, probability_right])
-        return int(score >= 0.0), probability, score
-
-
 def _validate_inputs(
     x: np.ndarray, labels: np.ndarray, channel_names: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     x = np.asarray(x, dtype=np.float64)
     labels = np.asarray(labels, dtype=np.int64)
     channel_names = np.asarray(channel_names).astype(str)
-    if x.ndim != 3 or x.shape[1:] != (CHANNELS, HISTORY_SAMPLES):
-        raise ValueError(
-            f"Expected (cases, {CHANNELS}, {HISTORY_SAMPLES}), got {x.shape}"
-        )
+    if x.ndim != 3 or x.shape[1:] != (CHANNELS, TIMEPOINTS):
+        raise ValueError(f"Expected (cases, {CHANNELS}, {TIMEPOINTS}), got {x.shape}")
     if labels.shape != (len(x),):
         raise ValueError("Labels do not match the number of cases")
     if channel_names.shape != (CHANNELS,) or len(set(channel_names)) != CHANNELS:

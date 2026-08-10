@@ -1,0 +1,59 @@
+{
+  "created_utc": "2026-08-10T20:15:55.835003+00:00",
+  "checkpoint": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/models/finger_movements/cssd_lda/checkpoints/finger_movements_cssd_lda_phase2c_causal.npz",
+  "checkpoint_sha256": "d92c23f7e6f8722d568d1b31963eab1328d5367ba32764b676d1ae0d73aaefd4",
+  "training_data": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/data/processed/finger_movements/train.npz",
+  "training_data_sha256": "a2025f277b5351839554e0ecf3398f1f4fd5151a4fc90f0e25c873734f5a91d1",
+  "configuration": {
+    "covariance": "empirical",
+    "trial_trace_normalization": true,
+    "bp_patterns_per_class": 1,
+    "f2_patterns_per_class": 1,
+    "fusion": "LDA",
+    "temporal_filters": "fourth-order causal Butterworth SOS",
+    "history_ms": 500,
+    "streaming_update_ms": 50
+  },
+  "selection_evidence": {
+    "mean_oof_balanced_accuracy": 0.8293073749148739,
+    "seed_balanced_accuracy_sd": 0.010319809536045069,
+    "worst_seed_balanced_accuracy": 0.8167287585626728,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "folds_per_seed": 5
+  },
+  "apparent_full_training_metrics": {
+    "accuracy": 0.8829113924050633,
+    "balanced_accuracy": 0.8830469094259504,
+    "macro_f1": 0.8828820706994821,
+    "mean_log_loss": 0.263993891526197,
+    "confusion_matrix": [
+      [
+        137,
+        22
+      ],
+      [
+        15,
+        142
+      ]
+    ]
+  },
+  "reload_verification": {
+    "predictions_exact": true,
+    "maximum_score_absolute_error": 0.0,
+    "maximum_probability_absolute_error": 0.0
+  },
+  "streaming_equivalence": {
+    "cases": 316,
+    "update_ms": 50,
+    "updates_before_first_output": 10,
+    "predictions_exact": true,
+    "maximum_score_absolute_error": 7.105427357601002e-15,
+    "maximum_probability_absolute_error": 1.1102230246251565e-15
+  },
+  "test_policy": "official TEST refused and not loaded",
+  "deployment_status": "causal firmware candidate; continuous EEG and rest/no-intent validation are still required"
+}

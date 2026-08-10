@@ -18,6 +18,8 @@
 | `phase2b_cssd_stabilization.py` | Tested isolated CSSD changes; its saved result predates the official-MATLAB correction and is invalid-source provenance |
 | `phase2b_combination_ablation.py` | Crossed 36 CSSD configurations on corrected official MATLAB TRAIN and selected the promoted model |
 | `evaluate_archived_terminal_logistic_phase1.py` | Re-evaluated the frozen terminal-feature Logistic pipeline on corrected official MATLAB TRAIN |
+| `phase2c_horizon_diagnostic.py` | Initial Phase 2c diagnostic that measured causal accuracy while accumulating 50--500 ms from a known epoch start; superseded by Phase 2c's past-only rolling interpretation |
+| `phase2c_streaming_causal_cssd_lda.py` | Verified the final past-only 500 ms / 50 ms streaming interpretation, post-A invariance, and exact chunked filtering |
 
 These files are frozen provenance. Active code must not import them. The
 scripts themselves are retained even where an associated result was later

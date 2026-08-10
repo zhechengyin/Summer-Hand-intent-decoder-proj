@@ -30,6 +30,9 @@ Important corrected-data result directories:
 results/phasea2_cssd_lda_official_matlab/
 results/phase2b_combination_ablation/
 results/archived_terminal_logistic_official_matlab/
+results/phase2c_horizon_diagnostic/
+results/phase2c_streaming_causal/
+models/cssd_lda_offline_phase2b/
 ```
 
 `results/phase2b_cssd_stabilization_retired_uea/` is explicitly retained as an
@@ -45,6 +48,7 @@ On corrected official TRAIN data:
 - Phase A2 CSSD + hierarchical LDA: 85.03%;
 - Phase 2b winner: 86.72%.
 
-The Phase 2b winner was promoted out of the archive to
-`models/finger_movements/cssd_lda/`. All experimental runners and comparison
-results remain here as immutable provenance.
+The Phase 2b zero-phase winner is now archived under
+`models/cssd_lda_offline_phase2b/`. Its causal Phase 2c successor is active
+under `models/finger_movements/cssd_lda/`. All completed experimental runners
+and comparison results remain here as immutable provenance.

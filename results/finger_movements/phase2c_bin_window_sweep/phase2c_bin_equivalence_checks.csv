@@ -1,0 +1,5 @@
+bin_ms,samples_per_bin,checked_cases,maximum_filtered_signal_error,passed
+10,1,64,0.0,True
+20,2,64,0.0,True
+50,5,64,0.0,True
+100,10,64,0.0,True

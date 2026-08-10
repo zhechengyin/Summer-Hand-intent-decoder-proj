@@ -1,0 +1,3 @@
+check,checked_cases,bins_per_window,maximum_filtered_signal_error,maximum_decision_score_error,maximum_probability_error,maximum_ring_buffer_error,predictions_exact,first_output_after_bins,next_output_after_one_more_bin,passed,synthetic_future_samples_after_a
+chunked_streaming_equivalence,64,10,0.0,0.0,0.0,0.0,True,10,True,True,
+post_a_future_invariance,64,,0.0,0.0,0.0,,True,,,True,10

@@ -4,8 +4,8 @@ This repository develops compact neural-signal models intended for eventual
 low-latency firmware deployment.
 
 The current task is FingerMovements left/right EEG classification from 28
-channels and 50 samples at 100 Hz. The active offline research model is the
-Phase 2b CSSD + hierarchical LDA winner, selected entirely from corrected
+channels and 50 samples at 100 Hz. The active model is the strictly causal
+Phase 2c CSSD + hierarchical LDA candidate, selected entirely from corrected
 official MATLAB TRAIN data.
 
 ## Current result
@@ -14,23 +14,29 @@ official MATLAB TRAIN data.
 |---|---:|
 | Terminal features + Logistic reproduction | 78.58% |
 | Paper-style CSSD + hierarchical LDA | 85.03% |
-| **Selected Phase 2b CSSD + hierarchical LDA** | **86.72%** |
+| Phase 2b zero-phase offline reference | 86.72% |
+| Phase 2c causal horizon diagnostic at 500 ms | 82.93% |
+| **Phase 2c causal 500 ms / 50 ms candidate** | **82.93%** |
+| Phase 2c provisional 400 ms window | 83.45% |
 
-The selected configuration uses empirical covariance, per-trial trace
+The active causal configuration uses empirical covariance, per-trial trace
 normalization, one BP and one ERD/F2 spatial pattern per class, and LDA fusion.
-Its seed standard deviation was 0.68 percentage points and its worst-seed OOF
-balanced accuracy was 86.09% across seeds 42/43/44.
+Its seed standard deviation was 1.03 percentage points and its worst-seed OOF
+balanced accuracy was 81.67% across seeds 42/43/44.
 
-The active implementation and verified all-TRAIN checkpoint are under
-`models/finger_movements/cssd_lda/`. All completed experimental code and
-results are archived under `history/finger_movements/`.
+The causal implementation and verified all-TRAIN checkpoint are under
+`models/finger_movements/cssd_lda/`. The bin/window sweep is the active Phase
+2c experiment under `experiments/active/`; completed runners, results, and the
+Phase 2b zero-phase reference are under `history/finger_movements/`.
 
 ## Important limitation
 
-The current model uses zero-phase temporal filtering. It is therefore an
-offline reference, not yet a causal streaming firmware model. The next model
-phase must replace that preprocessing with a causal implementation and repeat
-TRAIN-only validation before deployment.
+The former 86.72% Phase 2b checkpoint uses zero-phase temporal filtering and is
+archived as an offline reference. The active Phase 2c model reaches 82.93%
+TRAIN-only mean OOF balanced accuracy with strict left-to-right filtering and
+uses the 500 ms before the current prediction point. Its all-TRAIN checkpoint
+has been promoted, but continuous EEG and rest/no-intent validation are still
+required before firmware deployment.
 
 ## Project rules
 
@@ -48,9 +54,9 @@ TRAIN-only validation before deployment.
 data/raw/FingerMovements/               immutable official source files
 data/processed/finger_movements/        model-ready official splits
 data/processing/finger_movements/       supported conversion code
-models/finger_movements/cssd_lda/       active model and checkpoint
-experiments/active/                     empty experiment boundary + README
-results/                                no active experiment results
+models/finger_movements/cssd_lda/       active causal model and checkpoint
+experiments/active/                     Phase 2c bin/window sweep
+results/finger_movements/phase2c_bin_window_sweep/ current sweep evidence
 docs/STATUS.md                          current source of truth
 history/finger_movements/               completed EEG experiments/results
 history/indy/                           completed Indy project
