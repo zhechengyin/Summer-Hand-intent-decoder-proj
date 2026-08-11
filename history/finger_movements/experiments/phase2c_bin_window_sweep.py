@@ -33,7 +33,8 @@ from sklearn.metrics import (
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+ARCHIVE_ROOT = Path(__file__).resolve().parents[1]
 
 CASES = 316
 CHANNELS = 28
@@ -102,12 +103,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--data",
         type=Path,
-        default=ROOT / "data/processed/finger_movements/train.npz",
+        default=PROJECT_ROOT / "data/processed/finger_movements/train.npz",
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=ROOT / "results/finger_movements/phase2c_bin_window_sweep",
+        default=ARCHIVE_ROOT / "results/phase2c_bin_window_sweep",
     )
     parser.add_argument("--bins-ms", nargs="+", type=int, default=list(DEFAULT_BINS_MS))
     parser.add_argument(
@@ -696,7 +697,7 @@ def main() -> None:
             "select history window by mean BA, then worst-seed BA, then shorter "
             "window; select bin separately from firmware latency constraints"
         ),
-        "provisional_best_window_ms": int(best_window_row["window_ms"]),
+        "selected_window_ms": int(best_window_row["window_ms"]),
         "summary": summary_rows,
     }
     with (output_dir / "phase2c_bin_window_metrics.json").open(
@@ -719,7 +720,7 @@ def main() -> None:
             f"seed SD={100.0 * row['balanced_accuracy_seed_sd']:.2f} pp | "
             f"worst={100.0 * row['worst_seed_balanced_accuracy']:.2f}%"
         )
-    print(f"provisional best window={best_window_row['window_ms']} ms")
+    print(f"selected window={best_window_row['window_ms']} ms")
     print("bin-equivalence checks=PASS; choose bin from latency/firmware constraints")
     print(f"metrics={output_dir / 'phase2c_bin_window_metrics.json'}")
 

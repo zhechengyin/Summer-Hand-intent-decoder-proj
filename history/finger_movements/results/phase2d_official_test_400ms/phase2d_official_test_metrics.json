@@ -1,0 +1,49 @@
+{
+  "created_utc": "2026-08-11T17:58:22.073329+00:00",
+  "phase": "2d",
+  "evaluated_model_phase": "2c",
+  "scope": "retrospective pure inference on corrected official TEST",
+  "interpretation": "not a pristine blind test because official TEST labels/results were exposed earlier in the project",
+  "checkpoint": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/models/finger_movements/cssd_lda/checkpoints/finger_movements_cssd_lda_phase2c_causal_400ms.npz",
+  "checkpoint_sha256": "87b84cc2c8baf9efdc1ccf37ad28f5f58ad13c4db2a8f8a273fe73fce9956101",
+  "checkpoint_variant": "causal__window_400ms__bin_50ms",
+  "development_mean_oof_balanced_accuracy": 0.8398563206879515,
+  "test_data": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/data/processed/finger_movements/test.npz",
+  "test_data_sha256": "0bb5e56b6c9e511358dba4a71596b510c89561ad7b26b2dbe4cb8267d4f03cb4",
+  "test_cases": 100,
+  "class_counts": {
+    "left": 49,
+    "right": 51
+  },
+  "inference_contract": {
+    "feature_history_ms": 400,
+    "cold_start_ms": 500,
+    "streaming_update_ms": 50,
+    "training_or_test_derived_estimation": false
+  },
+  "streaming_equivalence": {
+    "predictions_exact": true,
+    "maximum_score_absolute_error": 9.769962616701378e-15,
+    "maximum_probability_absolute_error": 1.7763568394002505e-15
+  },
+  "metrics": {
+    "accuracy": 0.77,
+    "accuracy_wilson_95_low": 0.6784561697712622,
+    "accuracy_wilson_95_high": 0.8415673411969654,
+    "balanced_accuracy": 0.7705082032813125,
+    "macro_f1": 0.7699769976997699,
+    "mean_log_loss": 0.45841974767922694,
+    "left_recall": 0.7959183673469388,
+    "right_recall": 0.7450980392156863,
+    "confusion_matrix": [
+      [
+        39,
+        10
+      ],
+      [
+        13,
+        38
+      ]
+    ]
+  }
+}

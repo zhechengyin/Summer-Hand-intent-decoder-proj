@@ -27,7 +27,7 @@ from sklearn.metrics import (
     log_loss,
 )
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_DATA = ROOT / "data/processed/finger_movements/train.npz"
 DEFAULT_CHECKPOINT = (
     Path(__file__).resolve().parent

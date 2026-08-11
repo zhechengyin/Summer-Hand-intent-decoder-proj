@@ -587,7 +587,7 @@ diagnostic, not a generalization estimate. Save/reload predictions were exact.
 Ten stateful 50 ms updates reproduced batch endpoint inference on all 316
 cases, with maximum score error `7.11e-15` and probability error `1.11e-15`.
 
-The next active Phase 2c runner performs a predeclared 4 x 4 comparison:
+The Phase 2c sweep runner performed a predeclared 4 x 4 comparison:
 
 - past-context windows: 200, 300, 400, and 500 ms;
 - streaming bins: 10, 20, 50, and 100 ms;
@@ -602,14 +602,66 @@ The complete sweep produced:
 
 | Window | Mean OOF BA | Seed SD | Worst seed |
 |---:|---:|---:|---:|
-| 200 ms | 80.17% | 1.56 pp | 78.17% |
-| 300 ms | 82.81% | 1.30 pp | 81.33% |
-| **400 ms** | **83.45%** | **1.07 pp** | **81.98%** |
+| 200 ms | 79.62% | 1.23 pp | 78.46% |
+| 300 ms | 79.43% | 0.26 pp | 79.11% |
+| **400 ms** | **83.99%** | **0.54 pp** | **83.25%** |
 | 500 ms | 82.93% | 1.03 pp | 81.67% |
 
-The predeclared rule provisionally selects 400 ms, which improved mean BA by
-0.52 points and worst-seed BA by 0.31 points relative to 500 ms. The effect was
-not uniform: seed 42 decreased from 84.20% to 81.98%, while seeds 43 and 44
-increased from 82.92%/81.67% to 84.50%/83.87%. Therefore the active 500 ms /
-50 ms checkpoint remains unchanged pending a focused confirmation. All four
-bin sizes had exactly zero causal-filter discrepancy.
+Before freezing, the implementation was tightened so every candidate BP ring
+is re-referenced to its own oldest sample. This prevents a shorter candidate
+from depending on the removed part of the 500 ms epoch through its baseline.
+The corrected sweep selects 400 ms, improving mean BA by 1.05 points,
+worst-seed BA by 1.57 points, and seed SD by 0.49 points relative to 500 ms.
+Its seed BAs were 83.25%, 84.20%, and 84.52%. All four bin sizes had exactly
+zero causal-filter discrepancy.
+
+Decision: freeze 400 ms history and retain the 50 ms update baseline. The
+selected all-TRAIN checkpoint was fitted, reloaded, and verified at:
+
+```text
+models/finger_movements/cssd_lda/checkpoints/finger_movements_cssd_lda_phase2c_causal_400ms.npz
+```
+
+SHA-256:
+
+```text
+87b84cc2c8baf9efdc1ccf37ad28f5f58ad13c4db2a8f8a273fe73fce9956101
+```
+
+Apparent all-TRAIN BA was 89.89% (fit diagnostic only). Reload predictions
+were exact; ten 50 ms chunks reproduced batch inference with maximum score
+error `3.20e-14` and probability error `2.11e-15`. Official TEST was refused.
+The prior 500 ms causal model/checkpoint and the completed sweep were archived.
+
+## 2026-08-11 — Phase 2d frozen corrected official-TEST inference
+
+Phase 2d began only after the Phase 2c 400 ms model, 50 ms update interval, all
+preprocessing, and all-TRAIN checkpoint were frozen. The corrected 100-case
+official TEST was then opened for pure inference. The script verified
+checkpoint SHA-256
+`87b84cc2c8baf9efdc1ccf37ad28f5f58ad13c4db2a8f8a273fe73fce9956101`
+before loading TEST. It performed no fitting, normalization estimation,
+recalibration, threshold selection, or model choice.
+
+| Metric | Result |
+|---|---:|
+| Accuracy | 77.00% |
+| Balanced accuracy | 77.05% |
+| Macro-F1 | 77.00% |
+| Mean log loss | 0.4584 |
+| Left recall | 79.59% |
+| Right recall | 74.51% |
+| Accuracy Wilson 95% CI | 67.85%--84.16% |
+
+The confusion matrix was `[[39, 10], [13, 38]]` with rows=true and
+columns=predicted in left/right order. Batch inference and ten stateful 50 ms
+chunks produced identical labels; maximum score/probability discrepancies were
+`9.77e-15` and `1.78e-15`.
+
+The TEST BA is 6.94 points below the frozen 83.99% OOF estimate. The errors are
+not caused by a one-class collapse. Because official TEST was exposed during
+an earlier project phase, this is recorded as a retrospective benchmark rather
+than a pristine blind test. Decision: do not use this result to retune the
+checkpoint; independent future data is required for a new selection gate. The
+Phase 2d script and result were then archived; the checkpoint remains named
+and frozen as Phase 2c because no training or model selection occurred here.

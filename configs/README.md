@@ -6,11 +6,12 @@ configuration is declared beside the self-contained model under
 The initial horizon diagnostic is archived as
 `history/finger_movements/experiments/phase2c_horizon_diagnostic.py`.
 
-The promoted Phase 2c baseline freezes a 500 ms past-only ring buffer and a
-50 ms update interval. Its streaming state policy and endpoint feature windows
-are explicit in `models/finger_movements/cssd_lda/model.py`. The active sweep
-tests bins 10/20/50/100 ms and windows 200/300/400/500 ms in
-`experiments/active/phase2c_bin_window_sweep.py`.
+The promoted Phase 2c model freezes a 400 ms past-only feature ring and a
+50 ms update interval. After cold reset, 100 ms of causal filter pre-roll makes
+the first validated output occur at 500 ms; steady-state outputs then update
+every 50 ms. Its state policy is explicit in
+`models/finger_movements/cssd_lda/model.py`. The completed bin/window sweep is
+archived under `history/finger_movements/`.
 
 Completed experiment grids and their constants are preserved with their
 scripts under `history/finger_movements/experiments/`. Retired Indy

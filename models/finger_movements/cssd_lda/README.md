@@ -1,14 +1,15 @@
 # FingerMovements causal CSSD + hierarchical LDA
 
 This is the active Phase 2c model. It predicts left/right movement from the
-500 ms EEG interval ending at the current point A. The implementation is
+400 ms EEG interval ending at the current point A. The implementation is
 strictly causal: temporal filters run left-to-right, samples after A are never
-used, and the streaming API carries IIR state plus a rolling 500 ms buffer.
+used, and the streaming API carries IIR state plus a rolling 400 ms buffer.
 
 ## Frozen baseline configuration
 
 - 28 EEG channels sampled at 100 Hz;
-- 500 ms past-context window (50 samples);
+- 400 ms feature window (40 samples);
+- 100 ms causal filter pre-roll after a cold reset;
 - 50 ms streaming update (5 new samples);
 - fourth-order causal 0--7 Hz BP filter;
 - fourth-order causal 10--33 Hz ERD filter;
@@ -17,15 +18,15 @@ used, and the streaming API carries IIR state plus a rolling 500 ms buffer.
 - BP, ERD, and BP-trend branch LDAs followed by LDA fusion.
 
 TRAIN-only repeated five-fold validation across seeds 42/43/44 produced
-82.93% mean OOF balanced accuracy, 1.03 percentage-point seed standard
-deviation, and 81.67% worst-seed balanced accuracy.
+83.99% mean OOF balanced accuracy, 0.54 percentage-point seed standard
+deviation, and 83.25% worst-seed balanced accuracy.
 
 ## Checkpoint
 
 The active checkpoint is:
 
 ```text
-checkpoints/finger_movements_cssd_lda_phase2c_causal.npz
+checkpoints/finger_movements_cssd_lda_phase2c_causal_400ms.npz
 ```
 
 Its adjacent `.metrics.json` records the exact checkpoint hash, source-data
@@ -35,11 +36,17 @@ and streaming-equivalence verification.
 Checkpoint SHA-256:
 
 ```text
-d92c23f7e6f8722d568d1b31963eab1328d5367ba32764b676d1ae0d73aaefd4
+87b84cc2c8baf9efdc1ccf37ad28f5f58ad13c4db2a8f8a273fe73fce9956101
 ```
 
-The apparent all-TRAIN balanced accuracy is 88.30%. This number is only a fit
-diagnostic; the frozen generalization estimate remains 82.93% mean OOF BA.
+The apparent all-TRAIN balanced accuracy is 89.89%. It is only a fit
+diagnostic; the frozen generalization estimate remains 83.99% mean OOF BA.
+
+Phase 2d subsequently evaluated this exact checkpoint on the corrected
+official TEST using pure inference: 77.00% accuracy, 77.05% balanced accuracy,
+and 77.00% macro-F1 over 100 cases. That retrospective result is archived at
+`history/finger_movements/results/phase2d_official_test_400ms/`; it did not
+change the Phase 2c model or checkpoint.
 
 Rebuild it from official TRAIN only:
 
@@ -53,9 +60,11 @@ the 316 fitting cases are diagnostics, not held-out performance.
 ## Deployment boundary
 
 The model is causal, but the official dataset contains isolated 500 ms epochs
-rather than continuous EEG. Real continuous recordings are still required to
-validate long-running filter state, overlapping windows, and rest/no-intent
-behavior before firmware deployment.
+rather than continuous EEG. The first 100 ms supplies causal filter pre-roll;
+the selected feature ring is the following 400 ms. After cold reset, the first
+validated output therefore occurs at 500 ms; subsequent outputs update every
+50 ms. Real continuous recordings are still required to validate long-running
+filter state, overlapping windows, and rest/no-intent behavior.
 
-The previous zero-phase Phase 2b implementation and checkpoint are preserved
-under `history/finger_movements/models/cssd_lda_offline_phase2b/`.
+The previous 500 ms causal model/checkpoint and the zero-phase Phase 2b
+reference are preserved under `history/finger_movements/models/`.

@@ -11,7 +11,8 @@ BCI Competition II Data Set IV 100 Hz MATLAB release.
 - Case duration: 500 ms, represented by 50 timepoints at 10 ms intervals.
 - Timing: each case ends approximately 130 ms before the key press.
 - Official split: 316 training cases and 100 test cases. The test was opened
-  once for the frozen Phase 1h checkpoint on 2026-08-05.
+  for the frozen Phase 1h checkpoint on 2026-08-05 and for pure inference of
+  the frozen Phase 2c 400 ms checkpoint during Phase 2d on 2026-08-11.
 - Labels: `left = 0`, `right = 1`.
 
 The release describes three same-day recording sessions but does not provide a

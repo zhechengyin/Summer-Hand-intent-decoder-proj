@@ -20,6 +20,8 @@
 | `evaluate_archived_terminal_logistic_phase1.py` | Re-evaluated the frozen terminal-feature Logistic pipeline on corrected official MATLAB TRAIN |
 | `phase2c_horizon_diagnostic.py` | Initial Phase 2c diagnostic that measured causal accuracy while accumulating 50--500 ms from a known epoch start; superseded by Phase 2c's past-only rolling interpretation |
 | `phase2c_streaming_causal_cssd_lda.py` | Verified the final past-only 500 ms / 50 ms streaming interpretation, post-A invariance, and exact chunked filtering |
+| `phase2c_bin_window_sweep.py` | Swept causal 200/300/400/500 ms feature rings and verified 10/20/50/100 ms bin equivalence, selecting 400/50 |
+| `phase2d_evaluate_frozen_test.py` | Applied only the exact frozen Phase 2c 400 ms checkpoint to corrected official TEST and verified batch/streaming equivalence |
 
 These files are frozen provenance. Active code must not import them. The
 scripts themselves are retained even where an associated result was later

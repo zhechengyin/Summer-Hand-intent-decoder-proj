@@ -72,7 +72,7 @@
     }
   ],
   "selection_rule": "select history window by mean BA, then worst-seed BA, then shorter window; select bin separately from firmware latency constraints",
-  "provisional_best_window_ms": 400,
+  "selected_window_ms": 400,
   "summary": [
     {
       "bin_ms": 10,

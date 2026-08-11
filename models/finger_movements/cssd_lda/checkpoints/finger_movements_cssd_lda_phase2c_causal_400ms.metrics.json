@@ -1,0 +1,70 @@
+{
+  "created_utc": "2026-08-11T02:34:01.148807+00:00",
+  "checkpoint": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/models/finger_movements/cssd_lda/checkpoints/finger_movements_cssd_lda_phase2c_causal_400ms.npz",
+  "checkpoint_sha256": "87b84cc2c8baf9efdc1ccf37ad28f5f58ad13c4db2a8f8a273fe73fce9956101",
+  "training_data": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/data/processed/finger_movements/train.npz",
+  "training_data_sha256": "a2025f277b5351839554e0ecf3398f1f4fd5151a4fc90f0e25c873734f5a91d1",
+  "configuration": {
+    "covariance": "empirical",
+    "trial_trace_normalization": true,
+    "bp_patterns_per_class": 1,
+    "f2_patterns_per_class": 1,
+    "fusion": "LDA",
+    "temporal_filters": "fourth-order causal Butterworth SOS",
+    "history_ms": 400,
+    "cold_start_ms": 500,
+    "streaming_update_ms": 50
+  },
+  "selection_evidence": {
+    "mean_oof_balanced_accuracy": 0.8398563206879515,
+    "seed_balanced_accuracy_sd": 0.005394642486715603,
+    "worst_seed_balanced_accuracy": 0.8324520290029244,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "folds_per_seed": 5
+  },
+  "apparent_full_training_metrics": {
+    "accuracy": 0.8987341772151899,
+    "balanced_accuracy": 0.8988903577294396,
+    "macro_f1": 0.8986976557804047,
+    "mean_log_loss": 0.24492151390166636,
+    "confusion_matrix": [
+      [
+        139,
+        20
+      ],
+      [
+        12,
+        145
+      ]
+    ]
+  },
+  "reload_verification": {
+    "predictions_exact": true,
+    "maximum_score_absolute_error": 0.0,
+    "maximum_probability_absolute_error": 0.0
+  },
+  "streaming_equivalence": {
+    "cases": 316,
+    "update_ms": 50,
+    "updates_before_first_output": 10,
+    "predictions_exact": true,
+    "maximum_score_absolute_error": 3.197442310920451e-14,
+    "maximum_probability_absolute_error": 2.1094237467877974e-15
+  },
+  "test_policy": "official TEST was excluded from selection/fitting and loaded only for frozen Phase 2d pure inference",
+  "phase2d_retrospective_test_evidence": {
+    "result": "history/finger_movements/results/phase2d_official_test_400ms/phase2d_official_test_metrics.json",
+    "test_data_sha256": "0bb5e56b6c9e511358dba4a71596b510c89561ad7b26b2dbe4cb8267d4f03cb4",
+    "cases": 100,
+    "accuracy": 0.77,
+    "balanced_accuracy": 0.7705082032813125,
+    "macro_f1": 0.7699769976997699,
+    "confusion_matrix": [[39, 10], [13, 38]],
+    "interpretation": "retrospective pure inference; not a model-selection gate"
+  },
+  "deployment_status": "causal firmware candidate; continuous EEG and rest/no-intent validation are still required"
+}

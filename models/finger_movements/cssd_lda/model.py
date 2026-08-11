@@ -1,8 +1,9 @@
 """Strictly causal FingerMovements CSSD + hierarchical LDA model.
 
-Each prediction uses the 500 ms interval ending at the current point. Temporal
+Each prediction uses the 400 ms interval ending at the current point. Temporal
 filters run left-to-right and the streaming interface carries both IIR state
-and a rolling history buffer between updates.
+and a rolling history buffer between updates. Official 500 ms epochs provide
+100 ms of causal filter pre-roll before the selected 400 ms feature window.
 """
 
 from __future__ import annotations
@@ -20,9 +21,12 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 CHANNELS = 28
-HISTORY_SAMPLES = 50
+AVAILABLE_INPUT_SAMPLES = 50
+HISTORY_SAMPLES = 40
+FILTER_PREROLL_SAMPLES = AVAILABLE_INPUT_SAMPLES - HISTORY_SAMPLES
 SAMPLING_RATE_HZ = 100.0
-HISTORY_MS = 500
+HISTORY_MS = 400
+COLD_START_MS = 500
 UPDATE_SAMPLES = 5
 UPDATE_MS = 50
 CLASS_COUNTS = {0: 159, 1: 157}
@@ -198,7 +202,7 @@ def _trend_features(bp: np.ndarray, retained_indices: np.ndarray) -> np.ndarray:
 
 @dataclass(frozen=True)
 class FingerMovementsCausalCssdLda:
-    """Frozen Phase 2c causal model for 500 ms past-context windows."""
+    """Frozen Phase 2c causal model for 400 ms past-context windows."""
 
     channel_names: np.ndarray
     trend_indices: np.ndarray
@@ -235,9 +239,9 @@ class FingerMovementsCausalCssdLda:
             fs=SAMPLING_RATE_HZ,
             output="sos",
         )
-        bp = _causal_filter(x, bp_sos)
+        bp = _causal_filter(x, bp_sos)[..., -HISTORY_SAMPLES:]
         bp = bp - bp[..., :1]
-        erd = _causal_filter(x, erd_sos)
+        erd = _causal_filter(x, erd_sos)[..., -HISTORY_SAMPLES:]
         bp_filters = _fit_cssd_filters(
             bp[..., -BP_RECENT_SAMPLES:], labels, BP_PATTERNS_PER_CLASS
         )
@@ -306,17 +310,18 @@ class FingerMovementsCausalCssdLda:
     ) -> tuple[np.ndarray, np.ndarray]:
         x = np.asarray(x, dtype=np.float64)
         channel_names = np.asarray(channel_names).astype(str)
-        if x.ndim != 3 or x.shape[1:] != (CHANNELS, HISTORY_SAMPLES):
+        if x.ndim != 3 or x.shape[1:] != (CHANNELS, AVAILABLE_INPUT_SAMPLES):
             raise ValueError(
-                f"Expected (cases, {CHANNELS}, {HISTORY_SAMPLES}), got {x.shape}"
+                f"Expected (cases, {CHANNELS}, {AVAILABLE_INPUT_SAMPLES}), "
+                f"got {x.shape}"
             )
         if not np.isfinite(x).all():
             raise ValueError("Input contains non-finite values")
         if not np.array_equal(channel_names, self.channel_names):
             raise ValueError("Channel names/order differ from the frozen checkpoint")
-        bp = _causal_filter(x, self.bp_sos)
+        bp = _causal_filter(x, self.bp_sos)[..., -HISTORY_SAMPLES:]
         bp = bp - bp[..., :1]
-        erd = _causal_filter(x, self.erd_sos)
+        erd = _causal_filter(x, self.erd_sos)[..., -HISTORY_SAMPLES:]
         return bp, erd
 
     def decision_function(self, x: np.ndarray, channel_names: np.ndarray) -> np.ndarray:
@@ -391,7 +396,7 @@ class FingerMovementsCausalCssdLda:
 
 
 class CausalStreamingState:
-    """Mutable IIR and 500 ms ring state for one continuous EEG stream."""
+    """Mutable IIR and 400 ms ring state for one continuous EEG stream."""
 
     def __init__(
         self, model: FingerMovementsCausalCssdLda, first_sample: np.ndarray
@@ -408,6 +413,7 @@ class CausalStreamingState:
         )
         self.bp_ring = np.empty((CHANNELS, 0), dtype=np.float64)
         self.erd_ring = np.empty((CHANNELS, 0), dtype=np.float64)
+        self.samples_seen = 0
 
     def push(
         self, samples: np.ndarray
@@ -424,13 +430,17 @@ class CausalStreamingState:
         erd, self.erd_state = sosfilt(
             self.model.erd_sos, samples, axis=-1, zi=self.erd_state
         )
+        self.samples_seen += samples.shape[-1]
         self.bp_ring = np.concatenate([self.bp_ring, bp], axis=-1)[
             ..., -HISTORY_SAMPLES:
         ]
         self.erd_ring = np.concatenate([self.erd_ring, erd], axis=-1)[
             ..., -HISTORY_SAMPLES:
         ]
-        if self.bp_ring.shape[-1] < HISTORY_SAMPLES:
+        if (
+            self.bp_ring.shape[-1] < HISTORY_SAMPLES
+            or self.samples_seen < AVAILABLE_INPUT_SAMPLES
+        ):
             return None
         bp_window = self.bp_ring[None] - self.bp_ring[None, ..., :1]
         erd_window = self.erd_ring[None]
@@ -446,9 +456,9 @@ def _validate_inputs(
     x = np.asarray(x, dtype=np.float64)
     labels = np.asarray(labels, dtype=np.int64)
     channel_names = np.asarray(channel_names).astype(str)
-    if x.ndim != 3 or x.shape[1:] != (CHANNELS, HISTORY_SAMPLES):
+    if x.ndim != 3 or x.shape[1:] != (CHANNELS, AVAILABLE_INPUT_SAMPLES):
         raise ValueError(
-            f"Expected (cases, {CHANNELS}, {HISTORY_SAMPLES}), got {x.shape}"
+            f"Expected (cases, {CHANNELS}, {AVAILABLE_INPUT_SAMPLES}), got {x.shape}"
         )
     if labels.shape != (len(x),):
         raise ValueError("Labels do not match the number of cases")

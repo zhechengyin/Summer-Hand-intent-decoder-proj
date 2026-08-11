@@ -1,6 +1,6 @@
 # Project Status
 
-Updated: 2026-08-10
+Updated: 2026-08-11
 
 ## Current state
 
@@ -16,10 +16,12 @@ final LDA fusion
 ```
 
 The implementation and verified all-TRAIN checkpoint are under
-`models/finger_movements/cssd_lda/`. Each prediction at point A uses only
-`[A-500 ms, A]`, with causal filter state carried across 50 ms updates. The
-Phase 2b zero-phase model is now an archived offline reference. The active
-experiment remains Phase 2c and sweeps history-window and streaming-bin sizes.
+`models/finger_movements/cssd_lda/`. Each prediction at point A uses a 400 ms
+feature ring ending at A, with causal filter state carried across 50 ms
+updates. A cold start reserves 100 ms for causal filter pre-roll before the
+400 ms ring. The Phase 2b zero-phase and Phase 2c 500 ms models are archived.
+There is no active experiment. The completed Phase 2d official-TEST runner and
+result are archived under `history/finger_movements/`.
 
 ## Valid data contract
 
@@ -49,6 +51,7 @@ fold. Official TEST was not loaded.
 | Paper-style Phase A2 CSSD + hierarchical LDA | 85.03% | 1.27 pp | 83.25% |
 | **Promoted Phase 2b configuration** | **86.72%** | **0.68 pp** | **86.09%** |
 | Phase 2c causal model at 500 ms | 82.93% | 1.03 pp | 81.67% |
+| **Promoted Phase 2c causal model at 400 ms** | **83.99%** | **0.54 pp** | **83.25%** |
 
 The Phase 2b winner improved all three seeds over the corrected Phase A2
 reference. It was empirical covariance, trial trace normalization on, one F2
@@ -128,21 +131,23 @@ models/finger_movements/cssd_lda/model.py
 Checkpoint:
 
 ```text
-models/finger_movements/cssd_lda/checkpoints/finger_movements_cssd_lda_phase2c_causal.npz
+models/finger_movements/cssd_lda/checkpoints/finger_movements_cssd_lda_phase2c_causal_400ms.npz
 ```
 
 Checkpoint SHA-256:
 
 ```text
-d92c23f7e6f8722d568d1b31963eab1328d5367ba32764b676d1ae0d73aaefd4
+87b84cc2c8baf9efdc1ccf37ad28f5f58ad13c4db2a8f8a273fe73fce9956101
 ```
 
 The causal checkpoint was fitted once on all 316 official TRAIN cases, saved,
 reloaded, and verified with identical predictions and zero reload error.
-Processing each case as ten stateful 50 ms chunks reproduced batch endpoint
-inference with maximum score error `7.11e-15` and probability error `1.11e-15`.
-Apparent fitting balanced accuracy was 88.30%; this is a fit diagnostic, not a
-held-out estimate. Official TEST was refused and not loaded.
+Processing each case as ten stateful 50 ms chunks (100 ms filter pre-roll plus
+the 400 ms ring) reproduced batch inference with maximum score error
+`3.20e-14` and probability error `2.11e-15`. Apparent fitting balanced accuracy
+was 89.89%; this is a fit diagnostic, not a held-out estimate. Official TEST
+was refused while this checkpoint was selected and fitted, then opened later
+only by the frozen Phase 2d inference runner.
 
 ## Deployment boundary
 
@@ -153,21 +158,53 @@ state, overlapping predictions, and behavior between labeled events. The
 dataset also lacks a rest/no-intent class, and a new external holdout is still
 required for a genuinely independent final claim.
 
-## Active Phase 2c bin/window sweep
+## Completed Phase 2c bin/window sweep
 
-The active runner is:
+The archived runner is:
 
 ```text
-experiments/active/phase2c_bin_window_sweep.py
+history/finger_movements/experiments/phase2c_bin_window_sweep.py
 ```
 
 It compared past-context windows of 200/300/400/500 ms under the same
-TRAIN-only seeds 42/43/44 and five folds. Mean OOF BA was 80.17%, 82.81%,
-83.45%, and 82.93%, respectively. The provisional 400 ms winner improved mean
-BA by 0.52 points and worst-seed BA by 0.31 points over 500 ms, but seed 42
-decreased while seeds 43 and 44 improved. The frozen 500 ms checkpoint is
-therefore unchanged pending confirmation.
+TRAIN-only seeds 42/43/44 and five folds. Mean OOF BA was 79.62%, 79.43%,
+83.99%, and 82.93%, respectively. The frozen 400 ms winner improved mean BA by
+1.05 points, worst-seed BA by 1.57 points, and seed SD by 0.49 points over
+500 ms. Its seed BAs were 83.25%, 84.20%, and 84.52%.
 
 Streaming bins of 10/20/50/100 ms all reproduced the same filtered endpoint
 with exactly zero numerical error. Bin size is an update-cadence/firmware
-choice, not an accuracy hyperparameter for this feature model.
+choice, not an accuracy hyperparameter for this feature model. The runner and
+all result files are archived; no experiment remains active.
+
+## Phase 2d retrospective official TEST
+
+Phase 2d applied the frozen Phase 2c 400 ms checkpoint once to the corrected
+100-case official TEST through pure inference. No fitting, recalibration,
+threshold selection, or TEST-derived preprocessing occurred. Phase 2d is an
+evaluation record only and does not rename or modify the Phase 2c model.
+
+| Metric | Result |
+|---|---:|
+| Accuracy | 77.00% |
+| Balanced accuracy | 77.05% |
+| Macro-F1 | 77.00% |
+| Left recall | 79.59% |
+| Right recall | 74.51% |
+| Accuracy Wilson 95% CI | 67.85%--84.16% |
+
+The confusion matrix was `[[39, 10], [13, 38]]` in left/right order. TEST BA
+was 6.94 points below the frozen 83.99% TRAIN-only OOF estimate. Batch and ten
+stateful 50 ms-chunk predictions were identical, with maximum score error
+`9.77e-15` and probability error `1.78e-15`.
+
+This is a retrospective benchmark, not a pristine blind test, because official
+TEST was exposed earlier in the project. The checkpoint and model selection
+must not be changed in response to this result.
+
+Archived evidence:
+
+```text
+history/finger_movements/experiments/phase2d_evaluate_frozen_test.py
+history/finger_movements/results/phase2d_official_test_400ms/
+```

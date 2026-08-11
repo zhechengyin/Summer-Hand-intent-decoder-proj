@@ -11,10 +11,11 @@ from pathlib import Path
 
 import numpy as np
 from model import (
+    AVAILABLE_INPUT_SAMPLES,
     CHANNELS,
     CLASS_COUNTS,
+    COLD_START_MS,
     HISTORY_MS,
-    HISTORY_SAMPLES,
     UPDATE_MS,
     UPDATE_SAMPLES,
     FingerMovementsCausalCssdLda,
@@ -31,11 +32,11 @@ ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DATA = ROOT / "data/processed/finger_movements/train.npz"
 DEFAULT_CHECKPOINT = (
     Path(__file__).resolve().parent
-    / "checkpoints/finger_movements_cssd_lda_phase2c_causal.npz"
+    / "checkpoints/finger_movements_cssd_lda_phase2c_causal_400ms.npz"
 )
-DEVELOPMENT_MEAN_OOF_BA = 0.8293073749148739
-DEVELOPMENT_SEED_BA_SD = 0.010319809536045069
-DEVELOPMENT_WORST_SEED_BA = 0.8167287585626728
+DEVELOPMENT_MEAN_OOF_BA = 0.8398563206879515
+DEVELOPMENT_SEED_BA_SD = 0.005394642486715603
+DEVELOPMENT_WORST_SEED_BA = 0.8324520290029244
 
 
 def parse_args() -> argparse.Namespace:
@@ -70,7 +71,7 @@ def load_training_data(
         y = data["y"].astype(np.int64, copy=True)
         source_index = data["source_index"].astype(np.int64, copy=True)
         channel_names = data["channel_names"].astype(str, copy=True)
-    if x.shape != (316, CHANNELS, HISTORY_SAMPLES):
+    if x.shape != (316, CHANNELS, AVAILABLE_INPUT_SAMPLES):
         raise ValueError(f"Unexpected x shape: {x.shape}")
     if dict(Counter(y.tolist())) != CLASS_COUNTS:
         raise ValueError(f"Unexpected class counts: {dict(Counter(y.tolist()))}")
@@ -109,7 +110,7 @@ def verify_streaming(
     for case in x:
         state = model.new_stream(case[:, 0])
         result = None
-        for start in range(0, HISTORY_SAMPLES, UPDATE_SAMPLES):
+        for start in range(0, AVAILABLE_INPUT_SAMPLES, UPDATE_SAMPLES):
             result = state.push(case[:, start : start + UPDATE_SAMPLES])
         if result is None:
             raise RuntimeError("Streaming state did not emit after 500 ms")
@@ -131,7 +132,7 @@ def verify_streaming(
     return {
         "cases": len(x),
         "update_ms": UPDATE_MS,
-        "updates_before_first_output": HISTORY_SAMPLES // UPDATE_SAMPLES,
+        "updates_before_first_output": AVAILABLE_INPUT_SAMPLES // UPDATE_SAMPLES,
         "predictions_exact": True,
         "maximum_score_absolute_error": score_error,
         "maximum_probability_absolute_error": probability_error,
@@ -148,15 +149,21 @@ def main() -> None:
 
     print("=== FingerMovements Phase 2c causal full-TRAIN fit ===")
     print(f"data={data_path}")
-    print(f"cases={len(y)} | input={CHANNELS}x{HISTORY_SAMPLES} | test=REFUSED")
-    print(f"history={HISTORY_MS} ms | streaming update={UPDATE_MS} ms")
+    print(
+        f"cases={len(y)} | official input={CHANNELS}x{AVAILABLE_INPUT_SAMPLES} | "
+        "test=REFUSED"
+    )
+    print(
+        f"feature history={HISTORY_MS} ms | cold start={COLD_START_MS} ms | "
+        f"streaming update={UPDATE_MS} ms"
+    )
     print("filter=left-to-right causal SOS; future samples forbidden")
 
     metadata = {
         "created_utc": created_utc,
         "model": "FingerMovements causal CSSD + hierarchical LDA",
         "selection": "Phase 2c official-TRAIN-only repeated stratified CV",
-        "selected_variant": "causal__window_500ms__bin_50ms",
+        "selected_variant": "causal__window_400ms__bin_50ms",
         "development_mean_oof_balanced_accuracy": DEVELOPMENT_MEAN_OOF_BA,
         "training_data_path": str(data_path),
         "training_data_sha256": data_hash,
@@ -202,6 +209,7 @@ def main() -> None:
             "fusion": "LDA",
             "temporal_filters": "fourth-order causal Butterworth SOS",
             "history_ms": HISTORY_MS,
+            "cold_start_ms": COLD_START_MS,
             "streaming_update_ms": UPDATE_MS,
         },
         "selection_evidence": {
@@ -218,7 +226,10 @@ def main() -> None:
             "maximum_probability_absolute_error": probability_reload_error,
         },
         "streaming_equivalence": streaming,
-        "test_policy": "official TEST refused and not loaded",
+        "test_policy": (
+            "official TEST refused and not loaded by this checkpoint-training "
+            "entry point; frozen evaluation is a separate Phase 2d record"
+        ),
         "deployment_status": (
             "causal firmware candidate; continuous EEG and rest/no-intent "
             "validation are still required"

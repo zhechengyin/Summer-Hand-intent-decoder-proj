@@ -7,16 +7,17 @@ refused and not loaded.
 
 | Window | Mean OOF BA | Seed SD | Worst seed |
 |---:|---:|---:|---:|
-| 200 ms | 80.17% | 1.56 pp | 78.17% |
-| 300 ms | 82.81% | 1.30 pp | 81.33% |
-| **400 ms** | **83.45%** | **1.07 pp** | **81.98%** |
+| 200 ms | 79.62% | 1.23 pp | 78.46% |
+| 300 ms | 79.43% | 0.26 pp | 79.11% |
+| **400 ms** | **83.99%** | **0.54 pp** | **83.25%** |
 | 500 ms | 82.93% | 1.03 pp | 81.67% |
 
-The 400 ms window is the provisional winner by the predeclared mean-BA rule,
-improving mean BA by 0.52 points and worst-seed BA by 0.31 points relative to
-500 ms. It did not improve every seed: seed 42 decreased, while seeds 43 and
-44 improved. The 500 ms / 50 ms checkpoint therefore remains frozen until the
-400 ms result receives a dedicated confirmation.
+The 400 ms window is the frozen winner by the predeclared mean-BA rule,
+improving mean BA by 1.05 points, worst-seed BA by 1.57 points, and seed SD by
+0.49 points relative to 500 ms. Its seed results were 83.25%, 84.20%, and
+84.52%. The sweep causally re-references BP to the oldest sample inside every
+candidate ring; therefore the 400 ms classifier does not consume the removed
+100 ms through its feature baseline.
 
 All four bin sizes produced exactly identical causal filtered signals for the
 same endpoint (maximum error 0). Bin size is therefore a firmware latency and

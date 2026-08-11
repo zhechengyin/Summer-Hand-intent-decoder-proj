@@ -1,6 +1,6 @@
 # FingerMovements causal CSSD + hierarchical LDA
 
-This is the active Phase 2c model. It predicts left/right movement from the
+This is the archived Phase 2c 500 ms causal baseline. It predicts from the
 500 ms EEG interval ending at the current point A. The implementation is
 strictly causal: temporal filters run left-to-right, samples after A are never
 used, and the streaming API carries IIR state plus a rolling 500 ms buffer.
@@ -44,7 +44,7 @@ diagnostic; the frozen generalization estimate remains 82.93% mean OOF BA.
 Rebuild it from official TRAIN only:
 
 ```bash
-python models/finger_movements/cssd_lda/train_checkpoint.py
+python history/finger_movements/models/cssd_lda_causal_500ms_phase2c/train_checkpoint.py
 ```
 
 The entry point refuses any data path containing `test`. Apparent metrics on
