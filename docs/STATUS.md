@@ -1,6 +1,6 @@
 # Project Status
 
-Updated: 2026-08-11
+Updated: 2026-08-12
 
 ## Current state
 
@@ -20,8 +20,11 @@ The implementation and verified all-TRAIN checkpoint are under
 feature ring ending at A, with causal filter state carried across 50 ms
 updates. A cold start reserves 100 ms for causal filter pre-roll before the
 400 ms ring. The Phase 2b zero-phase and Phase 2c 500 ms models are archived.
-There is no active experiment. The completed Phase 2d official-TEST runner and
-result are archived under `history/finger_movements/`.
+Phase 2e completed its TRAIN-only paired comparison of regularized CSSD,
+shrinkage LDA, their combination, and block-Toeplitz LDA against the unchanged
+Phase 2c baseline. None met the predeclared stability criteria, so no model or
+checkpoint was promoted. The completed Phase 2d runner and result remain
+archived under `history/finger_movements/`.
 
 ## Valid data contract
 
@@ -52,6 +55,9 @@ fold. Official TEST was not loaded.
 | **Promoted Phase 2b configuration** | **86.72%** | **0.68 pp** | **86.09%** |
 | Phase 2c causal model at 500 ms | 82.93% | 1.03 pp | 81.67% |
 | **Promoted Phase 2c causal model at 400 ms** | **83.99%** | **0.54 pp** | **83.25%** |
+| Phase 2e regularized CSSD | 84.10% | 0.60 pp | 83.25% |
+| Phase 2e ToeplitzLDA | 84.50% | 0.90 pp | 83.23% |
+| Phase 2e baseline + Toeplitz nested fusion | 84.09% | 0.98 pp | 83.24% |
 
 The Phase 2b winner improved all three seeds over the corrected Phase A2
 reference. It was empirical covariance, trial trace normalization on, one F2
@@ -207,4 +213,43 @@ Archived evidence:
 ```text
 history/finger_movements/experiments/phase2d_evaluate_frozen_test.py
 history/finger_movements/results/phase2d_official_test_400ms/
+```
+
+## Completed Phase 2e lightweight comparison
+
+Phase 2e used the exact Phase 2c seeds 42/43/44, five deterministic stratified
+folds per seed, 400 ms causal feature ring, and 50 ms update contract. Every
+learned covariance, CSSD projection, scaler, and classifier was fitted inside
+its current training fold. Official TEST was refused.
+
+| Variant | Mean OOF BA | Seed SD | Worst seed | Fold SD | Seed BA deltas vs baseline |
+|---|---:|---:|---:|---:|---|
+| Current CSSD + LDA | 83.99% | 0.54 pp | 83.25% | 3.91 pp | reference |
+| Regularized CSSD | 84.10% | 0.60 pp | 83.25% | 4.24 pp | +0.01 / +0.32 / 0.00 pp |
+| Shrinkage LDA | 83.66% | 0.54 pp | 82.92% | 4.96 pp | +0.94 / -0.33 / -1.59 pp |
+| Regularized CSSD + shrinkage LDA | 83.55% | 0.45 pp | 82.91% | 4.75 pp | +0.62 / -0.33 / -1.60 pp |
+| ToeplitzLDA | 84.50% | 0.90 pp | 83.23% | 4.19 pp | +1.89 / +0.94 / -1.28 pp |
+| Baseline + Toeplitz nested fusion | 84.09% | 0.98 pp | 83.24% | 4.57 pp | 0.00 / +1.27 / -0.96 pp |
+
+ToeplitzLDA corrected 28.3%, 30.0%, and 18.4% of baseline errors in the three
+seeds, so it passed the predeclared complementarity gate. A four-fold
+inner-OOF shrinkage-LDA stacker was therefore evaluated in each outer fold.
+The fusion did not stabilize the gain: it improved only seed 43, increased
+seed/fold variability, and added parameters.
+
+All 5,688 OOF float32 predictions exactly matched the float64 reference. Each
+single model retained the same estimated deployment footprint as the baseline:
+323 float parameters, 1.28 KB parameter storage, and 12.19 KB working RAM. The
+fusion required 1.99 KB of parameters.
+
+Decision: retain the frozen Phase 2c empirical CSSD + SVD-LDA checkpoint.
+ToeplitzLDA is recorded as an exploratory mean-BA improvement, not a promoted
+model. The metrics JSON field selecting Toeplitz by mean-first ordering is a
+mechanical ranking only and does not override this multi-criterion decision.
+
+Evidence:
+
+```text
+experiments/active/phase2e_lightweight_regularization_comparison.py
+results/finger_movements/phase2e_lightweight_comparison/
 ```

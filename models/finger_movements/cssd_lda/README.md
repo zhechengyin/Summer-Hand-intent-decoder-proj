@@ -48,6 +48,12 @@ and 77.00% macro-F1 over 100 cases. That retrospective result is archived at
 `history/finger_movements/results/phase2d_official_test_400ms/`; it did not
 change the Phase 2c model or checkpoint.
 
+Phase 2e then compared regularized CSSD, shrinkage LDA, their combination,
+ToeplitzLDA, and conditional baseline/Toeplitz fusion on the same TRAIN-only
+folds. ToeplitzLDA improved mean BA to 84.50% but failed the stability criteria:
+seed 44 decreased, worst-seed BA did not improve, and variability increased.
+No Phase 2e method replaced this checkpoint.
+
 Rebuild it from official TRAIN only:
 
 ```bash

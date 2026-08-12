@@ -19,6 +19,9 @@ official MATLAB TRAIN data.
 | Phase 2c causal 500 ms / 50 ms baseline | 82.93% |
 | **Phase 2c causal 400 ms / 50 ms model** | **83.99%** |
 | Phase 2d retrospective official TEST of Phase 2c model | 77.05% |
+| Phase 2e regularized CSSD | 84.10% |
+| Phase 2e ToeplitzLDA exploratory result | 84.50% |
+| Phase 2e baseline + Toeplitz nested fusion | 84.09% |
 
 The active causal configuration uses empirical covariance, per-trial trace
 normalization, one BP and one ERD/F2 spatial pattern per class, and LDA fusion.
@@ -28,7 +31,10 @@ balanced accuracy was 83.25% across seeds 42/43/44.
 The causal implementation and verified all-TRAIN checkpoint are under
 `models/finger_movements/cssd_lda/`. All completed experiment code and results,
 including the Phase 2d official-TEST evaluation, are archived under
-`history/finger_movements/`. There is no active experiment.
+`history/finger_movements/`. Phase 2e completed its TRAIN-only lightweight
+comparison without identifying a sufficiently stable replacement. ToeplitzLDA
+had the highest mean BA but decreased seed 44, worsened seed/fold variability,
+and did not improve worst-seed BA. The frozen checkpoint remains unchanged.
 
 The frozen 400 ms checkpoint achieved 77.05% balanced accuracy on the 100-case
 corrected official TEST. This is a retrospective benchmark rather than a
@@ -61,8 +67,8 @@ data/raw/FingerMovements/               immutable official source files
 data/processed/finger_movements/        model-ready official splits
 data/processing/finger_movements/       supported conversion code
 models/finger_movements/cssd_lda/       active causal model and checkpoint
-experiments/active/                     empty boundary for future experiments
-results/                                no active experiment results
+experiments/active/                     completed Phase 2e runner pending archival
+results/finger_movements/phase2e_lightweight_comparison/ completed Phase 2e evidence
 docs/STATUS.md                          current source of truth
 history/finger_movements/               completed EEG experiments/results, including Phase 2d
 history/indy/                           completed Indy project

@@ -665,3 +665,46 @@ than a pristine blind test. Decision: do not use this result to retune the
 checkpoint; independent future data is required for a new selection gate. The
 Phase 2d script and result were then archived; the checkpoint remains named
 and frozen as Phase 2c because no training or model selection occurred here.
+
+## 2026-08-12 — Phase 2e lightweight CSSD/LDA regularization comparison
+
+Phase 2e compared five lightweight alternatives against the frozen Phase 2c
+400 ms causal model on the exact same TRAIN-only seeds 42/43/44 and five
+deterministic stratified folds per seed. Official TEST was refused. All CSSD
+covariances, spatial projections, scalers, and classifiers were learned inside
+the current training fold.
+
+The variants were current empirical CSSD + SVD LDA, OAS-regularized CSSD,
+analytical shrinkage LDA, their combination, and a lightweight ToeplitzLDA.
+The Toeplitz branches used channel-major block-Toeplitz within-class covariance
+with lag-diagonal averaging and fold-training-only OAS shrinkage. The final
+three-score fusion remained a shrinkage LDA because those scalar scores have no
+temporal block structure.
+
+| Variant | Mean OOF BA | Seed SD | Worst seed | Fold SD | Seed BA deltas vs baseline |
+|---|---:|---:|---:|---:|---|
+| Current CSSD + LDA | 83.99% | 0.54 pp | 83.25% | 3.91 pp | reference |
+| Regularized CSSD | 84.10% | 0.60 pp | 83.25% | 4.24 pp | +0.01 / +0.32 / 0.00 pp |
+| Shrinkage LDA | 83.66% | 0.54 pp | 82.92% | 4.96 pp | +0.94 / -0.33 / -1.59 pp |
+| Regularized CSSD + shrinkage LDA | 83.55% | 0.45 pp | 82.91% | 4.75 pp | +0.62 / -0.33 / -1.60 pp |
+| ToeplitzLDA | 84.50% | 0.90 pp | 83.23% | 4.19 pp | +1.89 / +0.94 / -1.28 pp |
+| Baseline + Toeplitz nested fusion | 84.09% | 0.98 pp | 83.24% | 4.57 pp | 0.00 / +1.27 / -0.96 pp |
+
+ToeplitzLDA corrected 15/53, 15/50, and 9/49 baseline errors in seeds 42,
+43, and 44, respectively, so it passed the predeclared requirement of
+correcting at least 10% in every seed. The resulting fusion was evaluated with
+four-fold inner-OOF stacking inside each outer fold. It failed to convert the
+error complementarity into a stable gain: only seed 43 improved, seed 44
+decreased, and both seed and fold variability exceeded the baseline.
+
+All 5,688 recorded OOF predictions were identical between the full float64
+reference and float32 inference path. The five single models all retained 323
+deployment floats, approximately 1.28 KB parameters and 12.19 KB estimated
+working RAM. Fusion increased parameter storage to 1.99 KB.
+
+Decision: retain the frozen Phase 2c empirical CSSD + SVD-LDA checkpoint.
+Regularized CSSD's +0.11-point mean gain was too small and inconsistent;
+shrinkage LDA and the combination reduced mean BA; ToeplitzLDA's +0.52-point
+mean gain failed seed consistency, worst-seed, and variability criteria; and
+nested fusion did not stabilize it. The JSON mean-first ranking of ToeplitzLDA
+is exploratory and is not a checkpoint-promotion decision.

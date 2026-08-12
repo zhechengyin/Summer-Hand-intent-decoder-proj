@@ -1,7 +1,17 @@
 # Results
 
-There are currently no active experiment results. Completed FingerMovements
-evidence is archived under:
+The completed Phase 2e result is stored at:
+
+```text
+results/finger_movements/phase2e_lightweight_comparison/
+```
+
+ToeplitzLDA had the highest mean OOF BA at 84.50%, compared with 83.99% for
+the baseline, but the gain was not consistent across seeds and did not improve
+worst-seed BA or fold variability. The conditional nested fusion reached
+84.09% and was also unstable. No model was promoted.
+
+Completed FingerMovements evidence is archived under:
 
 ```text
 history/finger_movements/results/phase2c_horizon_diagnostic/

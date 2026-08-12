@@ -1,0 +1,7 @@
+variant,deployment_float_parameters,deployment_parameter_bytes_float32,deployment_parameter_kb_float32,estimated_runtime_ram_bytes_float32,estimated_runtime_ram_kb_float32,note
+baseline_cssd_lda,323,1311,1.2802734375,12480,12.1875,Training covariance matrices are excluded because firmware stores only frozen linear weights; RAM is a conservative workspace estimate
+regularized_cssd,323,1311,1.2802734375,12480,12.1875,Training covariance matrices are excluded because firmware stores only frozen linear weights; RAM is a conservative workspace estimate
+shrinkage_lda,323,1311,1.2802734375,12480,12.1875,Training covariance matrices are excluded because firmware stores only frozen linear weights; RAM is a conservative workspace estimate
+regularized_cssd_shrinkage_lda,323,1311,1.2802734375,12480,12.1875,Training covariance matrices are excluded because firmware stores only frozen linear weights; RAM is a conservative workspace estimate
+toeplitz_lda,323,1311,1.2802734375,12480,12.1875,Training covariance matrices are excluded because firmware stores only frozen linear weights; RAM is a conservative workspace estimate
+baseline_toeplitz_nested_fusion,505,2039,1.9912109375,12480,12.1875,Training covariance matrices are excluded because firmware stores only frozen linear weights; RAM is a conservative workspace estimate
