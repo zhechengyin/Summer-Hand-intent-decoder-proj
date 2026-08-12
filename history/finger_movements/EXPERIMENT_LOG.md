@@ -708,3 +708,43 @@ shrinkage LDA and the combination reduced mean BA; ToeplitzLDA's +0.52-point
 mean gain failed seed consistency, worst-seed, and variability criteria; and
 nested fusion did not stabilize it. The JSON mean-first ranking of ToeplitzLDA
 is exploratory and is not a checkpoint-promotion decision.
+
+Phase 2e code and evidence were archived under
+`history/finger_movements/experiments/` and
+`history/finger_movements/results/phase2e_lightweight_comparison/` before
+Phase 2f began.
+
+## 2026-08-12 — Phase 2f low-dimensional Riemannian comparison and closeout
+
+Phase 2f performed the final planned model experiment. It paired the unchanged
+Phase 2c baseline with one low-dimensional Riemannian tangent-space candidate
+on the exact seeds 42/43/44 and five deterministic folds. Official TEST was
+refused.
+
+Within each training fold, the candidate learned four CSSD projections per BP
+and ERD band, constructed regularized 4x4 trial covariance matrices, estimated
+an affine-invariant Riemannian reference mean, and mapped each matrix into ten
+tangent features. The 38-dimensional signed BP-trend branch was retained. All
+spatial projections, means, tangent references, scalers, and LDAs were
+fold-training-only.
+
+| Variant | Mean OOF BA | Seed SD | Worst seed | Fold SD | Mean log loss |
+|---|---:|---:|---:|---:|---:|
+| Phase 2c baseline | 83.99% | 0.54 pp | 83.25% | 3.91 pp | 0.3705 |
+| Low-dimensional Riemannian | 85.13% | 1.14 pp | 84.17% | 4.79 pp | 0.3560 |
+
+The candidate changed seed BA by +1.25, -0.03, and +2.21 percentage points for
+seeds 42, 43, and 44. It improved mean BA and worst-seed BA, but seed 43 did
+not improve and both seed-level and fold-level variability increased. Every
+float32 OOF label matched the float64 reference exactly.
+
+The candidate required 479 deployment floats (1.89 KB) and an estimated
+14.02 KB working RAM, compared with 323 floats (1.28 KB) and 12.19 KB for the
+baseline. It also introduced two 4x4 matrix eigendecompositions per update.
+
+Decision: the candidate failed the predeclared all-seed and variability gates,
+so it was not promoted. The Phase 2c 400 ms checkpoint remained untouched.
+Phase 2f code and results were archived under
+`history/finger_movements/experiments/phase2f_low_dimensional_riemannian.py`
+and `history/finger_movements/results/phase2f_riemannian/`. Further model-family
+exploration is closed; the project returns to firmware deployment validation.

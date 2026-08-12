@@ -1,6 +1,6 @@
 # FingerMovements Archive Status
 
-Updated: 2026-08-11
+Updated: 2026-08-12
 
 The Phase 1h snapshot and the initial Phase A2/Phase 2b experiments were based
 on a retired UEA conversion with deterministic adjacent-channel overlap. The
@@ -18,6 +18,7 @@ produced:
 | Phase 2b winner | 86.72% | 0.68 pp | 86.09% |
 | Phase 2c causal 500 ms / 50 ms candidate | 82.93% | 1.03 pp | 81.67% |
 | Phase 2c causal 400 ms / 50 ms winner | 83.99% | 0.54 pp | 83.25% |
+| Phase 2f low-dimensional Riemannian | 85.13% | 1.14 pp | 84.17% |
 
 Phase 2d subsequently applied the frozen Phase 2c 400 ms checkpoint to the
 corrected 100-case official TEST and achieved 77.05% balanced accuracy. This
@@ -36,3 +37,17 @@ No archived code is an active dependency. Phase 2d is preserved under
 `experiments/phase2d_evaluate_frozen_test.py` and
 `results/phase2d_official_test_400ms/`. Official TEST cannot be treated as a
 pristine final gate.
+
+Phase 2e is also archived under
+`experiments/phase2e_lightweight_regularization_comparison.py` and
+`results/phase2e_lightweight_comparison/`. ToeplitzLDA reached 84.50% mean OOF
+BA but failed seed-consistency, worst-seed, and variability criteria; no Phase
+2e checkpoint was promoted.
+
+Phase 2f is archived under
+`experiments/phase2f_low_dimensional_riemannian.py` and
+`results/phase2f_riemannian/`. The Riemannian candidate improved mean OOF BA
+by 1.15 points and worst-seed BA by 0.92 points, but seed 43 did not improve
+and seed/fold variability increased. It failed the frozen promotion rule and
+did not create a checkpoint. Model exploration is closed; the Phase 2c 400 ms
+checkpoint remains active for firmware deployment validation.

@@ -22,6 +22,8 @@
 | `phase2c_streaming_causal_cssd_lda.py` | Verified the final past-only 500 ms / 50 ms streaming interpretation, post-A invariance, and exact chunked filtering |
 | `phase2c_bin_window_sweep.py` | Swept causal 200/300/400/500 ms feature rings and verified 10/20/50/100 ms bin equivalence, selecting 400/50 |
 | `phase2d_evaluate_frozen_test.py` | Applied only the exact frozen Phase 2c 400 ms checkpoint to corrected official TEST and verified batch/streaming equivalence |
+| `phase2e_lightweight_regularization_comparison.py` | Compared regularized CSSD, shrinkage LDA, ToeplitzLDA, and conditional fusion; no candidate was promoted |
+| `phase2f_low_dimensional_riemannian.py` | Compared the Phase 2c baseline with a low-dimensional Riemannian tangent-space candidate; mean BA improved but the candidate failed all-seed and variability gates |
 
 These files are frozen provenance. Active code must not import them. The
 scripts themselves are retained even where an associated result was later

@@ -1,23 +1,15 @@
 # Results
 
-The completed Phase 2e result is stored at:
-
-```text
-results/finger_movements/phase2e_lightweight_comparison/
-```
-
-ToeplitzLDA had the highest mean OOF BA at 84.50%, compared with 83.99% for
-the baseline, but the gain was not consistent across seeds and did not improve
-worst-seed BA or fold variability. The conditional nested fusion reached
-84.09% and was also unstable. No model was promoted.
-
-Completed FingerMovements evidence is archived under:
+There is no active result set. Completed FingerMovements evidence is archived
+under `history/finger_movements/results/`, including:
 
 ```text
 history/finger_movements/results/phase2c_horizon_diagnostic/
 history/finger_movements/results/phase2c_streaming_causal/
 history/finger_movements/results/phase2c_bin_window_sweep/
 history/finger_movements/results/phase2d_official_test_400ms/
+history/finger_movements/results/phase2e_lightweight_comparison/
+history/finger_movements/results/phase2f_riemannian/
 ```
 
 The selected 400 ms window reached 83.99% mean OOF balanced accuracy, compared
@@ -29,3 +21,8 @@ accuracy on 100 official TEST cases. It is retrospective evidence, not a new
 selection gate. The former 500 ms causal and zero-phase Phase 2b checkpoints
 are archived with their model implementations under
 `history/finger_movements/models/`.
+
+Phase 2f reached 85.13% mean OOF balanced accuracy but increased seed/fold
+variability and failed the frozen promotion rule. It did not create or modify
+a checkpoint. The active Phase 2c checkpoint remains under
+`models/finger_movements/cssd_lda/checkpoints/`.

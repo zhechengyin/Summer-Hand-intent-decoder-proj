@@ -22,6 +22,7 @@ official MATLAB TRAIN data.
 | Phase 2e regularized CSSD | 84.10% |
 | Phase 2e ToeplitzLDA exploratory result | 84.50% |
 | Phase 2e baseline + Toeplitz nested fusion | 84.09% |
+| Phase 2f low-dimensional Riemannian candidate | 85.13% |
 
 The active causal configuration uses empirical covariance, per-trial trace
 normalization, one BP and one ERD/F2 spatial pattern per class, and LDA fusion.
@@ -30,11 +31,12 @@ balanced accuracy was 83.25% across seeds 42/43/44.
 
 The causal implementation and verified all-TRAIN checkpoint are under
 `models/finger_movements/cssd_lda/`. All completed experiment code and results,
-including the Phase 2d official-TEST evaluation, are archived under
-`history/finger_movements/`. Phase 2e completed its TRAIN-only lightweight
-comparison without identifying a sufficiently stable replacement. ToeplitzLDA
-had the highest mean BA but decreased seed 44, worsened seed/fold variability,
-and did not improve worst-seed BA. The frozen checkpoint remains unchanged.
+including the Phase 2d official-TEST evaluation and the Phase 2e/2f model
+comparisons, are archived under `history/finger_movements/`. Phase 2f improved
+mean OOF BA to 85.13% and worst-seed BA to 84.17%, but seed and fold variability
+increased and seed 43 did not improve. It therefore failed the predeclared
+promotion rule. The Phase 2c checkpoint remains frozen, model exploration is
+closed, and the next work is firmware deployment validation.
 
 The frozen 400 ms checkpoint achieved 77.05% balanced accuracy on the 100-case
 corrected official TEST. This is a retrospective benchmark rather than a
@@ -67,9 +69,9 @@ data/raw/FingerMovements/               immutable official source files
 data/processed/finger_movements/        model-ready official splits
 data/processing/finger_movements/       supported conversion code
 models/finger_movements/cssd_lda/       active causal model and checkpoint
-experiments/active/                     completed Phase 2e runner pending archival
-results/finger_movements/phase2e_lightweight_comparison/ completed Phase 2e evidence
+experiments/active/                     no active experiment
+results/                                no active result set
 docs/STATUS.md                          current source of truth
-history/finger_movements/               completed EEG experiments/results, including Phase 2d
+history/finger_movements/               completed EEG experiments/results through Phase 2f
 history/indy/                           completed Indy project
 ```

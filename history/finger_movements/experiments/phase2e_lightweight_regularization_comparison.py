@@ -39,7 +39,8 @@ from sklearn.metrics import (
 )
 from sklearn.preprocessing import StandardScaler
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
+ARCHIVE_ROOT = Path(__file__).resolve().parents[1]
 
 CASES = 316
 CHANNELS = 28
@@ -183,7 +184,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=ROOT / "results/finger_movements/phase2e_lightweight_comparison",
+        default=ARCHIVE_ROOT / "results/phase2e_lightweight_comparison",
     )
     parser.add_argument("--seeds", nargs="+", type=int, default=list(SEEDS))
     parser.add_argument("--folds", type=int, default=FOLDS)

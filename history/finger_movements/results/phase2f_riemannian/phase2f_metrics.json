@@ -1,0 +1,145 @@
+{
+  "phase": "2f",
+  "created_utc": "2026-08-12T19:39:03.986066+00:00",
+  "scope": "final lightweight low-dimensional Riemannian candidate",
+  "data": {
+    "path": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/data/processed/finger_movements/train.npz",
+    "sha256": "a2025f277b5351839554e0ecf3398f1f4fd5151a4fc90f0e25c873734f5a91d1",
+    "cases": 316,
+    "class_counts": {
+      "left": 159,
+      "right": 157
+    },
+    "test_policy": "official TEST refused and not loaded"
+  },
+  "frozen_protocol": {
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "folds": 5,
+    "window_ms": 400,
+    "update_ms": 50,
+    "fold_construction": "exact Phase 2c deterministic stratified folds",
+    "all_learned_steps": "fitted inside each training fold only"
+  },
+  "candidate": {
+    "spatial_reduction": "four fold-trained CSSD projections per band",
+    "covariance": "4x4 centered trial covariance plus fixed 1e-3 trace-scaled ridge",
+    "geometry": "affine-invariant Riemannian mean and tangent mapping",
+    "features": "10 BP tangent + 10 ERD tangent + 38 BP trend",
+    "classifier": "three SVD-LDA branches plus SVD-LDA fusion"
+  },
+  "promotion_rule": {
+    "requirements": [
+      "mean OOF BA improves",
+      "all three seed OOF BAs improve",
+      "worst-seed OOF BA improves",
+      "fold BA variability does not increase",
+      "all float32 OOF predictions match float64"
+    ],
+    "mean_ba_improved": true,
+    "all_three_seeds_improved": false,
+    "worst_seed_improved": true,
+    "fold_variability_not_worse": false,
+    "float32_predictions_exact": true,
+    "seed_ba_deltas_vs_baseline": [
+      0.012538557064455391,
+      -0.0002804150142210471,
+      0.022132756479589788
+    ],
+    "passed": false
+  },
+  "terminal_decision": "retain Phase 2c checkpoint and stop further model exploration",
+  "summary": [
+    {
+      "variant": "baseline_cssd_lda",
+      "mean_balanced_accuracy": 0.8398563206879515,
+      "balanced_accuracy_seed_sd": 0.005394642486715603,
+      "worst_seed_balanced_accuracy": 0.8324520290029244,
+      "best_seed_balanced_accuracy": 0.8451508232183632,
+      "fold_balanced_accuracy_sd": 0.039123496283813064,
+      "mean_accuracy": 0.839662447257384,
+      "mean_macro_f1": 0.8395592126354009,
+      "mean_log_loss": 0.370503351555535,
+      "float32_all_predictions_exact": true,
+      "float32_max_score_error": 0.00023547723078998217,
+      "float32_max_probability_error": 4.020664678822117e-05,
+      "deployment_float_parameters": 323,
+      "deployment_parameter_bytes_float32": 1311,
+      "deployment_parameter_kb_float32": 1.2802734375,
+      "estimated_runtime_ram_kb_float32": 12.1875,
+      "inference_matrix_eigendecompositions_per_update": 0
+    },
+    {
+      "variant": "low_dimensional_riemannian_tslda",
+      "mean_balanced_accuracy": 0.8513199535312262,
+      "balanced_accuracy_seed_sd": 0.011368336050003473,
+      "worst_seed_balanced_accuracy": 0.841685694828346,
+      "best_seed_balanced_accuracy": 0.867283579697953,
+      "fold_balanced_accuracy_sd": 0.04794420497634693,
+      "mean_accuracy": 0.8512658227848101,
+      "mean_macro_f1": 0.8512178700454717,
+      "mean_log_loss": 0.3560495347001744,
+      "float32_all_predictions_exact": true,
+      "float32_max_score_error": 0.00027904143687407235,
+      "float32_max_probability_error": 6.607786320672604e-05,
+      "deployment_float_parameters": 479,
+      "deployment_parameter_bytes_float32": 1935,
+      "deployment_parameter_kb_float32": 1.8896484375,
+      "estimated_runtime_ram_kb_float32": 14.015625,
+      "inference_matrix_eigendecompositions_per_update": 2
+    }
+  ],
+  "error_complementarity": [
+    {
+      "seed": 42,
+      "baseline_errors": 53,
+      "riemannian_errors": 49,
+      "baseline_errors_corrected": 20,
+      "new_errors_introduced": 16,
+      "corrected_baseline_error_fraction": 0.37735849056603776,
+      "error_jaccard": 0.4782608695652174,
+      "prediction_disagreement_fraction": 0.11392405063291139
+    },
+    {
+      "seed": 43,
+      "baseline_errors": 50,
+      "riemannian_errors": 50,
+      "baseline_errors_corrected": 20,
+      "new_errors_introduced": 20,
+      "corrected_baseline_error_fraction": 0.4,
+      "error_jaccard": 0.42857142857142855,
+      "prediction_disagreement_fraction": 0.12658227848101267
+    },
+    {
+      "seed": 44,
+      "baseline_errors": 49,
+      "riemannian_errors": 42,
+      "baseline_errors_corrected": 17,
+      "new_errors_introduced": 10,
+      "corrected_baseline_error_fraction": 0.3469387755102041,
+      "error_jaccard": 0.5423728813559322,
+      "prediction_disagreement_fraction": 0.08544303797468354
+    }
+  ],
+  "resources": [
+    {
+      "variant": "baseline_cssd_lda",
+      "deployment_float_parameters": 323,
+      "deployment_parameter_bytes_float32": 1311,
+      "deployment_parameter_kb_float32": 1.2802734375,
+      "estimated_runtime_ram_kb_float32": 12.1875,
+      "inference_matrix_eigendecompositions_per_update": 0
+    },
+    {
+      "variant": "low_dimensional_riemannian_tslda",
+      "deployment_float_parameters": 479,
+      "deployment_parameter_bytes_float32": 1935,
+      "deployment_parameter_kb_float32": 1.8896484375,
+      "estimated_runtime_ram_kb_float32": 14.015625,
+      "inference_matrix_eigendecompositions_per_update": 2
+    }
+  ]
+}

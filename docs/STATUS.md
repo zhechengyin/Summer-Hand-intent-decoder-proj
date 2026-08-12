@@ -23,8 +23,12 @@ updates. A cold start reserves 100 ms for causal filter pre-roll before the
 Phase 2e completed its TRAIN-only paired comparison of regularized CSSD,
 shrinkage LDA, their combination, and block-Toeplitz LDA against the unchanged
 Phase 2c baseline. None met the predeclared stability criteria, so no model or
-checkpoint was promoted. The completed Phase 2d runner and result remain
-archived under `history/finger_movements/`.
+checkpoint was promoted. Phase 2f then tested a low-dimensional Riemannian
+tangent-space candidate on the same seeds/folds. It improved mean and
+worst-seed BA, but seed/fold variability increased and seed 43 did not improve,
+so it failed the frozen promotion rule. No checkpoint changed. Phase 2d/2e/2f
+evidence is archived, model exploration is closed, and firmware deployment
+validation is next.
 
 ## Valid data contract
 
@@ -58,6 +62,7 @@ fold. Official TEST was not loaded.
 | Phase 2e regularized CSSD | 84.10% | 0.60 pp | 83.25% |
 | Phase 2e ToeplitzLDA | 84.50% | 0.90 pp | 83.23% |
 | Phase 2e baseline + Toeplitz nested fusion | 84.09% | 0.98 pp | 83.24% |
+| Phase 2f low-dimensional Riemannian | 85.13% | 1.14 pp | 84.17% |
 
 The Phase 2b winner improved all three seeds over the corrected Phase A2
 reference. It was empirical covariance, trial trace normalization on, one F2
@@ -250,6 +255,35 @@ mechanical ranking only and does not override this multi-criterion decision.
 Evidence:
 
 ```text
-experiments/active/phase2e_lightweight_regularization_comparison.py
-results/finger_movements/phase2e_lightweight_comparison/
+history/finger_movements/experiments/phase2e_lightweight_regularization_comparison.py
+history/finger_movements/results/phase2e_lightweight_comparison/
+```
+
+## Completed Phase 2f Riemannian comparison
+
+Phase 2f compared the unchanged Phase 2c baseline with one self-contained
+low-dimensional Riemannian candidate on the exact seeds 42/43/44, five folds,
+400 ms causal ring, and 50 ms update contract. Official TEST was refused, and
+all learned operations were fit inside each training fold.
+
+| Variant | Mean OOF BA | Seed SD | Worst seed | Fold SD |
+|---|---:|---:|---:|---:|
+| Phase 2c baseline | 83.99% | 0.54 pp | 83.25% | 3.91 pp |
+| Low-dimensional Riemannian | 85.13% | 1.14 pp | 84.17% | 4.79 pp |
+
+The Riemannian seed deltas were +1.25, -0.03, and +2.21 percentage points.
+Mean BA and worst-seed BA improved, and every float32 OOF label matched the
+float64 reference. However, seed 43 did not improve and both seed and fold
+variability increased. The candidate therefore failed two of five predeclared
+promotion requirements. Its 479 float parameters require about 1.89 KB,
+estimated working RAM is 14.02 KB, and inference adds two 4x4 matrix
+eigendecompositions per update.
+
+Decision: retain the frozen Phase 2c checkpoint, promote no Phase 2f model,
+stop further model-family exploration, and proceed to firmware deployment
+validation. Archived evidence:
+
+```text
+history/finger_movements/experiments/phase2f_low_dimensional_riemannian.py
+history/finger_movements/results/phase2f_riemannian/
 ```

@@ -1,0 +1,4 @@
+seed,baseline_errors,riemannian_errors,baseline_errors_corrected,new_errors_introduced,corrected_baseline_error_fraction,error_jaccard,prediction_disagreement_fraction
+42,53,49,20,16,0.37735849056603776,0.4782608695652174,0.11392405063291139
+43,50,50,20,20,0.4,0.42857142857142855,0.12658227848101267
+44,49,42,17,10,0.3469387755102041,0.5423728813559322,0.08544303797468354

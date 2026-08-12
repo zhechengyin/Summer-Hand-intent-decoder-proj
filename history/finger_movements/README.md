@@ -34,6 +34,8 @@ results/phase2c_horizon_diagnostic/
 results/phase2c_streaming_causal/
 results/phase2c_bin_window_sweep/
 results/phase2d_official_test_400ms/
+results/phase2e_lightweight_comparison/
+results/phase2f_riemannian/
 models/cssd_lda_offline_phase2b/
 models/cssd_lda_causal_500ms_phase2c/
 ```
@@ -52,9 +54,12 @@ On corrected official TRAIN data:
 - Phase 2b zero-phase offline reference: 86.72%;
 - selected Phase 2c causal 400 ms model: 83.99%;
 - Phase 2d retrospective official-TEST BA of that frozen model: 77.05%.
+- Phase 2e ToeplitzLDA exploratory mean OOF BA: 84.50%, not promoted.
+- Phase 2f low-dimensional Riemannian mean OOF BA: 85.13%, not promoted.
 
 The Phase 2b zero-phase winner is now archived under
 `models/cssd_lda_offline_phase2b/`. Its causal Phase 2c successor is active
 under `models/finger_movements/cssd_lda/`. All completed experimental runners
-and comparison results remain here as immutable provenance. Phase 2d is the
-evaluation phase only; the active candidate remains the Phase 2c checkpoint.
+and comparison results remain here as immutable provenance. Phase 2f failed
+its predeclared stability rule and did not create a checkpoint; the active
+candidate remains the Phase 2c checkpoint.
