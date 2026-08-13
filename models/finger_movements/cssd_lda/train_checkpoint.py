@@ -122,9 +122,7 @@ def verify_streaming(
     probability_array = np.stack(stream_probabilities)
     score_array = np.asarray(stream_scores)
     score_error = float(np.max(np.abs(batch_score - score_array)))
-    probability_error = float(
-        np.max(np.abs(batch_probability - probability_array))
-    )
+    probability_error = float(np.max(np.abs(batch_probability - probability_array)))
     if not np.array_equal(batch_prediction, prediction_array):
         raise RuntimeError("Streaming checkpoint changed predictions")
     if max(score_error, probability_error) > 1e-12:
@@ -171,9 +169,7 @@ def main() -> None:
         "official_test_loaded": False,
         "deployment_status": "causal candidate; continuous-stream validation pending",
     }
-    model = FingerMovementsCausalCssdLda.fit(
-        x, y, channel_names, metadata=metadata
-    )
+    model = FingerMovementsCausalCssdLda.fit(x, y, channel_names, metadata=metadata)
     score_before = model.decision_function(x, channel_names)
     probability_before = model.predict_proba(x, channel_names)
     prediction_before = model.predict(x, channel_names)

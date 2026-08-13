@@ -15,7 +15,6 @@ from pathlib import Path
 import numpy as np
 from scipy.io import loadmat
 
-
 EXPECTED_CHANNEL_NAMES = np.asarray(
     [
         "F3",
@@ -134,10 +133,7 @@ def validate_dataset(
 ) -> None:
     """Fail fast if the official source violates the expected schema."""
     if not np.array_equal(channel_names, EXPECTED_CHANNEL_NAMES):
-        raise ValueError(
-            "Unexpected channel order: "
-            f"{channel_names.tolist()}"
-        )
+        raise ValueError(f"Unexpected channel order: {channel_names.tolist()}")
 
     for split, x, y in (
         ("train", train_x, train_y),

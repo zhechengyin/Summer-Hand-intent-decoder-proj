@@ -5,6 +5,10 @@ __pycache__/
 .venv/
 venv/
 .ipynb_checkpoints/
+.coverage
+htmlcov/
+.pytest_cache/
+.ruff_cache/
 
 # Dataset payloads (directory documentation remains tracked)
 data/ds004022/
@@ -22,6 +26,7 @@ data/processed/**/manifest.json
 *.fdt
 *.mat
 *.snirf
+data.tar.gz
 
 # Large results are regenerated. Small JSON/CSV evidence remains versioned.
 results/**/*.png

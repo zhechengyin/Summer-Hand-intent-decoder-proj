@@ -1,0 +1,5 @@
+# Repository quality and test tooling. Runtime dependencies remain in
+# requirements.txt so deployment users do not need these packages.
+pre-commit>=4.0,<5
+pytest>=8.0,<10
+ruff>=0.16,<0.17

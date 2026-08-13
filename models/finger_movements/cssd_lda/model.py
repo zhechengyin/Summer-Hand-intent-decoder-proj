@@ -250,11 +250,7 @@ class FingerMovementsCausalCssdLda:
         )
         rejected = set(REJECTED_TREND_CHANNELS)
         trend_indices = np.asarray(
-            [
-                index
-                for index, name in enumerate(channel_names)
-                if name not in rejected
-            ],
+            [index for index, name in enumerate(channel_names) if name not in rejected],
             dtype=np.int64,
         )
         if trend_indices.size != 19:
@@ -270,7 +266,7 @@ class FingerMovementsCausalCssdLda:
         branch_scores = np.column_stack(
             [
                 branch.decision_function(values)
-                for branch, values in zip(branches, features)
+                for branch, values in zip(branches, features, strict=True)
             ]
         )
         fusion = _fit_lda(branch_scores, labels)
@@ -288,9 +284,7 @@ class FingerMovementsCausalCssdLda:
             metadata=dict(metadata or {}),
         )
 
-    def _scores_from_filtered(
-        self, bp: np.ndarray, erd: np.ndarray
-    ) -> np.ndarray:
+    def _scores_from_filtered(self, bp: np.ndarray, erd: np.ndarray) -> np.ndarray:
         features = (
             _bp_features(bp, self.bp_filters),
             _erd_features(erd, self.erd_filters),
@@ -300,7 +294,7 @@ class FingerMovementsCausalCssdLda:
         branch_scores = np.column_stack(
             [
                 branch.decision_function(values)
-                for branch, values in zip(branches, features)
+                for branch, values in zip(branches, features, strict=True)
             ]
         )
         return self.fusion.decision_function(branch_scores)
@@ -415,13 +409,13 @@ class CausalStreamingState:
         self.erd_ring = np.empty((CHANNELS, 0), dtype=np.float64)
         self.samples_seen = 0
 
-    def push(
-        self, samples: np.ndarray
-    ) -> tuple[int, np.ndarray, float] | None:
+    def push(self, samples: np.ndarray) -> tuple[int, np.ndarray, float] | None:
         """Consume one causal chunk and return prediction/probability/score when warm."""
         samples = np.asarray(samples, dtype=np.float64)
         if samples.ndim != 2 or samples.shape[0] != CHANNELS or samples.shape[1] < 1:
-            raise ValueError(f"Expected ({CHANNELS}, positive samples), got {samples.shape}")
+            raise ValueError(
+                f"Expected ({CHANNELS}, positive samples), got {samples.shape}"
+            )
         if not np.isfinite(samples).all():
             raise ValueError("Streaming input contains non-finite values")
         bp, self.bp_state = sosfilt(

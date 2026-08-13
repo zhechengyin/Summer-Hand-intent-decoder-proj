@@ -3,6 +3,21 @@
 This repository develops compact neural-signal models intended for eventual
 low-latency firmware deployment.
 
+## New contributor setup
+
+Use Python 3.10 or newer inside a virtual environment:
+
+```bash
+make setup-dev
+make lint
+make test
+```
+
+Changes to the active model, checkpoint, exporter, or C implementation must
+also pass `make firmware-test`. Repository ownership, experiment approval,
+protected artifacts, data sharing, and phase/archiving rules are documented in
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
+
 The current task is FingerMovements left/right EEG classification from 28
 channels and 50 samples at 100 Hz. The active model is the frozen strictly
 causal Phase 2c CSSD + hierarchical LDA, selected entirely from corrected
@@ -36,7 +51,10 @@ comparisons, are archived under `history/finger_movements/`. Phase 2f improved
 mean OOF BA to 85.13% and worst-seed BA to 84.17%, but seed and fold variability
 increased and seed 43 did not improve. It therefore failed the predeclared
 promotion rule. The Phase 2c checkpoint remains frozen, model exploration is
-closed, and the next work is firmware deployment validation.
+closed, and the model now has a self-contained float32 C99 streaming port under
+`models/finger_movements/cssd_lda/firmware/`. Host validation found identical
+class labels on all 316 TRAIN cases. Target-STM32 measurement and continuous
+EEG validation remain next.
 
 The frozen 400 ms checkpoint achieved 77.05% balanced accuracy on the 100-case
 corrected official TEST. This is a retrospective benchmark rather than a
@@ -69,9 +87,11 @@ data/raw/FingerMovements/               immutable official source files
 data/processed/finger_movements/        model-ready official splits
 data/processing/finger_movements/       supported conversion code
 models/finger_movements/cssd_lda/       active causal model and checkpoint
+models/finger_movements/cssd_lda/firmware/ generated and validated C99 port
 experiments/active/                     no active experiment
 results/                                no active result set
 docs/STATUS.md                          current source of truth
+CONTRIBUTING.md                         onboarding and repository rules
 history/finger_movements/               completed EEG experiments/results through Phase 2f
 history/indy/                           completed Indy project
 ```

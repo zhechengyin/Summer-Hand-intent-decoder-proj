@@ -74,3 +74,14 @@ filter state, overlapping windows, and rest/no-intent behavior.
 
 The previous 500 ms causal model/checkpoint and the zero-phase Phase 2b
 reference are preserved under `history/finger_movements/models/`.
+
+## Firmware C implementation
+
+The frozen checkpoint now has a self-contained C99 streaming port under
+`firmware/`. It includes generated float32 parameters, a no-allocation causal
+SOS/ring-buffer/LDA implementation, an STM32-style integration example, and a
+host validation tool. All 316 official TRAIN cases produced identical Python
+and C class labels; the maximum score error was `1.335e-4`.
+
+See `firmware/README.md` for the exact channel/data contract, memory estimate,
+integration procedure, and remaining target-hardware validation boundary.

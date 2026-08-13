@@ -14,7 +14,9 @@ seed.
 
 The directory contains a self-contained implementation, an all-TRAIN fitting
 entry point, a verified NPZ checkpoint, and machine-readable checkpoint
-metrics. Active code does not import from `history/`.
+metrics. Its `firmware/` subdirectory contains the generated float32 C99
+streaming implementation and host-side Python/C equivalence checks. Active code
+does not import from `history/`.
 
 Phase 2d evaluated this exact frozen checkpoint through pure inference on the
 corrected official TEST (77.05% balanced accuracy). The runner and evidence

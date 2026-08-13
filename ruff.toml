@@ -1,0 +1,34 @@
+target-version = "py310"
+line-length = 88
+indent-width = 4
+
+extend-exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "history",
+    "data/raw",
+    "*.ipynb",
+]
+
+[lint]
+select = [
+    "E4",
+    "E7",
+    "E9",
+    "F",
+    "I",
+    "B",
+    "UP",
+]
+ignore = []
+fixable = ["ALL"]
+
+[lint.per-file-ignores]
+"**/__init__.py" = ["F401"]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+docstring-code-format = true

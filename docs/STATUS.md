@@ -1,6 +1,6 @@
 # Project Status
 
-Updated: 2026-08-12
+Updated: 2026-08-13
 
 ## Current state
 
@@ -28,7 +28,8 @@ tangent-space candidate on the same seeds/folds. It improved mean and
 worst-seed BA, but seed/fold variability increased and seed 43 did not improve,
 so it failed the frozen promotion rule. No checkpoint changed. Phase 2d/2e/2f
 evidence is archived, model exploration is closed, and firmware deployment
-validation is next.
+validation is next. A self-contained float32 C99 port has been added under the
+active model without changing its Python implementation or checkpoint.
 
 ## Valid data contract
 
@@ -287,3 +288,47 @@ validation. Archived evidence:
 history/finger_movements/experiments/phase2f_low_dimensional_riemannian.py
 history/finger_movements/results/phase2f_riemannian/
 ```
+
+## Firmware C port
+
+The active frozen Phase 2c checkpoint is exported into a portable C99
+implementation at:
+
+```text
+models/finger_movements/cssd_lda/firmware/
+```
+
+The port contains no fitting code, dynamic allocation, Python dependency, or
+runtime file loading. It implements the causal BP/ERD SOS filters, persistent
+400 ms circular buffers, frozen CSSD projections, BP/ERD/trend features, three
+branch LDAs, and final LDA fusion using float32. The LDA normalization and
+coefficients are algebraically folded into equivalent inference weights.
+
+The exporter verifies checkpoint SHA-256
+`87b84cc2c8baf9efdc1ccf37ad28f5f58ad13c4db2a8f8a273fe73fce9956101`
+before generating C constants. Host C validation over all 316 official TRAIN
+cases produced zero class-label mismatches against Python and zero mismatches
+between one 500 ms block and ten 50 ms chunks. Maximum absolute score and
+probability errors were `1.335e-4` and `3.228e-5`.
+
+Persistent state is 10,312 bytes (10.07 KiB); core numeric constants plus trend
+indices occupy 903 bytes before alignment/metadata. This is a source-level
+firmware candidate, not yet a target-board qualification. Remaining work is to
+integrate the selected STM32 acquisition path, confirm EEG scaling/channel
+order, measure Flash/RAM/stack/cycles on the real toolchain, and validate
+continuous EEG including rest/no-intent behavior.
+
+## Repository collaboration tooling
+
+The repository now provides a root `Makefile`, `.pre-commit-config.yaml`,
+`ruff.toml`, `pytest.ini`, and separate `requirements-dev.txt`. `make
+setup-dev` installs runtime/development dependencies plus pre-commit and
+pre-push hooks. `make lint`, `make format`, `make test`, and `make
+firmware-test` provide the standard local workflow.
+
+Two initial pytest guardrails protect the frozen checkpoint SHA-256 and require
+the generated C parameters to identify that same checkpoint. Ruff and generic
+pre-commit checks apply to active code/configuration; immutable `history/` and
+`data/raw/` are excluded from mechanical rewrites. `make data-archive` shares
+only `data/processed/`, not raw source data. Full contribution and experiment
+governance is documented in `CONTRIBUTING.md`.

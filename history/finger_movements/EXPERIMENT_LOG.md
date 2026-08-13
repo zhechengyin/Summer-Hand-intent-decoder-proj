@@ -748,3 +748,30 @@ Phase 2f code and results were archived under
 `history/finger_movements/experiments/phase2f_low_dimensional_riemannian.py`
 and `history/finger_movements/results/phase2f_riemannian/`. Further model-family
 exploration is closed; the project returns to firmware deployment validation.
+
+## 2026-08-13 — Phase 2c firmware C conversion and repository handoff
+
+The frozen Phase 2c 400 ms checkpoint was converted into a self-contained
+float32 C99 streaming implementation under
+`models/finger_movements/cssd_lda/firmware/`. This was an inference-porting
+step, not a new model experiment: no parameter was relearned and the checkpoint
+SHA-256 remained
+`87b84cc2c8baf9efdc1ccf37ad28f5f58ad13c4db2a8f8a273fe73fce9956101`.
+
+The port implements causal BP/ERD SOS filtering, persistent 400 ms ring
+buffers, frozen CSSD projection, BP/ERD/trend features, three branch LDAs, and
+final fusion without dynamic allocation or runtime file loading. Host C
+validation on all 316 official TRAIN cases produced zero Python/C label
+mismatches and zero mismatches between a single 500 ms input block and ten
+50 ms chunks. Maximum score and probability errors were `1.335e-4` and
+`3.228e-5`. Persistent stream state was 10,312 bytes; core numeric constants
+plus trend indices were 903 bytes before linker alignment and metadata.
+
+Repository handoff tooling was added for new contributors: a Makefile,
+pre-commit/pre-push configuration, Ruff configuration, pytest configuration,
+development requirements, checkpoint/C-parameter guardrail tests, and a
+contribution guide. Active lint, formatting, pytest, direct C99 compilation,
+and full Python/C equivalence validation passed. Archived evidence and raw data
+are excluded from mechanical formatting. No new experiment phase was opened;
+the next authorized technical work remains target-STM32 integration and
+continuous EEG validation.
