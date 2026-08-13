@@ -5,5 +5,8 @@ import from this directory.
 
 | Archive | Description |
 |---|---|
-| [`finger_movements/`](finger_movements/README.md) | Complete Phase 1b–1h FingerMovements direction, including the frozen checkpoint and official-test result, captured on 2026-08-05 |
-| [`indy/`](indy/README.md) | Complete Indy Loco decoder, detector, architecture, data, checkpoint, and result archive captured on 2026-07-29 |
+| [`finger_movements/`](finger_movements/README.md) | Completed and superseded FingerMovements experiments through Phase 2f, including the invalid UEA-source history and corrected official-MATLAB evidence |
+| [`indy/`](indy/README.md) | Retired Indy Loco decoder, detector, architecture, data, checkpoints, and results; archived on 2026-07-29 |
+
+Each archive starts with a short `README.md`, a final `STATUS.md`, and a concise
+`EXPERIMENT_LOG.md`. Read those files before opening individual result folders.

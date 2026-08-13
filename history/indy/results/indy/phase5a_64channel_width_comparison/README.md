@@ -1,50 +1,10 @@
-# Phase 5a 64-channel width comparison
+# Phase 5a 64-Channel Width Comparison
 
-Phase 5a compares two strictly causal TCN+GRU widths while expanding the neural
-input from 32 to 64 selected channels:
+This is an exploratory, single-seed comparison using 64 neural channels and 64 causal EWMA features. The authoritative run used CPU, seed 43, 30 epochs, train-only fitting, and December validation selection. January was not loaded.
 
-- 64 TCN filters / 64 GRU hidden units;
-- 48 TCN filters / 48 GRU hidden units.
+| Architecture | Parameters | Selected epoch | Validation loss | Pooled R² | Macro R² | Worst R² |
+|---|---:|---:|---:|---:|---:|---:|
+| 64/64 | 82,882 | 7 | 0.3571 | 0.6625 | 0.6669 | 0.5842 |
+| 48/48 | 48,338 | 4 | 0.3613 | 0.6569 | 0.6608 | 0.5760 |
 
-Both candidates use 64 raw count streams plus 64 causal-EWMA streams, giving a
-128-by-50 input window. Channel selection uses only the first 60 seconds of
-the 29 train sessions. Both candidates use CPU, seed 43, session-balanced
-sampling, the frozen optimizer settings and a complete 30-epoch cosine
-schedule.
-
-December validation is inference-only and selects the minimum-loss checkpoint.
-January is never loaded. The two checkpoints remain experiment artifacts and
-cannot replace the active 32-channel runtime: both detector layers must be
-refitted for the new channel mapping, and Layer 2 must match the chosen GRU
-hidden width.
-
-Run from the repository root:
-
-```bash
-python experiments/active/phase5a_64channel_width_comparison.py --device cpu
-```
-
-Phase 5a is deliberately CPU-only. PyTorch 2.13.0 on Apple MPS reproduced
-incorrect backward gradients for this graph even though forward predictions
-matched CPU. `--validate-only` checks the protocol without loading arrays or
-writing output.
-
-If the CPU 64/64 checkpoint has already completed, train only the replacement
-48/48 candidate and reuse the saved 64/64 evidence:
-
-```bash
-python experiments/active/phase5a_64channel_width_comparison.py \
-  --device cpu \
-  --architectures 64ch_48x48
-```
-
-The omitted 64/64 architecture is checksum-read from its existing Phase-5a
-checkpoint and is not retrained or overwritten.
-
-The first run on 2026-07-28 used the earlier unsafe `auto` default and selected
-MPS. Its checkpoints, metrics, CSV and figure are invalid and must be replaced
-with a CPU run using `--overwrite`.
-
-An intermediate CPU run used an unintended 32/32 comparison. That architecture
-is withdrawn from Phase 5a and its artifact is not eligible for selection.
-The registered comparison is only 64/64 versus 48/48.
+The 64/64 model ranked first. It was not promoted because the comparison lacked multi-seed confirmation and the existing detector was calibrated to a different 32-channel input. An earlier unstable MPS run and the stored 32/32 artifact are withdrawn and should not be cited as valid comparisons.

@@ -1,53 +1,50 @@
 # FingerMovements Archive Status
 
-Updated: 2026-08-12
+**Updated:** 2026-08-13
 
-The Phase 1h snapshot and the initial Phase A2/Phase 2b experiments were based
-on a retired UEA conversion with deterministic adjacent-channel overlap. The
-old 68.89% development score, 62.10% one-time test score, 59.81% Phase A2
-score, and 63.41% Phase 2b score are preserved in this archive only to explain
-the project history. They are not valid evidence for the corrected dataset.
+## Active result represented by this archive
 
-After direct conversion of the official MATLAB release, TRAIN-only reruns
-produced:
+The project currently deploys the strictly causal Phase 2c CSSD + hierarchical LDA model outside this archive at `../../models/finger_movements/cssd_lda/`.
 
-| Completed model | Mean OOF BA | Seed SD | Worst seed |
-|---|---:|---:|---:|
-| Terminal features + Logistic | 78.58% | 1.04 pp | 77.22% |
-| Phase A2 CSSD + hierarchical LDA | 85.03% | 1.27 pp | 83.25% |
-| Phase 2b winner | 86.72% | 0.68 pp | 86.09% |
-| Phase 2c causal 500 ms / 50 ms candidate | 82.93% | 1.03 pp | 81.67% |
-| Phase 2c causal 400 ms / 50 ms winner | 83.99% | 0.54 pp | 83.25% |
-| Phase 2f low-dimensional Riemannian | 85.13% | 1.14 pp | 84.17% |
+| Item | Value |
+|---|---|
+| Task | left/right finger-movement classification |
+| Source | official BCI Competition II Data Set IV MATLAB release |
+| Input | 28 EEG channels, 100 Hz, isolated 500 ms cases |
+| Development data | 316 TRAIN cases: 159 left, 157 right |
+| Causal feature ring | previous 400 ms, after 100 ms cold-start filter pre-roll |
+| Update interval | 50 ms |
+| TRAIN-only OOF BA | 83.99% mean; 0.54 pp seed SD; 83.25% worst seed |
+| Frozen official TEST BA | 77.05% on 100 cases; retrospective, not pristine |
+| Checkpoint SHA-256 | `87b84cc2c8baf9efdc1ccf37ad28f5f58ad13c4db2a8f8a273fe73fce9956101` |
 
-Phase 2d subsequently applied the frozen Phase 2c 400 ms checkpoint to the
-corrected 100-case official TEST and achieved 77.05% balanced accuracy. This
-is a retrospective benchmark, not a pristine blind test, because TEST was
-exposed earlier in the project. It must not be used to retune the checkpoint.
+The apparent 89.89% all-TRAIN balanced accuracy is only a fit diagnostic, not a generalization estimate.
 
-The Phase 2b winner uses empirical covariance, per-trial trace normalization,
-one F2 component per class, and LDA fusion. Its zero-phase implementation and
-checkpoint are archived under `models/cssd_lda_offline_phase2b/`. The strictly
-causal Phase 2c 500 ms baseline is archived under
-`models/cssd_lda_causal_500ms_phase2c/`. The selected 400 ms successor and
-all-TRAIN checkpoint are active outside this archive under
-`models/finger_movements/cssd_lda/`.
+## Corrected TRAIN-only evidence
 
-No archived code is an active dependency. Phase 2d is preserved under
-`experiments/phase2d_evaluate_frozen_test.py` and
-`results/phase2d_official_test_400ms/`. Official TEST cannot be treated as a
-pristine final gate.
+All comparisons below used five stratified folds for seeds 42, 43, and 44. Spatial filters, scalers, and classifiers were fitted inside each training fold; official TEST was not loaded.
 
-Phase 2e is also archived under
-`experiments/phase2e_lightweight_regularization_comparison.py` and
-`results/phase2e_lightweight_comparison/`. ToeplitzLDA reached 84.50% mean OOF
-BA but failed seed-consistency, worst-seed, and variability criteria; no Phase
-2e checkpoint was promoted.
+| Model | Mean OOF BA | Seed SD | Worst seed | Decision |
+|---|---:|---:|---:|---|
+| Terminal features + Logistic | 78.58% | 1.04 pp | 77.22% | control only |
+| Phase A2 CSSD + hierarchical LDA | 85.03% | 1.27 pp | 83.25% | baseline |
+| Phase 2b zero-phase CSSD + LDA | 86.72% | 0.68 pp | 86.09% | best offline reference |
+| Phase 2c causal 500 ms | 82.93% | 1.03 pp | 81.67% | superseded |
+| Phase 2c causal 400 ms | 83.99% | 0.54 pp | 83.25% | active deployable model |
+| Phase 2e regularized CSSD | 84.10% | 0.60 pp | 83.25% | not promoted |
+| Phase 2e ToeplitzLDA | 84.50% | 0.90 pp | 83.23% | not promoted |
+| Phase 2f Riemannian | 85.13% | 1.14 pp | 84.17% | not promoted |
 
-Phase 2f is archived under
-`experiments/phase2f_low_dimensional_riemannian.py` and
-`results/phase2f_riemannian/`. The Riemannian candidate improved mean OOF BA
-by 1.15 points and worst-seed BA by 0.92 points, but seed 43 did not improve
-and seed/fold variability increased. It failed the frozen promotion rule and
-did not create a checkpoint. Model exploration is closed; the Phase 2c 400 ms
-checkpoint remains active for firmware deployment validation.
+## Invalid historical evidence
+
+The former UEA conversion contained deterministic adjacent-channel overlap. Results generated from it—including 68.89% development BA, 62.10% one-time TEST BA, 59.81% Phase A2 BA, and 63.41% Phase 2b BA—are invalid for scientific comparison. They remain in the archive only for provenance.
+
+## Deployment state
+
+The active checkpoint has a self-contained float32 C99 port. Host validation covered all 316 TRAIN cases with zero class mismatches; maximum score error was `1.335e-4` and maximum probability error was `3.228e-5`. Runtime state is approximately 10,312 bytes and frozen constants approximately 903 bytes.
+
+Continuous EEG is still required to validate long-running filter state, overlapping predictions, and rest/no-intent behavior. The official dataset contains isolated labeled epochs and no rest class.
+
+## Archive rule
+
+Phase 2e and Phase 2f did not satisfy their predefined promotion criteria. Do not substitute their artifacts for the active Phase 2c model. Official TEST has already been exposed and must not be used for further model selection.

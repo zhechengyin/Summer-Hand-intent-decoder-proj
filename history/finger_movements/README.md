@@ -1,65 +1,27 @@
 # FingerMovements Experiment Archive
 
-This directory preserves completed FingerMovements experiments. Nothing under
-it is an active Python dependency.
+This directory preserves completed and superseded FingerMovements work. Nothing here is an active Python dependency.
 
-## Data-validity boundary
+## Read this validity boundary first
 
-The experiments through 2026-08-07 used a retired UEA conversion later found
-to contain deterministic adjacent-channel overlap. Their scripts, metrics,
-and the one-time official-test result are preserved for provenance, but those
-numbers are invalid for comparison with the corrected official MATLAB data.
+Experiments run through 2026-08-07 used a retired UEA conversion later found to contain deterministic adjacent-channel overlap. Those results are retained only to explain project history and must not be compared with results from the corrected official MATLAB data.
 
-On 2026-08-10 the official MATLAB TRAIN data was converted directly and the
-relevant models were rerun. Corrected-data evidence is explicitly identified
-by its directory name or creation date.
+Corrected evidence begins with the direct MATLAB conversion on 2026-08-10. Directory names containing `official_matlab`, plus Phase 2c and later results, use the corrected source unless explicitly marked otherwise.
+
+## Final outcome
+
+- Best offline zero-phase model: CSSD + hierarchical LDA, 86.72% mean out-of-fold balanced accuracy.
+- Selected causal deployable model: 400 ms past-only CSSD + hierarchical LDA, 83.99% mean out-of-fold balanced accuracy.
+- Retrospective official TEST result for the frozen causal model: 77.05% balanced accuracy on 100 cases.
+- Phase 2e linear regularization and Phase 2f Riemannian alternatives were not promoted.
+- The active model and firmware implementation live outside this archive at `../../models/finger_movements/cssd_lda/`.
 
 ## Contents
 
-```text
-EXPERIMENT_LOG.md   chronological protocol, invalidations, results, decisions
-STATUS.md           archive snapshot and validity boundary
-experiments/        completed Phase 1, Phase A2, and Phase 2b runners
-models/             retired implementations and invalid-source checkpoints
-results/            old provenance plus corrected-data completed evidence
-```
+- `STATUS.md`: current relationship between the archive and active model.
+- `EXPERIMENT_LOG.md`: concise phase history, results, and decisions.
+- `experiments/`: frozen runners.
+- `models/`: superseded implementations and checkpoints.
+- `results/`: metrics, predictions, and figures.
 
-Important corrected-data result directories:
-
-```text
-results/phasea2_cssd_lda_official_matlab/
-results/phase2b_combination_ablation/
-results/archived_terminal_logistic_official_matlab/
-results/phase2c_horizon_diagnostic/
-results/phase2c_streaming_causal/
-results/phase2c_bin_window_sweep/
-results/phase2d_official_test_400ms/
-results/phase2e_lightweight_comparison/
-results/phase2f_riemannian/
-models/cssd_lda_offline_phase2b/
-models/cssd_lda_causal_500ms_phase2c/
-```
-
-`results/phase2b_cssd_stabilization_retired_uea/` is explicitly retained as an
-invalid-source result and must not be mixed with the corrected combination
-ablation. Likewise, `results/phasea2_cssd_lda/` is the retired UEA result;
-`results/phasea2_cssd_lda_official_matlab/` is the corrected rerun.
-
-## Final archived outcome
-
-On corrected official TRAIN data:
-
-- terminal features + Logistic: 78.58% mean OOF balanced accuracy;
-- Phase A2 CSSD + hierarchical LDA: 85.03%;
-- Phase 2b zero-phase offline reference: 86.72%;
-- selected Phase 2c causal 400 ms model: 83.99%;
-- Phase 2d retrospective official-TEST BA of that frozen model: 77.05%.
-- Phase 2e ToeplitzLDA exploratory mean OOF BA: 84.50%, not promoted.
-- Phase 2f low-dimensional Riemannian mean OOF BA: 85.13%, not promoted.
-
-The Phase 2b zero-phase winner is now archived under
-`models/cssd_lda_offline_phase2b/`. Its causal Phase 2c successor is active
-under `models/finger_movements/cssd_lda/`. All completed experimental runners
-and comparison results remain here as immutable provenance. Phase 2f failed
-its predeclared stability rule and did not create a checkpoint; the active
-candidate remains the Phase 2c checkpoint.
+Old UEA result directories remain for provenance. Their invalid-source status is repeated in the relevant README and experiment log.

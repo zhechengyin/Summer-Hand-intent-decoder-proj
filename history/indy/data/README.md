@@ -1,37 +1,11 @@
-# Data
+# Indy Data Archive
 
-The active project uses one dataset: Indy.
+This directory preserves the complete data path used by the retired Indy project.
 
-```text
-data/
-  raw/indy_loco/indy/                 37 immutable Zenodo MAT files
-  processed/indy_loco/indy/
-    train/                            29 sessions
-    validation/                        4 sessions
-    test/                              4 consumed January sessions
-  processing/indy_loco/indy/
-    prepare_indy_model_ready.ipynb    supported conversion notebook
-    causal_targets.py                 causal sample-hold and target velocity
-```
+- `raw/indy_loco/indy/`: 37 original Zenodo MAT sessions. Treat as immutable source data.
+- `processing/indy_loco/indy/`: the preparation notebook and causal target helper.
+- `processed/indy_loco/indy/`: model-ready NPZ sessions split into 29 train, 4 validation, and 4 test files.
 
-Rules:
+The split is chronological: April–October 2016 for training, December 2016 for validation, and January 2017 for test. The January split has already been evaluated and is not an untouched holdout.
 
-1. Never modify files under `raw/`.
-2. Preserve session boundaries.
-3. Generate processed data only through the supported notebook.
-4. Do not convert MAT to CSV for model training.
-5. Do not use January for future model or detector selection.
-
-To rebuild the model-ready data, open
-`processing/indy_loco/indy/prepare_indy_model_ready.ipynb` with the project
-virtual environment and run it from top to bottom.
-
-Neural EWMA features and normalization are not preprocessing outputs; they are
-computed at model time under `models/indy_32ch/`.
-
-The canonical checksum/split manifest is
-`configs/datasets/indy_sessions.yaml`. The model-ready schema is documented in
-`processed/indy_loco/indy/README.md`.
-
-Any inactive U-M/Deep Blue files already present under raw or processed storage
-are left untouched, but no active code in this repository consumes them.
+Do not edit source MAT files. If preprocessing is rerun, write to a new location and record the exact transformation and split.

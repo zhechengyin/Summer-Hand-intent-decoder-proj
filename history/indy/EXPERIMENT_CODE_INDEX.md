@@ -1,37 +1,23 @@
-# History
+# Indy Experiment Code Index
 
-This directory contains only completed code needed to explain how the current
-frozen model was selected:
+All paths are relative to `history/indy/`.
 
-- `phase1/phase1a_optuna.py`
-- `phase1/phase1b_regularization_grid.py`
-- `phase1/phase1c_wd_upper_grid.py`
-- `phase1/phase1d_seed_confirmation.py`
-- `phase1/phase1e_seed_crosscheck.py`
-- `phase2/phase2_locked_january.py`
-- `phase3/phase3a_drift_detector.py`
-- `phase3/phase3b_leave_one_month_out.py`
-- `phase3/phase3c_decoder_state_detector.py`
-- `phase3/test_*.py`
-- `phase4/phase4a_architecture_sweep.py`
-- `phase4/phase4b_five_seed_architecture_confirmation.py`
-- `phase4/train_48x48_checkpoint.py`
-- `tests/test_causality.py`
-- `tests/test_session_balanced_sampling.py`
+| Phase | Script | Primary output |
+|---|---|---|
+| 0a | `experiments/active_at_archive/phase0a_data_audit.py` | `results/indy/phase0a_data_audit/` |
+| 0b | archived sampler script is not retained separately | `results/indy/phase0b_sampler_selection/` |
+| 1a | `experiments/phase1/phase1a_optuna.py` | historical tuning artifacts |
+| 1b | `experiments/phase1/phase1b_regularization_grid.py` | historical tuning artifacts |
+| 1c | `experiments/phase1/phase1c_wd_upper_grid.py` | historical tuning artifacts |
+| 1d | `experiments/phase1/phase1d_seed_confirmation.py` | historical tuning artifacts |
+| 1e | `experiments/phase1/phase1e_seed_crosscheck.py` | `results/indy/phase1e_seed_crosscheck/` |
+| 2 | `experiments/phase2/phase2_locked_january.py` | `results/indy/phase2_locked_january/` |
+| 3a | `experiments/phase3/phase3a_drift_detector.py` | `results/indy/phase3a_drift_detector/` |
+| 3b | `experiments/phase3/phase3b_leave_one_month_out.py` | `results/indy/phase3b_leave_one_month_out/` |
+| 3c | `experiments/phase3/phase3c_decoder_state_detector.py` | `results/indy/phase3c_decoder_state_detector/` |
+| 4a | `experiments/phase4/phase4a_architecture_sweep.py` | `results/indy/phase4a_architecture_sweep/` |
+| 4b | `experiments/phase4/phase4b_five_seed_architecture_confirmation.py` | `results/indy/phase4b_five_seed_confirmation/` |
+| 4c | `experiments/phase4/train_48x48_checkpoint.py` | `models/indy_32ch/48x48checkpoint.pt` |
+| 5a | `experiments/active_at_archive/phase5a_64channel_width_comparison.py` | `results/indy/phase5a_64channel_width_comparison/` |
 
-The Phase-1 scripts cover the completed Optuna search, boundary grids and
-five-seed confirmation. Their retained evidence is under matching
-`results/indy/phase*/` directories. The Phase-2 runner produced the one-shot
-January result on 2026-07-22. Phase 3 contains the completed raw-count,
-leave-one-month-out, and decoder-state detector studies. The archived tests
-document the protocol invariants verified before each cleanup. Phase 4 contains
-the completed architecture Optuna runner, five-seed non-inferiority
-confirmation, and fixed 48/48 checkpoint builder. The Phase-4a and Phase-4b
-runners saved no weights. The final builder created
-`models/indy_32ch/48x48checkpoint.pt` after confirmation, while preserving
-`models/indy_32ch/64x64checkpoint.pt`.
-
-These files are provenance, not active entry points. Do not run or import them.
-They may reference deleted intermediate databases or non-selected checkpoints.
-The frozen configuration is in `configs/indy_32ch.yaml`; current conclusions are
-in `docs/history/EXPERIMENT_LOG.md`.
+Scripts under `experiments/active_at_archive/` were active immediately before the whole Indy project was archived; the directory name does not mean they are active now.
