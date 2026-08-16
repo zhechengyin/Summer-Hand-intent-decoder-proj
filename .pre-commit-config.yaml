@@ -1,7 +1,7 @@
 # Archived experiments are immutable provenance and are intentionally excluded
 # from mechanical cleanup. Active code, configuration, and documentation remain
 # checked on every commit.
-exclude: ^(history/|data/raw/)
+exclude: ^((finger_movements|indy_loco)/history/|(finger_movements|indy_loco)/data/raw/)
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks

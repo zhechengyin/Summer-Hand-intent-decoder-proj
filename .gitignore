@@ -11,37 +11,48 @@ htmlcov/
 .ruff_cache/
 
 # Dataset payloads (directory documentation remains tracked)
-data/ds004022/
-data/ds004362/
-data/way_eeg_gal/
-data/raw/**
-data/cache/
-data/external/
-!data/raw/**/
-!data/raw/**/README.md
+finger_movements/data/raw/**
+indy_loco/data/raw/**
+finger_movements/data/cache/
+indy_loco/data/cache/
+finger_movements/data/external/
+indy_loco/data/external/
+!finger_movements/data/raw/**/
+!indy_loco/data/raw/**/
+!finger_movements/data/raw/**/README.md
+!indy_loco/data/raw/**/README.md
 # Generated processed arrays are reproducible; schemas and processing code remain tracked.
-data/processed/**/*.npz
-data/processed/**/manifest.json
+finger_movements/data/processed/**/*.npz
+indy_loco/data/processed/**/*.npz
+finger_movements/data/processed/**/manifest.json
+indy_loco/data/processed/**/manifest.json
 *.set
 *.fdt
 *.mat
 *.snirf
 data.tar.gz
 
-# Large results are regenerated. Small JSON/CSV evidence remains versioned.
-results/**/*.png
-results/**/*.pt
-results/**/*.db
-results/**/.cache/
-results/*.log
+# Large active results are regenerated. Small JSON/CSV evidence remains versioned.
+finger_movements/results/**/*.png
+finger_movements/results/**/*.pt
+finger_movements/results/**/*.db
+finger_movements/results/**/.cache/
+finger_movements/results/*.log
+indy_loco/results/**/*.png
+indy_loco/results/**/*.pt
+indy_loco/results/**/*.db
+indy_loco/results/**/.cache/
+indy_loco/results/*.log
 
-# Retired Indy payloads remain on disk but are not recommitted as generated data.
-history/indy/data/processed/**/*.npz
-history/indy/data/processed/**/manifest.json
-history/indy/results/**/*.png
-history/indy/results/**/*.pt
-history/indy/results/**/*.db
-history/indy/results/**/.cache/
+# Archived generated payloads remain on disk but are not recommitted.
+finger_movements/history/results/**/*.png
+finger_movements/history/results/**/*.pt
+finger_movements/history/results/**/*.db
+finger_movements/history/results/**/.cache/
+indy_loco/history/results/**/*.png
+indy_loco/history/results/**/*.pt
+indy_loco/history/results/**/*.db
+indy_loco/history/results/**/.cache/
 
 # OS
 .DS_Store

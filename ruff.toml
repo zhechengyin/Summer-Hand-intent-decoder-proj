@@ -6,8 +6,8 @@ extend-exclude = [
     ".git",
     ".venv",
     "venv",
-    "history",
-    "data/raw",
+    "**/history/**",
+    "**/data/raw/**",
     "*.ipynb",
 ]
 
