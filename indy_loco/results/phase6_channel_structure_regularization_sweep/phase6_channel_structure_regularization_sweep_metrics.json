@@ -1,0 +1,252 @@
+{
+  "phase": "6",
+  "name": "phase6_channel_structure_regularization_sweep",
+  "created_at_utc": "2026-08-17T21:35:38.209003+00:00",
+  "protocol_signature": "22f7528588736a75334475ee63436016ccd6e65e8e26ae5568916ddae800b3b3",
+  "purpose": "isolate channel count/ranking, temporal structure, and paired channel dropout while freezing 64/64 width",
+  "protocol": {
+    "phase": "phase6_channel_structure_regularization_sweep",
+    "configs": [
+      {
+        "label": "activity64",
+        "channel_key": "activity64",
+        "kernel_size": 3,
+        "dilations": [
+          1,
+          2,
+          4,
+          8
+        ],
+        "channel_dropout": 0.0,
+        "category": "channel"
+      },
+      {
+        "label": "stable64",
+        "channel_key": "stable64",
+        "kernel_size": 3,
+        "dilations": [
+          1,
+          2,
+          4,
+          8
+        ],
+        "channel_dropout": 0.0,
+        "category": "channel"
+      },
+      {
+        "label": "stable72",
+        "channel_key": "stable72",
+        "kernel_size": 3,
+        "dilations": [
+          1,
+          2,
+          4,
+          8
+        ],
+        "channel_dropout": 0.0,
+        "category": "channel"
+      },
+      {
+        "label": "stable80",
+        "channel_key": "stable80",
+        "kernel_size": 3,
+        "dilations": [
+          1,
+          2,
+          4,
+          8
+        ],
+        "channel_dropout": 0.0,
+        "category": "channel"
+      },
+      {
+        "label": "stable88",
+        "channel_key": "stable88",
+        "kernel_size": 3,
+        "dilations": [
+          1,
+          2,
+          4,
+          8
+        ],
+        "channel_dropout": 0.0,
+        "category": "channel"
+      },
+      {
+        "label": "all96_baseline",
+        "channel_key": "all96",
+        "kernel_size": 3,
+        "dilations": [
+          1,
+          2,
+          4,
+          8
+        ],
+        "channel_dropout": 0.0,
+        "category": "all96"
+      },
+      {
+        "label": "all96_kernel2",
+        "channel_key": "all96",
+        "kernel_size": 2,
+        "dilations": [
+          1,
+          2,
+          4,
+          8
+        ],
+        "channel_dropout": 0.0,
+        "category": "all96_structure"
+      },
+      {
+        "label": "all96_3blocks",
+        "channel_key": "all96",
+        "kernel_size": 3,
+        "dilations": [
+          1,
+          2,
+          4
+        ],
+        "channel_dropout": 0.0,
+        "category": "all96_structure"
+      },
+      {
+        "label": "all96_chdrop010",
+        "channel_key": "all96",
+        "kernel_size": 3,
+        "dilations": [
+          1,
+          2,
+          4,
+          8
+        ],
+        "channel_dropout": 0.1,
+        "category": "all96_regularization"
+      },
+      {
+        "label": "all96_chdrop020",
+        "channel_key": "all96",
+        "kernel_size": 3,
+        "dilations": [
+          1,
+          2,
+          4,
+          8
+        ],
+        "channel_dropout": 0.2,
+        "category": "all96_regularization"
+      }
+    ],
+    "ranking_weights": {
+      "activity": 0.35,
+      "cross_session_stability": 0.25,
+      "availability": 0.2,
+      "cross_month_stability": 0.2
+    },
+    "silent_rate_threshold": 0.01,
+    "model_width": 64,
+    "gru_width": 64,
+    "learning_rate": 0.0009,
+    "weight_decay": 0.025,
+    "model_dropout": 0.1,
+    "epochs": 20,
+    "screen_seed": 43,
+    "confirmation_seeds": [
+      42,
+      44
+    ],
+    "device": "cpu"
+  },
+  "data_policy": {
+    "train_sessions_updated_weights": 29,
+    "validation_sessions_updated_weights": 0,
+    "validation_selected_configs_and_checkpoints": true,
+    "test_sessions_loaded": 0,
+    "january_loaded": false
+  },
+  "screen_channel_winner": "stable72",
+  "screen_all96_structure_or_regularization_winner": "all96_chdrop020",
+  "confirmed_candidates": [
+    "activity64",
+    "all96_baseline",
+    "stable72",
+    "all96_chdrop020"
+  ],
+  "aggregate_results": [
+    {
+      "config_label": "all96_chdrop020",
+      "channel_count": 96,
+      "kernel_size": 3,
+      "tcn_blocks": 4,
+      "channel_dropout": 0.2,
+      "parameter_count": 86978,
+      "validation_loss_mean": 0.3187211950620015,
+      "validation_loss_std": 0.0019184643576791514,
+      "validation_pooled_r2_mean": 0.7003919084866842,
+      "validation_pooled_r2_std": 0.001896698064374329,
+      "validation_macro_r2_mean": 0.7023412237564722,
+      "validation_macro_r2_std": 0.0015389671815731149,
+      "validation_worst_r2_mean": 0.6084994872411092,
+      "validation_worst_r2_min": 0.5950090885162354,
+      "train_validation_gap_mean": 0.1459915041923523,
+      "selected_epoch_mean": 14.333333333333334
+    },
+    {
+      "config_label": "stable72",
+      "channel_count": 72,
+      "kernel_size": 3,
+      "tcn_blocks": 4,
+      "channel_dropout": 0.0,
+      "parameter_count": 83906,
+      "validation_loss_mean": 0.34623653690020245,
+      "validation_loss_std": 0.00805628685401238,
+      "validation_pooled_r2_mean": 0.6734740932782491,
+      "validation_pooled_r2_std": 0.007600496749454348,
+      "validation_macro_r2_mean": 0.6770335137844086,
+      "validation_macro_r2_std": 0.0075871926633060685,
+      "validation_worst_r2_mean": 0.5961287419001261,
+      "validation_worst_r2_min": 0.5782085061073303,
+      "train_validation_gap_mean": 0.15067789951960245,
+      "selected_epoch_mean": 6.666666666666667
+    },
+    {
+      "config_label": "activity64",
+      "channel_count": 64,
+      "kernel_size": 3,
+      "tcn_blocks": 4,
+      "channel_dropout": 0.0,
+      "parameter_count": 82882,
+      "validation_loss_mean": 0.3639082709948222,
+      "validation_loss_std": 0.0064559003233488396,
+      "validation_pooled_r2_mean": 0.6565807660420736,
+      "validation_pooled_r2_std": 0.0060643067480409246,
+      "validation_macro_r2_mean": 0.6617447038491567,
+      "validation_macro_r2_std": 0.005796554498039673,
+      "validation_worst_r2_mean": 0.5516668359438578,
+      "validation_worst_r2_min": 0.517554521560669,
+      "train_validation_gap_mean": 0.16428367296854654,
+      "selected_epoch_mean": 6.666666666666667
+    },
+    {
+      "config_label": "all96_baseline",
+      "channel_count": 96,
+      "kernel_size": 3,
+      "tcn_blocks": 4,
+      "channel_dropout": 0.0,
+      "parameter_count": 86978,
+      "validation_loss_mean": 0.37188322345415753,
+      "validation_loss_std": 0.006326278826173832,
+      "validation_pooled_r2_mean": 0.6475594838460287,
+      "validation_pooled_r2_std": 0.005700661719404782,
+      "validation_macro_r2_mean": 0.6504233479499817,
+      "validation_macro_r2_std": 0.005213586030657704,
+      "validation_worst_r2_mean": 0.5506821473439535,
+      "validation_worst_r2_min": 0.5380591154098511,
+      "train_validation_gap_mean": 0.18707029024759927,
+      "selected_epoch_mean": 6.0
+    }
+  ],
+  "recommended_by_mean_validation_loss": "all96_chdrop020",
+  "interpretation_boundary": "Seed 43 screened configurations; seeds 42 and 44 confirm only the selected candidates and fixed references. December is reused for tuning; January remains unopened.",
+  "epochs_each": 20
+}

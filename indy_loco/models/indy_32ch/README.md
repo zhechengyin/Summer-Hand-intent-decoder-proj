@@ -1,9 +1,8 @@
 # Indy Causal Decoder Modules and Retained 32-Channel Models
 
 This package contains the causal TCN+GRU implementation, retained 32-channel
-checkpoints, and historical detector modules. Phase 6 reuses the general feature,
-model, input, and sampling modules with 96 channels; it does not load or replace
-the retained checkpoints.
+checkpoints, and historical detector modules. Phase 6 did not replace these
+artifacts; its promoted 96-channel model is isolated under `../indy_96ch/`.
 
 ## Checkpoints
 

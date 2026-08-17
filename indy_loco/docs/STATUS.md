@@ -1,24 +1,36 @@
 # Indy Loco Status
 
-**State:** Phase 5 is complete and archived. Phase 6 is active as a controlled
-96-channel experiment. Previous retained models remain frozen; no new candidate
-has been promoted.
+**State:** Phase 6 is complete. The 96-channel 64/64 TCN+GRU with 0.20 paired
+channel dropout is promoted as the strongest validation-selected candidate.
+The smaller historical checkpoints remain intact.
 
-## Active Phase 6 experiment
+## Final Phase 6 result
 
-The active runner trains one 96-channel 64/64 TCN+GRU for 20 epochs using the
-Phase 5 winning settings: learning rate 0.0009, weight decay 0.025, dropout 0.10,
-and seed 43. It uses all 96 physical channels as 96 raw count streams plus 96
-causal EWMAs. No channel ranking is fitted.
+The controlled runner kept the 64/64 width, learning rate 0.0009, weight decay
+0.025, model dropout 0.10, causal preprocessing, and session-balanced sampler
+fixed. It screened channel counts/rankings, kernel size 2, a three-block TCN,
+and paired channel dropout. Seed 43 performed the screen; fixed references and
+category winners were confirmed with seeds 42 and 44.
 
 The runner automatically selects NVIDIA CUDA when available and otherwise uses
 CPU. Apple MPS remains disabled because it previously produced invalid training
 gradients for this model graph.
 
-All 29 train sessions update weights under session-balanced sampling. December
-is inference-only and selects the checkpoint. January is never loaded. This is
-a single-seed channel-count extension, not a promoted model. See
+All 29 train sessions updated weights. Channel ranking used only their first
+60-second prefixes and includes activity, cross-session stability, availability,
+and drift across training months. December was inference-only and selected
+configurations/checkpoints. January was never loaded. See
 `experiments/active/README.md` for the exact command and protocol.
+
+The winner used all 96 channels, kernel size 3, four TCN blocks, and 0.20 paired
+channel dropout. Across seeds 42–44 it achieved pooled December validation R²
+`0.7004 ± 0.0019`, macro R² `0.7023 ± 0.0015`, mean worst-session R²
+`0.6085`, and minimum worst-session R² `0.5950`. Its seed-specific pooled R²
+values were 0.6978, 0.7022, and 0.7012.
+
+The no-channel-dropout 96-channel reference reached only pooled R²
+`0.6476 ± 0.0057`. The improvement therefore came from combining the wider
+input with channel-level regularization, not from channel count alone.
 
 ## Data and protocol
 
@@ -26,16 +38,27 @@ a single-seed channel-count extension, not a promoted model. See
 |---|---|
 | Sessions | 29 train / 4 December validation / 4 January test |
 | Bin and window | 40 ms bins; 50-bin (2 s) past-only windows |
-| Active Phase 6 input | 96 raw counts + 96 causal EWMA features |
+| Promoted Phase 6 input | 96 raw counts + 96 causal EWMA features |
 | Target | x/y fingertip velocity |
 | Calibration | first 60 s of each session; past-only |
 | Sampling | session-balanced |
-| Active optimizer settings | learning rate 0.0009; weight decay 0.025; dropout 0.10; batch 32; seed 43 |
+| Optimizer settings | learning rate 0.0009; weight decay 0.025; model dropout 0.10; paired channel dropout 0.20; batch 32 |
 
-## Retained 32-channel checkpoints
+## Initial Phase 6 diagnostic
+
+The all-96 seed-43 CUDA run selected epoch 5. Train R² was 0.8283 and pooled
+December validation R² was 0.6439 (macro 0.6466; worst session 0.5444). By epoch
+20, train R² reached 0.8821 while validation R² was 0.6202. The checkpoint rule
+protected the better epoch-5 state, but the widening gap motivated the
+controlled sweep. CPU and CUDA reruns reportedly showed the same qualitative
+overfitting pattern; the completed sweep forbade mixing backends within one
+resumable result set.
+
+## Retained checkpoints
 
 | Checkpoint | Role | Parameters | Validation result | SHA-256 |
 |---|---|---:|---|---|
+| `models/indy_96ch/phase6_96ch_64x64_checkpoint.pt` | strongest validation candidate | 86,978 | pooled R² 0.7022; macro 0.7041; worst 0.6029 | `685ee659b56e40d2484d09b4d03bbdcb032856e772228fb0125c3703575e378a` |
 | `models/indy_32ch/48x48checkpoint.pt` | preferred standalone firmware candidate | 45,266 | pooled R² 0.5651; macro 0.5750; worst 0.3461 | `5c8b375787ff93f90006df5f0cfea07303660928c7b69a84d4d75e1a368319ef` |
 | `models/indy_32ch/64x64checkpoint.pt` | reference model used by detector work | 78,786 | pooled R² 0.5604; macro 0.5702; worst 0.3144 | `2ee52c426ee43ba88cebe7c85dd8392f40f9e75748abe9bbf4e94093556363a5` |
 
@@ -84,5 +107,6 @@ training-data cleaner.
 
 The Indy line was closed in favor of FingerMovements EEG classification on
 2026-07-29, then reopened for controlled channel-count experiments. Phase 5 is
-archived and Phase 6 is active. All earlier retained checkpoints remain
-unchanged until a new result is reviewed and explicitly promoted.
+archived and Phase 6 is now complete. The 96-channel candidate is promoted;
+all earlier retained checkpoints remain unchanged for size and detector
+comparisons.

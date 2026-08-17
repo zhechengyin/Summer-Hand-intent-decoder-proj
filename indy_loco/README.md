@@ -1,12 +1,16 @@
 # Indy Loco Project
 
-The historical decoder and detector work is preserved under `history/`. Phase 5
-is complete and archived; Phase 6 is the only active experiment and tests a
-96-channel extension without changing retained checkpoints.
+The historical decoder and detector work is preserved under `history/`. Phase 6
+is complete and promotes a regularized 96-channel decoder as the strongest
+validation candidate. Earlier checkpoints remain available for comparison.
 
 ## Problem definition
 
-The project decoded x/y fingertip velocity every 40 ms from intracortical spike counts. Each input window contained the previous 50 bins (2 seconds): 32 selected raw-count channels plus 32 causal EWMA features. Targets were two-dimensional velocity.
+The project decoded x/y fingertip velocity every 40 ms from intracortical spike
+counts. Every input window contains the previous 50 bins (2 seconds). The
+promoted Phase 6 model uses all 96 raw-count channels plus 96 causal EWMAs;
+historical compact models use 32 selected raw-count channels plus 32 EWMAs.
+Targets are two-dimensional velocity.
 
 All preprocessing used past information only:
 
@@ -15,9 +19,18 @@ All preprocessing used past information only:
 - EWMA features were updated forward in time;
 - validation and test data never updated model weights.
 
-## Retained system
+## Retained systems
 
-The preferred standalone firmware candidate was the 48/48 TCN+GRU checkpoint in `models/indy_32ch/48x48checkpoint.pt`. It reduced parameters from 78,786 to 45,266 while remaining non-inferior in the five-seed, leave-one-month-out comparison.
+The strongest validation candidate is the 96-channel 64/64 TCN+GRU checkpoint
+in `models/indy_96ch/phase6_96ch_64x64_checkpoint.pt`. It has 86,978 parameters
+and achieved pooled December validation R² `0.7004 ± 0.0019` over seeds
+42–44. Training used 0.20 paired channel dropout; the promoted seed-43 epoch-15
+checkpoint reached pooled R² 0.7022 and macro R² 0.7041.
+
+The 32-channel 48/48 checkpoint in `models/indy_32ch/48x48checkpoint.pt`
+remains the smaller firmware reference. It reduced parameters from 78,786 to
+45,266 while remaining non-inferior in its five-seed, leave-one-month-out
+comparison.
 
 The drift detector remained coupled to the older 64/64 representation. Its two layers were:
 
@@ -33,9 +46,10 @@ The detector was retrospective safety research, not a validated production gate.
 - January test was opened once in Phase 2 and cannot be called untouched afterward.
 - Phase 3 leave-one-month-out results are the strongest cross-month robustness evidence.
 - Phase 5 confirmed the 64-channel hyperparameters over seeds 42–44 and found no mean benefit from retrospective detector filtering.
-- Phase 6 uses all 96 physical channels, seed 43, and the Phase 5 winner for one 20-epoch controlled run. January remains unloaded.
+- Phase 6 confirmed the 96-channel paired-dropout winner over seeds 42–44. December selected the model; January remained unloaded.
 
 Start with `docs/STATUS.md` for the current state and
 `history/EXPERIMENT_LOG.md` for the decision trail. Completed runners and
-results are under `history/`; the retained implementation and checkpoints are
-under `models/`; the current runner is under `experiments/active/`.
+results are under `history/`; the retained implementations and checkpoints are
+under `models/`; the completed Phase 6 reproduction runners remain under
+`experiments/active/`.

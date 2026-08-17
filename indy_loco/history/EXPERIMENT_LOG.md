@@ -20,6 +20,7 @@ are read from the Indy project root.
 | 4c | Final 48/48 build | Epoch 10; validation pooled R² 0.5651; macro 0.5750; worst 0.3461 | Retain checkpoint |
 | 5a | 64-channel width comparison | 64/64 reached validation R² 0.6625; 48/48 reached 0.6569 | Exploratory only; single seed, no promotion |
 | 5 | 64-channel tuning and detector-filter ablation | Full-session winner: LR 0.0009, WD 0.025, dropout 0.10; pooled R² 0.6575 ± 0.0080 over seeds 42–44 | Freeze settings; keep all 29 sessions; detector remains a runtime gate |
+| 6 | Channel, structure, and regularization sweep | 96 channels with 0.20 paired channel dropout reached pooled R² 0.7004 ± 0.0019 and macro R² 0.7023 ± 0.0015 | Promote seed-43 epoch-15 checkpoint as the strongest validation candidate |
 
 ## Phase 0 — Data and sampling
 
@@ -96,9 +97,45 @@ the detector as a runtime compatibility gate rather than a retrospective data
 deletion rule. Phase 6 inherits the winning baseline hyperparameters and tests
 all 96 physical channels.
 
+## Phase 6 — 96-channel regularized model
+
+Phase 6 kept the 64/64 width, session-balanced sampling, chronological split,
+causal preprocessing, learning rate 0.0009, weight decay 0.025, and model
+dropout 0.10 fixed. Seed 43 screened channel count/ranking, kernel size, TCN
+depth, and paired physical-channel dropout. The selected configurations and
+fixed references were then confirmed with seeds 42 and 44. All 29 training
+sessions updated weights; December was inference-only but selected
+configurations and checkpoints; January was never loaded.
+
+The winner used all 96 physical channels, kernel size 3, four TCN blocks, and
+0.20 paired channel dropout. Dropping a physical channel removed its raw-count
+and causal-EWMA streams together during training. The regularizer was inactive
+during validation and inference.
+
+| Configuration | Pooled validation R² | Macro R² | Worst-session mean | Worst-session minimum |
+|---|---:|---:|---:|---:|
+| 96 channels, paired dropout 0.20 | **0.7004 ± 0.0019** | **0.7023 ± 0.0015** | **0.6085** | **0.5950** |
+| Stability-ranked 72 channels | 0.6735 ± 0.0076 | 0.6770 ± 0.0076 | 0.5961 | 0.5782 |
+| Activity-ranked 64 channels | 0.6566 ± 0.0061 | 0.6617 ± 0.0058 | 0.5517 | 0.5176 |
+| 96 channels without paired dropout | 0.6476 ± 0.0057 | 0.6504 ± 0.0052 | 0.5507 | 0.5381 |
+
+The winning pooled R² values for seeds 42, 43, and 44 were 0.6978, 0.7022,
+and 0.7012. The result therefore reflects a stable regularization effect rather
+than one lucky initialization. Compared with the Phase 5 64-channel winner,
+mean pooled R² improved by 0.0429 and the mean worst-session R² improved by
+0.0559. All 96 channels without paired dropout were worse than the 64-channel
+reference, showing that channel count alone did not produce the gain.
+
+Seed 43 had the lowest validation loss and highest pooled/macro R² of the three
+confirmed runs. Its epoch-15 state was promoted to
+`models/indy_96ch/phase6_96ch_64x64_checkpoint.pt`. It has 86,978 parameters
+and is the strongest validation-selected Indy candidate. This is not a new
+January result, and the existing 32-channel firmware references remain intact.
+
 ## Current handoff
 
 The earlier Indy line was archived on 2026-07-29, then reopened for controlled
-channel-count experiments. The 48/48 checkpoint remains the retained standalone
-firmware artifact. Phase 5 is complete historical evidence; Phase 6 is an
-unpromoted 96-channel experiment and does not modify retained checkpoints.
+channel-count experiments. Phase 6 is complete and its 96-channel seed-43
+checkpoint is the strongest validation candidate. The 32-channel 48/48 model
+remains the smaller firmware reference; neither historical checkpoint was
+overwritten.
