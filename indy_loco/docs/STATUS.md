@@ -1,6 +1,20 @@
-# Indy Loco Final Status
+# Indy Loco Status
 
-**State:** retired and archived on 2026-07-29. No Indy module is active in the current project.
+**State:** reopened on 2026-08-16 for one controlled Phase 5 experiment. The
+previous retained models remain frozen; no new candidate has been promoted.
+
+## Active Phase 5 experiment
+
+The active runner compares the 64-channel 64/64 TCN+GRU under the full
+29-session training baseline and a 27-session policy that excludes the two
+retrospective Phase-3c detector failures (`indy_20160630_01` and
+`indy_20161013_03`). It sweeps learning rate, weight decay and dropout, then
+confirms the winning configurations over seeds 42–44. Both policies receive the
+same number of session-balanced samples per epoch. December remains validation
+only and January is not loaded.
+
+This is a retrospective exclusion ablation, not prospective validation of the
+detector. See `experiments/active/README.md` for the exact command and protocol.
 
 ## Data and protocol
 
@@ -47,6 +61,8 @@ The final authoritative run used CPU, seed 43, 30 epochs, training-only fitting,
 
 The 64/64 option ranked first, but the result was single-seed and was not promoted. An earlier MPS run and an unregistered 32/32 artifact are withdrawn evidence.
 
-## Final decision
+## Previous closeout decision
 
-The Indy line was closed in favor of FingerMovements EEG classification. Keep this directory only for reproducibility and historical reference.
+The Indy line was closed in favor of FingerMovements EEG classification on
+2026-07-29. Phase 5 reopens only the 64-channel comparison; all earlier evidence
+and checkpoints remain unchanged until the new results are reviewed.

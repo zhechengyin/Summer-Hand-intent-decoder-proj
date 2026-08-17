@@ -1,0 +1,237 @@
+{
+  "phase": "5",
+  "name": "phase5_64channel_detector_filtered_sweep",
+  "created_at_utc": "2026-08-17T01:04:14.841231+00:00",
+  "protocol_signature": "44b3127716a5a095cdfb765221dd9796857e29d66dd961eb45a9e83b82633107",
+  "purpose": "64-channel hyperparameter sweep and paired retrospective detector-filter exclusion ablation",
+  "protocol": {
+    "model": "strictly causal 64-channel 64/64 TCN+GRU",
+    "parameter_count": 82882,
+    "features": "64 raw counts + 64 causal EWMA",
+    "sampling": "session-balanced",
+    "epoch_size_policy": "both policies use the baseline available-window count so optimizer update counts match",
+    "epochs_each": 30,
+    "sweep_seed": 43,
+    "confirmation_seeds": [
+      42,
+      44
+    ],
+    "search_space": {
+      "learning_rate": [
+        0.0003,
+        0.0009
+      ],
+      "weight_decay": [
+        0.025,
+        0.06
+      ],
+      "dropout": [
+        0.025,
+        0.1
+      ]
+    },
+    "checkpoint_selection": "minimum pooled December validation normalized MSE",
+    "device": "cpu only"
+  },
+  "data_policy": {
+    "baseline_train_sessions": 29,
+    "detector_filtered_train_sessions": 27,
+    "validation_sessions": 4,
+    "validation_updates_weights": false,
+    "test_sessions_loaded": 0,
+    "january_loaded": false,
+    "excluded_source_data_deleted": false
+  },
+  "detector_audit": {
+    "path": "indy_loco/history/results/indy/phase3c_decoder_state_detector/phase3c_decoder_state_detector_sessions.csv",
+    "sha256": "38a14d47015bec8a1f827d01183f3a1f9097dd6c05e327d935d2ee816e7d468f",
+    "flagged_sessions": [
+      "indy_20160630_01",
+      "indy_20161013_03"
+    ],
+    "rows": {
+      "indy_20160630_01": {
+        "known_failure": true,
+        "layer2_flag": true,
+        "proposed_combined_decision": "abstain",
+        "decoder_r2_mean": -0.1364778876304626
+      },
+      "indy_20161013_03": {
+        "known_failure": true,
+        "layer2_flag": true,
+        "proposed_combined_decision": "abstain",
+        "decoder_r2_mean": -0.0541344285011291
+      }
+    },
+    "interpretation": "Retrospective Phase-3c evidence; valid for this exclusion ablation only, not prospective detector performance."
+  },
+  "seed43_winners": {
+    "baseline": {
+      "learning_rate": 0.0009,
+      "weight_decay": 0.025,
+      "dropout": 0.1
+    },
+    "detector_filtered": {
+      "learning_rate": 0.0003,
+      "weight_decay": 0.06,
+      "dropout": 0.1
+    }
+  },
+  "confirmation_candidates": [
+    {
+      "learning_rate": 0.0003,
+      "weight_decay": 0.06,
+      "dropout": 0.1
+    },
+    {
+      "learning_rate": 0.0009,
+      "weight_decay": 0.025,
+      "dropout": 0.1
+    }
+  ],
+  "aggregate_results": [
+    {
+      "policy": "baseline",
+      "config_label": "lr3e-04_wd0.060_do0.100",
+      "learning_rate": 0.0003,
+      "weight_decay": 0.06,
+      "dropout": 0.1,
+      "seeds": [
+        43,
+        42,
+        44
+      ],
+      "validation_loss_mean": 0.3856970965862274,
+      "validation_loss_std": 0.010150984146790165,
+      "validation_pooled_r2_mean": 0.6376660267512003,
+      "validation_pooled_r2_std": 0.008789999402792265,
+      "validation_macro_r2_mean": 0.6424573262532552,
+      "validation_macro_r2_std": 0.0074400565406375066,
+      "validation_worst_r2_mean": 0.5377190113067627,
+      "validation_worst_r2_min": 0.4807664752006531,
+      "selected_epoch_mean": 18.0
+    },
+    {
+      "policy": "detector_filtered",
+      "config_label": "lr3e-04_wd0.060_do0.100",
+      "learning_rate": 0.0003,
+      "weight_decay": 0.06,
+      "dropout": 0.1,
+      "seeds": [
+        43,
+        42,
+        44
+      ],
+      "validation_loss_mean": 0.37967053055763245,
+      "validation_loss_std": 0.00826252423492948,
+      "validation_pooled_r2_mean": 0.6466241280237833,
+      "validation_pooled_r2_std": 0.006284958820598684,
+      "validation_macro_r2_mean": 0.6514522731304169,
+      "validation_macro_r2_std": 0.0062535671011701025,
+      "validation_worst_r2_mean": 0.5692580342292786,
+      "validation_worst_r2_min": 0.5559203028678894,
+      "selected_epoch_mean": 16.333333333333332
+    },
+    {
+      "policy": "baseline",
+      "config_label": "lr9e-04_wd0.025_do0.100",
+      "learning_rate": 0.0009,
+      "weight_decay": 0.025,
+      "dropout": 0.1,
+      "seeds": [
+        43,
+        42,
+        44
+      ],
+      "validation_loss_mean": 0.36331923802693683,
+      "validation_loss_std": 0.00828745095525752,
+      "validation_pooled_r2_mean": 0.6574991544087728,
+      "validation_pooled_r2_std": 0.008046649738758564,
+      "validation_macro_r2_mean": 0.6626560240983963,
+      "validation_macro_r2_std": 0.007636715158727266,
+      "validation_worst_r2_mean": 0.5525545477867126,
+      "validation_worst_r2_min": 0.5185760259628296,
+      "selected_epoch_mean": 6.666666666666667
+    },
+    {
+      "policy": "detector_filtered",
+      "config_label": "lr9e-04_wd0.025_do0.100",
+      "learning_rate": 0.0009,
+      "weight_decay": 0.025,
+      "dropout": 0.1,
+      "seeds": [
+        43,
+        42,
+        44
+      ],
+      "validation_loss_mean": 0.36995940407117206,
+      "validation_loss_std": 0.005762263143811024,
+      "validation_pooled_r2_mean": 0.6552371184031168,
+      "validation_pooled_r2_std": 0.003442739353764062,
+      "validation_macro_r2_mean": 0.6594720979531606,
+      "validation_macro_r2_std": 0.003916687564781927,
+      "validation_worst_r2_mean": 0.5766017635663351,
+      "validation_worst_r2_min": 0.5566113591194153,
+      "selected_epoch_mean": 6.333333333333333
+    }
+  ],
+  "aggregate_winners": {
+    "baseline": {
+      "policy": "baseline",
+      "config_label": "lr9e-04_wd0.025_do0.100",
+      "learning_rate": 0.0009,
+      "weight_decay": 0.025,
+      "dropout": 0.1,
+      "seeds": [
+        43,
+        42,
+        44
+      ],
+      "validation_loss_mean": 0.36331923802693683,
+      "validation_loss_std": 0.00828745095525752,
+      "validation_pooled_r2_mean": 0.6574991544087728,
+      "validation_pooled_r2_std": 0.008046649738758564,
+      "validation_macro_r2_mean": 0.6626560240983963,
+      "validation_macro_r2_std": 0.007636715158727266,
+      "validation_worst_r2_mean": 0.5525545477867126,
+      "validation_worst_r2_min": 0.5185760259628296,
+      "selected_epoch_mean": 6.666666666666667
+    },
+    "detector_filtered": {
+      "policy": "detector_filtered",
+      "config_label": "lr9e-04_wd0.025_do0.100",
+      "learning_rate": 0.0009,
+      "weight_decay": 0.025,
+      "dropout": 0.1,
+      "seeds": [
+        43,
+        42,
+        44
+      ],
+      "validation_loss_mean": 0.36995940407117206,
+      "validation_loss_std": 0.005762263143811024,
+      "validation_pooled_r2_mean": 0.6552371184031168,
+      "validation_pooled_r2_std": 0.003442739353764062,
+      "validation_macro_r2_mean": 0.6594720979531606,
+      "validation_macro_r2_std": 0.003916687564781927,
+      "validation_worst_r2_mean": 0.5766017635663351,
+      "validation_worst_r2_min": 0.5566113591194153,
+      "selected_epoch_mean": 6.333333333333333
+    }
+  },
+  "paired_deltas": [
+    {
+      "config_label": "lr3e-04_wd0.060_do0.100",
+      "filtered_minus_baseline_pooled_r2": 0.008958101272583008,
+      "filtered_minus_baseline_macro_r2": 0.008994946877161625,
+      "filtered_minus_baseline_worst_r2": 0.03153902292251587
+    },
+    {
+      "config_label": "lr9e-04_wd0.025_do0.100",
+      "filtered_minus_baseline_pooled_r2": -0.0022620360056559985,
+      "filtered_minus_baseline_macro_r2": -0.0031839261452356604,
+      "filtered_minus_baseline_worst_r2": 0.024047215779622433
+    }
+  ],
+  "interpretation_boundary": "December validation may compare policies and tune hyperparameters. January remains unopened. Detector filtering is retrospective and does not establish prospective detector reliability."
+}
