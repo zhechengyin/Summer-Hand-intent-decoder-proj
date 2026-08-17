@@ -1,20 +1,24 @@
 # Indy Loco Status
 
-**State:** reopened on 2026-08-16 for one controlled Phase 5 experiment. The
-previous retained models remain frozen; no new candidate has been promoted.
+**State:** Phase 5 is complete and archived. Phase 6 is active as a controlled
+96-channel experiment. Previous retained models remain frozen; no new candidate
+has been promoted.
 
-## Active Phase 5 experiment
+## Active Phase 6 experiment
 
-The active runner compares the 64-channel 64/64 TCN+GRU under the full
-29-session training baseline and a 27-session policy that excludes the two
-retrospective Phase-3c detector failures (`indy_20160630_01` and
-`indy_20161013_03`). It sweeps learning rate, weight decay and dropout, then
-confirms the winning configurations over seeds 42–44. Both policies receive the
-same number of session-balanced samples per epoch. December remains validation
-only and January is not loaded.
+The active runner trains one 96-channel 64/64 TCN+GRU for 20 epochs using the
+Phase 5 winning settings: learning rate 0.0009, weight decay 0.025, dropout 0.10,
+and seed 43. It uses all 96 physical channels as 96 raw count streams plus 96
+causal EWMAs. No channel ranking is fitted.
 
-This is a retrospective exclusion ablation, not prospective validation of the
-detector. See `experiments/active/README.md` for the exact command and protocol.
+The runner automatically selects NVIDIA CUDA when available and otherwise uses
+CPU. Apple MPS remains disabled because it previously produced invalid training
+gradients for this model graph.
+
+All 29 train sessions update weights under session-balanced sampling. December
+is inference-only and selects the checkpoint. January is never loaded. This is
+a single-seed channel-count extension, not a promoted model. See
+`experiments/active/README.md` for the exact command and protocol.
 
 ## Data and protocol
 
@@ -22,11 +26,11 @@ detector. See `experiments/active/README.md` for the exact command and protocol.
 |---|---|
 | Sessions | 29 train / 4 December validation / 4 January test |
 | Bin and window | 40 ms bins; 50-bin (2 s) past-only windows |
-| Input | 32 raw counts + 32 causal EWMA features |
+| Active Phase 6 input | 96 raw counts + 96 causal EWMA features |
 | Target | x/y fingertip velocity |
 | Calibration | first 60 s of each session; past-only |
 | Sampling | session-balanced |
-| Optimizer settings | learning rate 0.0009; weight decay 0.060; dropout 0.025; batch 32 |
+| Active optimizer settings | learning rate 0.0009; weight decay 0.025; dropout 0.10; batch 32; seed 43 |
 
 ## Retained 32-channel checkpoints
 
@@ -61,8 +65,24 @@ The final authoritative run used CPU, seed 43, 30 epochs, training-only fitting,
 
 The 64/64 option ranked first, but the result was single-seed and was not promoted. An earlier MPS run and an unregistered 32/32 artifact are withdrawn evidence.
 
-## Previous closeout decision
+## Phase 5 confirmed 64-channel result
+
+Phase 5 swept the 64-channel 64/64 model and compared all 29 training sessions
+against a retrospective 27-session detector-filtered policy. January was never
+loaded.
+
+| Policy | Hyperparameters | Validation pooled R² | Macro R² | Worst-session evidence |
+|---|---|---:|---:|---:|
+| All 29 sessions | LR 0.0009; WD 0.025; dropout 0.10 | 0.6575 ± 0.0080 | 0.6627 ± 0.0076 | mean 0.5526; minimum 0.5186 |
+| Detector-filtered 27 sessions | LR 0.0009; WD 0.025; dropout 0.10 | 0.6552 ± 0.0034 | 0.6595 | mean 0.5766; minimum 0.5566 |
+
+Filtering improved the lower tail but not the mean. The active training policy
+therefore remains all 29 sessions. The detector is not used as a retrospective
+training-data cleaner.
+
+## Project-history note
 
 The Indy line was closed in favor of FingerMovements EEG classification on
-2026-07-29. Phase 5 reopens only the 64-channel comparison; all earlier evidence
-and checkpoints remain unchanged until the new results are reviewed.
+2026-07-29, then reopened for controlled channel-count experiments. Phase 5 is
+archived and Phase 6 is active. All earlier retained checkpoints remain
+unchanged until a new result is reviewed and explicitly promoted.

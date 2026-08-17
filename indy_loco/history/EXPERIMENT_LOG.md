@@ -1,6 +1,8 @@
 # Indy Loco Experiment Log
 
-This is the concise record of the retired Indy velocity-decoding work. Metrics refer to archived artifacts under `history/results/indy/` when paths are read from the Indy project root.
+This is the concise historical record of Indy velocity-decoding experiments.
+Metrics refer to archived artifacts under `history/results/indy/` when paths
+are read from the Indy project root.
 
 ## Phase summary
 
@@ -17,6 +19,7 @@ This is the concise record of the retired Indy velocity-decoding work. Metrics r
 | 4b | Five-seed confirmation | 48/48 passed all predefined non-inferiority limits, with 42.5% fewer parameters | Promote 48/48 firmware candidate |
 | 4c | Final 48/48 build | Epoch 10; validation pooled R² 0.5651; macro 0.5750; worst 0.3461 | Retain checkpoint |
 | 5a | 64-channel width comparison | 64/64 reached validation R² 0.6625; 48/48 reached 0.6569 | Exploratory only; single seed, no promotion |
+| 5 | 64-channel tuning and detector-filter ablation | Full-session winner: LR 0.0009, WD 0.025, dropout 0.10; pooled R² 0.6575 ± 0.0080 over seeds 42–44 | Freeze settings; keep all 29 sessions; detector remains a runtime gate |
 
 ## Phase 0 — Data and sampling
 
@@ -74,6 +77,28 @@ The authoritative run was repeated on CPU after an invalid unstable MPS attempt.
 
 The 64/64 model achieved pooled validation R² 0.6625 at epoch 7; the 48/48 model achieved 0.6569 at epoch 4. This indicated value in additional channels, but one seed was insufficient to replace the confirmed 32-channel candidate. The experiment ended without promotion when the project changed datasets.
 
-## Closeout
+## Phase 5 — 64-channel tuning and detector-filter ablation
 
-The Indy work was archived on 2026-07-29. The 48/48 checkpoint is the preferred standalone artifact; the 64/64 checkpoint is retained for reproducing detector work. No result in this archive is an active project dependency.
+Phase 5 reopened the 64-channel 64/64 model and compared two policies under the
+same session-balanced optimizer exposure: the canonical 29-session baseline
+and a 27-session variant excluding the retrospective Phase-3c failures
+`indy_20160630_01` and `indy_20161013_03`. January was never loaded.
+
+The best full-session configuration was learning rate 0.0009, weight decay
+0.025, and dropout 0.10. Across seeds 42–44 it achieved pooled December
+validation R² `0.6575 ± 0.0080`, macro R² `0.6627 ± 0.0076`, mean worst-session
+R² `0.5526`, and minimum worst-session R² `0.5186`.
+
+The detector-filtered variant achieved pooled R² `0.6552 ± 0.0034` and macro
+R² `0.6595`. It improved the worst-session floor but did not improve mean
+performance. The decision was therefore to train on all 29 sessions and keep
+the detector as a runtime compatibility gate rather than a retrospective data
+deletion rule. Phase 6 inherits the winning baseline hyperparameters and tests
+all 96 physical channels.
+
+## Current handoff
+
+The earlier Indy line was archived on 2026-07-29, then reopened for controlled
+channel-count experiments. The 48/48 checkpoint remains the retained standalone
+firmware artifact. Phase 5 is complete historical evidence; Phase 6 is an
+unpromoted 96-channel experiment and does not modify retained checkpoints.

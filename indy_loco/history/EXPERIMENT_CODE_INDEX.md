@@ -20,5 +20,9 @@ retained model checkpoint path, which is relative to the Indy project root.
 | 4b | `experiments/phase4/phase4b_five_seed_architecture_confirmation.py` | `results/indy/phase4b_five_seed_confirmation/` |
 | 4c | `experiments/phase4/train_48x48_checkpoint.py` | `../models/indy_32ch/48x48checkpoint.pt` |
 | 5a | `experiments/active_at_archive/phase5a_64channel_width_comparison.py` | `results/indy/phase5a_64channel_width_comparison/` |
+| 5 | `experiments/phase5/phase5_64channel_detector_filtered_sweep.py` | `results/indy/phase5_64channel_detector_filtered_sweep/` |
 
 Scripts under `experiments/active_at_archive/` were active immediately before the whole Indy project was archived; the directory name does not mean they are active now.
+
+Phase 5 was completed after that earlier project archive. Phase 6 is the current
+active experiment and is intentionally not listed as historical code.

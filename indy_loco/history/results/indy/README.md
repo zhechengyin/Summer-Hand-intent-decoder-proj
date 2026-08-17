@@ -14,5 +14,6 @@ Each directory contains the immutable outputs for one archived phase.
 | `phase4a_architecture_sweep/` | architecture search database and summaries |
 | `phase4b_five_seed_confirmation/` | 64/64 versus 48/48 confirmation |
 | `phase5a_64channel_width_comparison/` | exploratory 64-channel comparison |
+| `phase5_64channel_detector_filtered_sweep/` | confirmed 64-channel tuning and detector-filter ablation |
 
 Use the JSON/CSV files as the source of truth; figures are summaries. See `../../EXPERIMENT_LOG.md` for interpretation and validity limits.

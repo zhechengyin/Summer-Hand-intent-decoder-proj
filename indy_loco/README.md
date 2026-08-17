@@ -1,4 +1,8 @@
-# Archived Indy Loco Project
+# Indy Loco Project
+
+The historical decoder and detector work is preserved under `history/`. Phase 5
+is complete and archived; Phase 6 is the only active experiment and tests a
+96-channel extension without changing retained checkpoints.
 
 ## Problem definition
 
@@ -11,7 +15,7 @@ All preprocessing used past information only:
 - EWMA features were updated forward in time;
 - validation and test data never updated model weights.
 
-## Final archived system
+## Retained system
 
 The preferred standalone firmware candidate was the 48/48 TCN+GRU checkpoint in `models/indy_32ch/48x48checkpoint.pt`. It reduced parameters from 78,786 to 45,266 while remaining non-inferior in the five-seed, leave-one-month-out comparison.
 
@@ -28,9 +32,10 @@ The detector was retrospective safety research, not a validated production gate.
 - December validation influenced model and checkpoint choices.
 - January test was opened once in Phase 2 and cannot be called untouched afterward.
 - Phase 3 leave-one-month-out results are the strongest cross-month robustness evidence.
-- Phase 5a used one seed only; its 64-channel result is exploratory.
+- Phase 5 confirmed the 64-channel hyperparameters over seeds 42–44 and found no mean benefit from retrospective detector filtering.
+- Phase 6 uses all 96 physical channels, seed 43, and the Phase 5 winner for one 20-epoch controlled run. January remains unloaded.
 
-Start with `docs/STATUS.md` for final numbers and
+Start with `docs/STATUS.md` for the current state and
 `history/EXPERIMENT_LOG.md` for the decision trail. Completed runners and
 results are under `history/`; the retained implementation and checkpoints are
-under `models/`.
+under `models/`; the current runner is under `experiments/active/`.

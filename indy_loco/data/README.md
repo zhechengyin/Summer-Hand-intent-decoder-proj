@@ -1,6 +1,7 @@
-# Indy Data Archive
+# Indy Data
 
-This directory preserves the complete data path used by the retired Indy project.
+This directory preserves the complete Indy data path and supplies the active
+Phase 6 experiment.
 
 - `raw/indy_loco/indy/`: 37 original Zenodo MAT sessions. Treat as immutable source data.
 - `processing/indy_loco/indy/`: the preparation notebook and causal target helper.

@@ -1,6 +1,9 @@
-# Archived Indy 32-Channel Models
+# Indy Causal Decoder Modules and Retained 32-Channel Models
 
-This package contains the retired 32-channel causal TCN+GRU pipeline and detector modules.
+This package contains the causal TCN+GRU implementation, retained 32-channel
+checkpoints, and historical detector modules. Phase 6 reuses the general feature,
+model, input, and sampling modules with 96 channels; it does not load or replace
+the retained checkpoints.
 
 ## Checkpoints
 
@@ -19,4 +22,6 @@ Key modules:
 - `runtime.py`: decoder runtime path.
 - `drift_detector.py` and `decoder_state_detector.py`: archived detector layers.
 
-These files are historical and are not imported by the active FingerMovements project.
+The detector modules and saved 32-channel weights remain historical. The general
+decoder modules are imported by the active Indy Phase 6 runner. FingerMovements
+remains an independent project.
