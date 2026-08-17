@@ -1,0 +1,84 @@
+{
+  "phase": "6",
+  "name": "phase6_96channel_training",
+  "created_at_utc": "2026-08-17T18:57:51.570703+00:00",
+  "purpose": "single-seed 96-channel extension of Phase 5 winner",
+  "protocol": {
+    "architecture": "strictly causal 64/64 TCN+GRU",
+    "parameter_count": 86978,
+    "neural_channels": 96,
+    "features": "96 raw counts + 96 causal EWMA",
+    "channel_selection": "all 96 physical channels; no fitted ranking",
+    "bin_seconds": 0.04,
+    "window_bins": 50,
+    "observation_seconds": 60,
+    "sampling": "session-balanced",
+    "seed": 43,
+    "epochs": 20,
+    "learning_rate": 0.0009,
+    "weight_decay": 0.025,
+    "dropout": 0.1,
+    "checkpoint_selection": "minimum pooled December validation normalized MSE",
+    "device_policy": "CUDA when available, otherwise CPU; MPS disabled",
+    "selected_device": "cuda"
+  },
+  "data_policy": {
+    "train_sessions_updated_weights": 29,
+    "validation_sessions_updated_weights": 0,
+    "validation_selected_checkpoint": true,
+    "test_sessions_loaded": 0,
+    "january_loaded": false,
+    "detector_exclusions_applied_to_training": false
+  },
+  "checkpoint": "indy_loco\\results\\phase6_96channel_training\\phase6_96channel_checkpoint.pt",
+  "checkpoint_sha256": "c5edca49efcf7a96430f8c15c4688e5dddbe06edf6dc7f21258196da44913afe",
+  "checkpoint_size_bytes": 364309,
+  "checkpoint_epoch": 5,
+  "train_metrics": {
+    "windows": 11175,
+    "loss": 0.17165090143680573,
+    "r2_x": 0.805451512336731,
+    "r2_y": 0.851237952709198,
+    "r2_mean": 0.8283447027206421
+  },
+  "validation_metrics": {
+    "windows": 1038,
+    "loss": 0.3780233561992645,
+    "r2_x": 0.5929899215698242,
+    "r2_y": 0.6947555541992188,
+    "r2_mean": 0.6438727378845215
+  },
+  "validation_macro_r2_mean": 0.6465530544519424,
+  "validation_worst_session_r2_mean": 0.544389545917511,
+  "validation_by_session": {
+    "indy_20161206_02": {
+      "windows": 338,
+      "loss": 0.40428489446640015,
+      "r2_x": 0.5339305996894836,
+      "r2_y": 0.5979225635528564,
+      "r2_mean": 0.5659265518188477
+    },
+    "indy_20161207_02": {
+      "windows": 192,
+      "loss": 0.31280410289764404,
+      "r2_x": 0.6878257393836975,
+      "r2_y": 0.8152586817741394,
+      "r2_mean": 0.7515422105789185
+    },
+    "indy_20161212_02": {
+      "windows": 250,
+      "loss": 0.3084324896335602,
+      "r2_x": 0.6759713888168335,
+      "r2_y": 0.7727364301681519,
+      "r2_mean": 0.7243539094924927
+    },
+    "indy_20161220_02": {
+      "windows": 258,
+      "loss": 0.45958566665649414,
+      "r2_x": 0.4860823154449463,
+      "r2_y": 0.6026967763900757,
+      "r2_mean": 0.544389545917511
+    }
+  },
+  "interpretation_boundary": "This is one seed on December validation. Do not promote the checkpoint or refit the detector until the result is reviewed."
+}
