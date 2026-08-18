@@ -21,6 +21,7 @@ Key modules:
 - `runtime.py`: decoder runtime path.
 - `drift_detector.py` and `decoder_state_detector.py`: archived detector layers.
 
-The detector modules and saved 32-channel weights remain historical. The general
-decoder modules are imported by the active Indy Phase 6 runner. FingerMovements
-remains an independent project.
+The detector modules and saved 32-channel weights remain historical. The
+general decoder modules are retained for reproducibility; completed Phase 6
+and Phase 7 runners are archived under `../../history/experiments/`.
+FingerMovements remains an independent project.

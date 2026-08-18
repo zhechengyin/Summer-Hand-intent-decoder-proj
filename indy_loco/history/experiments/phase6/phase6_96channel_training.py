@@ -37,8 +37,8 @@ import numpy as np
 # for deterministic CUDA matrix multiplication on supported CUDA versions.
 os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 if str(REPOSITORY_ROOT) not in sys.path:
     sys.path.insert(0, str(REPOSITORY_ROOT))
 

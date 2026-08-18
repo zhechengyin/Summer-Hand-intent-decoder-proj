@@ -21,8 +21,11 @@ retained model checkpoint path, which is relative to the Indy project root.
 | 4c | `experiments/phase4/train_48x48_checkpoint.py` | `../models/indy_32ch/48x48checkpoint.pt` |
 | 5a | `experiments/active_at_archive/phase5a_64channel_width_comparison.py` | `results/indy/phase5a_64channel_width_comparison/` |
 | 5 | `experiments/phase5/phase5_64channel_detector_filtered_sweep.py` | `results/indy/phase5_64channel_detector_filtered_sweep/` |
+| 6 initial | `experiments/phase6/phase6_96channel_training.py` | `results/indy/phase6_96channel_training/` |
+| 6 sweep | `experiments/phase6/phase6_channel_structure_regularization_sweep.py` | `results/indy/phase6_channel_structure_regularization_sweep/` |
+| 7 | `experiments/phase7/phase7_ann_vs_snn_fivefold.py` | `results/indy/phase7_ann_vs_snn_fivefold/` |
 
 Scripts under `experiments/active_at_archive/` were active immediately before the whole Indy project was archived; the directory name does not mean they are active now.
 
-Phase 5 was completed after that earlier project archive. Phase 6 is the current
-active experiment and is intentionally not listed as historical code.
+Phases 5–7 were completed after the earlier whole-project archive. They are now
+indexed alongside the older historical code. There is no active experiment.

@@ -12,6 +12,8 @@ FingerMovements project.
 - Final candidate validation: pooled R² 0.5651; session-macro R² 0.5750; worst session R² 0.3461.
 - January test had already been inspected: pooled R² 0.5511; one session (`indy_20170124_01`) failed with R² -0.0524. It is historical evidence, not an untouched test set.
 - Phase 5 confirmed a 64-channel 64/64 baseline over seeds 42–44: pooled December validation R² `0.6575 ± 0.0080`. Detector-based session removal did not improve the mean.
+- Phase 6 promoted a 96-channel 64/64 model with 0.20 paired channel dropout: pooled December validation R² `0.7004 ± 0.0019` over seeds 42–44.
+- Phase 7 completed 30 session-local benchmark folds: test R² `0.7056 ± 0.0722`.
 
 ## Where to read
 
@@ -21,9 +23,10 @@ FingerMovements project.
 - `experiments/`: archived experiment scripts.
 - `results/indy/`: metrics, figures, and intermediate artifacts.
 
-The retained implementation and checkpoints are under `../models/indy_32ch/`.
-Data and processing code are under `../data/`. The new 96-channel Phase 6 runner
-is under `../experiments/active/`; it does not import this archive.
+Retained model implementations and promoted checkpoints are under `../models/`.
+Data and processing code are under `../data/`. Completed Phase 6 and Phase 7
+runners are under `experiments/phase6/` and `experiments/phase7/`; there is no
+active experiment.
 
 ## Archive rule
 

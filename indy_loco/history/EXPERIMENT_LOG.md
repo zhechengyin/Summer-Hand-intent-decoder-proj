@@ -21,6 +21,7 @@ are read from the Indy project root.
 | 5a | 64-channel width comparison | 64/64 reached validation R² 0.6625; 48/48 reached 0.6569 | Exploratory only; single seed, no promotion |
 | 5 | 64-channel tuning and detector-filter ablation | Full-session winner: LR 0.0009, WD 0.025, dropout 0.10; pooled R² 0.6575 ± 0.0080 over seeds 42–44 | Freeze settings; keep all 29 sessions; detector remains a runtime gate |
 | 6 | Channel, structure, and regularization sweep | 96 channels with 0.20 paired channel dropout reached pooled R² 0.7004 ± 0.0019 and macro R² 0.7023 ± 0.0015 | Promote seed-43 epoch-15 checkpoint as the strongest validation candidate |
+| 7 | Six-session ANN-vs-SNN reach-level five-fold benchmark | Test R² 0.7056 ± 0.0722 over 30 folds; session means ranged from 0.6277 to 0.8066 | Benchmark complete; retain Phase 6 model as the source architecture and do not promote any session-specific fold checkpoint |
 
 ## Phase 0 — Data and sampling
 
@@ -132,10 +133,49 @@ confirmed runs. Its epoch-15 state was promoted to
 and is the strongest validation-selected Indy candidate. This is not a new
 January result, and the existing 32-channel firmware references remain intact.
 
+## Phase 7 — Six-session ANN-vs-SNN benchmark
+
+Completed on 2026-08-18. Phase 7 reused the Phase 6 architecture and frozen
+hyperparameters but not its weights. A new seed-43 model was trained for each
+of five reach-level folds in each of the six paper sessions, producing 30
+independent fits. Four reach groups trained each fold; the fifth was divided
+between checkpoint-selecting validation and post-selection test subsets.
+
+Indy used all 96 physical channels. Loco selected 96 of its 192 source channels
+inside each fold using training reaches only. Both subjects used 96 raw 40 ms
+counts, 96 causal-EWMA streams, the 64/64 TCN+GRU, and 0.20 paired channel
+dropout. Incomplete edge reaches and reaches over eight seconds were excluded.
+Short reaches were causally right-padded and masked out of loss and metrics.
+
+| Session | Test R² mean ± SD | Fold range |
+|---|---:|---:|
+| `indy_20160622_01` | **0.8066 ± 0.0153** | 0.7816–0.8216 |
+| `indy_20160630_01` | 0.6828 ± 0.0115 | 0.6707–0.7004 |
+| `indy_20170131_02` | 0.7443 ± 0.0445 | 0.6956–0.7998 |
+| `loco_20170210_03` | 0.6749 ± 0.0289 | 0.6365–0.7067 |
+| `loco_20170215_02` | 0.6277 ± 0.0838 | 0.5211–0.6981 |
+| `loco_20170301_05` | 0.6974 ± 0.0590 | 0.6031–0.7500 |
+| **All 30 folds** | **0.7056 ± 0.0722** | **0.5211–0.8216** |
+
+The fold-macro result exceeded the paper table's ANN (0.6186), ANN3D (0.6467),
+and SNN3D (0.6661) reference means by 0.0870, 0.0589, and 0.0395,
+respectively. This is encouraging but not an exact architecture comparison:
+Phase 7 used the project's 40 ms causal TCN+GRU and a 96-channel firmware input
+limit, while the paper evaluated its own ANN/SNN pipelines. The Loco-only fold
+mean was 0.6667, versus 0.7446 for Indy, and `loco_20170215_02` showed the
+largest fold variance. The result therefore establishes a strong benchmark
+mean, not uniform robustness across every session.
+
+All fold checkpoints remain experiment evidence under
+`results/indy/phase7_ann_vs_snn_fivefold/checkpoints/`. They are session/fold
+specific and are not promoted as a general firmware checkpoint. The retained
+Phase 6 checkpoint remains unchanged.
+
 ## Current handoff
 
 The earlier Indy line was archived on 2026-07-29, then reopened for controlled
-channel-count experiments. Phase 6 is complete and its 96-channel seed-43
-checkpoint is the strongest validation candidate. The 32-channel 48/48 model
-remains the smaller firmware reference; neither historical checkpoint was
-overwritten.
+channel-count and paper-benchmark experiments. Phase 7 is complete. Its
+session-local fold checkpoints are benchmark evidence only; the Phase 6
+96-channel seed-43 checkpoint remains the strongest general validation
+candidate. The 32-channel 48/48 model remains the smaller firmware reference;
+neither retained checkpoint was overwritten.

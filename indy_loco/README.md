@@ -2,7 +2,10 @@
 
 The historical decoder and detector work is preserved under `history/`. Phase 6
 is complete and promotes a regularized 96-channel decoder as the strongest
-validation candidate. Earlier checkpoints remain available for comparison.
+validation candidate. Phase 7 completed all 30 six-session five-fold fits with
+test R² `0.7056 ± 0.0722`; its session-local checkpoints are benchmark evidence
+and do not replace the Phase 6 firmware candidate. Earlier checkpoints remain
+available for comparison.
 
 ## Problem definition
 

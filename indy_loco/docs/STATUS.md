@@ -1,8 +1,56 @@
 # Indy Loco Status
 
-**State:** Phase 6 is complete. The 96-channel 64/64 TCN+GRU with 0.20 paired
-channel dropout is promoted as the strongest validation-selected candidate.
-The smaller historical checkpoints remain intact.
+**State:** Phase 7 is complete: all 30 six-session five-fold fits finished with
+test R² `0.7056 ± 0.0722`. The Phase 6 96-channel 64/64 TCN+GRU with 0.20
+paired channel dropout remains the strongest general validation-selected Indy
+candidate, and all retained checkpoints are intact.
+
+## Final Phase 7 benchmark
+
+The exact Loco sessions used by the NeuroBench primate-reaching benchmark are
+downloaded from Zenodo and MD5-verified: `loco_20170210_03`,
+`loco_20170215_02`, and `loco_20170301_05`. They are processed independently at
+the native 4 ms interval into 192-channel binary spike-presence arrays. Unit
+slots are combined per physical channel with the same logical-OR rule as the
+official loader.
+
+Each NPZ also preserves cursor/target kinematics, original timestamps, reach
+boundaries, and the official ordered reach split: first 50% train, next 25%
+validation, and final 25% test. No model statistics, normalization, or weights
+are fit during conversion. The official central-gradient velocity target is
+retained for benchmark comparability and is explicitly separate from a
+deployment-focused causal-target claim.
+
+`history/experiments/phase7/phase7_ann_vs_snn_fivefold.py` trained a separate fresh
+seed-43 decoder for each session and fold. All 96 Indy channels were used. Each
+Loco fold selected 96 of 192 channels from training reaches only and retained
+the winning 0.20 paired channel dropout. Train-only statistics and weights did
+not use held-out reaches; validation selected each checkpoint and test was
+evaluated only afterward.
+
+| Session | Five-fold test R² |
+|---|---:|
+| `indy_20160622_01` | 0.8066 ± 0.0153 |
+| `indy_20160630_01` | 0.6828 ± 0.0115 |
+| `indy_20170131_02` | 0.7443 ± 0.0445 |
+| `loco_20170210_03` | 0.6749 ± 0.0289 |
+| `loco_20170215_02` | 0.6277 ± 0.0838 |
+| `loco_20170301_05` | 0.6974 ± 0.0590 |
+| **All 30 folds** | **0.7056 ± 0.0722** |
+
+The overall mean is 0.0395 above the paper's SNN3D reference of 0.6661. This
+is a protocol-level benchmark rather than a perfectly controlled architecture
+comparison: Phase 7 used the project's 40 ms causal TCN+GRU and restricted
+Loco to 96 selected inputs. Indy averaged 0.7446 across its 15 folds and Loco
+averaged 0.6667. The weakest fold was 0.5211, and
+`loco_20170215_02` had the highest session-level SD (0.0838), so cross-reach
+stability remains uneven despite the strong overall result.
+
+The 30 fold checkpoints are retained under
+`history/results/indy/phase7_ann_vs_snn_fivefold/checkpoints/` as
+reproducibility evidence.
+They are session-specific benchmark models and do not replace the promoted
+Phase 6 firmware candidate.
 
 ## Final Phase 6 result
 
@@ -106,7 +154,7 @@ training-data cleaner.
 ## Project-history note
 
 The Indy line was closed in favor of FingerMovements EEG classification on
-2026-07-29, then reopened for controlled channel-count experiments. Phase 5 is
-archived and Phase 6 is now complete. The 96-channel candidate is promoted;
-all earlier retained checkpoints remain unchanged for size and detector
-comparisons.
+2026-07-29, then reopened for controlled channel-count and benchmark
+experiments. Phases 5–7 are archived and there is no active experiment. The
+96-channel candidate remains promoted; all earlier retained checkpoints remain
+unchanged for size and detector comparisons.
