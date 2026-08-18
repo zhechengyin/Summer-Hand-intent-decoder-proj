@@ -22,6 +22,7 @@ are read from the Indy project root.
 | 5 | 64-channel tuning and detector-filter ablation | Full-session winner: LR 0.0009, WD 0.025, dropout 0.10; pooled R² 0.6575 ± 0.0080 over seeds 42–44 | Freeze settings; keep all 29 sessions; detector remains a runtime gate |
 | 6 | Channel, structure, and regularization sweep | 96 channels with 0.20 paired channel dropout reached pooled R² 0.7004 ± 0.0019 and macro R² 0.7023 ± 0.0015 | Promote seed-43 epoch-15 checkpoint as the strongest validation candidate |
 | 7 | Six-session ANN-vs-SNN reach-level five-fold benchmark | Test R² 0.7056 ± 0.0722 over 30 folds; session means ranged from 0.6277 to 0.8066 | Benchmark complete; retain Phase 6 model as the source architecture and do not promote any session-specific fold checkpoint |
+| 8 | Permitted neural-lookahead comparison | Indy test R² 0.7576 ± 0.0396 at 48 ms and 0.7554 ± 0.0397 at 100 ms over 15 folds per condition | Use 48 ms as the current high-accuracy/longer-latency operating point; do not describe it as causal |
 
 ## Phase 0 — Data and sampling
 
@@ -171,11 +172,57 @@ All fold checkpoints remain experiment evidence under
 specific and are not promoted as a general firmware checkpoint. The retained
 Phase 6 checkpoint remains unchanged.
 
+## Phase 8 — Permitted neural-lookahead comparison
+
+Completed for Indy on 2026-08-18. Phase 8 held the Phase 6 64/64 TCN+GRU,
+optimizer settings, temporal window, and paired channel dropout fixed, then
+changed only the alignment between neural input and velocity target. The two
+conditions deliberately allowed either 12 native samples (48 ms) or 25 native
+samples (100 ms) of neural lookahead. Fresh seed-43 weights were trained for
+each of five reach-level folds in each of three Indy sessions.
+
+| Lookahead condition | Folds | Test R² mean ± SD | Fold range |
+|---|---:|---:|---:|
+| 48 ms | 15 | **0.7576 ± 0.0396** | 0.7071–0.8192 |
+| 100 ms | 15 | 0.7554 ± 0.0397 | 0.6908–0.8135 |
+
+The 48 ms condition was slightly stronger overall and requires less waiting,
+so it is the preferred lookahead operating point. Session-specific effects
+were mixed: 100 ms improved June 30 but reduced January 31. Phase 8 therefore
+supports a controlled accuracy/latency tradeoff, not a claim that more future
+information always improves every session. These models are deliberately
+non-causal and are not interchangeable with the promoted Phase 6 general
+checkpoint. The equivalent Loco runner is ready but has not yet produced
+results.
+
+## Deployment-tier decision — Tiny, Mid-size, and Large
+
+On 2026-08-18, the retained Indy results were organized into three deployment
+tiers for system planning and presentation. Channel count is not used in the
+tier names.
+
+| Tier | Evidence assigned to the tier | Architecture and timing | Result used |
+|---|---|---|---|
+| **Tiny** | Retained `48x48checkpoint.pt` | Four-block width-48 causal TCN + one-layer width-48 unidirectional GRU; past-only input; 45,266 parameters | December pooled validation R² 0.5651 |
+| **Mid-size** | Promoted Phase 6 checkpoint | Four-block width-64 causal TCN + one-layer width-64 unidirectional GRU; past-only input; 86,978 parameters | Seed-43 pooled validation R² 0.7022; three-seed mean 0.7004 ± 0.0019 |
+| **Large** | Phase 8 48 ms lookahead operating point | Same 64/64 TCN+GRU topology, retrained with 48 ms future neural alignment; 86,978 parameters plus future-input buffering | 15-fold Indy test R² 0.7576 ± 0.0396 |
+
+The decision is a deployment taxonomy, not a new controlled three-model
+experiment. Tiny and Mid-size are chronological validation checkpoints; Large
+is reach-level five-fold test evidence under a different, deliberately
+non-causal protocol. The current project does not contain a retained Indy MLP,
+so Tiny must not be labeled MLP. Large has the highest measured performance and
+longest latency, but it is not yet a wider/deeper neural network and does not
+by itself prove that off-chip memory is required. A structurally larger
+off-chip model would need a separately approved experiment and checkpoint.
+
 ## Current handoff
 
 The earlier Indy line was archived on 2026-07-29, then reopened for controlled
-channel-count and paper-benchmark experiments. Phase 7 is complete. Its
-session-local fold checkpoints are benchmark evidence only; the Phase 6
-96-channel seed-43 checkpoint remains the strongest general validation
-candidate. The 32-channel 48/48 model remains the smaller firmware reference;
-neither retained checkpoint was overwritten.
+channel-count, paper-benchmark, and lookahead experiments. Phase 8 is complete
+for Indy and pending for Loco. The three deployment tiers above summarize the
+current operating points: compact causal Tiny, promoted causal Mid-size, and
+48 ms lookahead Large. Phase 7 and Phase 8 fold checkpoints remain benchmark
+evidence only; the Phase 6 seed-43 checkpoint remains the strongest general
+validation candidate. The compact 48/48 checkpoint remains the smaller
+firmware reference; neither retained checkpoint was overwritten.

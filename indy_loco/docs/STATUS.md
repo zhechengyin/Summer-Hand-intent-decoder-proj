@@ -5,7 +5,41 @@ R² `0.7576 ± 0.0396` and 100 ms reached `0.7554 ± 0.0397` over 15 folds each.
 The equivalent 30-fit Loco runner is ready but has not been trained. Phase 7
 remains complete at test R² `0.7056 ± 0.0722`. The Phase 6 96-channel 64/64
 TCN+GRU remains the strongest general validation-selected candidate, and all
-retained checkpoints are intact.
+retained checkpoints are intact. For presentation and deployment planning,
+the retained work is now organized into Tiny, Mid-size, and Large operating
+tiers. These tiers deliberately do not use channel count as their defining
+label.
+
+## Tiny, Mid-size, and Large model tiers
+
+The three tiers describe deployment operating points rather than three claims
+of directly comparable accuracy. Tiny and Mid-size report chronological
+December validation results, while Large reports Phase 8 reach-level five-fold
+test results on three Indy benchmark sessions. Their R² values must therefore
+retain the protocol labels below and must not be plotted as one controlled
+architecture sweep.
+
+| Tier | Current architecture | Temporal contract | Parameters | Current result | Deployment role |
+|---|---|---|---:|---|---|
+| **Tiny** | Four-block causal TCN, width 48; one-layer unidirectional GRU, width 48; linear 2-D velocity head | 50 past 40 ms bins; no future data | 45,266 | December pooled validation R² **0.5651**; macro R² 0.5750; worst-session R² 0.3461 | Smallest retained firmware candidate; lowest compute and memory demand, intended for minimum-latency on-chip deployment |
+| **Mid-size** | Four-block causal TCN, width 64; one-layer unidirectional GRU, width 64; linear 2-D velocity head; paired channel dropout used only during training | 50 past 40 ms bins; strictly causal, no future data | 86,978 | Promoted seed-43 December pooled validation R² **0.7022**; three-seed pooled R² **0.7004 ± 0.0019** | Primary real-time decoder, balancing causal latency and accuracy; current strongest general validation-selected checkpoint |
+| **Large** | Phase 8 lookahead TCN+GRU: the Mid-size 64/64 topology retrained per reach fold with future-aligned neural input | Same past context plus **48 ms neural lookahead**; deliberately non-causal | 86,978 in the completed experiment | 15-fold Indy test R² **0.7576 ± 0.0396** at 48 ms; 100 ms reached 0.7554 ± 0.0397 | Highest-performing operating mode; trades buffering and at least 48 ms of algorithmic latency for accuracy |
+
+The Tiny tier is **not an MLP**: the project has no retained, validated Indy
+MLP checkpoint. The current Tiny evidence is the compact 48/48 causal TCN+GRU.
+The Large tier is currently larger at the **system level** because it requires
+future-sample buffering and accepts longer latency, but its trained neural
+network has the same 86,978-parameter topology as Mid-size. Off-chip memory is
+therefore an available implementation option, not a requirement established by
+the present model. A professor requirement for a structurally larger third
+network or mandatory off-chip execution would require a new approved training
+and deployment experiment; it should not be claimed from Phase 8 alone.
+
+Recommended presentation labels are:
+
+- **Tiny — Compact causal / minimum resource**
+- **Mid-size — Full causal / real-time balanced**
+- **Large — Lookahead / maximum measured accuracy**
 
 ## Active Phase 8 protocol
 
