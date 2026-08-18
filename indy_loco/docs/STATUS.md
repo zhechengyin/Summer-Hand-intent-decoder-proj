@@ -1,9 +1,38 @@
 # Indy Loco Status
 
-**State:** Phase 7 is complete: all 30 six-session five-fold fits finished with
-test R² `0.7056 ± 0.0722`. The Phase 6 96-channel 64/64 TCN+GRU with 0.20
-paired channel dropout remains the strongest general validation-selected Indy
-candidate, and all retained checkpoints are intact.
+**State:** The Indy half of Phase 8 is complete: 48 ms lookahead reached test
+R² `0.7576 ± 0.0396` and 100 ms reached `0.7554 ± 0.0397` over 15 folds each.
+The equivalent 30-fit Loco runner is ready but has not been trained. Phase 7
+remains complete at test R² `0.7056 ± 0.0722`. The Phase 6 96-channel 64/64
+TCN+GRU remains the strongest general validation-selected candidate, and all
+retained checkpoints are intact.
+
+## Active Phase 8 protocol
+
+`experiments/active/phase8_future_lookahead_fivefold.py` used the three Indy
+paper sessions and identical reach folds for both lookahead conditions. Every
+fold starts from fresh seed-43 weights. All feature/target statistics and model
+weights use training reaches only; validation selects a checkpoint, and test is
+evaluated afterward. The model, optimizer, 96-channel input, and paired channel
+dropout are frozen from Phase 6 so lookahead is the controlled variable.
+
+The nominal 50 ms condition used 12 native samples = 48 ms, never 52 ms,
+because 52 ms would exceed the permitted future interval. The 100 ms condition
+uses exactly 25 native samples. This experiment intentionally trades latency
+for accuracy and must not be described as strictly causal.
+
+The completed Indy session means were:
+
+| Condition | `20160622` | `20160630` | `20170131` | Overall |
+|---|---:|---:|---:|---:|
+| 48 ms | 0.8046 | 0.7225 | 0.7457 | **0.7576** |
+| 100 ms | 0.8028 | 0.7343 | 0.7289 | 0.7554 |
+
+`experiments/active/phase8_loco_future_lookahead_fivefold.py` now repeats the
+same protocol for the three Loco sessions. Every fold selects 96 of 192 source
+channels using training reaches only, freezes that selection across both
+lookahead conditions, and retains 0.20 paired channel dropout. No Loco Phase 8
+R² has been reported yet.
 
 ## Final Phase 7 benchmark
 

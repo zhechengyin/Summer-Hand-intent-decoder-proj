@@ -5,7 +5,10 @@ is complete and promotes a regularized 96-channel decoder as the strongest
 validation candidate. Phase 7 completed all 30 six-session five-fold fits with
 test R² `0.7056 ± 0.0722`; its session-local checkpoints are benchmark evidence
 and do not replace the Phase 6 firmware candidate. Earlier checkpoints remain
-available for comparison.
+available for comparison. Phase 8 found Indy test R² `0.7576 ± 0.0396` at
+48 ms lookahead and `0.7554 ± 0.0397` at 100 ms. The same controlled
+accuracy/latency comparison is now ready to run on the three Loco benchmark
+sessions.
 
 ## Problem definition
 
