@@ -1,5 +1,28 @@
 # Active Indy Loco experiment
 
+## Phase 9: causal deployment-policy replay
+
+**Status: complete.** `phase9_deployment_policy_replay.py` replays the promoted
+Phase 6 checkpoint without fitting weights or changing preprocessing. December
+validation selected the continuous rolling calibration-seeded window over the
+original block-reset policy: pooled post-calibration R² `0.7526` versus
+`0.7021`. The frozen rolling policy then reached pooled January R² `0.7277`;
+test data was loaded only after selection and only the winner was evaluated.
+
+Run the protocol-only check or reproduce the complete evaluation:
+
+```bash
+python indy_loco/experiments/active/phase9_deployment_policy_replay.py \
+  --protocol-check-only --threads 4
+
+python indy_loco/experiments/active/phase9_deployment_policy_replay.py \
+  --threads 4 --overwrite
+```
+
+Outputs, representative traces, and STM32-oriented golden vectors are under
+`../../results/phase9_deployment_policy_replay/`. The runner preserves the
+checkpoint and never edits data, training code, or firmware.
+
 ## Phase 8: permitted neural-lookahead comparison
 
 **Indy status: complete.** The 48 ms condition reached fold-macro test R²

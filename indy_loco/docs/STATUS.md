@@ -1,6 +1,11 @@
 # Indy Loco Status
 
-**State:** The Indy half of Phase 8 is complete: 48 ms lookahead reached test
+**State:** Phase 9 is complete. For the promoted Phase 6 causal checkpoint, a
+continuous rolling 50-bin past-window reached pooled December validation R²
+`0.7526`, compared with `0.7021` for the original 50-bin block-reset policy.
+The rolling policy won all four validation sessions, was frozen, and then
+reached pooled January R² `0.7277` in a single locked-test pass. January was not
+used to select the policy. The Indy half of Phase 8 is also complete: 48 ms lookahead reached test
 R² `0.7576 ± 0.0396` and 100 ms reached `0.7554 ± 0.0397` over 15 folds each.
 The equivalent 30-fit Loco runner is ready but has not been trained. Phase 7
 remains complete at test R² `0.7056 ± 0.0722`. The Phase 6 96-channel 64/64
@@ -9,6 +14,38 @@ retained checkpoints are intact. For presentation and deployment planning,
 the retained work is now organized into Tiny, Mid-size, and Large operating
 tiers. These tiers deliberately do not use channel count as their defining
 label.
+
+## Phase 9 deployment-policy replay
+
+Phase 9 did not retrain or modify the Phase 6 checkpoint. It preserved the
+96-channel raw-plus-causal-EWMA preprocessing and session-local 60-second
+calibration, then compared two inference policies on December validation only:
+
+- **A — block reset:** start at bin 1500, zero-fill the unseen suffix of each
+  non-overlapping 50-bin block, and clear the block every two seconds;
+- **B — rolling calibration seed:** at 60 seconds, normalize calibration bins
+  1450–1499 with the newly frozen statistics, then keep a continuous stride-1
+  past-only window without clearing it.
+
+| Validation aggregation | A mean R² | B mean R² | A MSE | B MSE |
+|---|---:|---:|---:|---:|
+| Pooled, first 10 s | 0.7278 | **0.8059** | 8.2333 | **5.6674** |
+| Pooled, first 30 s | 0.7144 | **0.7690** | 10.1647 | **8.1631** |
+| Pooled, all post-calibration | 0.7021 | **0.7526** | 14.8720 | **12.3567** |
+| Per-session macro, all post-calibration | 0.7039 | **0.7540** | 14.6735 | **12.1699** |
+
+Strategy B improved full-session mean R² by `0.0505` and reduced pooled MSE
+by about `16.9%`. It also won every validation session. Short-interval
+per-session macro R² is not used for selection because one session has almost
+no target variance in its opening interval, making R² numerically unstable;
+pooled R², MSE, and full-session per-session results agree on B.
+
+After B was frozen, the runner loaded January and evaluated B only. Locked-test
+pooled mean R² was `0.7277` with MSE `12.3149`. The replay also verified A
+against full-block inference to within `2.9e-6` maximum absolute error. Phase 9
+therefore recommends seeding firmware with the final two calibration seconds
+and never clearing the rolling inference window. Exact replay artifacts and
+golden vectors are under `results/phase9_deployment_policy_replay/`.
 
 ## Tiny, Mid-size, and Large model tiers
 

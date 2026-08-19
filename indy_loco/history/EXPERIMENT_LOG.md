@@ -195,6 +195,30 @@ non-causal and are not interchangeable with the promoted Phase 6 general
 checkpoint. The equivalent Loco runner is ready but has not yet produced
 results.
 
+## Phase 9 — Causal deployment-policy replay
+
+Completed on 2026-08-19. No weights were trained and the promoted Phase 6
+checkpoint remained unchanged. The replay preserved the exact 96 raw + 96
+causal-EWMA feature order, 60-second session-local calibration, checkpoint
+feature-std floor, and target de-normalization. December validation alone
+compared the original non-overlapping block-reset inference policy against a
+continuous stride-1 rolling past-window seeded by calibration bins 1450–1499.
+
+| Validation interval | Block-reset pooled R² | Rolling pooled R² | Block-reset MSE | Rolling MSE |
+|---|---:|---:|---:|---:|
+| First 10 s | 0.7278 | **0.8059** | 8.2333 | **5.6674** |
+| First 30 s | 0.7144 | **0.7690** | 10.1647 | **8.1631** |
+| All post-calibration | 0.7021 | **0.7526** | 14.8720 | **12.3567** |
+
+Rolling won all four validation sessions, improved pooled full-session R² by
+`0.0505`, and reduced MSE by about `16.9%`. It was frozen before January was
+loaded. Winner-only locked-test inference then reached pooled January R²
+`0.7277` and MSE `12.3149`. The block replay matched corresponding full-block
+outputs within `2.9e-6`, supporting implementation validity. The deployment
+decision is to retain the final 50 calibration bins as the initial past window
+and never reset that window every 50 bins. Phase 9 results remain active under
+`results/phase9_deployment_policy_replay/`; no firmware was modified.
+
 ## Deployment-tier decision — Tiny, Mid-size, and Large
 
 On 2026-08-18, the retained Indy results were organized into three deployment

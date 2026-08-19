@@ -8,7 +8,10 @@ and do not replace the Phase 6 firmware candidate. Earlier checkpoints remain
 available for comparison. Phase 8 found Indy test R² `0.7576 ± 0.0396` at
 48 ms lookahead and `0.7554 ± 0.0397` at 100 ms. The same controlled
 accuracy/latency comparison is now ready to run on the three Loco benchmark
-sessions.
+sessions. Phase 9 then replayed two strictly causal cold-start policies for the
+promoted Phase 6 checkpoint. On December validation, a continuous rolling
+past-window reached pooled R² `0.7526`, versus `0.7021` for the original
+50-bin block-reset protocol, and was frozen before one January test inference.
 
 ## Problem definition
 
@@ -53,6 +56,9 @@ The detector was retrospective safety research, not a validated production gate.
 - Phase 3 leave-one-month-out results are the strongest cross-month robustness evidence.
 - Phase 5 confirmed the 64-channel hyperparameters over seeds 42–44 and found no mean benefit from retrospective detector filtering.
 - Phase 6 confirmed the 96-channel paired-dropout winner over seeds 42–44. December selected the model; January remained unloaded.
+- Phase 9 selected the rolling calibration-seeded window using December only.
+  The selected policy then reached pooled January R² `0.7277`; January did not
+  participate in policy selection.
 
 Start with `docs/STATUS.md` for the current state and
 `history/EXPERIMENT_LOG.md` for the decision trail. Completed runners and
