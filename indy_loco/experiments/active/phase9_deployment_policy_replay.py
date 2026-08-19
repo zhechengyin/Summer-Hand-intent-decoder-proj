@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any, Final
 
 import numpy as np
+import yaml
 
 os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
 
@@ -33,19 +34,12 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 if str(REPOSITORY_ROOT) not in sys.path:
     sys.path.insert(0, str(REPOSITORY_ROOT))
 
-from indy_loco.models.indy_32ch.features import multiscale_counts  # noqa: E402
-from indy_loco.models.indy_32ch.input_pipeline import (  # noqa: E402
-    apply_feature_stats,
-    fit_feature_stats,
-    load_model_data,
-    load_session_manifest,
-)
-from indy_loco.models.indy_96ch.model import load_checkpoint  # noqa: E402
+from indy_loco.models.midsize.model import load_checkpoint  # noqa: E402
 
 PHASE_NAME: Final = "phase9_deployment_policy_replay"
-CHECKPOINT_PATH = (
-    PROJECT_ROOT / "models" / "indy_96ch" / "phase6_96ch_64x64_checkpoint.pt"
-)
+CHECKPOINT_PATH = PROJECT_ROOT / "models" / "midsize" / "checkpoint.pt"
+PROCESSED_DIR = PROJECT_ROOT / "data" / "processed" / "indy_loco" / "indy"
+SESSION_MANIFEST = PROJECT_ROOT / "configs" / "datasets" / "indy_sessions.yaml"
 RESULT_DIR = PROJECT_ROOT / "results" / PHASE_NAME
 METRICS_PATH = RESULT_DIR / f"{PHASE_NAME}_metrics.json"
 VALIDATION_SESSION_PATH = RESULT_DIR / f"{PHASE_NAME}_validation_sessions.csv"
@@ -103,6 +97,67 @@ class StrategyReplay:
     post_predictions: np.ndarray
     initial_prediction: np.ndarray | None
     a_full_block_max_abs_difference: float | None
+
+
+def load_session_manifest() -> dict[str, Any]:
+    """Load the canonical chronological split used by this replay."""
+    with SESSION_MANIFEST.open("r", encoding="utf-8") as source:
+        return yaml.safe_load(source)
+
+
+def load_model_data(name: str) -> tuple[np.ndarray, np.ndarray]:
+    """Load one already-processed session without fitting anything."""
+    split = load_session_manifest()["chronological_split"]
+    matches = [key for key, sessions in split.items() if name in sessions]
+    if len(matches) != 1:
+        raise ValueError(f"Expected one registered split for {name}, got {matches}")
+    path = PROCESSED_DIR / matches[0] / f"{name}.npz"
+    with np.load(path, allow_pickle=False) as artifact:
+        return (
+            artifact["counts"].astype(np.float32),
+            artifact["velocity"].astype(np.float32),
+        )
+
+
+def multiscale_counts(
+    counts: np.ndarray,
+    alphas: tuple[float, ...] = ALPHAS,
+) -> np.ndarray:
+    """Build raw-then-causal-EWMA features in the deployment order."""
+    blocks = []
+    for alpha in alphas:
+        if alpha == 1.0:
+            blocks.append(counts.astype(np.float32))
+            continue
+        output = counts.astype(np.float64, copy=True)
+        for index in range(1, counts.shape[1]):
+            output[:, index] = (
+                alpha * counts[:, index] + (1.0 - alpha) * output[:, index - 1]
+            )
+        blocks.append(output.astype(np.float32))
+    return np.concatenate(blocks, axis=0)
+
+
+def fit_feature_stats(
+    features: np.ndarray,
+    *,
+    observation_bins: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Fit population statistics from the allowed calibration prefix only."""
+    prefix = features[:, :observation_bins]
+    return (
+        prefix.mean(axis=1, keepdims=True),
+        prefix.std(axis=1, ddof=0, keepdims=True) + 1e-6,
+    )
+
+
+def apply_feature_stats(
+    features: np.ndarray,
+    stats: tuple[np.ndarray, np.ndarray],
+) -> np.ndarray:
+    """Apply already-frozen statistics."""
+    mean, std = stats
+    return ((features - mean) / std).astype(np.float32)
 
 
 def utc_now() -> str:

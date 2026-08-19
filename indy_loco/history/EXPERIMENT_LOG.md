@@ -130,7 +130,7 @@ reference, showing that channel count alone did not produce the gain.
 
 Seed 43 had the lowest validation loss and highest pooled/macro R² of the three
 confirmed runs. Its epoch-15 state was promoted to
-`models/indy_96ch/phase6_96ch_64x64_checkpoint.pt`. It has 86,978 parameters
+`models/midsize/checkpoint.pt`. It has 86,978 parameters
 and is the strongest validation-selected Indy candidate. This is not a new
 January result, and the existing 32-channel firmware references remain intact.
 

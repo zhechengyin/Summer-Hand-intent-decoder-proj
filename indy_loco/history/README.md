@@ -8,8 +8,8 @@ FingerMovements project.
 
 - Task: predict two-dimensional fingertip velocity from binned intracortical spike counts.
 - Data: 37 sessions; 29 training, 4 December validation, and 4 January test sessions.
-- Final deployable candidate: 32-channel, 48/48 TCN+GRU, 45,266 parameters.
-- Final candidate validation: pooled R² 0.5651; session-macro R² 0.5750; worst session R² 0.3461.
+- Compact deployable candidate: 32-channel, 48/48 TCN+GRU, 45,266 parameters.
+- Primary deployable candidate: 96-channel, 64/64 TCN+GRU, 86,978 parameters.
 - January test had already been inspected: pooled R² 0.5511; one session (`indy_20170124_01`) failed with R² -0.0524. It is historical evidence, not an untouched test set.
 - Phase 5 confirmed a 64-channel 64/64 baseline over seeds 42–44: pooled December validation R² `0.6575 ± 0.0080`. Detector-based session removal did not improve the mean.
 - Phase 6 promoted a 96-channel 64/64 model with 0.20 paired channel dropout: pooled December validation R² `0.7004 ± 0.0019` over seeds 42–44.
@@ -24,6 +24,8 @@ FingerMovements project.
 - `results/indy/`: metrics, figures, and intermediate artifacts.
 
 Retained model implementations and promoted checkpoints are under `../models/`.
+Legacy model support code and the old 32-channel 64/64 detector checkpoint are
+preserved under this archive's `models/` directory.
 Data and processing code are under `../data/`. Completed Phase 6 and Phase 7
 runners are under `experiments/phase6/` and `experiments/phase7/`; there is no
 active experiment.

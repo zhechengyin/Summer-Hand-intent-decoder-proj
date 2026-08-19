@@ -1,7 +1,7 @@
 {
   "phase": "phase9_deployment_policy_replay",
   "completed_at_utc": "2026-08-19T18:22:32.280202+00:00",
-  "checkpoint": "models/indy_96ch/phase6_96ch_64x64_checkpoint.pt",
+  "checkpoint": "models/midsize/checkpoint.pt",
   "checkpoint_sha256": "685ee659b56e40d2484d09b4d03bbdcb032856e772228fb0125c3703575e378a",
   "checkpoint_metadata": {
     "physical_channel_count": 96,

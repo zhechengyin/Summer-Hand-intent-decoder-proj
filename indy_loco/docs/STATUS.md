@@ -206,11 +206,19 @@ resumable result set.
 
 | Checkpoint | Role | Parameters | Validation result | SHA-256 |
 |---|---|---:|---|---|
-| `models/indy_96ch/phase6_96ch_64x64_checkpoint.pt` | strongest validation candidate | 86,978 | pooled R² 0.7022; macro 0.7041; worst 0.6029 | `685ee659b56e40d2484d09b4d03bbdcb032856e772228fb0125c3703575e378a` |
-| `models/indy_32ch/48x48checkpoint.pt` | preferred standalone firmware candidate | 45,266 | pooled R² 0.5651; macro 0.5750; worst 0.3461 | `5c8b375787ff93f90006df5f0cfea07303660928c7b69a84d4d75e1a368319ef` |
-| `models/indy_32ch/64x64checkpoint.pt` | reference model used by detector work | 78,786 | pooled R² 0.5604; macro 0.5702; worst 0.3144 | `2ee52c426ee43ba88cebe7c85dd8392f40f9e75748abe9bbf4e94093556363a5` |
+| `models/midsize/checkpoint.pt` | strongest validation candidate | 86,978 | pooled R² 0.7022; macro 0.7041; worst 0.6029 | `685ee659b56e40d2484d09b4d03bbdcb032856e772228fb0125c3703575e378a` |
+| `models/tiny/checkpoint.pt` | compact firmware candidate | 45,266 | pooled R² 0.5651; macro 0.5750; worst 0.3461 | `5c8b375787ff93f90006df5f0cfea07303660928c7b69a84d4d75e1a368319ef` |
 
-The 48/48 checkpoint was trained with seed 43 for 20 epochs and selected epoch 10 by December validation loss. It is not interchangeable with the detector artifacts built from 64/64 hidden states.
+Each current deployment directory contains only its standalone model,
+streaming runtime, and checkpoint. Tiny retains its original block-reset
+inference contract. Midsize uses the Phase 9 rolling calibration-seeded past
+window. The older 32-channel 64/64 detector reference is archived under
+`history/models/indy_32ch/`. Large remains pending because no general Large
+checkpoint has been trained.
+
+The 48/48 checkpoint was trained with seed 43 for 20 epochs and selected epoch
+10 by December validation loss. It is not interchangeable with the detector
+artifacts built from 64/64 hidden states.
 
 ## Strongest evidence
 

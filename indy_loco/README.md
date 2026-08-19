@@ -31,12 +31,12 @@ All preprocessing used past information only:
 ## Retained systems
 
 The strongest validation candidate is the 96-channel 64/64 TCN+GRU checkpoint
-in `models/indy_96ch/phase6_96ch_64x64_checkpoint.pt`. It has 86,978 parameters
+in `models/midsize/checkpoint.pt`. It has 86,978 parameters
 and achieved pooled December validation R² `0.7004 ± 0.0019` over seeds
 42–44. Training used 0.20 paired channel dropout; the promoted seed-43 epoch-15
 checkpoint reached pooled R² 0.7022 and macro R² 0.7041.
 
-The 32-channel 48/48 checkpoint in `models/indy_32ch/48x48checkpoint.pt`
+The 32-channel 48/48 checkpoint in `models/tiny/checkpoint.pt`
 remains the smaller firmware reference. It reduced parameters from 78,786 to
 45,266 while remaining non-inferior in its five-seed, leave-one-month-out
 comparison.
@@ -65,3 +65,8 @@ Start with `docs/STATUS.md` for the current state and
 results are under `history/`; the retained implementations and checkpoints are
 under `models/`; the completed Phase 6 reproduction runners remain under
 `experiments/active/`.
+
+The deployment packages are self-contained. `models/tiny/` and
+`models/midsize/` each contain only `model.py`, `runtime.py`, and
+`checkpoint.pt`. Large will be added only after a general Large checkpoint
+exists.
