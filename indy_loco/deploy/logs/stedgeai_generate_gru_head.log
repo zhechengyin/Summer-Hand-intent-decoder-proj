@@ -1,0 +1,44 @@
+ST Edge AI Core v2.2.0-20266 2adc00962
+PASS:   0%|          | 0/167 [00:00<?, ?it/s]PASS:   5%|5         | 9/167 [00:05<01:42,  1.54it/s]PASS:  89%|########9 | 149/167 [00:06<00:00, 34.46it/s]                                                       
+Creating c (debug) info json file /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/gru_head/generated/indy_gru_head_c_info.json
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.46it/s]                                                        
+ Exec/report summary (generate)
+ ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ model file         :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/model/indy_phase6_gru_head.h5        
+ type               :   keras                                                                                                                                            
+ c_name             :   indy_gru_head                                                                                                                                    
+ compression        :   lossless                                                                                                                                         
+ options            :   allocate-inputs, allocate-outputs                                                                                                                
+ optimization       :   time                                                                                                                                             
+ target/series      :   stm32                                                                                                                                            
+ workspace dir      :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/workspace/generate_gru_head   
+ output dir         :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/gru_head/generated            
+ model_fmt          :   float                                                                                                                                            
+ model_name         :   indy_phase6_gru_head                                                                                                                             
+ model_hash         :   0x6e6ec000cc3661698f9f99344f0cdb45                                                                                                               
+ params #           :   25,090 items (98.01 KiB)                                                                                                                         
+ ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ input 1/1          :   'encoded_sequence', f32(1x50x64), 12.50 KBytes, activations                                                                                      
+ output 1/1         :   'velocity_norm', f32(1x50x2), 400 Bytes, activations                                                                                             
+ macc               :   1,241,700                                                                                                                                        
+ weights (ro)       :   100,360 B (98.01 KiB) (1 segment)                                                                                                                
+ activations (rw)   :   27,136 B (26.50 KiB) (1 segment) *                                                                                                               
+ ram (total)        :   27,136 B (26.50 KiB) = 27,136 + 0 + 0                                                                                                            
+ ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ (*) 'input'/'output' buffers are allocated in the activations buffer
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.46it/s]                                                       
+Computing AI RT data/code size (target=stm32)..
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.46it/s]                                                        -> compiler "gcc:arm-none-eabi-gcc" is not in the PATH
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.46it/s]                                                       
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.46it/s]                                                        Generated files (7)
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.46it/s]                                                        -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.46it/s]                                                        /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/gru_head/generated/indy_gru_head_data_params.h
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.46it/s]                                                        /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/gru_head/generated/indy_gru_head_data_params.c
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.46it/s]                                                        /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/gru_head/generated/indy_gru_head_data.h
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.46it/s]                                                        /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/gru_head/generated/indy_gru_head_data.c
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.46it/s]                                                        /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/gru_head/generated/indy_gru_head_config.h
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.46it/s]                                                        /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/gru_head/generated/indy_gru_head.h
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.46it/s]                                                        /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/gru_head/generated/indy_gru_head.c
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.46it/s]                                                       
+Creating txt report file /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/gru_head/generated/indy_gru_head_generate_report.txt
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.46it/s]                                                       elapsed time (generate): 8.562s

@@ -1,0 +1,70 @@
+ST Edge AI Core v2.2.0-20266 2adc00962
+PASS:   0%|          | 0/167 [00:00<?, ?it/s]PASS:   5%|5         | 9/167 [00:05<01:42,  1.54it/s]PASS:  89%|########9 | 149/167 [00:05<00:00, 34.52it/s]                                                       
+Creating c (debug) info json file /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/gru_head/analyze/indy_gru_head_c_info.json
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        
+ Exec/report summary (analyze)
+ -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ model file         :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/model/indy_phase6_gru_head.h5       
+ type               :   keras                                                                                                                                           
+ c_name             :   indy_gru_head                                                                                                                                   
+ compression        :   lossless                                                                                                                                        
+ options            :   allocate-inputs, allocate-outputs                                                                                                               
+ optimization       :   time                                                                                                                                            
+ target/series      :   stm32                                                                                                                                           
+ workspace dir      :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/workspace/analyze_gru_head   
+ output dir         :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/gru_head/analyze             
+ model_fmt          :   float                                                                                                                                           
+ model_name         :   indy_phase6_gru_head                                                                                                                            
+ model_hash         :   0x6e6ec000cc3661698f9f99344f0cdb45                                                                                                              
+ params #           :   25,090 items (98.01 KiB)                                                                                                                        
+ -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ input 1/1          :   'encoded_sequence', f32(1x50x64), 12.50 KBytes, activations                                                                                     
+ output 1/1         :   'velocity_norm', f32(1x50x2), 400 Bytes, activations                                                                                            
+ macc               :   1,241,700                                                                                                                                       
+ weights (ro)       :   100,360 B (98.01 KiB) (1 segment)                                                                                                               
+ activations (rw)   :   27,136 B (26.50 KiB) (1 segment) *                                                                                                              
+ ram (total)        :   27,136 B (26.50 KiB) = 27,136 + 0 + 0                                                                                                           
+ -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ (*) 'input'/'output' buffers are allocated in the activations buffer
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                       
+Computing AI RT data/code size (target=stm32)..
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        -> compiler "gcc:arm-none-eabi-gcc" is not in the PATH
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                       
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        Model name - indy_phase6_gru_head
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        ------ ------------------------------- ----------------- --------------- ----------- ------------------
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        m_id   layer (original)                oshape            param/size             macc       connected to
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        ------ ------------------------------- ----------------- --------------- ----------- ------------------
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        0      encoded_sequence (InputLayer)   [b:1,h:50,c:64]
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        ------ ------------------------------- ----------------- --------------- ----------- ------------------
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        1      gru (GRU)                       [b:1,h:50,c:64]   24,960/99,840     1,235,200   encoded_sequence
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        ------ ------------------------------- ----------------- --------------- ----------- ------------------
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        2      velocity_norm (Dense)           [b:1,h:50,c:2]    130/520               6,500                gru
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        ------ ------------------------------- ----------------- --------------- ----------- ------------------
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        model: macc=1,241,700 weights=100,360 activations=-- io=--
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                       
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        Number of operations per c-layer
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        ------- ------ ----------------------- ----------- --------------
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        c_id    m_id   name (type)                     #op           type
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        ------- ------ ----------------------- ----------- --------------
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        0       1      gru (GRU)                 1,235,200   smul_f32_f32
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        1       2      velocity_norm (Dense)         6,500   smul_f32_f32
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        ------- ------ ----------------------- ----------- --------------
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        total                                    1,241,700
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                       
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        Number of operation types
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        ---------------- ----------- -----------
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        operation type             #           %
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        ---------------- ----------- -----------
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        smul_f32_f32       1,241,700      100.0%
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                       
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        Complexity report (model)
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        ------ --------------- ------------------------- ------------------------- ------
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        m_id   name            c_macc                    c_rom                     c_id
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        ------ --------------- ------------------------- ------------------------- ------
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        1      gru             ||||||||||||||||  99.5%   ||||||||||||||||  99.5%   [0]
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        2      velocity_norm   |                  0.5%   |                  0.5%   [1]
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        ------ --------------- ------------------------- ------------------------- ------
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                        macc=1,241,700 weights=100,360 act=27,136 ram_io=0
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                       
+Creating txt report file /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/gru_head/analyze/indy_gru_head_analyze_report.txt
+PASS:  89%|########9 | 149/167 [00:06<00:00, 34.52it/s]                                                       elapsed time (analyze): 8.546s

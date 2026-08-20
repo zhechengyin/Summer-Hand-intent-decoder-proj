@@ -1,0 +1,8 @@
+X-CUBE-AI pack:
+/Users/yinzhecheng/STM32Cube/Repository/Packs/STMicroelectronics/X-CUBE-AI/10.2.0
+
+Headers copied from:
+Middlewares/ST/AI/Inc
+
+CM7 GCC runtime copied from:
+Middlewares/ST/AI/Lib/GCC/STM32H7/NetworkRuntime1020_CM7_GCC.a

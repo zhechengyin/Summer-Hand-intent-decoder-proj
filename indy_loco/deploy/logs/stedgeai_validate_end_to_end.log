@@ -1,0 +1,142 @@
+ST Edge AI Core v2.2.0-20266 2adc00962
+PASS:   0%|          | 0/183 [00:00<?, ?it/s]PASS:   5%|5         | 10/183 [00:05<01:42,  1.69it/s]PASS:  82%|########1 | 150/183 [00:06<00:00, 34.37it/s]                                                       
+PASS:  82%|########1 | 150/183 [00:06<00:00, 34.37it/s]                                                       Setting validation data...
+PASS:  82%|########1 | 150/183 [00:06<00:00, 34.37it/s]                                                        loading file: /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/encoder/validate/indy_encoder_val_c_outputs_1.csv
+PASS:  82%|########1 | 150/183 [00:06<00:00, 34.37it/s]                                                          samples are reshaped: (8, 3200) -> (8, 50, 1, 64)
+PASS:  82%|########1 | 150/183 [00:06<00:00, 34.37it/s]                                                        loading file: /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/validation/pytorch_outputs.csv
+PASS:  82%|########1 | 150/183 [00:06<00:00, 34.37it/s]                                                          samples are reshaped: (8, 100) -> (8, 50, 1, 2)
+PASS:  82%|########1 | 150/183 [00:06<00:00, 34.37it/s]                                                          I[1]: (8, 50, 1, 64)/float32, min/max=[0.000000, 4.093270], mean/std=[0.174981, 0.451746]
+PASS:  82%|########1 | 150/183 [00:06<00:00, 34.37it/s]                                                          O[1]: (8, 50, 1, 2)/float32, min/max=[-1.273159, 1.577224], mean/std=[-0.007164, 0.427221]
+PASS:  82%|########1 | 150/183 [00:06<00:00, 34.37it/s]                                                       
+Creating c (debug) info json file /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/end_to_end/indy_gru_head_c_info.json
+PASS:  82%|########1 | 150/183 [00:06<00:00, 34.37it/s]                                                       Copying the AI runtime files to the user workspace: /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/workspace/validate_end_to_end/inspector_indy_gru_head/workspace
+PASS:  82%|########1 | 150/183 [00:06<00:00, 34.37it/s]                                                        from: /Users/yinzhecheng/STM32Cube/Repository/Packs/STMicroelectronics/X-CUBE-AI/10.2.0/Utilities/macarm/targets/common/EmbedNets/tools/inspector/workspace
+PASS:  82%|########1 | 150/183 [00:06<00:00, 34.37it/s]                                                        
+ Exec/report summary (validate)
+ ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ model file         :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/model/indy_phase6_gru_head.h5                              
+ type               :   keras                                                                                                                                                                  
+ c_name             :   indy_gru_head                                                                                                                                                          
+ compression        :   lossless                                                                                                                                                               
+ options            :   allocate-inputs, allocate-outputs                                                                                                                                      
+ optimization       :   time                                                                                                                                                                   
+ target/series      :   stm32                                                                                                                                                                  
+ workspace dir      :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/workspace/validate_end_to_end                       
+ output dir         :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/end_to_end                                          
+ vinput files       :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/encoder/validate/indy_encoder_val_c_outputs_1.csv   
+ voutput files      :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/validation/pytorch_outputs.csv                             
+ model_fmt          :   float                                                                                                                                                                  
+ model_name         :   indy_phase6_gru_head                                                                                                                                                   
+ model_hash         :   0x6e6ec000cc3661698f9f99344f0cdb45                                                                                                                                     
+ params #           :   25,090 items (98.01 KiB)                                                                                                                                               
+ ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ input 1/1          :   'encoded_sequence', f32(1x50x64), 12.50 KBytes, activations                                                                                                            
+ output 1/1         :   'velocity_norm', f32(1x50x2), 400 Bytes, activations                                                                                                                   
+ macc               :   1,241,700                                                                                                                                                              
+ weights (ro)       :   100,360 B (98.01 KiB) (1 segment)                                                                                                                                      
+ activations (rw)   :   27,136 B (26.50 KiB) (1 segment) *                                                                                                                                     
+ ram (total)        :   27,136 B (26.50 KiB) = 27,136 + 0 + 0                                                                                                                                  
+ ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ (*) 'input'/'output' buffers are allocated in the activations buffer
+PASS:  82%|########1 | 150/183 [00:06<00:00, 34.37it/s]                                                       
+Running the Keras model...
+PASS:  82%|########1 | 150/183 [00:06<00:00, 34.37it/s][1m1/1[0m [32m====================[0m[37m[0m [1m0s[0m 96ms/step[1m1/1[0m [32m====================[0m[37m[0m [1m0s[0m 102ms/step
+[1m1/1[0m [32m====================[0m[37m[0m [1m0s[0m 36ms/step[1m1/1[0m [32m====================[0m[37m[0m [1m0s[0m 42ms/step
+[1m1/1[0m [32m====================[0m[37m[0m [1m0s[0m 37ms/step[1m1/1[0m [32m====================[0m[37m[0m [1m0s[0m 43ms/step
+[1m1/1[0m [32m====================[0m[37m[0m [1m0s[0m 37ms/step[1m1/1[0m [32m====================[0m[37m[0m [1m0s[0m 42ms/step
+[1m1/1[0m [32m====================[0m[37m[0m [1m0s[0m 36ms/step[1m1/1[0m [32m====================[0m[37m[0m [1m0s[0m 42ms/step
+[1m1/1[0m [32m====================[0m[37m[0m [1m0s[0m 36ms/step[1m1/1[0m [32m====================[0m[37m[0m [1m0s[0m 43ms/step
+[1m1/1[0m [32m====================[0m[37m[0m [1m0s[0m 36ms/step[1m1/1[0m [32m====================[0m[37m[0m [1m0s[0m 42ms/step
+[1m1/1[0m [32m====================[0m[37m[0m [1m0s[0m 36ms/step[1m1/1[0m [32m====================[0m[37m[0m [1m0s[0m 42ms/step
+                                                       
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       Running the ST.AI c-model (AI RUNNER)...(name=indy_gru_head, mode=HOST)
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        DLL Driver v2.0 - Direct Python binding (/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/workspace/validate_end_to_end/inspector_indy_gru_head/workspace/lib/libai_indy_gru_head.dylib) ['indy_gru_head']
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         Summary 'indy_gru_head' - ['indy_gru_head']
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         -----------------------------------------------------------------------------
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         I[1/1] 'input_1'    :   f32[1,50,1,64], 12800 Bytes, in activations buffer
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         O[1/1] 'output_1'   :   f32[1,50,1,2], 400 Bytes, in activations buffer
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         n_nodes             :   2
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         activations         :   27136
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         weights             :   100360
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         macc                :   1241700
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         hash                :   0x6e6ec000cc3661698f9f99344f0cdb45
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         compile_datetime    :   Aug 19 2026 20:30:54
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         -----------------------------------------------------------------------------
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         protocol            :   DLL Driver v2.0 - Direct Python binding
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         tools               :   ST.AI (legacy api) v2.2.0
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         runtime lib         :   v10.2.0
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         capabilities        :   IO_ONLY, PER_LAYER, PER_LAYER_WITH_DATA
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         device.desc         :   arm64, arm, Darwin
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         -----------------------------------------------------------------------------
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        NOTE: The duration and execution time per layer are just indications. They depend on the host machine's workload.
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         ST.AI Profiling results v2.0 - "indy_gru_head"
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         ------------------------------------------------------------
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         nb sample(s)   :   8
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         duration       :   0.545 ms by sample (0.515/0.707/0.062)
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         macc           :   1241700
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         ------------------------------------------------------------
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         Statistic per tensor
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         -----------------------------------------------------------------------------------
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         tensor   #   type[shape]:size            min     max     mean      std  name
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         -----------------------------------------------------------------------------------
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         I.0      8   f32[1,50,1,64]:12800      0.000   4.093    0.175    0.452  input_1
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         O.0      8   f32[1,50,1,2]:400        -1.273   1.577   -0.007    0.427  output_1
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         -----------------------------------------------------------------------------------
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       Saving validation data...
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        output directory: /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/end_to_end
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        creating /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/end_to_end/indy_gru_head_val_io.npz
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        m_outputs_1: (8, 50, 2)/float32, min/max=[-1.273159, 1.577223], mean/std=[-0.007164, 0.427221], velocity_norm
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        c_outputs_1: (8, 50, 1, 2)/float32, min/max=[-1.273159, 1.577224], mean/std=[-0.007164, 0.427221], velocity_norm
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       Computing the metrics...
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        Accuracy report #1 for the generated HOST C-model
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        ----------------------------------------------------------------------------------------------------
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        notes: - ACC metric is not computed ("--classifier" option can be used to force it)
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                               - computed against the provided ground truth values
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                               - 8 samples (100 items per sample)
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         acc=n.a. rmse=0.000000137 mae=0.000000101 l2r=0.000000320 mean=0.000000 std=0.000000 nse=1.000000 cos=1.000000
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        Accuracy report #1 for the reference model
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        ----------------------------------------------------------------------------------------------------
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        notes: - ACC metric is not computed ("--classifier" option can be used to force it)
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                               - computed against the provided ground truth values
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                               - 8 samples (100 items per sample)
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         acc=n.a. rmse=0.000000135 mae=0.000000098 l2r=0.000000316 mean=0.000000 std=0.000000 nse=1.000000 cos=1.000000
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        Cross accuracy report #1 (reference vs C-model)
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        ----------------------------------------------------------------------------------------------------
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        notes: - ACC metric is not computed ("--classifier" option can be used to force it)
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                               - the output of the reference model is used as ground truth/reference value
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                               - 8 samples (100 items per sample)
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         acc=n.a. rmse=0.000000085 mae=0.000000065 l2r=0.000000198 mean=-0.000000 std=0.000000 nse=1.000000 cos=1.000000
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        Evaluation report (summary)
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        Output              acc    rmse          mae           l2r           mean        std        nse        cos        tensor
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        HOST c-model #1     n.a.   0.000000137   0.000000101   0.000000320   0.000000    0.000000   1.000000   1.000000   'velocity_norm', 8 x f32(1x50x2), m_id=[2]
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        original model #1   n.a.   0.000000135   0.000000098   0.000000316   0.000000    0.000000   1.000000   1.000000   'velocity_norm', 8 x f32(1x50x2), m_id=[2]
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        X-cross #1          n.a.   0.000000085   0.000000065   0.000000198   -0.000000   0.000000   1.000000   1.000000   'velocity_norm', 8 x f32(1x50x2), m_id=[2]
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                        ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         acc  : Accuracy (class, axis=-1)
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         rmse : Root Mean Squared Error
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         mae  : Mean Absolute Error
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         l2r  : L2 relative error
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         mean : Mean error
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         std  : Standard deviation error
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         nse  : Nash-Sutcliffe efficiency criteria, bigger is better, best=1, range=(-inf, 1]
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                         cos  : COsine Similarity, bigger is better, best=1, range=(0, 1]
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       
+Creating txt report file /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/end_to_end/indy_gru_head_validate_report.txt
+PASS:  82%|########1 | 150/183 [00:07<00:00, 34.37it/s]                                                       elapsed time (validate): 10.474s

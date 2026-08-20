@@ -1,0 +1,21 @@
+{
+  "encoder_onnx_max_abs_error": 1.430511474609375e-06,
+  "encoder_onnx_mean_abs_error": 4.555452548515859e-08,
+  "gru_head_keras_end_to_end_max_abs_error": 3.5762786865234375e-07,
+  "gru_head_keras_end_to_end_mean_abs_error": 5.942420244764435e-08,
+  "timestep_49_max_abs_error": 1.7881393432617188e-07,
+  "encoder_onnx_operators": {
+    "Add": 6,
+    "Constant": 18,
+    "Conv": 5,
+    "Div": 1,
+    "Mul": 1,
+    "Pow": 1,
+    "ReduceMean": 2,
+    "Relu": 5,
+    "Slice": 4,
+    "Sqrt": 1,
+    "Sub": 1,
+    "Transpose": 3
+  }
+}

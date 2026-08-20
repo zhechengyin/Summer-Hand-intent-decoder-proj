@@ -1,0 +1,47 @@
+{
+  "samples": 8,
+  "max_abs_error": 5.364418029785156e-07,
+  "mean_abs_error": 8.729402622975613e-08,
+  "per_sample": [
+    {
+      "name": "phase9_calibration_seed",
+      "max_abs_error": 5.364418029785156e-07,
+      "mean_abs_error": 1.0099262226503924e-07
+    },
+    {
+      "name": "phase9_post_bin_1500",
+      "max_abs_error": 3.5762786865234375e-07,
+      "mean_abs_error": 9.363517250449149e-08
+    },
+    {
+      "name": "phase9_post_bin_1501",
+      "max_abs_error": 4.76837158203125e-07,
+      "mean_abs_error": 9.045005100460912e-08
+    },
+    {
+      "name": "phase9_post_bin_1502",
+      "max_abs_error": 3.5762786865234375e-07,
+      "mean_abs_error": 8.276663976403142e-08
+    },
+    {
+      "name": "phase9_post_bin_1503",
+      "max_abs_error": 3.5762786865234375e-07,
+      "mean_abs_error": 7.954426450851315e-08
+    },
+    {
+      "name": "phase9_post_bin_1504",
+      "max_abs_error": 3.5762786865234375e-07,
+      "mean_abs_error": 1.011416301821555e-07
+    },
+    {
+      "name": "deterministic_random",
+      "max_abs_error": 4.76837158203125e-07,
+      "mean_abs_error": 1.0318122889430015e-07
+    },
+    {
+      "name": "zeros",
+      "max_abs_error": 1.7881393432617188e-07,
+      "mean_abs_error": 4.664063624204573e-08
+    }
+  ]
+}

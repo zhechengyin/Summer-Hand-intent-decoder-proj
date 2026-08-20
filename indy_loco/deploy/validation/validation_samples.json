@@ -1,0 +1,12 @@
+{
+  "samples": [
+    "phase9_calibration_seed",
+    "phase9_post_bin_1500",
+    "phase9_post_bin_1501",
+    "phase9_post_bin_1502",
+    "phase9_post_bin_1503",
+    "phase9_post_bin_1504",
+    "deterministic_random",
+    "zeros"
+  ]
+}

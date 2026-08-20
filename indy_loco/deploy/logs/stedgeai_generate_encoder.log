@@ -1,0 +1,44 @@
+ST Edge AI Core v2.2.0-20266 2adc00962
+PASS:   0%|          | 0/167 [00:00<?, ?it/s]PASS:   6%|5         | 10/167 [00:05<01:29,  1.76it/s]PASS:  10%|#         | 17/167 [00:05<00:44,  3.38it/s]PASS:  29%|##8       | 48/167 [00:05<00:08, 13.60it/s]PASS:  50%|#####     | 84/167 [00:06<00:02, 29.32it/s]PASS:  66%|######6   | 111/167 [00:06<00:01, 43.88it/s]PASS:  81%|########1 | 136/167 [00:06<00:00, 54.82it/s]                                                       
+Creating c (debug) info json file /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/encoder/generated/indy_encoder_c_info.json
+PASS:  81%|########1 | 136/167 [00:06<00:00, 54.82it/s]PASS:  93%|#########3| 156/167 [00:06<00:00, 60.31it/s]                                                        
+ Exec/report summary (generate)
+ -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ model file         :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/model/indy_phase6_encoder.onnx      
+ type               :   onnx                                                                                                                                            
+ c_name             :   indy_encoder                                                                                                                                    
+ compression        :   lossless                                                                                                                                        
+ options            :   allocate-inputs, allocate-outputs                                                                                                               
+ optimization       :   time                                                                                                                                            
+ target/series      :   stm32                                                                                                                                           
+ workspace dir      :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/workspace/generate_encoder   
+ output dir         :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/encoder/generated            
+ model_fmt          :   float                                                                                                                                           
+ model_name         :   indy_phase6_encoder                                                                                                                             
+ model_hash         :   0xd1136eae31a868985a39017781b835ad                                                                                                              
+ params #           :   61,890 items (241.76 KiB)                                                                                                                       
+ -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ input 1/1          :   'features', f32(1x192x50), 37.50 KBytes, activations                                                                                            
+ output 1/1         :   '_activation_3_Relu_0', f32(1x50x64), 12.50 KBytes, activations                                                                                 
+ macc               :   3,542,560                                                                                                                                       
+ weights (ro)       :   248,156 B (242.34 KiB) (1 segment) / +596(+0.2%) vs float model                                                                                 
+ activations (rw)   :   76,800 B (75.00 KiB) (1 segment) *                                                                                                              
+ ram (total)        :   76,800 B (75.00 KiB) = 76,800 + 0 + 0                                                                                                           
+ -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ (*) 'input'/'output' buffers are allocated in the activations buffer
+PASS:  93%|#########3| 156/167 [00:06<00:00, 60.31it/s]                                                       
+Computing AI RT data/code size (target=stm32)..
+PASS:  93%|#########3| 156/167 [00:06<00:00, 60.31it/s]                                                        -> compiler "gcc:arm-none-eabi-gcc" is not in the PATH
+PASS:  93%|#########3| 156/167 [00:06<00:00, 60.31it/s]                                                       
+PASS:  93%|#########3| 156/167 [00:06<00:00, 60.31it/s]                                                        Generated files (7)
+PASS:  93%|#########3| 156/167 [00:06<00:00, 60.31it/s]                                                        -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+PASS:  93%|#########3| 156/167 [00:06<00:00, 60.31it/s]                                                        /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/encoder/generated/indy_encoder_data_params.h
+PASS:  93%|#########3| 156/167 [00:06<00:00, 60.31it/s]                                                        /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/encoder/generated/indy_encoder_data_params.c
+PASS:  93%|#########3| 156/167 [00:06<00:00, 60.31it/s]                                                        /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/encoder/generated/indy_encoder_data.h
+PASS:  93%|#########3| 156/167 [00:06<00:00, 60.31it/s]                                                        /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/encoder/generated/indy_encoder_data.c
+PASS:  93%|#########3| 156/167 [00:06<00:00, 60.31it/s]                                                        /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/encoder/generated/indy_encoder_config.h
+PASS:  93%|#########3| 156/167 [00:06<00:00, 60.31it/s]                                                        /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/encoder/generated/indy_encoder.h
+PASS:  93%|#########3| 156/167 [00:06<00:00, 60.31it/s]                                                        /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/encoder/generated/indy_encoder.c
+PASS:  93%|#########3| 156/167 [00:06<00:00, 60.31it/s]                                                       
+Creating txt report file /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/encoder/generated/indy_encoder_generate_report.txt
+PASS:  93%|#########3| 156/167 [00:06<00:00, 60.31it/s]                                                       elapsed time (generate): 9.186s

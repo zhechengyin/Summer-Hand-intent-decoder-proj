@@ -1,0 +1,463 @@
+ST Edge AI Core v2.2.0-20266 2adc00962
+Created date          : 2026-08-19 20:11:04
+Parameters            : analyze --target stm32 --model /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/model/indy_phase6_fp32.onnx --name indy_phase6 --optimization time --c-api legacy --workspace /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/workspace/analyze --output /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/analyze --verbosity 1
+
+Exec/report summary (analyze)
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+model file         :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/model/indy_phase6_fp32.onnx   
+type               :   onnx                                                                                                                                      
+c_name             :   indy_phase6                                                                                                                               
+compression        :   lossless                                                                                                                                  
+options            :   allocate-inputs, allocate-outputs                                                                                                         
+optimization       :   time                                                                                                                                      
+target/series      :   stm32                                                                                                                                     
+workspace dir      :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/workspace/analyze      
+output dir         :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/analyze                
+model_fmt          :   float                                                                                                                                     
+model_name         :   indy_phase6_fp32                                                                                                                          
+model_hash         :   0xcab45ffee55505682a531d22729b030d                                                                                                        
+params #           :   87,044 items (340.02 KiB)                                                                                                                 
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+input 1/1          :   'features', f32(1x192x50), 37.50 KBytes, activations                                                                                      
+output 1/1         :   'velocity_norm_Transpose_0', f32(1x50x2), 400 Bytes, activations                                                                          
+macc               :   4,789,062                                                                                                                                 
+weights (ro)       :   348,772 B (340.60 KiB) (1 segment) / +596(+0.2%) vs float model                                                                           
+activations (rw)   :   76,800 B (75.00 KiB) (1 segment) *                                                                                                        
+ram (total)        :   76,800 B (75.00 KiB) = 76,800 + 0 + 0                                                                                                     
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+(*) 'input'/'output' buffers are allocated in the activations buffer
+
+Model name - indy_phase6_fp32
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+m_id   layer (type,original)                                   oshape                              param/size              macc                     connected to   | c_size               c_macc              c_type                                     
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+6      _spatial_spatial_1..t_output_0 (Placeholder, Pow)       []                                  1/4                                                             |                      +32,000(+100.0%)    Eltwise/pow_[6]                            
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+9      _spatial_spatial_1..1_output_0 (Placeholder, Add)       []                                  1/4                                                             | +396(+9900.0%)       +3,300(+100.0%)     Reduce_/ScaleBias_[7, 8]                   
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+1      spatial_1_normalization_weight (Placeholder, Mul)       [b:64]                              64/256                                                          | +49,152(+19200.0%)   +614,514(+100.0%)   Conv2D_/Transpose_[o][1, 38]               
+       spatial_1_normalization_bias (Placeholder, Add)         [b:64]                              64/256                                                          | -256(-100.0%)                            
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+63     onnxMatMul_207 (Placeholder, MatMul)                    [b:64,c:2]                          128/512                                                         |                      +8,050(+100.0%)     Transpose_/Dense_/Transpose_[34, 35, 36]   
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+64     head_bias (Placeholder, Add)                            [b:2]                               2/8                                                             |                      +2(+100.0%)         Eltwise/add_[37]                           
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+0      features (Input, )                                      [b:1,h:50,c:192]                                                                                    |                                          
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+1      _spatial_spatial_0..v_output_0 (Conv2D, Conv)           [b:1,h:50,c:64]                     12,352/49,408        614,464                         features   | -49,408(-100.0%)     -614,464(-100.0%)   
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+2      _spatial_spatial_1..e_output_0 (Transpose, Transpose)   [b:1,h:64,c:50]                                            1,600   _spatial_spatial_0..v_output_0   |                      +4,800(+300.0%)     Transpose_/Transpose_[0, 2]                
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+3      _spatial_spatial_1..n_output_0 (Reduce, ReduceMean)     [b:1,h:1,c:50]                                             6,400   _spatial_spatial_1..e_output_0   | +400(+100.0%)        -3,100(-48.4%)      Reduce_/ScaleBias_[3, 4]                   
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+4      _spatial_spatial_1..b_output_0 (Eltwise, Sub)           [b:1,h:64,c:50]                                            3,200   _spatial_spatial_1..e_output_0   |                                          Eltwise/sub_[5]                            
+                                                                                                                                  _spatial_spatial_1..n_output_0   | 
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+6      _spatial_spatial_1..w_output_0 (Eltwise, Pow)           [b:1,h:64,c:50]                                           32,000   _spatial_spatial_1..b_output_0   |                      -32,000(-100.0%)    
+                                                                                                                                  _spatial_spatial_1..t_output_0   | 
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+7      _spatial_spatial_1..1_output_0 (Reduce, ReduceMean)     [b:1,h:1,c:50]                                             6,400   _spatial_spatial_1..w_output_0   |                      -6,400(-100.0%)     
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+9      _spatial_spatial_1..d_output_0 (Eltwise, Add)           [b:1,h:1,c:50]                                                50   _spatial_spatial_1..1_output_0   |                      -50(-100.0%)        
+                                                                                                                                  _spatial_spatial_1..1_output_0   | 
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+10     _spatial_spatial_1..t_output_0 (Nonlinearity, Sqrt)     [b:1,h:1,c:50]                                               600   _spatial_spatial_1..d_output_0   |                                          Nonlinearity_[9]                           
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+11     _spatial_spatial_1..v_output_0 (Eltwise, Div)           [b:1,h:64,c:50]                                           16,000   _spatial_spatial_1..b_output_0   |                                          Eltwise/div_[10]                           
+                                                                                                                                  _spatial_spatial_1..t_output_0   | 
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+12     _spatial_spatial_1..l_output_0 (Eltwise, Mul)           [b:1,h:64,c:50]                                            3,200   _spatial_spatial_1..v_output_0   | +256(+100.0%)                            Eltwise/mul_[11]                           
+                                                                                                                                  spatial_1_normalization_weight   | 
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+13     _spatial_spatial_1..1_output_0 (Eltwise, Add)           [b:1,h:64,c:50]                                            3,200   _spatial_spatial_1..l_output_0   | +256(+100.0%)                            Eltwise/add_[12]                           
+                                                                                                                                    spatial_1_normalization_bias   | 
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+14     _spatial_spatial_1..1_output_0 (Transpose, Transpose)   [b:1,h:50,c:64]                                            1,600   _spatial_spatial_1..1_output_0   |                                          Transpose_[13]                             
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+15     _spatial_spatial_2..u_output_0 (Nonlinearity, Relu)     [b:1,h:50,c:64]                                            3,200   _spatial_spatial_1..1_output_0   |                                          Nonlinearity_[14]                          
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+16     _convolutions_0_Conv_output_0 (Conv2D, Conv)            [b:1,h:52,c:64]                     12,352/49,408        639,040   _spatial_spatial_2..u_output_0   |                                          Conv2D_[15]                                
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+21     _Slice_output_0 (Slice, Slice)                          [b:1,h:50,c:64]                                                     _convolutions_0_Conv_output_0   |                                          Slice_[16]                                 
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+22     _Add_output_0 (Eltwise, Add)                            [b:1,h:50,c:64]                                            3,200                  _Slice_output_0   |                                          Eltwise/add_[17]                           
+                                                                                                                                  _spatial_spatial_2..u_output_0   | 
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+23     _activation_Relu_output_0 (Nonlinearity, Relu)          [b:1,h:50,c:64]                                            3,200                    _Add_output_0   |                                          Nonlinearity_[18]                          
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+24     _convolutions_1_Conv_output_0 (Conv2D, Conv)            [b:1,h:54,c:64]                     12,352/49,408        663,616        _activation_Relu_output_0   |                                          Conv2D_[19]                                
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+29     _Slice_1_output_0 (Slice, Slice)                        [b:1,h:50,c:64]                                                     _convolutions_1_Conv_output_0   |                                          Slice_[20]                                 
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+30     _Add_1_output_0 (Eltwise, Add)                          [b:1,h:50,c:64]                                            3,200                _Slice_1_output_0   |                                          Eltwise/add_[21]                           
+                                                                                                                                       _activation_Relu_output_0   | 
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+31     _activation_1_Relu_output_0 (Nonlinearity, Relu)        [b:1,h:50,c:64]                                            3,200                  _Add_1_output_0   |                                          Nonlinearity_[22]                          
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+32     _convolutions_2_Conv_output_0 (Conv2D, Conv)            [b:1,h:58,c:64]                     12,352/49,408        712,768      _activation_1_Relu_output_0   |                                          Conv2D_[23]                                
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+37     _Slice_2_output_0 (Slice, Slice)                        [b:1,h:50,c:64]                                                     _convolutions_2_Conv_output_0   |                                          Slice_[24]                                 
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+38     _Add_2_output_0 (Eltwise, Add)                          [b:1,h:50,c:64]                                            3,200                _Slice_2_output_0   |                                          Eltwise/add_[25]                           
+                                                                                                                                     _activation_1_Relu_output_0   | 
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+39     _activation_2_Relu_output_0 (Nonlinearity, Relu)        [b:1,h:50,c:64]                                            3,200                  _Add_2_output_0   |                                          Nonlinearity_[26]                          
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+40     _convolutions_3_Conv_output_0 (Conv2D, Conv)            [b:1,h:66,c:64]                     12,352/49,408        811,072      _activation_2_Relu_output_0   |                                          Conv2D_[27]                                
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+45     _Slice_3_output_0 (Slice, Slice)                        [b:1,h:50,c:64]                                                     _convolutions_3_Conv_output_0   |                                          Slice_[28]                                 
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+46     _Add_3_output_0 (Eltwise, Add)                          [b:1,h:50,c:64]                                            3,200                _Slice_3_output_0   |                                          Eltwise/add_[29]                           
+                                                                                                                                     _activation_2_Relu_output_0   | 
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+47     _activation_3_Relu_output_0 (Nonlinearity, Relu)        [b:1,h:50,c:64]                                            3,200                  _Add_3_output_0   |                                          Nonlinearity_[30]                          
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+49     _gru_Transpose_output_0 (Transpose, Transpose)          [b:1,h:64,c:50]                                            1,600      _activation_3_Relu_output_0   |                      -1,600(-100.0%)     
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+59     _gru_GRU_output_0 (GRU, GRU)                            [b:1,h:1,w:64,c:50][b:1,w:64,c:1]   25,024/100,096     1,581,056          _gru_Transpose_output_0   |                      -342,656(-21.7%)    Transpose_/GRU_/Transpose_[31, 32, 33]     
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+61     _gru_Squeeze_output_0 (Reshape, Squeeze)                [b:1,h:64,c:50]                                                                 _gru_GRU_output_0   |                                          
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+62     _gru_Transpose_1_output_0 (Transpose, Transpose)        [b:1,h:64,c:50]                                            1,600            _gru_Squeeze_output_0   |                      -1,600(-100.0%)     
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+63     _head_MatMul_output_0 (Gemm, MatMul)                    [b:1,h:2,c:50]                                           320,100        _gru_Transpose_1_output_0   |                      -320,100(-100.0%)   
+                                                                                                                                                  onnxMatMul_207   | 
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+64     velocity_norm (Eltwise, Add)                            [b:1,h:2,c:50]                                                 2                        head_bias   |                      -2(-100.0%)         
+                                                                                                                                           _head_MatMul_output_0   | 
+------ ------------------------------------------------------- ----------------------------------- ---------------- ----------- -------------------------------- --- -------------------- ------------------- ------------------------------------------ 
+model/c-model: macc=5,448,368/4,789,062 -659,306(-12.1%) weights=348,176/348,772 +596(+0.2%) activations=--/76,800 io=--/0
+
+
+
+Generated C-graph summary
+------------------------------------------------------------------------------------------------------------------------
+model name            : indy_phase6_fp32
+c-name                : indy_phase6
+c-node #              : 39
+c-array #             : 66
+activations size      : 76800 (1 segment)
+weights size          : 348772 (1 segment)
+macc                  : 4789062
+inputs                : ['features_output']
+outputs               : ['velocity_norm_Transpose_0_output']
+
+C-Arrays (66)
+------ ------------------------------------------------------------------- ------------- ------------------------- ------------- --------- 
+c_id   name (*_array)                                                      item/size     domain/mem-pool           c-type        comment   
+------ ------------------------------------------------------------------- ------------- ------------------------- ------------- --------- 
+0      _Add_1_output_0_output                                              3200/12800    activations/**default**   float                   
+1      _Add_2_output_0_output                                              3200/12800    activations/**default**   float                   
+2      _Add_3_output_0_output                                              3200/12800    activations/**default**   float                   
+3      _Add_output_0_output                                                3200/12800    activations/**default**   float                   
+4      _Slice_1_output_0_output                                            3200/12800    activations/**default**   float                   
+5      _Slice_2_output_0_output                                            3200/12800    activations/**default**   float                   
+6      _Slice_3_output_0_output                                            3200/12800    activations/**default**   float                   
+7      _Slice_output_0_output                                              3200/12800    activations/**default**   float                   
+8      _activation_1_Relu_output_0_output                                  3200/12800    activations/**default**   float                   
+9      _activation_2_Relu_output_0_output                                  3200/12800    activations/**default**   float                   
+10     _activation_3_Relu_output_0_output                                  3200/12800    activations/**default**   float                   
+11     _activation_Relu_output_0_output                                    3200/12800    activations/**default**   float                   
+12     _convolutions_0_Conv_output_0_bias                                  64/256        weights/weights           const float             
+13     _convolutions_0_Conv_output_0_output                                3328/13312    activations/**default**   float                   
+14     _convolutions_0_Conv_output_0_scratch0                              192/768       activations/**default**   float                   
+15     _convolutions_0_Conv_output_0_weights                               12288/49152   weights/weights           const float             
+16     _convolutions_1_Conv_output_0_bias                                  64/256        weights/weights           const float             
+17     _convolutions_1_Conv_output_0_output                                3456/13824    activations/**default**   float                   
+18     _convolutions_1_Conv_output_0_weights                               12288/49152   weights/weights           const float             
+19     _convolutions_2_Conv_output_0_bias                                  64/256        weights/weights           const float             
+20     _convolutions_2_Conv_output_0_output                                3712/14848    activations/**default**   float                   
+21     _convolutions_2_Conv_output_0_weights                               12288/49152   weights/weights           const float             
+22     _convolutions_3_Conv_output_0_bias                                  64/256        weights/weights           const float             
+23     _convolutions_3_Conv_output_0_output                                4224/16896    activations/**default**   float                   
+24     _convolutions_3_Conv_output_0_weights                               12288/49152   weights/weights           const float             
+25     _gru_GRU_output_0_bias                                              384/1536      weights/weights           const float             
+26     _gru_GRU_output_0_in_transpose_output                               3200/12800    activations/**default**   float                   
+27     _gru_GRU_output_0_initial_h                                         64/256        weights/weights           const float             
+28     _gru_GRU_output_0_kernel                                            12288/49152   weights/weights           const float             
+29     _gru_GRU_output_0_out_0_transpose_output                            3200/12800    activations/**default**   float                   
+30     _gru_GRU_output_0_output0                                           3200/12800    activations/**default**   float                   
+31     _gru_GRU_output_0_output1                                           64/256        activations/**default**   float                   
+32     _gru_GRU_output_0_recurrent                                         12288/49152   weights/weights           const float             
+33     _gru_GRU_output_0_scratch0                                          384/1536      activations/**default**   float                   
+34     _head_MatMul_output_0_gemm_to_dense_in_transpose_output             3200/12800    activations/**default**   float                   
+35     _head_MatMul_output_0_gemm_to_dense_out_transpose_output            100/400       activations/**default**   float                   
+36     _head_MatMul_output_0_gemm_to_dense_output                          100/400       activations/**default**   float                   
+37     _head_MatMul_output_0_gemm_to_dense_weights                         128/512       weights/weights           const float             
+38     _spatial_spatial_0_Conv_output_0_bias                               64/256        weights/weights           const float             
+39     _spatial_spatial_0_Conv_output_0_output                             3200/12800    activations/**default**   float                   
+40     _spatial_spatial_0_Conv_output_0_scratch0                           192/768       activations/**default**   float                   
+41     _spatial_spatial_0_Conv_output_0_weights                            12288/49152   weights/weights           const float             
+42     _spatial_spatial_1_Transpose_1_output_0_output                      3200/12800    activations/**default**   float                   
+43     _spatial_spatial_1_Transpose_output_0_output                        3200/12800    activations/**default**   float                   
+44     _spatial_spatial_1_normalization_Add_1_output_0_output              3200/12800    activations/**default**   float                   
+45     _spatial_spatial_1_normalization_Constant_output_0_3D               1/4           weights/weights           const float             
+46     _spatial_spatial_1_normalization_Div_output_0_output                3200/12800    activations/**default**   float                   
+47     _spatial_spatial_1_normalization_Mul_output_0_output                3200/12800    activations/**default**   float                   
+48     _spatial_spatial_1_normalization_Pow_output_0_output                3200/12800    activations/**default**   float                   
+49     _spatial_spatial_1_normalization_ReduceMean_1_output_0_Mul_bias     50/200        weights/weights           const float             
+50     _spatial_spatial_1_normalization_ReduceMean_1_output_0_Mul_output   50/200        activations/**default**   float                   
+51     _spatial_spatial_1_normalization_ReduceMean_1_output_0_output       50/200        activations/**default**   float                   
+52     _spatial_spatial_1_normalization_ReduceMean_output_0_Mul_bias       50/200        weights/weights           const float             
+53     _spatial_spatial_1_normalization_ReduceMean_output_0_Mul_output     50/200        activations/**default**   float                   
+54     _spatial_spatial_1_normalization_ReduceMean_output_0_Mul_scale      50/200        weights/weights           const float             
+55     _spatial_spatial_1_normalization_ReduceMean_output_0_output         50/200        activations/**default**   float                   
+56     _spatial_spatial_1_normalization_Sqrt_output_0_output               50/200        activations/**default**   float                   
+57     _spatial_spatial_1_normalization_Sub_output_0_output                3200/12800    activations/**default**   float                   
+58     _spatial_spatial_2_Relu_output_0_output                             3200/12800    activations/**default**   float                   
+59     features_Transpose_output                                           9600/38400    activations/**default**   float                   
+60     features_output                                                     9600/38400    activations/**default**   float         /input    
+61     head_bias_3D                                                        2/8           weights/weights           const float             
+62     spatial_1_normalization_bias_3D                                     64/256        weights/weights           const float             
+63     spatial_1_normalization_weight_3D                                   64/256        weights/weights           const float             
+64     velocity_norm_Transpose_0_output                                    100/400       activations/**default**   float         /output   
+65     velocity_norm_output                                                100/400       activations/**default**   float                   
+------ ------------------------------------------------------------------- ------------- ------------------------- ------------- --------- 
+
+C-Layers (39)
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+c_id   name (*_layer)                                               id   layer_type      macc      rom      tensors                                                                shape (array id)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+0      features_Transpose                                           2    Transpose       4800      0        I: features_output                                                     f32(1x192x50) (60)     
+                                                                                                            O: features_Transpose_output                                           f32(1x50x192) (59)     
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+1      _spatial_spatial_0_Conv_output_0                             1    Conv2D          614464    49408    I: features_Transpose_output                                           f32(1x50x192) (59)     
+                                                                                                            S: _spatial_spatial_0_Conv_output_0_scratch0                                                  
+                                                                                                            W: _spatial_spatial_0_Conv_output_0_weights                            f32(64x1x1x192) (41)   
+                                                                                                            W: _spatial_spatial_0_Conv_output_0_bias                               f32(64) (38)           
+                                                                                                            O: _spatial_spatial_0_Conv_output_0_output                             f32(1x50x64) (39)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+2      _spatial_spatial_1_Transpose_output_0                        2    Transpose       1600      0        I: _spatial_spatial_0_Conv_output_0_output                             f32(1x50x64) (39)      
+                                                                                                            O: _spatial_spatial_1_Transpose_output_0_output                        f32(1x64x50) (43)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+3      _spatial_spatial_1_normalization_ReduceMean_output_0         3    Reduce          3200      0        I: _spatial_spatial_1_Transpose_output_0_output                        f32(1x64x50) (43)      
+                                                                                                            O: _spatial_spatial_1_normalization_ReduceMean_output_0_output         f32(1x1x50) (55)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+4      _spatial_spatial_1_normalization_ReduceMean_output_0_Mul     3    ScaleBias       100       400      I: _spatial_spatial_1_normalization_ReduceMean_output_0_output         f32(1x1x50) (55)       
+                                                                                                            W: _spatial_spatial_1_normalization_ReduceMean_output_0_Mul_scale      f32(50) (54)           
+                                                                                                            W: _spatial_spatial_1_normalization_ReduceMean_output_0_Mul_bias       f32(50) (52)           
+                                                                                                            O: _spatial_spatial_1_normalization_ReduceMean_output_0_Mul_output     f32(1x1x50) (53)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+5      _spatial_spatial_1_normalization_Sub_output_0                4    Eltwise/sub     3200      0        I: _spatial_spatial_1_Transpose_output_0_output                        f32(1x64x50) (43)      
+                                                                                                            I: _spatial_spatial_1_normalization_ReduceMean_output_0_Mul_output     f32(1x64x50) (43)      
+                                                                                                            O: _spatial_spatial_1_normalization_Sub_output_0_output                f32(1x64x50) (57)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+6      _spatial_spatial_1_normalization_Pow_output_0                6    Eltwise/pow     32000     4        I: _spatial_spatial_1_normalization_Sub_output_0_output                f32(1x64x50) (57)      
+                                                                                                            W: _spatial_spatial_1_normalization_Constant_output_0_3D               f32(1x1) (45)          
+                                                                                                            O: _spatial_spatial_1_normalization_Pow_output_0_output                f32(1x64x50) (48)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+7      _spatial_spatial_1_normalization_ReduceMean_1_output_0       9    Reduce          3200      0        I: _spatial_spatial_1_normalization_Pow_output_0_output                f32(1x64x50) (48)      
+                                                                                                            O: _spatial_spatial_1_normalization_ReduceMean_1_output_0_output       f32(1x1x50) (51)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+8      _spatial_spatial_1_normalization_ReduceMean_1_output_0_Mul   9    ScaleBias       100       400      I: _spatial_spatial_1_normalization_ReduceMean_1_output_0_output       f32(1x1x50) (51)       
+                                                                                                            W: _spatial_spatial_1_normalization_ReduceMean_output_0_Mul_scale      f32(50) (54)           
+                                                                                                            W: _spatial_spatial_1_normalization_ReduceMean_1_output_0_Mul_bias     f32(50) (49)           
+                                                                                                            O: _spatial_spatial_1_normalization_ReduceMean_1_output_0_Mul_output   f32(1x1x50) (50)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+9      _spatial_spatial_1_normalization_Sqrt_output_0               10   Nonlinearity    600       0        I: _spatial_spatial_1_normalization_ReduceMean_1_output_0_Mul_output   f32(1x1x50) (50)       
+                                                                                                            O: _spatial_spatial_1_normalization_Sqrt_output_0_output               f32(1x1x50) (56)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+10     _spatial_spatial_1_normalization_Div_output_0                11   Eltwise/div     16000     0        I: _spatial_spatial_1_normalization_Sub_output_0_output                f32(1x64x50) (57)      
+                                                                                                            I: _spatial_spatial_1_normalization_Sqrt_output_0_output               f32(1x64x50) (57)      
+                                                                                                            O: _spatial_spatial_1_normalization_Div_output_0_output                f32(1x64x50) (46)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+11     _spatial_spatial_1_normalization_Mul_output_0                12   Eltwise/mul     3200      256      I: _spatial_spatial_1_normalization_Div_output_0_output                f32(1x64x50) (46)      
+                                                                                                            W: spatial_1_normalization_weight_3D                                   f32(64x1) (63)         
+                                                                                                            O: _spatial_spatial_1_normalization_Mul_output_0_output                f32(1x64x50) (47)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+12     _spatial_spatial_1_normalization_Add_1_output_0              13   Eltwise/add     3200      256      I: _spatial_spatial_1_normalization_Mul_output_0_output                f32(1x64x50) (47)      
+                                                                                                            W: spatial_1_normalization_bias_3D                                     f32(64x1) (62)         
+                                                                                                            O: _spatial_spatial_1_normalization_Add_1_output_0_output              f32(1x64x50) (44)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+13     _spatial_spatial_1_Transpose_1_output_0                      14   Transpose       1600      0        I: _spatial_spatial_1_normalization_Add_1_output_0_output              f32(1x64x50) (44)      
+                                                                                                            O: _spatial_spatial_1_Transpose_1_output_0_output                      f32(1x50x64) (42)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+14     _spatial_spatial_2_Relu_output_0                             15   Nonlinearity    3200      0        I: _spatial_spatial_1_Transpose_1_output_0_output                      f32(1x50x64) (42)      
+                                                                                                            O: _spatial_spatial_2_Relu_output_0_output                             f32(1x50x64) (58)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+15     _convolutions_0_Conv_output_0                                16   Conv2D          639040    49408    I: _spatial_spatial_2_Relu_output_0_output                             f32(1x50x64) (58)      
+                                                                                                            S: _convolutions_0_Conv_output_0_scratch0                                                     
+                                                                                                            W: _convolutions_0_Conv_output_0_weights                               f32(64x3x1x64) (15)    
+                                                                                                            W: _convolutions_0_Conv_output_0_bias                                  f32(64) (12)           
+                                                                                                            O: _convolutions_0_Conv_output_0_output                                f32(1x52x64) (13)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+16     _Slice_output_0                                              21   Slice           0         0        I: _convolutions_0_Conv_output_0_output                                f32(1x52x64) (13)      
+                                                                                                            O: _Slice_output_0_output                                              f32(1x50x64) (7)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+17     _Add_output_0                                                22   Eltwise/add     3200      0        I: _Slice_output_0_output                                              f32(1x50x64) (7)       
+                                                                                                            I: _spatial_spatial_2_Relu_output_0_output                             f32(1x50x64) (7)       
+                                                                                                            O: _Add_output_0_output                                                f32(1x50x64) (3)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+18     _activation_Relu_output_0                                    23   Nonlinearity    3200      0        I: _Add_output_0_output                                                f32(1x50x64) (3)       
+                                                                                                            O: _activation_Relu_output_0_output                                    f32(1x50x64) (11)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+19     _convolutions_1_Conv_output_0                                24   Conv2D          663616    49408    I: _activation_Relu_output_0_output                                    f32(1x50x64) (11)      
+                                                                                                            W: _convolutions_1_Conv_output_0_weights                               f32(64x3x1x64) (18)    
+                                                                                                            W: _convolutions_1_Conv_output_0_bias                                  f32(64) (16)           
+                                                                                                            O: _convolutions_1_Conv_output_0_output                                f32(1x54x64) (17)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+20     _Slice_1_output_0                                            29   Slice           0         0        I: _convolutions_1_Conv_output_0_output                                f32(1x54x64) (17)      
+                                                                                                            O: _Slice_1_output_0_output                                            f32(1x50x64) (4)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+21     _Add_1_output_0                                              30   Eltwise/add     3200      0        I: _Slice_1_output_0_output                                            f32(1x50x64) (4)       
+                                                                                                            I: _activation_Relu_output_0_output                                    f32(1x50x64) (4)       
+                                                                                                            O: _Add_1_output_0_output                                              f32(1x50x64) (0)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+22     _activation_1_Relu_output_0                                  31   Nonlinearity    3200      0        I: _Add_1_output_0_output                                              f32(1x50x64) (0)       
+                                                                                                            O: _activation_1_Relu_output_0_output                                  f32(1x50x64) (8)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+23     _convolutions_2_Conv_output_0                                32   Conv2D          712768    49408    I: _activation_1_Relu_output_0_output                                  f32(1x50x64) (8)       
+                                                                                                            W: _convolutions_2_Conv_output_0_weights                               f32(64x3x1x64) (21)    
+                                                                                                            W: _convolutions_2_Conv_output_0_bias                                  f32(64) (19)           
+                                                                                                            O: _convolutions_2_Conv_output_0_output                                f32(1x58x64) (20)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+24     _Slice_2_output_0                                            37   Slice           0         0        I: _convolutions_2_Conv_output_0_output                                f32(1x58x64) (20)      
+                                                                                                            O: _Slice_2_output_0_output                                            f32(1x50x64) (5)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+25     _Add_2_output_0                                              38   Eltwise/add     3200      0        I: _Slice_2_output_0_output                                            f32(1x50x64) (5)       
+                                                                                                            I: _activation_1_Relu_output_0_output                                  f32(1x50x64) (5)       
+                                                                                                            O: _Add_2_output_0_output                                              f32(1x50x64) (1)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+26     _activation_2_Relu_output_0                                  39   Nonlinearity    3200      0        I: _Add_2_output_0_output                                              f32(1x50x64) (1)       
+                                                                                                            O: _activation_2_Relu_output_0_output                                  f32(1x50x64) (9)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+27     _convolutions_3_Conv_output_0                                40   Conv2D          811072    49408    I: _activation_2_Relu_output_0_output                                  f32(1x50x64) (9)       
+                                                                                                            W: _convolutions_3_Conv_output_0_weights                               f32(64x3x1x64) (24)    
+                                                                                                            W: _convolutions_3_Conv_output_0_bias                                  f32(64) (22)           
+                                                                                                            O: _convolutions_3_Conv_output_0_output                                f32(1x66x64) (23)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+28     _Slice_3_output_0                                            45   Slice           0         0        I: _convolutions_3_Conv_output_0_output                                f32(1x66x64) (23)      
+                                                                                                            O: _Slice_3_output_0_output                                            f32(1x50x64) (6)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+29     _Add_3_output_0                                              46   Eltwise/add     3200      0        I: _Slice_3_output_0_output                                            f32(1x50x64) (6)       
+                                                                                                            I: _activation_2_Relu_output_0_output                                  f32(1x50x64) (6)       
+                                                                                                            O: _Add_3_output_0_output                                              f32(1x50x64) (2)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+30     _activation_3_Relu_output_0                                  47   Nonlinearity    3200      0        I: _Add_3_output_0_output                                              f32(1x50x64) (2)       
+                                                                                                            O: _activation_3_Relu_output_0_output                                  f32(1x50x64) (10)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+31     _gru_GRU_output_0_in_transpose                               59   Transpose       1600      0        I: _activation_3_Relu_output_0_output                                  f32(1x50x64) (10)      
+                                                                                                            O: _gru_GRU_output_0_in_transpose_output                               f32(1x50x64) (26)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+32     _gru_GRU_output_0                                            59   GRU             1235200   100096   I: _gru_GRU_output_0_in_transpose_output                               f32(1x50x64) (26)      
+                                                                                                            S: _gru_GRU_output_0_scratch0                                                                 
+                                                                                                            W: _gru_GRU_output_0_kernel                                            f32(192x64) (28)       
+                                                                                                            W: _gru_GRU_output_0_recurrent                                         f32(192x64) (32)       
+                                                                                                            W: _gru_GRU_output_0_bias                                              f32(384) (25)          
+                                                                                                            W: _gru_GRU_output_0_initial_h                                         f32(64) (27)           
+                                                                                                            O: _gru_GRU_output_0_output0                                           f32(1x50x1x64) (30)    
+                                                                                                            O: _gru_GRU_output_0_output1                                           f32(1x64x1) (31)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+33     _gru_GRU_output_0_out_0_transpose                            59   Transpose       1600      0        I: _gru_GRU_output_0_output0                                           f32(1x50x1x64) (30)    
+                                                                                                            O: _gru_GRU_output_0_out_0_transpose_output                            f32(1x50x1x64) (29)    
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+34     _head_MatMul_output_0_gemm_to_dense_in_transpose             63   Transpose       1600      0        I: _gru_GRU_output_0_out_0_transpose_output                            f32(1x50x1x64) (29)    
+                                                                                                            O: _head_MatMul_output_0_gemm_to_dense_in_transpose_output             f32(1x50x64) (34)      
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+35     _head_MatMul_output_0_gemm_to_dense                          63   Dense           6400      512      I: _head_MatMul_output_0_gemm_to_dense_in_transpose_output             f32(1x50x64) (34)      
+                                                                                                            W: _head_MatMul_output_0_gemm_to_dense_weights                         f32(2x64) (37)         
+                                                                                                            O: _head_MatMul_output_0_gemm_to_dense_output                          f32(1x50x2) (36)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+36     _head_MatMul_output_0_gemm_to_dense_out_transpose            63   Transpose       50        0        I: _head_MatMul_output_0_gemm_to_dense_output                          f32(1x50x2) (36)       
+                                                                                                            O: _head_MatMul_output_0_gemm_to_dense_out_transpose_output            f32(1x2x50) (35)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+37     velocity_norm                                                64   Eltwise/add     2         8        I: _head_MatMul_output_0_gemm_to_dense_out_transpose_output            f32(1x2x50) (35)       
+                                                                                                            W: head_bias_3D                                                        f32(2x1) (61)          
+                                                                                                            O: velocity_norm_output                                                f32(1x2x50) (65)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+38     velocity_norm_Transpose_0                                    1    Transpose       50        0        I: velocity_norm_output                                                f32(1x2x50) (65)       
+                                                                                                            O: velocity_norm_Transpose_0_output                                    f32(1x50x2) (64)       
+------ ------------------------------------------------------------ ---- --------------- --------- -------- ---------------------------------------------------------------------- ---------------------- 
+
+
+
+Number of operations per c-layer
+------- ------ ----------------------------------------------- ----------- -------------- 
+c_id    m_id   name (type)                                             #op           type 
+------- ------ ----------------------------------------------- ----------- -------------- 
+0       2      features_Transpose (Transpose)                        4,800   smul_f32_f32 
+1       1      _spatial_spatial_0..v_output_0 (Conv2D)             614,464   smul_f32_f32 
+2       2      _spatial_spatial_1..e_output_0 (Transpose)            1,600   smul_f32_f32 
+3       3      _spatial_spatial_1..n_output_0 (Reduce)               3,200   smul_f32_f32 
+4       3      _spatial_spatial_1..tput_0_Mul (ScaleBias)              100   smul_f32_f32 
+5       4      _spatial_spatial_1..b_output_0 (Eltwise/sub)          3,200     op_f32_f32 
+6       6      _spatial_spatial_1..w_output_0 (Eltwise/pow)         32,000     op_f32_f32 
+7       9      _spatial_spatial_1..1_output_0 (Reduce)               3,200   smul_f32_f32 
+8       9      _spatial_spatial_1..tput_0_Mul (ScaleBias)              100   smul_f32_f32 
+9       10     _spatial_spatial_1..t_output_0 (Nonlinearity)           600     op_f32_f32 
+10      11     _spatial_spatial_1..v_output_0 (Eltwise/div)         16,000     op_f32_f32 
+11      12     _spatial_spatial_1..l_output_0 (Eltwise/mul)          3,200     op_f32_f32 
+12      13     _spatial_spatial_1..1_output_0 (Eltwise/add)          3,200     op_f32_f32 
+13      14     _spatial_spatial_1..1_output_0 (Transpose)            1,600   smul_f32_f32 
+14      15     _spatial_spatial_2..u_output_0 (Nonlinearity)         3,200     op_f32_f32 
+15      16     _convolutions_0_Conv_output_0 (Conv2D)              639,040   smul_f32_f32 
+16      21     _Slice_output_0 (Slice)                                   0   smul_f32_f32 
+17      22     _Add_output_0 (Eltwise/add)                           3,200     op_f32_f32 
+18      23     _activation_Relu_output_0 (Nonlinearity)              3,200     op_f32_f32 
+19      24     _convolutions_1_Conv_output_0 (Conv2D)              663,616   smul_f32_f32 
+20      29     _Slice_1_output_0 (Slice)                                 0   smul_f32_f32 
+21      30     _Add_1_output_0 (Eltwise/add)                         3,200     op_f32_f32 
+22      31     _activation_1_Relu_output_0 (Nonlinearity)            3,200     op_f32_f32 
+23      32     _convolutions_2_Conv_output_0 (Conv2D)              712,768   smul_f32_f32 
+24      37     _Slice_2_output_0 (Slice)                                 0   smul_f32_f32 
+25      38     _Add_2_output_0 (Eltwise/add)                         3,200     op_f32_f32 
+26      39     _activation_2_Relu_output_0 (Nonlinearity)            3,200     op_f32_f32 
+27      40     _convolutions_3_Conv_output_0 (Conv2D)              811,072   smul_f32_f32 
+28      45     _Slice_3_output_0 (Slice)                                 0   smul_f32_f32 
+29      46     _Add_3_output_0 (Eltwise/add)                         3,200     op_f32_f32 
+30      47     _activation_3_Relu_output_0 (Nonlinearity)            3,200     op_f32_f32 
+31      59     _gru_GRU_output_0_in_transpose (Transpose)            1,600   smul_f32_f32 
+32      59     _gru_GRU_output_0 (GRU)                           1,235,200   smul_f32_f32 
+33      59     _gru_GRU_output_0_.._transpose (Transpose)            1,600   smul_f32_f32 
+34      63     _head_MatMul_outpu.._transpose (Transpose)            1,600   smul_f32_f32 
+35      63     _head_MatMul_outpu..m_to_dense (Dense)                6,400   smul_f32_f32 
+36      63     _head_MatMul_outpu.._transpose (Transpose)               50   smul_f32_f32 
+37      64     velocity_norm (Eltwise/add)                               2     op_f32_f32 
+38      1      velocity_norm_Transpose_0 (Transpose)                    50   smul_f32_f32 
+------- ------ ----------------------------------------------- ----------- -------------- 
+total                                                            4,789,062 
+
+Number of operation types
+---------------- ----------- ----------- 
+operation type             #           % 
+---------------- ----------- ----------- 
+smul_f32_f32       4,702,060       98.2% 
+op_f32_f32            87,002        1.8% 
+
+Complexity report (model)
+------ ------------------------------------------ ------------------------- ------------------------- -------------- 
+m_id   name                                       c_macc                    c_rom                     c_id           
+------ ------------------------------------------ ------------------------- ------------------------- -------------- 
+6      _spatial_spatial_1_normaliza..t_output_0   |                  0.7%   |                  0.0%   [6]            
+9      _spatial_spatial_1_normaliza..1_output_0   |                  0.1%   |                  0.1%   [7, 8]         
+1      spatial_1_normalization_weight             ||||||||          12.8%   ||||||||          14.2%   [1, 38]        
+63     onnxMatMul_207                             |                  0.2%   |                  0.1%   [34, 35, 36]   
+64     head_bias                                  |                  0.0%   |                  0.0%   [37]           
+2      _spatial_spatial_1_Transpose_output_0      |                  0.1%   |                  0.0%   [0, 2]         
+3      _spatial_spatial_1_normaliza..n_output_0   |                  0.1%   |                  0.1%   [3, 4]         
+4      _spatial_spatial_1_normaliza..b_output_0   |                  0.1%   |                  0.0%   [5]            
+10     _spatial_spatial_1_normaliza..t_output_0   |                  0.0%   |                  0.0%   [9]            
+11     _spatial_spatial_1_normaliza..v_output_0   |                  0.3%   |                  0.0%   [10]           
+12     _spatial_spatial_1_normaliza..l_output_0   |                  0.1%   |                  0.1%   [11]           
+13     _spatial_spatial_1_normaliza..1_output_0   |                  0.1%   |                  0.1%   [12]           
+14     _spatial_spatial_1_Transpose_1_output_0    |                  0.0%   |                  0.0%   [13]           
+15     _spatial_spatial_2_Relu_output_0           |                  0.1%   |                  0.0%   [14]           
+16     _convolutions_0_Conv_output_0              ||||||||          13.3%   ||||||||          14.2%   [15]           
+21     _Slice_output_0                            |                  0.0%   |                  0.0%   [16]           
+22     _Add_output_0                              |                  0.1%   |                  0.0%   [17]           
+23     _activation_Relu_output_0                  |                  0.1%   |                  0.0%   [18]           
+24     _convolutions_1_Conv_output_0              |||||||||         13.9%   ||||||||          14.2%   [19]           
+29     _Slice_1_output_0                          |                  0.0%   |                  0.0%   [20]           
+30     _Add_1_output_0                            |                  0.1%   |                  0.0%   [21]           
+31     _activation_1_Relu_output_0                |                  0.1%   |                  0.0%   [22]           
+32     _convolutions_2_Conv_output_0              |||||||||         14.9%   ||||||||          14.2%   [23]           
+37     _Slice_2_output_0                          |                  0.0%   |                  0.0%   [24]           
+38     _Add_2_output_0                            |                  0.1%   |                  0.0%   [25]           
+39     _activation_2_Relu_output_0                |                  0.1%   |                  0.0%   [26]           
+40     _convolutions_3_Conv_output_0              ||||||||||        16.9%   ||||||||          14.2%   [27]           
+45     _Slice_3_output_0                          |                  0.0%   |                  0.0%   [28]           
+46     _Add_3_output_0                            |                  0.1%   |                  0.0%   [29]           
+47     _activation_3_Relu_output_0                |                  0.1%   |                  0.0%   [30]           
+59     _gru_GRU_output_0                          ||||||||||||||||  25.9%   ||||||||||||||||  28.7%   [31, 32, 33]   
+------ ------------------------------------------ ------------------------- ------------------------- -------------- 
+macc=4,789,062 weights=348,772 act=76,800 ram_io=0

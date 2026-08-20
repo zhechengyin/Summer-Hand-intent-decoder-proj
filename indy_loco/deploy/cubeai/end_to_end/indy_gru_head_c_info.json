@@ -1,0 +1,599 @@
+{
+  "buffers": [
+    {
+      "alignment": 4,
+      "batch": 0,
+      "channel_first": false,
+      "channel_last": true,
+      "epochs": {
+        "end": 5,
+        "start": 2
+      },
+      "flags": "STAI_FLAG_INPUTS|STAI_FLAG_PREALLOCATED|STAI_FLAG_ACTIVATIONS",
+      "format": "STAI_FORMAT_FLOAT",
+      "id": 41,
+      "intq": {},
+      "is_param": false,
+      "mpool_id": 0,
+      "name": "encoded_sequence_output_array",
+      "nbits": 32,
+      "offset_start": 0,
+      "qmn": {},
+      "shape": [
+        50,
+        64
+      ],
+      "shape_map": [
+        "H",
+        "CH"
+      ],
+      "size_bytes": 12800
+    },
+    {
+      "alignment": 4,
+      "batch": 0,
+      "channel_first": true,
+      "channel_last": true,
+      "epochs": {
+        "end": 1,
+        "start": 0
+      },
+      "flags": "STAI_FLAG_WEIGHTS|STAI_FLAG_CONST|STAI_FLAG_PREALLOCATED",
+      "format": "STAI_FORMAT_FLOAT",
+      "id": 53,
+      "intq": {},
+      "is_param": true,
+      "mpool_id": 1,
+      "name": "gru_bias_array",
+      "nbits": 32,
+      "offset_start": 98304,
+      "qmn": {},
+      "shape": [
+        2,
+        192
+      ],
+      "shape_map": [
+        "CH",
+        "CH_IN"
+      ],
+      "size_bytes": 1536
+    },
+    {
+      "alignment": 4,
+      "batch": 0,
+      "channel_first": true,
+      "channel_last": true,
+      "epochs": {
+        "end": 1,
+        "start": 0
+      },
+      "flags": "STAI_FLAG_WEIGHTS|STAI_FLAG_CONST|STAI_FLAG_PREALLOCATED",
+      "format": "STAI_FORMAT_FLOAT",
+      "id": 47,
+      "intq": {},
+      "is_param": true,
+      "mpool_id": 1,
+      "name": "gru_kernel_array",
+      "nbits": 32,
+      "offset_start": 0,
+      "qmn": {},
+      "shape": [
+        192,
+        64
+      ],
+      "shape_map": [
+        "CH",
+        "CH_IN"
+      ],
+      "size_bytes": 49152
+    },
+    {
+      "alignment": 4,
+      "batch": 0,
+      "channel_first": false,
+      "channel_last": true,
+      "epochs": {
+        "end": 8,
+        "start": 4
+      },
+      "flags": "STAI_FLAG_PREALLOCATED|STAI_FLAG_ACTIVATIONS",
+      "format": "STAI_FORMAT_FLOAT",
+      "id": 43,
+      "intq": {},
+      "is_param": false,
+      "mpool_id": 0,
+      "name": "gru_output0_array",
+      "nbits": 32,
+      "offset_start": 14336,
+      "qmn": {},
+      "shape": [
+        50,
+        64
+      ],
+      "shape_map": [
+        "H",
+        "CH"
+      ],
+      "size_bytes": 12800
+    },
+    {
+      "alignment": 4,
+      "batch": 0,
+      "channel_first": true,
+      "channel_last": true,
+      "epochs": {
+        "end": 1,
+        "start": 0
+      },
+      "flags": "STAI_FLAG_WEIGHTS|STAI_FLAG_CONST|STAI_FLAG_PREALLOCATED",
+      "format": "STAI_FORMAT_FLOAT",
+      "id": 50,
+      "intq": {},
+      "is_param": true,
+      "mpool_id": 1,
+      "name": "gru_recurrent_array",
+      "nbits": 32,
+      "offset_start": 49152,
+      "qmn": {},
+      "shape": [
+        192,
+        64
+      ],
+      "shape_map": [
+        "CH",
+        "CH_IN"
+      ],
+      "size_bytes": 49152
+    },
+    {
+      "alignment": 4,
+      "batch": 0,
+      "channel_first": false,
+      "channel_last": true,
+      "epochs": {
+        "end": 6,
+        "start": 3
+      },
+      "flags": "STAI_FLAG_PREALLOCATED|STAI_FLAG_ACTIVATIONS|STAI_FLAG_SCRATCHS",
+      "format": "STAI_FORMAT_FLOAT",
+      "id": 64,
+      "intq": {},
+      "is_param": false,
+      "mpool_id": 0,
+      "name": "gru_scratch0_array",
+      "nbits": 32,
+      "offset_start": 12800,
+      "qmn": {},
+      "shape": [
+        1,
+        1,
+        384,
+        1
+      ],
+      "shape_map": [
+        "H",
+        "W",
+        "CH",
+        "CH_IN"
+      ],
+      "size_bytes": 1536
+    },
+    {
+      "alignment": 4,
+      "batch": 0,
+      "channel_first": true,
+      "channel_last": true,
+      "epochs": {
+        "end": 1,
+        "start": 0
+      },
+      "flags": "STAI_FLAG_WEIGHTS|STAI_FLAG_CONST|STAI_FLAG_PREALLOCATED",
+      "format": "STAI_FORMAT_FLOAT",
+      "id": 59,
+      "intq": {},
+      "is_param": true,
+      "mpool_id": 1,
+      "name": "velocity_norm_bias_array",
+      "nbits": 32,
+      "offset_start": 100352,
+      "qmn": {},
+      "shape": [
+        2
+      ],
+      "shape_map": [
+        "CH"
+      ],
+      "size_bytes": 8
+    },
+    {
+      "alignment": 4,
+      "batch": 0,
+      "channel_first": false,
+      "channel_last": true,
+      "epochs": {
+        "end": 9,
+        "start": 7
+      },
+      "flags": "STAI_FLAG_OUTPUTS|STAI_FLAG_PREALLOCATED|STAI_FLAG_ACTIVATIONS",
+      "format": "STAI_FORMAT_FLOAT",
+      "id": 45,
+      "intq": {},
+      "is_param": false,
+      "mpool_id": 0,
+      "name": "velocity_norm_output_array",
+      "nbits": 32,
+      "offset_start": 0,
+      "qmn": {},
+      "shape": [
+        50,
+        2
+      ],
+      "shape_map": [
+        "H",
+        "CH"
+      ],
+      "size_bytes": 400
+    },
+    {
+      "alignment": 4,
+      "batch": 0,
+      "channel_first": true,
+      "channel_last": true,
+      "epochs": {
+        "end": 1,
+        "start": 0
+      },
+      "flags": "STAI_FLAG_WEIGHTS|STAI_FLAG_CONST|STAI_FLAG_PREALLOCATED",
+      "format": "STAI_FORMAT_FLOAT",
+      "id": 56,
+      "intq": {},
+      "is_param": true,
+      "mpool_id": 1,
+      "name": "velocity_norm_weights_array",
+      "nbits": 32,
+      "offset_start": 99840,
+      "qmn": {},
+      "shape": [
+        2,
+        64
+      ],
+      "shape_map": [
+        "CH",
+        "CH_IN"
+      ],
+      "size_bytes": 512
+    }
+  ],
+  "environment": {
+    "device": "arm64, arm, Darwin",
+    "generated_model": {
+      "generated_time": "2026-08-19T20:30:53-0400",
+      "model_files": [
+        {
+          "name": "indy_gru_head_data_params.h",
+          "signature": "0x421474611517dd1ee92d7295a443af45"
+        },
+        {
+          "name": "indy_gru_head_data_params.c",
+          "signature": "0xcc512270271e31aa433ff5592e2757d7"
+        },
+        {
+          "name": "indy_gru_head_data.h",
+          "signature": "0xb384d8ca8f7f88ae14bfd703581f690f"
+        },
+        {
+          "name": "indy_gru_head_data.c",
+          "signature": "0x7fcb3d9d84db4370188dc7fe5cf52602"
+        },
+        {
+          "name": "indy_gru_head_config.h",
+          "signature": "0x70fba8027e24663dea9e4b9da3d5e6b0"
+        },
+        {
+          "name": "indy_gru_head.h",
+          "signature": "0xf0f5503e1b8f3bba07b6adcbcdc9d80d"
+        },
+        {
+          "name": "indy_gru_head.c",
+          "signature": "0x365bd74ac4fcdfb31241986c3035551a"
+        }
+      ],
+      "name": "indy_gru_head"
+    },
+    "network_signature": "0x6015f074b9a3467d",
+    "test_name": "",
+    "tools": [
+      {
+        "arguments": "validate --target stm32 --model /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/model/indy_phase6_gru_head.h5 --type keras --name indy_gru_head --optimization time --c-api legacy --mode host --valinput /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/encoder/validate/indy_encoder_val_c_outputs_1.csv --valoutput /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/validation/pytorch_outputs.csv --workspace /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/workspace/validate_end_to_end --output /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/deploy/cubeai/end_to_end --save-csv --verbosity 1",
+        "environment": [],
+        "input_model": {
+          "model_files": [
+            {
+              "name": "indy_phase6_gru_head.h5",
+              "signature": "0x6e6ec000cc3661698f9f99344f0cdb45"
+            }
+          ],
+          "n_params": 25090,
+          "name": "indy_phase6_gru_head",
+          "size": 100360,
+          "type": "keras"
+        },
+        "name": "ST.EdgeAI.Core",
+        "version": "2.2.0-20266 2adc00962"
+      }
+    ]
+  },
+  "graphs": [
+    {
+      "edges": [
+        {
+          "buffer": 43,
+          "edge_kind": "EDGE_MEMORY",
+          "end": {
+            "node_id": 8,
+            "port": 0
+          },
+          "id": 0,
+          "name": "n7-p0_n8-p0",
+          "start": {
+            "node_id": 7,
+            "port": 0
+          }
+        }
+      ],
+      "exec_time": {
+        "counters": null,
+        "cycles": 0,
+        "cycles_by_macc": 0.0,
+        "duration_ms": 0.5226666717790067,
+        "percentage": 100.0
+      },
+      "id": 0,
+      "inputs": [
+        41
+      ],
+      "name": "indy_phase6_gru_head",
+      "nodes": [
+        {
+          "attributes": {
+            "activation_nl": "tanh",
+            "activation_param": "False",
+            "go_backwards": "False",
+            "n_features": "64",
+            "num_units": "64",
+            "out_nl": "tanh",
+            "out_param": "False",
+            "recurrent_nl": "sigmoid",
+            "recurrent_param": "False",
+            "reset_after": "True",
+            "return_sequences": "True",
+            "return_state": "False",
+            "stateful": "False",
+            "use_bias": "True"
+          },
+          "description": "GRU",
+          "exec_time": {
+            "counters": [],
+            "cycles": 0,
+            "cycles_by_macc": 0.0,
+            "duration_ms": 0.5196666717529297,
+            "percentage": 99.42602040878829
+          },
+          "id": 7,
+          "inputs": [
+            41,
+            47,
+            50,
+            53
+          ],
+          "macc": 1235200,
+          "mapping": "NODE_SW",
+          "name": "gru",
+          "original_nodes": [
+            "1"
+          ],
+          "outputs": [
+            43
+          ],
+          "scratchs": [
+            64
+          ],
+          "subgraph_nodes": [],
+          "sw_functions": [
+            "forward_gru"
+          ]
+        },
+        {
+          "attributes": {
+            "num_units": "2",
+            "use_bias": "True"
+          },
+          "description": "Dense",
+          "exec_time": {
+            "counters": [],
+            "cycles": 0,
+            "cycles_by_macc": 0.0,
+            "duration_ms": 0.003000000026077032,
+            "percentage": 0.5739795912117175
+          },
+          "id": 8,
+          "inputs": [
+            43,
+            56,
+            59
+          ],
+          "macc": 6500,
+          "mapping": "NODE_SW",
+          "name": "velocity_norm",
+          "original_nodes": [
+            "2"
+          ],
+          "outputs": [
+            45
+          ],
+          "scratchs": [],
+          "subgraph_nodes": [],
+          "sw_functions": [
+            "forward_dense"
+          ]
+        }
+      ],
+      "original_inputs": [
+        {
+          "c_shape_map": [],
+          "data_format": {
+            "quantizer": "NONE",
+            "scale": [],
+            "size": 32,
+            "type": "FLOAT",
+            "zero": []
+          },
+          "name": "encoded_sequence",
+          "shape": [
+            1,
+            50,
+            64
+          ],
+          "shape_map": [
+            "BATCH",
+            "H",
+            "CH"
+          ]
+        }
+      ],
+      "original_outputs": [
+        {
+          "c_shape_map": [],
+          "data_format": {
+            "quantizer": "NONE",
+            "scale": [],
+            "size": 32,
+            "type": "FLOAT",
+            "zero": []
+          },
+          "name": "velocity_norm",
+          "shape": [
+            1,
+            50,
+            2
+          ],
+          "shape_map": [
+            "BATCH",
+            "H",
+            "CH"
+          ]
+        }
+      ],
+      "outputs": [
+        45
+      ]
+    }
+  ],
+  "json_schema_version": "2.0",
+  "memory_footprint": {
+    "activations": 27136,
+    "io": [
+      0,
+      0
+    ],
+    "kernel_flash": null,
+    "kernel_ram": null,
+    "series": "generic",
+    "toolchain": null,
+    "toolchain_flash": null,
+    "toolchain_ram": null,
+    "weights": 100360
+  },
+  "memory_pools": [
+    {
+      "address": "NULL",
+      "alignment": 4,
+      "attributes": {
+        "latency": "HIGH",
+        "score": 768,
+        "throughput": "LOW"
+      },
+      "buffers": [
+        41,
+        43,
+        45,
+        64
+      ],
+      "id": 0,
+      "name": "heap_overlay_pool",
+      "offset_start": 0,
+      "persistent": false,
+      "rights": "ACC_WRITE",
+      "size_bytes": -1,
+      "subpools": [],
+      "used_size_bytes": 27136,
+      "user_allocated": false,
+      "virtual": false
+    },
+    {
+      "address": "NULL",
+      "alignment": 0,
+      "attributes": {
+        "latency": "UNDEF",
+        "score": 0,
+        "throughput": "UNDEF"
+      },
+      "buffers": [
+        47,
+        50,
+        53,
+        56,
+        59
+      ],
+      "id": 1,
+      "name": "weights_array",
+      "offset_start": 0,
+      "persistent": true,
+      "rights": "ACC_READ",
+      "size_bytes": -1,
+      "subpools": [],
+      "used_size_bytes": 100360,
+      "user_allocated": false,
+      "virtual": false
+    }
+  ],
+  "validation": {
+    "val_error": 1.9836818410112755e-07,
+    "val_error_desc": "x-cross (l2r) #1",
+    "val_metrics": [
+      {
+        "acc": "n.a.",
+        "cos": 1.0,
+        "desc": "HOST c-model #1",
+        "l2r": 3.1981721804186236e-07,
+        "mae": 1.0079588008693463e-07,
+        "mean": 1.2406380811569306e-08,
+        "nse": 0.9999999999998979,
+        "rmse": 1.3665173526078433e-07,
+        "std": 1.361725168180783e-07
+      },
+      {
+        "acc": "n.a.",
+        "cos": 1.0,
+        "desc": "original model #1",
+        "l2r": 3.1570166925121157e-07,
+        "mae": 9.79122702915447e-08,
+        "mean": 1.574633579082274e-08,
+        "nse": 0.9999999999999004,
+        "rmse": 1.348932556766158e-07,
+        "std": 1.3405485788098304e-07
+      },
+      {
+        "acc": "n.a.",
+        "cos": 1.0,
+        "desc": "X-cross #1",
+        "l2r": 1.9836818410112755e-07,
+        "mae": 6.499350746480559e-08,
+        "mean": -3.339955645387249e-09,
+        "nse": 0.9999999999999607,
+        "rmse": 8.475890211911974e-08,
+        "std": 8.47460555064572e-08
+      }
+    ]
+  }
+}

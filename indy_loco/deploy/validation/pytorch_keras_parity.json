@@ -1,0 +1,10 @@
+{
+  "samples": 8,
+  "max_abs_error": 5.960464477539062e-07,
+  "mean_abs_error": 8.276081331359819e-08,
+  "timestep_49_max_abs_error": 2.682209014892578e-07,
+  "tensorflow": "2.19.1",
+  "keras": "3.15.1",
+  "gru_reset_after": true,
+  "gru_gate_mapping": "pytorch_rzn_to_keras_zrn"
+}

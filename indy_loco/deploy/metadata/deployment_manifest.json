@@ -1,0 +1,61 @@
+{
+  "bundle": "indy_phase6_phase9_cubeai",
+  "status": "host_c_validated",
+  "firmware_modified": false,
+  "checkpoint": {
+    "path": "source/midsize_checkpoint.pt",
+    "sha256": "685ee659b56e40d2484d09b4d03bbdcb032856e772228fb0125c3703575e378a",
+    "parameters": 86978
+  },
+  "overall_interface": {
+    "input": {"name": "features", "dtype": "float32", "shape": [1, 192, 50]},
+    "output": {"name": "velocity_norm", "dtype": "float32", "shape": [1, 50, 2]},
+    "read_timestep": 49
+  },
+  "networks": [
+    {
+      "name": "indy_encoder",
+      "model": "model/indy_phase6_encoder.onnx",
+      "sha256": "6fdaeb21117aec6efb3d82e2c43934b775192be790e661ad84a11aaf6fcfad07",
+      "input_shape": [1, 192, 50],
+      "output_shape": [1, 50, 64],
+      "weights_bytes": 248156,
+      "activations_bytes": 76800,
+      "macc": 3542560
+    },
+    {
+      "name": "indy_gru_head",
+      "model": "model/indy_phase6_gru_head.h5",
+      "sha256": "6978a3b7aa1af8f35acb8f580f92c464a6056f1fed9da521f01fae53fdc1cbb1",
+      "input_shape": [1, 50, 64],
+      "output_shape": [1, 50, 2],
+      "weights_bytes": 100360,
+      "activations_bytes": 27136,
+      "macc": 1241700
+    }
+  ],
+  "combined": {
+    "weights_bytes": 348516,
+    "conservative_activations_bytes": 103936,
+    "macc": 4784260
+  },
+  "generated_c_chain_vs_pytorch": {
+    "samples": 8,
+    "rmse": 1.3665173526078433e-7,
+    "mean_abs_error": 1.0079588008693463e-7,
+    "max_abs_error": 6.258487701416016e-7,
+    "timestep_49_max_abs_error": 1.4901161193847656e-7,
+    "cosine_similarity": 1.0
+  },
+  "cubeai": {
+    "core": "ST Edge AI Core v2.2.0-20266 2adc00962",
+    "stm32cubeai": "10.2.0-RC1",
+    "target": "stm32",
+    "optimization": "time",
+    "c_api": "legacy"
+  },
+  "runtime": {
+    "library": "cubeai/runtime/Lib/NetworkRuntime1020_CM7_GCC.a",
+    "sha256": "a595d3ef15880a29c288efeafad40636314fd44e0f71908f5a4281bf507d393b"
+  }
+}
