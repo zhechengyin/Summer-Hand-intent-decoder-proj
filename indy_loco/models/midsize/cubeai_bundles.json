@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "bundle_format": "bci-cubeai-bundle-v1",
+  "status": "deployment_candidate_replay_complete",
+  "promotion_claimed": false,
+  "sessions": [
+    {
+      "model_id": "indy_20160622_01",
+      "manifest": "indy_20160622_01/cubeai/manifest.json",
+      "bundle": "indy_20160622_01/cubeai/indy_20160622_01.aibundle",
+      "bundle_bytes": 349776,
+      "bundle_crc32": "61c44cfd",
+      "bundle_sha256": "205f935b3898843f61427494917ed2e3894d99d03f9e321045fda4cf4de86647"
+    },
+    {
+      "model_id": "indy_20160630_01",
+      "manifest": "indy_20160630_01/cubeai/manifest.json",
+      "bundle": "indy_20160630_01/cubeai/indy_20160630_01.aibundle",
+      "bundle_bytes": 349776,
+      "bundle_crc32": "0bc827e5",
+      "bundle_sha256": "4066aca2e9322902757cd789381da3a3e5967255617a1d5190f4d26327ce68ad"
+    },
+    {
+      "model_id": "indy_20170131_02",
+      "manifest": "indy_20170131_02/cubeai/manifest.json",
+      "bundle": "indy_20170131_02/cubeai/indy_20170131_02.aibundle",
+      "bundle_bytes": 349776,
+      "bundle_crc32": "7985d191",
+      "bundle_sha256": "9becc646ab9d39cc50c3d2da548611a42a944f0a19367915e2b622ce3cc8f8af"
+    },
+    {
+      "model_id": "loco_20170210_03",
+      "manifest": "loco_20170210_03/cubeai/manifest.json",
+      "bundle": "loco_20170210_03/cubeai/loco_20170210_03.aibundle",
+      "bundle_bytes": 349776,
+      "bundle_crc32": "0dc1b23b",
+      "bundle_sha256": "2f3925506a902efda2691a0a320cd8b2e5dd31d30d2565198ffa61ec2170cbdb"
+    },
+    {
+      "model_id": "loco_20170215_02",
+      "manifest": "loco_20170215_02/cubeai/manifest.json",
+      "bundle": "loco_20170215_02/cubeai/loco_20170215_02.aibundle",
+      "bundle_bytes": 349776,
+      "bundle_crc32": "4d56eef5",
+      "bundle_sha256": "3c95212e69b63f03d114020f97f9cb7316138bfe851f4c4a7dc47e05e77af267"
+    },
+    {
+      "model_id": "loco_20170301_05",
+      "manifest": "loco_20170301_05/cubeai/manifest.json",
+      "bundle": "loco_20170301_05/cubeai/loco_20170301_05.aibundle",
+      "bundle_bytes": 349776,
+      "bundle_crc32": "83c2aa1d",
+      "bundle_sha256": "4282abb8bea5731c27f15222d68dfeee2b338aa856d215da7765fb7044d46cfe"
+    }
+  ]
+}

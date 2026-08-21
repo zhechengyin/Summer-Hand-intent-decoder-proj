@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "purpose": "phase7_fold1_session_checkpoints",
+  "status": "benchmark_only_not_promoted",
+  "architecture": {
+    "module": "model.py",
+    "class": "MidsizeTCNGRU",
+    "parameter_count": 86978,
+    "input_features": 192,
+    "window_bins": 50,
+    "bin_ms": 40,
+    "causal_ewma_alpha": 0.1,
+    "tcn_width": 64,
+    "gru_width": 64
+  },
+  "training": {
+    "experiment": "phase7_ann_vs_snn_fivefold",
+    "fold": 1,
+    "fold_seed": 43,
+    "epochs": 20,
+    "selection": "minimum validation loss",
+    "test_policy": "evaluated only after checkpoint selection",
+    "note": "Retrained because the archived Phase 7 weight files were absent; metrics and hashes below describe these new files."
+  },
+  "paper_session_aliases": {
+    "loco_20170131_02": "loco_20170210_03"
+  },
+  "sessions": [
+    {
+      "session": "indy_20160622_01",
+      "subject": "indy",
+      "checkpoint": "indy_20160622_01/checkpoint.pt",
+      "best_epoch": 14,
+      "train_r2": 0.8795473575592041,
+      "validation_r2": 0.8083776235580444,
+      "test_r2": 0.8079534769058228,
+      "test_r2_x": 0.8249050974845886,
+      "test_r2_y": 0.7910018563270569,
+      "sha256": "ed676af9f3f8faa230928085119f32ec151055efc004e14e1bcb17c105db0932",
+      "deployment_candidate": {
+        "status": "deployment_candidate_replay_complete",
+        "checkpoint": "indy_20160622_01/deployment_candidate.pt",
+        "sha256": "38f906b0981e6ea3e8a2007dfef2bf6248d1a8f0013ce62392cd45cbd0bdfd0e",
+        "constants": "indy_20160622_01/deployment_constants.npz",
+        "constants_sha256": "41b4c0aa8edacf9b6685174c1be0f04501bf76c5d977d134aa3961f2ae68817b",
+        "golden_vectors": "indy_20160622_01/deployment_golden_vectors.npz",
+        "golden_vectors_sha256": "301e779d5054985e7ca6a9cf1319f4fb79ee4adbe177b3d1838bc718d47d9e2a",
+        "firmware_replay_r2_mean": 0.6907678842544556,
+        "phase7_same_bins_r2_mean": 0.8079662322998047,
+        "promotion_decision": "manual_review_required"
+      }
+    },
+    {
+      "session": "indy_20160630_01",
+      "subject": "indy",
+      "checkpoint": "indy_20160630_01/checkpoint.pt",
+      "best_epoch": 17,
+      "train_r2": 0.8412014245986938,
+      "validation_r2": 0.7038215398788452,
+      "test_r2": 0.6720836162567139,
+      "test_r2_x": 0.5508395433425903,
+      "test_r2_y": 0.7933277487754822,
+      "sha256": "69dbbff1d792b6969d1a8c90fa439bdcd3b76f63d4cac80d35937430edbc81e0",
+      "deployment_candidate": {
+        "status": "deployment_candidate_replay_complete",
+        "checkpoint": "indy_20160630_01/deployment_candidate.pt",
+        "sha256": "731e930771f038f3fb2da4097bd19a66d4f6518e927b99068d84fe6397a63b9e",
+        "constants": "indy_20160630_01/deployment_constants.npz",
+        "constants_sha256": "633abc37f3eb428581965e8e2998a052d6e70fcc6bc53cf86064ed9c2408e5af",
+        "golden_vectors": "indy_20160630_01/deployment_golden_vectors.npz",
+        "golden_vectors_sha256": "15b25841c99fa7af0048e67303cda92c2c31a93b5322ee9522c49ab82c8c636c",
+        "firmware_replay_r2_mean": 0.47925660014152527,
+        "phase7_same_bins_r2_mean": 0.6711654663085938,
+        "promotion_decision": "manual_review_required"
+      }
+    },
+    {
+      "session": "indy_20170131_02",
+      "subject": "indy",
+      "checkpoint": "indy_20170131_02/checkpoint.pt",
+      "best_epoch": 9,
+      "train_r2": 0.827576220035553,
+      "validation_r2": 0.7306168675422668,
+      "test_r2": 0.7295125126838684,
+      "test_r2_x": 0.7239478826522827,
+      "test_r2_y": 0.7350771427154541,
+      "sha256": "8c7d198f06459cf0c6c72b1d763eac7366756421cc41db3bb79e35273c6f9b8e",
+      "deployment_candidate": {
+        "status": "deployment_candidate_replay_complete",
+        "checkpoint": "indy_20170131_02/deployment_candidate.pt",
+        "sha256": "78ad2631c2a8cf4ccabec751f66cc2f952c6b9d9834e1a2393d654aa10aa1121",
+        "constants": "indy_20170131_02/deployment_constants.npz",
+        "constants_sha256": "46d11578b99437bf23d958f0b76810f17a93a5dfbcf8dff44458d6eb4fb7ce57",
+        "golden_vectors": "indy_20170131_02/deployment_golden_vectors.npz",
+        "golden_vectors_sha256": "12aabca8cb983c94897648c057e3435dac10f3ea0dc4f4a6ffd887bbc732241c",
+        "firmware_replay_r2_mean": 0.5977269411087036,
+        "phase7_same_bins_r2_mean": 0.7252320647239685,
+        "promotion_decision": "manual_review_required"
+      }
+    },
+    {
+      "session": "loco_20170210_03",
+      "subject": "loco",
+      "checkpoint": "loco_20170210_03/checkpoint.pt",
+      "best_epoch": 13,
+      "train_r2": 0.8231671452522278,
+      "validation_r2": 0.564082682132721,
+      "test_r2": 0.6562504768371582,
+      "test_r2_x": 0.5671333074569702,
+      "test_r2_y": 0.7453675866127014,
+      "sha256": "9dc25fc16c245d9282973f1bfb6fd66c289800c2ea9989e734bbc3da42edb6e0",
+      "deployment_candidate": {
+        "status": "deployment_candidate_replay_complete",
+        "checkpoint": "loco_20170210_03/deployment_candidate.pt",
+        "sha256": "9d9fee53ce7e4c84627609086f4881ef196e6f80f59a8af5f4863f117094efdf",
+        "constants": "loco_20170210_03/deployment_constants.npz",
+        "constants_sha256": "00fbe62d9e81019e06ddb97eed5ba875f9f84bb9851d05c276305c69cf5c2ffc",
+        "golden_vectors": "loco_20170210_03/deployment_golden_vectors.npz",
+        "golden_vectors_sha256": "42657d408dfbbc50dbb79b6b441c1fdfcd6b204c0682d6d4886804d4a35ca249",
+        "firmware_replay_r2_mean": 0.6591733694076538,
+        "phase7_same_bins_r2_mean": 0.6658386588096619,
+        "promotion_decision": "manual_review_required"
+      }
+    },
+    {
+      "session": "loco_20170215_02",
+      "subject": "loco",
+      "checkpoint": "loco_20170215_02/checkpoint.pt",
+      "best_epoch": 13,
+      "train_r2": 0.7940031290054321,
+      "validation_r2": 0.6429939270019531,
+      "test_r2": 0.5553683042526245,
+      "test_r2_x": 0.4170295000076294,
+      "test_r2_y": 0.6937071084976196,
+      "sha256": "7fc8b63b6fa03049c1b941df99f759342b58e211011dee7a0bcb8c6731952179",
+      "deployment_candidate": {
+        "status": "deployment_candidate_replay_complete",
+        "checkpoint": "loco_20170215_02/deployment_candidate.pt",
+        "sha256": "2f5aef4589c0a1241315c1c7bf918ca0234e48c0a1a28fb5f7f3c31f142ead10",
+        "constants": "loco_20170215_02/deployment_constants.npz",
+        "constants_sha256": "a47c014ed54fc447271cd5e353da18c4e22b2dcf8a7728c8300e5d914f904b7f",
+        "golden_vectors": "loco_20170215_02/deployment_golden_vectors.npz",
+        "golden_vectors_sha256": "e849eb641671d0edc43c7107b50ce14716e00f6470fb65b50bcbf52750d292f7",
+        "firmware_replay_r2_mean": 0.4239107370376587,
+        "phase7_same_bins_r2_mean": 0.551980197429657,
+        "promotion_decision": "manual_review_required"
+      }
+    },
+    {
+      "session": "loco_20170301_05",
+      "subject": "loco",
+      "checkpoint": "loco_20170301_05/checkpoint.pt",
+      "best_epoch": 13,
+      "train_r2": 0.8425287008285522,
+      "validation_r2": 0.6820513010025024,
+      "test_r2": 0.7385282516479492,
+      "test_r2_x": 0.6341164708137512,
+      "test_r2_y": 0.842940092086792,
+      "sha256": "7a09eff79c4489da42bc992aeb45f9a97aef006da432eaacf767bf59849d6ea3",
+      "deployment_candidate": {
+        "status": "deployment_candidate_replay_complete",
+        "checkpoint": "loco_20170301_05/deployment_candidate.pt",
+        "sha256": "4edd48ceb61be64fde9d29ece80561a06b3dddc2d1d272748030d3f89866a50d",
+        "constants": "loco_20170301_05/deployment_constants.npz",
+        "constants_sha256": "44758f173c54120e142076f8ed72353636e493ecda06f567487930441fd0c705",
+        "golden_vectors": "loco_20170301_05/deployment_golden_vectors.npz",
+        "golden_vectors_sha256": "987314fd178b5c4b14b837d30b64f78bb1a0cb725c0eb0c1f3d84ccc62f92803",
+        "firmware_replay_r2_mean": 0.7292327880859375,
+        "phase7_same_bins_r2_mean": 0.7426151633262634,
+        "promotion_decision": "manual_review_required"
+      }
+    }
+  ],
+  "deployment_validation": {
+    "phase": "phase10_session_deployment_candidates",
+    "schema_version": 1,
+    "policy": "continuous EWMA, 60 s calibration, rolling 50-bin window, timestep 49",
+    "promotion": "manual review required; this script never silently promotes weights"
+  }
+}

@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "model_id": "indy_20160622_01",
+  "session": "indy_20160622_01",
+  "subject": "indy",
+  "status": "deployment_candidate_replay_complete",
+  "promotion_claimed": false,
+  "architecture": {
+    "physical_channels": 96,
+    "input_features": 192,
+    "input_bin_ms": 40,
+    "window_bins": 50,
+    "window_seconds": 2.0,
+    "causal_ewma_alpha": 0.1,
+    "tcn_width": 64,
+    "gru_width": 64,
+    "kernel_size": 3,
+    "dilations": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "model_dropout": 0.1,
+    "paired_channel_dropout": 0.2,
+    "learning_rate": 0.0009,
+    "weight_decay": 0.025,
+    "batch_size": 32,
+    "gradient_clip": 1.0,
+    "epochs": 20,
+    "parameter_count": 86978
+  },
+  "source_channel_count": 96,
+  "selected_channel_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95
+  ],
+  "checkpoint": {
+    "file": "deployment_candidate.pt",
+    "bytes": 364461,
+    "sha256": "38f906b0981e6ea3e8a2007dfef2bf6248d1a8f0013ce62392cd45cbd0bdfd0e"
+  },
+  "deployment_constants": {
+    "file": "deployment_constants.npz",
+    "bytes": 2779,
+    "crc32": "d84b2537",
+    "sha256": "41b4c0aa8edacf9b6685174c1be0f04501bf76c5d977d134aa3961f2ae68817b"
+  },
+  "deployment_golden_vectors": {
+    "file": "deployment_golden_vectors.npz",
+    "bytes": 169639,
+    "crc32": "20fd0bc7",
+    "sha256": "301e779d5054985e7ca6a9cf1319f4fb79ee4adbe177b3d1838bc718d47d9e2a"
+  },
+  "models": {
+    "encoder_onnx_sha256": "048482be9f823a9cea42493e44e2d4512a5d765466c25159a7cf9917479112ef",
+    "gru_head_h5_sha256": "adb5964831bff60da3dd7a9c55d11fc2ce84067de254a27a2f9a352ca892662a"
+  },
+  "components": {
+    "encoder": {
+      "file": "encoder.weights.bin",
+      "bytes": 248156,
+      "crc32": "4a39428b",
+      "sha256": "cf1023e7905bce6c08ce29e9884b206b329214b8e4b8fc032f6e5d0060c19af2",
+      "weights_bytes": 248156,
+      "activations_bytes": 76800,
+      "macc": 3542560
+    },
+    "gru_head": {
+      "file": "gru_head.weights.bin",
+      "bytes": 100360,
+      "crc32": "875af3a5",
+      "sha256": "78eb45c915f312b46a3cc3d2f4e190421548bce4917f79b769c59e3604372b20",
+      "weights_bytes": 100360,
+      "activations_bytes": 27136,
+      "macc": 1241700
+    }
+  },
+  "combined": {
+    "weights_bytes": 348516,
+    "conservative_activations_bytes": 103936,
+    "macc": 4784260
+  },
+  "parity": {
+    "checkpoint_vs_replay_golden": {
+      "max_abs_error": 1.5273690223693848e-07,
+      "mean_abs_error": 2.9333168640732765e-08,
+      "rmse": 3.9463702046689316e-08,
+      "timestep_49_max_abs_error": 6.332993507385254e-08
+    },
+    "encoder_onnx_vs_pytorch": {
+      "max_abs_error": 3.814697265625e-06,
+      "mean_abs_error": 9.392563242727192e-08,
+      "rmse": 2.456993496872019e-07,
+      "timestep_49_max_abs_error": 1.430511474609375e-06
+    },
+    "split_keras_vs_pytorch": {
+      "max_abs_error": 2.384185791015625e-07,
+      "mean_abs_error": 4.4855987653136254e-08,
+      "rmse": 5.778176429836878e-08,
+      "timestep_49_max_abs_error": 1.1920928955078125e-07
+    },
+    "encoder_host_c_vs_pytorch": {
+      "max_abs_error": 3.337860107421875e-06,
+      "mean_abs_error": 9.848905392573215e-08,
+      "rmse": 2.5162769077925435e-07,
+      "timestep_49_max_abs_error": 1.9073486328125e-06
+    },
+    "gru_head_host_c_vs_pytorch": {
+      "max_abs_error": 3.5762786865234375e-07,
+      "mean_abs_error": 6.399990525096655e-08,
+      "rmse": 8.671210387212926e-08,
+      "timestep_49_max_abs_error": 2.086162567138672e-07
+    },
+    "generated_c_chain_vs_pytorch": {
+      "max_abs_error": 3.8743019104003906e-07,
+      "mean_abs_error": 7.009657565504313e-08,
+      "rmse": 9.30595990547257e-08,
+      "timestep_49_max_abs_error": 1.4901161193847656e-07
+    }
+  },
+  "bundle": {
+    "format": "bci-cubeai-bundle-v1",
+    "format_version": 1,
+    "graph_abi_id": "tcn64-gru64-xcubeai10.2-f32-v1",
+    "magic_hex": "4243494149423100",
+    "header_bytes": 256,
+    "alignment_bytes": 32,
+    "total_bytes": 349776,
+    "crc32": "61c44cfd",
+    "sha256": "205f935b3898843f61427494917ed2e3894d99d03f9e321045fda4cf4de86647",
+    "header_crc32": "e42dfcdc",
+    "body_sha256": "307b0139827cb9d900929c7710e46e9dac7f09062e99ed47c82f344d0b757f40",
+    "encoder_offset": 256,
+    "gru_head_offset": 248416,
+    "parameters_offset": 348800,
+    "parameters_layout": {
+      "endianness": "little",
+      "feature_std_floor": {
+        "dtype": "float32",
+        "count": 192,
+        "offset": 0
+      },
+      "target_mean": {
+        "dtype": "float32",
+        "count": 2,
+        "offset": 768
+      },
+      "target_std": {
+        "dtype": "float32",
+        "count": 2,
+        "offset": 776
+      },
+      "selected_channel_indices": {
+        "dtype": "uint16",
+        "count": 96,
+        "offset": 784
+      },
+      "total_bytes": 976
+    }
+  },
+  "cubeai": {
+    "version_output": [
+      "ST Edge AI Core v2.2.0-20266 2adc00962",
+      "STM32CubeAI 10.2.0-RC1"
+    ],
+    "target": "stm32",
+    "optimization": "time",
+    "c_api": "legacy",
+    "weight_binary_source": "official stedgeai generate --binary"
+  },
+  "python_environment": {
+    "python": "3.12.13",
+    "torch": "2.13.0+cpu",
+    "onnx": "1.22.0",
+    "onnxruntime": "1.29.0",
+    "tensorflow": "2.19.1",
+    "keras": "3.15.1",
+    "numpy": "2.1.3",
+    "h5py": "3.16.0"
+  }
+}
