@@ -1,12 +1,16 @@
 # Session Cube.AI weight bundles
 
 The six session directories below `models/midsize` contain dynamically
-loadable Cube.AI weight bundles. They are deployment candidates, not promoted
-production models. Every build uses the verified split graph from the Phase 6
-deployment:
+loadable Cube.AI weight bundles. The promoted firmware path uses the validated
+`cubeai_int8` artifacts:
 
-1. `indy_encoder`: float32 `(1, 192, 50)` to `(1, 50, 64)`
+1. six session-specific INT8 encoder graphs with a float32 external ABI,
+   `(1, 192, 50)` to `(1, 50, 64)`
 2. `indy_gru_head`: float32 `(1, 50, 64)` to `(1, 50, 2)`
+
+The encoder graph must be selected by session because X-CUBE-AI embeds the
+session-specific INT8 scales and zero-points in generated C. The uploaded
+bundle still carries that session's encoder and GRU/head weights.
 
 The component `.bin` files are emitted directly by X-CUBE-AI 10.2
 `stedgeai generate --binary`. The project scripts do not reconstruct Cube.AI's
@@ -18,19 +22,32 @@ Install the exact versions in `requirements-deploy.txt` in a Python 3.12
 environment, then run from the repository root:
 
 ```powershell
-python indy_loco/deploy/build_session_cubeai.py
-python indy_loco/deploy/verify_session_cubeai.py
+python indy_loco/deploy/build_session_cubeai_int8.py
+python indy_loco/deploy/promote_cubeai_int8.py
 ```
 
-`build_session_cubeai.py` exports the checkpoint into the two verified network
-formats, runs PyTorch/ONNX/Keras parity, runs Cube.AI host-C validation for both
-components and the chained graph, requests the official binary weights, and
-then creates the bundle. Any parity error over `1e-5`, or a binary whose size
-differs from Cube.AI's `c_info.json`, stops the build.
+`build_session_cubeai_int8.py` performs post-training quantization using only
+the selected fold's training reaches. It checks the full held-out fold against
+the float32 checkpoint using the generated Cube.AI host library and rejects a
+session when mean R2 drops by more than 0.01. It then emits the six graph source
+sets and bundles. `promote_cubeai_int8.py` copies those checked artifacts into
+the firmware and GUI repositories.
 
-`verify_session_cubeai.py` is intentionally independent of the builder. It
-recalculates every size, mapping, CRC32 and SHA256 and parses every bundle
-header and parameter payload.
+The original float32 builder and verifier remain available for regression and
+fallback builds.
+
+## Test from a clean checkout
+
+The promoted firmware graph sources and the GUI's six `.aibundle` files are
+checked-in artifacts. A second computer does not need the training datasets,
+PyTorch, TensorFlow, or X-CUBE-AI to run Dataset Replay:
+
+1. build and flash the CM7 **Release** configuration;
+2. install `BCI-STM32-Plot/requirements.txt` and launch the GUI;
+3. select one of the six Dataset Replay sessions and start it.
+
+The training/export environment and X-CUBE-AI 10.2 CLI are needed only when
+regenerating or auditing the INT8 artifacts.
 
 ## Graph ABI contract
 
@@ -38,14 +55,14 @@ The firmware must only load these weights into generated graph code carrying
 this exact identifier:
 
 ```text
-tcn64-gru64-xcubeai10.2-f32-v1
+tcn64i8x6-gru64f32-xcai10-v2
 ```
 
-This identifier covers the split, tensor shapes, float32 representation,
-X-CUBE-AI 10.2 conversion family, `time` optimization and legacy C API used by
-the current generated graph. It is separate from the container version. A
-firmware graph or conversion-layout change requires a new ABI identifier even
-when component sizes happen to remain unchanged.
+This identifier covers the split, tensor shapes, INT8 encoder / FP32 GRU
+representation, six graph variants, X-CUBE-AI 10.2 conversion family and the
+legacy C API used by the generated graphs. It is separate from the container
+version. A firmware graph or conversion-layout change requires a new ABI
+identifier even when component sizes happen to remain unchanged.
 
 ## Bundle v1 binary layout
 

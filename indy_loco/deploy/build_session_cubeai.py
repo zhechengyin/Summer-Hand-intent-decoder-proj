@@ -239,7 +239,6 @@ def export_models(
         input_names=["features"],
         output_names=["encoded_sequence"],
         opset_version=16,
-        dynamo=False,
         dynamic_axes=None,
         do_constant_folding=True,
     )
@@ -579,6 +578,9 @@ def build_bundle(
     constants: dict[str, Any],
     encoder_binary: Path,
     gru_binary: Path,
+    *,
+    model_bundle_version: str = MODEL_BUNDLE_VERSION,
+    graph_abi_id: str = GRAPH_ABI_ID,
 ) -> dict[str, Any]:
     encoder = encoder_binary.read_bytes()
     gru = gru_binary.read_bytes()
@@ -623,17 +625,17 @@ def build_bundle(
         len(params),
         crc32_bytes(params),
         body_digest,
-        encode_fixed_string(MODEL_BUNDLE_VERSION, 32),
+        encode_fixed_string(model_bundle_version, 32),
         0,
-        encode_fixed_string(GRAPH_ABI_ID, 32),
+        encode_fixed_string(graph_abi_id, 32),
     )
     header_crc = crc32_bytes(bytes(header))
     struct.pack_into("<I", header, BUNDLE_HEADER_CRC_OFFSET, header_crc)
     destination.write_bytes(bytes(header) + bytes(body))
     return {
-        "format": MODEL_BUNDLE_VERSION,
+        "format": model_bundle_version,
         "format_version": 1,
-        "graph_abi_id": GRAPH_ABI_ID,
+        "graph_abi_id": graph_abi_id,
         "magic_hex": BUNDLE_MAGIC.hex(),
         "header_bytes": BUNDLE_HEADER_SIZE,
         "alignment_bytes": BUNDLE_ALIGNMENT,

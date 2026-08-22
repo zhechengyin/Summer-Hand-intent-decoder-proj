@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "bundle_format": "bci-cubeai-bundle-v1",
+  "graph_abi_id": "tcn64i8x6-gru64f32-xcai10-v2",
+  "status": "encoder_int8_gru_fp32_all_sessions_validated",
+  "promotion_claimed": false,
+  "session_specific_encoder_graphs_required": true,
+  "reason": "X-CUBE-AI embeds session-specific INT8 quantization metadata in C",
+  "sessions": [
+    {
+      "model_id": "indy_20160622_01",
+      "encoder_graph_name": "indy_enc_i622",
+      "manifest": "indy_20160622_01/cubeai_int8/manifest.json",
+      "bundle": "indy_20160622_01/cubeai_int8/indy_20160622_01.aibundle",
+      "bundle_bytes": 164496,
+      "bundle_crc32": "d9f7aac0",
+      "bundle_sha256": "f7bf8145949f0a9b1c48b134346b342a49826f03388b8ce117d3373835366133",
+      "held_out_r2_mean": 0.7304989695549011,
+      "r2_mean_drop": 0.0006048083305358887
+    },
+    {
+      "model_id": "indy_20160630_01",
+      "encoder_graph_name": "indy_enc_i630",
+      "manifest": "indy_20160630_01/cubeai_int8/manifest.json",
+      "bundle": "indy_20160630_01/cubeai_int8/indy_20160630_01.aibundle",
+      "bundle_bytes": 164496,
+      "bundle_crc32": "f6721e83",
+      "bundle_sha256": "02ab8ae1a189001a77c4cbbc0bc769adea6e97a36ca6b559fee996beabd62fbd",
+      "held_out_r2_mean": 0.53319251537323,
+      "r2_mean_drop": 0.004530191421508789
+    },
+    {
+      "model_id": "indy_20170131_02",
+      "encoder_graph_name": "indy_enc_i131",
+      "manifest": "indy_20170131_02/cubeai_int8/manifest.json",
+      "bundle": "indy_20170131_02/cubeai_int8/indy_20170131_02.aibundle",
+      "bundle_bytes": 164496,
+      "bundle_crc32": "994fcfab",
+      "bundle_sha256": "3b27f3f6a3eaac7f4b797f2e5fb34ce3e55c68170d0668632f3f231679315544",
+      "held_out_r2_mean": 0.5636447072029114,
+      "r2_mean_drop": 0.0023145675659179688
+    },
+    {
+      "model_id": "loco_20170210_03",
+      "encoder_graph_name": "indy_enc_l210",
+      "manifest": "loco_20170210_03/cubeai_int8/manifest.json",
+      "bundle": "loco_20170210_03/cubeai_int8/loco_20170210_03.aibundle",
+      "bundle_bytes": 164496,
+      "bundle_crc32": "6126cbbd",
+      "bundle_sha256": "5291864eaa4a6fe85d0d5d60699ab2e38ab07c8a8bb75e8519aefe84bb039e8b",
+      "held_out_r2_mean": 0.6436212062835693,
+      "r2_mean_drop": -0.0015007853507995605
+    },
+    {
+      "model_id": "loco_20170215_02",
+      "encoder_graph_name": "indy_enc_l215",
+      "manifest": "loco_20170215_02/cubeai_int8/manifest.json",
+      "bundle": "loco_20170215_02/cubeai_int8/loco_20170215_02.aibundle",
+      "bundle_bytes": 164496,
+      "bundle_crc32": "ceb81a47",
+      "bundle_sha256": "fd76e6ca70bf0b29e3c790433be12ef186d5c59cf46e231d9c1ac1e11f244116",
+      "held_out_r2_mean": 0.5118879079818726,
+      "r2_mean_drop": 0.0014185905456542969
+    },
+    {
+      "model_id": "loco_20170301_05",
+      "encoder_graph_name": "indy_enc_l301",
+      "manifest": "loco_20170301_05/cubeai_int8/manifest.json",
+      "bundle": "loco_20170301_05/cubeai_int8/loco_20170301_05.aibundle",
+      "bundle_bytes": 164496,
+      "bundle_crc32": "aafe0574",
+      "bundle_sha256": "24de89371392ef03f93c5587cc92b61228a9db82f551b27149d0bd6687f8c99a",
+      "held_out_r2_mean": 0.7438367009162903,
+      "r2_mean_drop": 0.0005297064781188965
+    }
+  ]
+}
