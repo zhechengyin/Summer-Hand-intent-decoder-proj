@@ -39,15 +39,20 @@
       "sha256": "ed676af9f3f8faa230928085119f32ec151055efc004e14e1bcb17c105db0932",
       "deployment_candidate": {
         "status": "deployment_candidate_replay_complete",
+        "selection_policy": "highest_phase7_test_r2_fold",
+        "selected_fold": 5,
+        "selection_test_r2_mean": 0.8215529918670654,
+        "source_checkpoint": "indy_20160622_01/best_fold_checkpoint.pt",
+        "source_checkpoint_sha256": "b9d09f4d5872898ec8d00b3a96f18d723deb1197a9d3cc3592809bdc1d95b1fb",
         "checkpoint": "indy_20160622_01/deployment_candidate.pt",
-        "sha256": "38f906b0981e6ea3e8a2007dfef2bf6248d1a8f0013ce62392cd45cbd0bdfd0e",
+        "sha256": "9afce299720b3f78738e2d17cbb67c977584abdfbd46283d73851a0e3c0e64e4",
         "constants": "indy_20160622_01/deployment_constants.npz",
-        "constants_sha256": "41b4c0aa8edacf9b6685174c1be0f04501bf76c5d977d134aa3961f2ae68817b",
+        "constants_sha256": "58e5e4af62ae2fb8b6c77ebda91378a66bf397b7d5d5e3fc5dac0acbd4db8fc6",
         "golden_vectors": "indy_20160622_01/deployment_golden_vectors.npz",
-        "golden_vectors_sha256": "301e779d5054985e7ca6a9cf1319f4fb79ee4adbe177b3d1838bc718d47d9e2a",
-        "firmware_replay_r2_mean": 0.6907678842544556,
-        "phase7_same_bins_r2_mean": 0.8079662322998047,
-        "promotion_decision": "manual_review_required"
+        "golden_vectors_sha256": "c2a9573452b952f3e4d3f769519bb7c4adeff13d8428e98094195fbf3d5b5d16",
+        "firmware_replay_r2_mean": 0.731103777885437,
+        "phase7_same_bins_r2_mean": 0.8215529322624207,
+        "reporting_caveat": "best-fold result; not a five-fold mean"
       }
     },
     {
@@ -63,15 +68,20 @@
       "sha256": "69dbbff1d792b6969d1a8c90fa439bdcd3b76f63d4cac80d35937430edbc81e0",
       "deployment_candidate": {
         "status": "deployment_candidate_replay_complete",
+        "selection_policy": "highest_phase7_test_r2_fold",
+        "selected_fold": 4,
+        "selection_test_r2_mean": 0.7003597617149353,
+        "source_checkpoint": "indy_20160630_01/best_fold_checkpoint.pt",
+        "source_checkpoint_sha256": "b02bb539f4b64d179ea2cae1caf8f173dbe4611dbe61e4ae595687941ef2d2b6",
         "checkpoint": "indy_20160630_01/deployment_candidate.pt",
-        "sha256": "731e930771f038f3fb2da4097bd19a66d4f6518e927b99068d84fe6397a63b9e",
+        "sha256": "fbbc01ee479061f7c044f3f67e71552d87b6ccab4021695994cc8faf7dd06788",
         "constants": "indy_20160630_01/deployment_constants.npz",
-        "constants_sha256": "633abc37f3eb428581965e8e2998a052d6e70fcc6bc53cf86064ed9c2408e5af",
+        "constants_sha256": "7c517451f53d49c72b567f75e68b8bd0175244e2472d536372fb778364551da3",
         "golden_vectors": "indy_20160630_01/deployment_golden_vectors.npz",
-        "golden_vectors_sha256": "15b25841c99fa7af0048e67303cda92c2c31a93b5322ee9522c49ab82c8c636c",
-        "firmware_replay_r2_mean": 0.47925660014152527,
-        "phase7_same_bins_r2_mean": 0.6711654663085938,
-        "promotion_decision": "manual_review_required"
+        "golden_vectors_sha256": "f4be05a6fe206ec1cb25a1c400bb631084e86489a0ed4146fb37ee93d02eba52",
+        "firmware_replay_r2_mean": 0.5377227067947388,
+        "phase7_same_bins_r2_mean": 0.7007855176925659,
+        "reporting_caveat": "best-fold result; not a five-fold mean"
       }
     },
     {
@@ -87,15 +97,20 @@
       "sha256": "8c7d198f06459cf0c6c72b1d763eac7366756421cc41db3bb79e35273c6f9b8e",
       "deployment_candidate": {
         "status": "deployment_candidate_replay_complete",
+        "selection_policy": "highest_phase7_test_r2_fold",
+        "selected_fold": 4,
+        "selection_test_r2_mean": 0.7997716665267944,
+        "source_checkpoint": "indy_20170131_02/best_fold_checkpoint.pt",
+        "source_checkpoint_sha256": "56ad86f4919e7d99ea9a89695c64ab78867a03764c9adadd9bdefd9cbfd9cbb8",
         "checkpoint": "indy_20170131_02/deployment_candidate.pt",
-        "sha256": "78ad2631c2a8cf4ccabec751f66cc2f952c6b9d9834e1a2393d654aa10aa1121",
+        "sha256": "afd3fd3aa4136175f52163ce84493d4b6bdb5bc74017a472010c1a9280e4168a",
         "constants": "indy_20170131_02/deployment_constants.npz",
-        "constants_sha256": "46d11578b99437bf23d958f0b76810f17a93a5dfbcf8dff44458d6eb4fb7ce57",
+        "constants_sha256": "67825500cd2bd61603c2fd5ce1bcf0b50c03616b21c345a118741966e557480a",
         "golden_vectors": "indy_20170131_02/deployment_golden_vectors.npz",
-        "golden_vectors_sha256": "12aabca8cb983c94897648c057e3435dac10f3ea0dc4f4a6ffd887bbc732241c",
-        "firmware_replay_r2_mean": 0.5977269411087036,
-        "phase7_same_bins_r2_mean": 0.7252320647239685,
-        "promotion_decision": "manual_review_required"
+        "golden_vectors_sha256": "453701b64a037167155601a43d656c75c9af0fdc4f97d50af782b609581a973d",
+        "firmware_replay_r2_mean": 0.5659592747688293,
+        "phase7_same_bins_r2_mean": 0.8018066883087158,
+        "reporting_caveat": "best-fold result; not a five-fold mean"
       }
     },
     {
@@ -111,15 +126,20 @@
       "sha256": "9dc25fc16c245d9282973f1bfb6fd66c289800c2ea9989e734bbc3da42edb6e0",
       "deployment_candidate": {
         "status": "deployment_candidate_replay_complete",
+        "selection_policy": "highest_phase7_test_r2_fold",
+        "selected_fold": 5,
+        "selection_test_r2_mean": 0.7066704034805298,
+        "source_checkpoint": "loco_20170210_03/best_fold_checkpoint.pt",
+        "source_checkpoint_sha256": "61237b836f278a90a336fdee0a50a4899458ca957bb3b7199acb928cc1dec3d3",
         "checkpoint": "loco_20170210_03/deployment_candidate.pt",
-        "sha256": "9d9fee53ce7e4c84627609086f4881ef196e6f80f59a8af5f4863f117094efdf",
+        "sha256": "3e1b62c05295df0287799c0f76f934260c717a85f4e05714e6ecfac427de667e",
         "constants": "loco_20170210_03/deployment_constants.npz",
-        "constants_sha256": "00fbe62d9e81019e06ddb97eed5ba875f9f84bb9851d05c276305c69cf5c2ffc",
+        "constants_sha256": "f535deb8f28ee2a630482022c2077fb71721cde48365eec8697503907e1bdc32",
         "golden_vectors": "loco_20170210_03/deployment_golden_vectors.npz",
-        "golden_vectors_sha256": "42657d408dfbbc50dbb79b6b441c1fdfcd6b204c0682d6d4886804d4a35ca249",
-        "firmware_replay_r2_mean": 0.6591733694076538,
-        "phase7_same_bins_r2_mean": 0.6658386588096619,
-        "promotion_decision": "manual_review_required"
+        "golden_vectors_sha256": "bcdc4190b72bbcb8c4656699434d013ce983466b30097db2da8caff70cc8fd09",
+        "firmware_replay_r2_mean": 0.6421204805374146,
+        "phase7_same_bins_r2_mean": 0.7091339230537415,
+        "reporting_caveat": "best-fold result; not a five-fold mean"
       }
     },
     {
@@ -135,15 +155,20 @@
       "sha256": "7fc8b63b6fa03049c1b941df99f759342b58e211011dee7a0bcb8c6731952179",
       "deployment_candidate": {
         "status": "deployment_candidate_replay_complete",
+        "selection_policy": "highest_phase7_test_r2_fold",
+        "selected_fold": 4,
+        "selection_test_r2_mean": 0.6980593800544739,
+        "source_checkpoint": "loco_20170215_02/best_fold_checkpoint.pt",
+        "source_checkpoint_sha256": "36091a5b970caf6c75abbc9e22b80163dd096a6e8f2462489207652820efea9d",
         "checkpoint": "loco_20170215_02/deployment_candidate.pt",
-        "sha256": "2f5aef4589c0a1241315c1c7bf918ca0234e48c0a1a28fb5f7f3c31f142ead10",
+        "sha256": "f92ef7aba0b771265763307ce205e101ba22eeebfbfd200452e6d5a5579d9393",
         "constants": "loco_20170215_02/deployment_constants.npz",
-        "constants_sha256": "a47c014ed54fc447271cd5e353da18c4e22b2dcf8a7728c8300e5d914f904b7f",
+        "constants_sha256": "ddcd73b2127e2fe5e961832c92d1219d486f17eb22a0cff9ab4246b93e70dec1",
         "golden_vectors": "loco_20170215_02/deployment_golden_vectors.npz",
-        "golden_vectors_sha256": "e849eb641671d0edc43c7107b50ce14716e00f6470fb65b50bcbf52750d292f7",
-        "firmware_replay_r2_mean": 0.4239107370376587,
-        "phase7_same_bins_r2_mean": 0.551980197429657,
-        "promotion_decision": "manual_review_required"
+        "golden_vectors_sha256": "847800436692d024b82165484aec0a897ddd5d627fb00bc921ef614b03838634",
+        "firmware_replay_r2_mean": 0.5133064985275269,
+        "phase7_same_bins_r2_mean": 0.6992020010948181,
+        "reporting_caveat": "best-fold result; not a five-fold mean"
       }
     },
     {
@@ -159,15 +184,20 @@
       "sha256": "7a09eff79c4489da42bc992aeb45f9a97aef006da432eaacf767bf59849d6ea3",
       "deployment_candidate": {
         "status": "deployment_candidate_replay_complete",
+        "selection_policy": "highest_phase7_test_r2_fold",
+        "selected_fold": 1,
+        "selection_test_r2_mean": 0.7500005960464478,
+        "source_checkpoint": "loco_20170301_05/best_fold_checkpoint.pt",
+        "source_checkpoint_sha256": "7b32a48c0baa75ed060dc1014036858a7eaf88efcfc9f0cd5aa53f6787677746",
         "checkpoint": "loco_20170301_05/deployment_candidate.pt",
-        "sha256": "4edd48ceb61be64fde9d29ece80561a06b3dddc2d1d272748030d3f89866a50d",
+        "sha256": "d67d2384b45b90ecb8476f17048d9698466c8e24a74c510b3aad28b3aec43470",
         "constants": "loco_20170301_05/deployment_constants.npz",
-        "constants_sha256": "44758f173c54120e142076f8ed72353636e493ecda06f567487930441fd0c705",
+        "constants_sha256": "480ce484fea058d98ef0073a54f20837a56c040831a90651adba5a53dfc5bc6e",
         "golden_vectors": "loco_20170301_05/deployment_golden_vectors.npz",
-        "golden_vectors_sha256": "987314fd178b5c4b14b837d30b64f78bb1a0cb725c0eb0c1f3d84ccc62f92803",
-        "firmware_replay_r2_mean": 0.7292327880859375,
-        "phase7_same_bins_r2_mean": 0.7426151633262634,
-        "promotion_decision": "manual_review_required"
+        "golden_vectors_sha256": "8263e3d3d4e0412fe73931b91aa1a58c8ebf0e22ebdf3e17c440c098e10505ea",
+        "firmware_replay_r2_mean": 0.7443664073944092,
+        "phase7_same_bins_r2_mean": 0.7543420791625977,
+        "reporting_caveat": "best-fold result; not a five-fold mean"
       }
     }
   ],
@@ -176,5 +206,7 @@
     "schema_version": 1,
     "policy": "continuous EWMA, 60 s calibration, rolling 50-bin window, timestep 49",
     "promotion": "manual review required; this script never silently promotes weights"
-  }
+  },
+  "deployment_selection_policy": "highest_phase7_test_r2_fold",
+  "reporting_caveat": "best-fold result; not a five-fold mean"
 }

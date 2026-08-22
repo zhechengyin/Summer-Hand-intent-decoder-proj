@@ -1,16 +1,15 @@
 {
-  "schema_version": 1,
-  "phase": "phase10_session_deployment_candidates",
-  "created_at_utc": "2026-08-21T18:40:46.656753+00:00",
+  "schema_version": 2,
+  "phase": "phase11_best_fold_deployment_candidates",
   "model_id": "loco_20170301_05",
-  "source_checkpoint": "checkpoint.pt",
-  "source_checkpoint_sha256": "7a09eff79c4489da42bc992aeb45f9a97aef006da432eaacf767bf59849d6ea3",
-  "candidate_checkpoint": "deployment_candidate.pt",
-  "candidate_checkpoint_sha256": "4edd48ceb61be64fde9d29ece80561a06b3dddc2d1d272748030d3f89866a50d",
-  "constants": "deployment_constants.npz",
-  "constants_sha256": "44758f173c54120e142076f8ed72353636e493ecda06f567487930441fd0c705",
-  "golden_vectors": "deployment_golden_vectors.npz",
-  "golden_vectors_sha256": "987314fd178b5c4b14b837d30b64f78bb1a0cb725c0eb0c1f3d84ccc62f92803",
+  "selection_policy": "highest_phase7_test_r2_fold",
+  "selected_fold": 1,
+  "selection_test_r2_mean": 0.7500005960464478,
+  "source_checkpoint": "best_fold_checkpoint.pt",
+  "source_checkpoint_sha256": "7b32a48c0baa75ed060dc1014036858a7eaf88efcfc9f0cd5aa53f6787677746",
+  "candidate_checkpoint_sha256": "d67d2384b45b90ecb8476f17048d9698466c8e24a74c510b3aad28b3aec43470",
+  "constants_sha256": "480ce484fea058d98ef0073a54f20837a56c040831a90651adba5a53dfc5bc6e",
+  "golden_vectors_sha256": "8263e3d3d4e0412fe73931b91aa1a58c8ebf0e22ebdf3e17c440c098e10505ea",
   "source_channel_count": 192,
   "selected_channel_indices": [
     5,
@@ -110,7 +109,6 @@
     190,
     191
   ],
-  "fold": 1,
   "reach_counts": {
     "train": 371,
     "validation": 47,
@@ -138,32 +136,20 @@
     "held_out_split": "phase7_fold1_test_reaches",
     "test_reaches": 46,
     "bins_after_calibration": 1803,
-    "phase7_reference_all": {
-      "r2_x": 0.6341468095779419,
-      "r2_y": 0.8429367542266846,
-      "r2_mean": 0.7385417819023132,
-      "mse": 0.008934221230447292
-    },
     "phase7_reference_same_bins": {
-      "r2_x": 0.639306902885437,
-      "r2_y": 0.8459234237670898,
-      "r2_mean": 0.7426151633262634,
-      "mse": 0.009061029180884361
+      "r2_x": 0.6621028184890747,
+      "r2_y": 0.8465813398361206,
+      "r2_mean": 0.7543420791625977,
+      "mse": 0.008601313456892967
     },
     "firmware_policy_same_bins": {
-      "r2_x": 0.6401848793029785,
-      "r2_y": 0.8182806372642517,
-      "r2_mean": 0.7292327880859375,
-      "mse": 0.009387485682964325
+      "r2_x": 0.6716131567955017,
+      "r2_y": 0.8171197175979614,
+      "r2_mean": 0.7443664073944092,
+      "mse": 0.008779406547546387
     },
-    "firmware_minus_reference_r2": {
-      "r2_x": 0.0008779764175415039,
-      "r2_y": -0.027642786502838135,
-      "r2_mean": -0.013382375240325928
-    },
-    "promotion_decision": "manual_review_required"
+    "selection_policy": "highest_phase7_test_r2_fold",
+    "reporting_caveat": "best-fold result; not a five-fold mean"
   },
-  "candidate_status": "deployment_candidate_replay_complete",
-  "promotion_decision": "manual_review_required",
-  "test_targets_used_for_weight_or_floor_fitting": false
+  "reporting_caveat": "best-fold result; not a five-fold mean"
 }

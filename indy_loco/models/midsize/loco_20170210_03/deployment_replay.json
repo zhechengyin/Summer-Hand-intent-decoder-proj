@@ -1,19 +1,19 @@
 {
-  "schema_version": 1,
-  "phase": "phase10_session_deployment_candidates",
-  "created_at_utc": "2026-08-21T18:40:43.791653+00:00",
+  "schema_version": 2,
+  "phase": "phase11_best_fold_deployment_candidates",
   "model_id": "loco_20170210_03",
-  "source_checkpoint": "checkpoint.pt",
-  "source_checkpoint_sha256": "9dc25fc16c245d9282973f1bfb6fd66c289800c2ea9989e734bbc3da42edb6e0",
-  "candidate_checkpoint": "deployment_candidate.pt",
-  "candidate_checkpoint_sha256": "9d9fee53ce7e4c84627609086f4881ef196e6f80f59a8af5f4863f117094efdf",
-  "constants": "deployment_constants.npz",
-  "constants_sha256": "00fbe62d9e81019e06ddb97eed5ba875f9f84bb9851d05c276305c69cf5c2ffc",
-  "golden_vectors": "deployment_golden_vectors.npz",
-  "golden_vectors_sha256": "42657d408dfbbc50dbb79b6b441c1fdfcd6b204c0682d6d4886804d4a35ca249",
+  "selection_policy": "highest_phase7_test_r2_fold",
+  "selected_fold": 5,
+  "selection_test_r2_mean": 0.7066704034805298,
+  "source_checkpoint": "best_fold_checkpoint.pt",
+  "source_checkpoint_sha256": "61237b836f278a90a336fdee0a50a4899458ca957bb3b7199acb928cc1dec3d3",
+  "candidate_checkpoint_sha256": "3e1b62c05295df0287799c0f76f934260c717a85f4e05714e6ecfac427de667e",
+  "constants_sha256": "f535deb8f28ee2a630482022c2077fb71721cde48365eec8697503907e1bdc32",
+  "golden_vectors_sha256": "bcdc4190b72bbcb8c4656699434d013ce983466b30097db2da8caff70cc8fd09",
   "source_channel_count": 192,
   "selected_channel_indices": [
     6,
+    9,
     13,
     18,
     30,
@@ -27,7 +27,6 @@
     54,
     57,
     58,
-    63,
     66,
     67,
     91,
@@ -110,10 +109,9 @@
     190,
     191
   ],
-  "fold": 1,
   "reach_counts": {
-    "train": 457,
-    "validation": 58,
+    "train": 458,
+    "validation": 57,
     "test": 57
   },
   "floor_fit": {
@@ -121,49 +119,37 @@
     "calibration_bins": 1500,
     "bin_seconds": 0.04,
     "block_stride_bins": 1500,
-    "block_count": 14,
-    "training_reach_count": 457,
-    "training_bins": 21255,
+    "block_count": 13,
+    "training_reach_count": 458,
+    "training_bins": 20815,
     "percentile": 10.0,
     "silent_threshold": 0.0001,
     "silent_feature_fallback": "promoted_phase6_feature_std_floor",
     "silent_feature_fallback_count": 0,
     "silent_feature_fallback_indices": [],
     "test_or_validation_reaches_used": false,
-    "minimum": 0.08690480142831802,
-    "median": 0.4056892395019531,
-    "maximum": 1.0169013738632202
+    "minimum": 0.0900518000125885,
+    "median": 0.4062789976596832,
+    "maximum": 1.0285533666610718
   },
   "replay": {
-    "held_out_split": "phase7_fold1_test_reaches",
+    "held_out_split": "phase7_fold5_test_reaches",
     "test_reaches": 57,
-    "bins_after_calibration": 2256,
-    "phase7_reference_all": {
-      "r2_x": 0.5671190619468689,
-      "r2_y": 0.7453779578208923,
-      "r2_mean": 0.6562485098838806,
-      "mse": 0.01110169105231762
-    },
+    "bins_after_calibration": 2812,
     "phase7_reference_same_bins": {
-      "r2_x": 0.5804572105407715,
-      "r2_y": 0.7512201070785522,
-      "r2_mean": 0.6658386588096619,
-      "mse": 0.01033405214548111
+      "r2_x": 0.661738932132721,
+      "r2_y": 0.756528913974762,
+      "r2_mean": 0.7091339230537415,
+      "mse": 0.008270300924777985
     },
     "firmware_policy_same_bins": {
-      "r2_x": 0.6024439334869385,
-      "r2_y": 0.7159028053283691,
-      "r2_mean": 0.6591733694076538,
-      "mse": 0.010336151346564293
+      "r2_x": 0.5934157967567444,
+      "r2_y": 0.6908251047134399,
+      "r2_mean": 0.6421204805374146,
+      "mse": 0.010126481764018536
     },
-    "firmware_minus_reference_r2": {
-      "r2_x": 0.021986722946166992,
-      "r2_y": -0.035317301750183105,
-      "r2_mean": -0.006665289402008057
-    },
-    "promotion_decision": "manual_review_required"
+    "selection_policy": "highest_phase7_test_r2_fold",
+    "reporting_caveat": "best-fold result; not a five-fold mean"
   },
-  "candidate_status": "deployment_candidate_replay_complete",
-  "promotion_decision": "manual_review_required",
-  "test_targets_used_for_weight_or_floor_fitting": false
+  "reporting_caveat": "best-fold result; not a five-fold mean"
 }

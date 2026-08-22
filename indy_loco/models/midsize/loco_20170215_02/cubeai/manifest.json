@@ -38,7 +38,6 @@
     11,
     19,
     32,
-    40,
     49,
     50,
     51,
@@ -46,13 +45,13 @@
     56,
     57,
     58,
-    59,
     62,
     63,
     66,
     69,
     77,
     83,
+    86,
     96,
     97,
     98,
@@ -102,6 +101,7 @@
     154,
     155,
     156,
+    158,
     159,
     160,
     161,
@@ -132,30 +132,30 @@
   "checkpoint": {
     "file": "deployment_candidate.pt",
     "bytes": 364397,
-    "sha256": "2f5aef4589c0a1241315c1c7bf918ca0234e48c0a1a28fb5f7f3c31f142ead10"
+    "sha256": "f92ef7aba0b771265763307ce205e101ba22eeebfbfd200452e6d5a5579d9393"
   },
   "deployment_constants": {
     "file": "deployment_constants.npz",
-    "bytes": 2792,
-    "crc32": "f2ed5d13",
-    "sha256": "a47c014ed54fc447271cd5e353da18c4e22b2dcf8a7728c8300e5d914f904b7f"
+    "bytes": 2947,
+    "crc32": "b24fe43f",
+    "sha256": "ddcd73b2127e2fe5e961832c92d1219d486f17eb22a0cff9ab4246b93e70dec1"
   },
   "deployment_golden_vectors": {
     "file": "deployment_golden_vectors.npz",
-    "bytes": 183087,
-    "crc32": "955a4495",
-    "sha256": "e849eb641671d0edc43c7107b50ce14716e00f6470fb65b50bcbf52750d292f7"
+    "bytes": 183505,
+    "crc32": "b237603c",
+    "sha256": "847800436692d024b82165484aec0a897ddd5d627fb00bc921ef614b03838634"
   },
   "models": {
-    "encoder_onnx_sha256": "6d13aff58b73a43710e97581c67fc564071d48f2a55f82430aa8246d028159aa",
-    "gru_head_h5_sha256": "a686711460663d0f11329924dffe9b5e27e074c831ff304e1bd3bac17a3235f8"
+    "encoder_onnx_sha256": "1218ecea1871c4e900febbf1f24c21422143f8c025dc87b26c218ee4c998ad36",
+    "gru_head_h5_sha256": "ed4069a932fd25154c5ecfb7aedc41ca2a4dc7ff4296ffdf6fe6179ed808495d"
   },
   "components": {
     "encoder": {
       "file": "encoder.weights.bin",
       "bytes": 248156,
-      "crc32": "d561de60",
-      "sha256": "0caec62ef3cdf5161d5d34d03ff56b8b96628e3dd30584f2e0e8921e22901fd0",
+      "crc32": "93c1275e",
+      "sha256": "4e0e8877bec81415e1128879abf36ff2212dbf6a21d41fd34269df1ed01b7270",
       "weights_bytes": 248156,
       "activations_bytes": 76800,
       "macc": 3542560
@@ -163,8 +163,8 @@
     "gru_head": {
       "file": "gru_head.weights.bin",
       "bytes": 100360,
-      "crc32": "50668dd5",
-      "sha256": "aee4ee9ea4aa82065033727d8e6fac1d597d43e14ca10d277b56baad0697c51c",
+      "crc32": "444f4e02",
+      "sha256": "2d5f9b9fd86453671689a64147731b7611f66e3bd5e67437a473b56f95553130",
       "weights_bytes": 100360,
       "activations_bytes": 27136,
       "macc": 1241700
@@ -177,40 +177,40 @@
   },
   "parity": {
     "checkpoint_vs_replay_golden": {
-      "max_abs_error": 4.76837158203125e-07,
-      "mean_abs_error": 4.786532372236252e-08,
-      "rmse": 8.376634369013217e-08,
-      "timestep_49_max_abs_error": 5.960464477539063e-08
+      "max_abs_error": 0.0,
+      "mean_abs_error": 0.0,
+      "rmse": 0.0,
+      "timestep_49_max_abs_error": 0.0
     },
     "encoder_onnx_vs_pytorch": {
-      "max_abs_error": 1.9073486328125e-06,
-      "mean_abs_error": 1.26457198348362e-07,
-      "rmse": 2.636804934009423e-07,
-      "timestep_49_max_abs_error": 1.9073486328125e-06
+      "max_abs_error": 1.5497207641601562e-06,
+      "mean_abs_error": 1.0069497648146353e-07,
+      "rmse": 1.986365936741977e-07,
+      "timestep_49_max_abs_error": 1.430511474609375e-06
     },
     "split_keras_vs_pytorch": {
-      "max_abs_error": 4.76837158203125e-07,
-      "mean_abs_error": 6.205635145306587e-08,
-      "rmse": 9.260143918714891e-08,
-      "timestep_49_max_abs_error": 3.2782554626464844e-07
+      "max_abs_error": 7.152557373046875e-07,
+      "mean_abs_error": 6.672053132206202e-08,
+      "rmse": 1.0664356372273063e-07,
+      "timestep_49_max_abs_error": 1.341104507446289e-07
     },
     "encoder_host_c_vs_pytorch": {
-      "max_abs_error": 2.384185791015625e-06,
-      "mean_abs_error": 1.4945945622457657e-07,
-      "rmse": 3.0857362500724953e-07,
+      "max_abs_error": 1.9073486328125e-06,
+      "mean_abs_error": 1.268157052436436e-07,
+      "rmse": 2.482637060963616e-07,
       "timestep_49_max_abs_error": 1.430511474609375e-06
     },
     "gru_head_host_c_vs_pytorch": {
-      "max_abs_error": 1.1920928955078125e-06,
-      "mean_abs_error": 1.1594092939049005e-07,
-      "rmse": 1.96358035638832e-07,
-      "timestep_49_max_abs_error": 1.7136335372924805e-07
+      "max_abs_error": 4.76837158203125e-07,
+      "mean_abs_error": 7.099268259480595e-08,
+      "rmse": 1.08448281554587e-07,
+      "timestep_49_max_abs_error": 1.1175870895385742e-07
     },
     "generated_c_chain_vs_pytorch": {
-      "max_abs_error": 1.1920928955078125e-06,
-      "mean_abs_error": 1.5058147255331277e-07,
-      "rmse": 2.497575915225919e-07,
-      "timestep_49_max_abs_error": 1.4156103134155273e-07
+      "max_abs_error": 5.960464477539062e-07,
+      "mean_abs_error": 1.0716437827795744e-07,
+      "rmse": 1.5718911741464427e-07,
+      "timestep_49_max_abs_error": 1.0244548320770264e-07
     }
   },
   "bundle": {
@@ -221,10 +221,10 @@
     "header_bytes": 256,
     "alignment_bytes": 32,
     "total_bytes": 349776,
-    "crc32": "4d56eef5",
-    "sha256": "3c95212e69b63f03d114020f97f9cb7316138bfe851f4c4a7dc47e05e77af267",
-    "header_crc32": "94138fba",
-    "body_sha256": "5a737fb816453972db415f8cc2e050f63880506abf9cb3096ccb2c5f51d3290d",
+    "crc32": "68b68430",
+    "sha256": "ce7edd73bb3960d09198a8e12cfd4a8d6bf1299cbd57d877a6ff4a69f4ad9e62",
+    "header_crc32": "93fc6b07",
+    "body_sha256": "15fe5405a868952f0168362ae2c62f8bf77fcb6a1034ef7a0b6c0d0ad088bae0",
     "encoder_offset": 256,
     "gru_head_offset": 248416,
     "parameters_offset": 348800,
@@ -264,8 +264,8 @@
     "weight_binary_source": "official stedgeai generate --binary"
   },
   "python_environment": {
-    "python": "3.12.13",
-    "torch": "2.13.0+cpu",
+    "python": "3.12.10",
+    "torch": "2.13.0",
     "onnx": "1.22.0",
     "onnxruntime": "1.29.0",
     "tensorflow": "2.19.1",

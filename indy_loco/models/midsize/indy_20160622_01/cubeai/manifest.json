@@ -132,30 +132,30 @@
   "checkpoint": {
     "file": "deployment_candidate.pt",
     "bytes": 364461,
-    "sha256": "38f906b0981e6ea3e8a2007dfef2bf6248d1a8f0013ce62392cd45cbd0bdfd0e"
+    "sha256": "9afce299720b3f78738e2d17cbb67c977584abdfbd46283d73851a0e3c0e64e4"
   },
   "deployment_constants": {
     "file": "deployment_constants.npz",
-    "bytes": 2779,
-    "crc32": "d84b2537",
-    "sha256": "41b4c0aa8edacf9b6685174c1be0f04501bf76c5d977d134aa3961f2ae68817b"
+    "bytes": 2933,
+    "crc32": "0e6cfb0d",
+    "sha256": "58e5e4af62ae2fb8b6c77ebda91378a66bf397b7d5d5e3fc5dac0acbd4db8fc6"
   },
   "deployment_golden_vectors": {
     "file": "deployment_golden_vectors.npz",
-    "bytes": 169639,
-    "crc32": "20fd0bc7",
-    "sha256": "301e779d5054985e7ca6a9cf1319f4fb79ee4adbe177b3d1838bc718d47d9e2a"
+    "bytes": 170294,
+    "crc32": "04d82acb",
+    "sha256": "c2a9573452b952f3e4d3f769519bb7c4adeff13d8428e98094195fbf3d5b5d16"
   },
   "models": {
-    "encoder_onnx_sha256": "048482be9f823a9cea42493e44e2d4512a5d765466c25159a7cf9917479112ef",
-    "gru_head_h5_sha256": "adb5964831bff60da3dd7a9c55d11fc2ce84067de254a27a2f9a352ca892662a"
+    "encoder_onnx_sha256": "33e513f3757e96d375bc36e2a14e32ccee464c75198e3bca97ad42d29625f84d",
+    "gru_head_h5_sha256": "cb0127ba5ef199c6b3a57a87322f2f0f907efc1e642b4a41fefdac689814116b"
   },
   "components": {
     "encoder": {
       "file": "encoder.weights.bin",
       "bytes": 248156,
-      "crc32": "4a39428b",
-      "sha256": "cf1023e7905bce6c08ce29e9884b206b329214b8e4b8fc032f6e5d0060c19af2",
+      "crc32": "77d56b9f",
+      "sha256": "07af03ca86d1ff0164dd9e3820df114627f41648feb5c0decde4e9bcc6bbf014",
       "weights_bytes": 248156,
       "activations_bytes": 76800,
       "macc": 3542560
@@ -163,8 +163,8 @@
     "gru_head": {
       "file": "gru_head.weights.bin",
       "bytes": 100360,
-      "crc32": "875af3a5",
-      "sha256": "78eb45c915f312b46a3cc3d2f4e190421548bce4917f79b769c59e3604372b20",
+      "crc32": "dc1048a2",
+      "sha256": "764523ae0165f8e3dac143d7ab32438fd0c94a45599e2e923518cf726ad25ebe",
       "weights_bytes": 100360,
       "activations_bytes": 27136,
       "macc": 1241700
@@ -177,40 +177,40 @@
   },
   "parity": {
     "checkpoint_vs_replay_golden": {
-      "max_abs_error": 1.5273690223693848e-07,
-      "mean_abs_error": 2.9333168640732765e-08,
-      "rmse": 3.9463702046689316e-08,
-      "timestep_49_max_abs_error": 6.332993507385254e-08
+      "max_abs_error": 0.0,
+      "mean_abs_error": 0.0,
+      "rmse": 0.0,
+      "timestep_49_max_abs_error": 0.0
     },
     "encoder_onnx_vs_pytorch": {
-      "max_abs_error": 3.814697265625e-06,
-      "mean_abs_error": 9.392563242727192e-08,
-      "rmse": 2.456993496872019e-07,
-      "timestep_49_max_abs_error": 1.430511474609375e-06
+      "max_abs_error": 1.9073486328125e-06,
+      "mean_abs_error": 6.290507656103728e-08,
+      "rmse": 1.5627050038596273e-07,
+      "timestep_49_max_abs_error": 9.5367431640625e-07
     },
     "split_keras_vs_pytorch": {
-      "max_abs_error": 2.384185791015625e-07,
-      "mean_abs_error": 4.4855987653136254e-08,
-      "rmse": 5.778176429836878e-08,
-      "timestep_49_max_abs_error": 1.1920928955078125e-07
+      "max_abs_error": 2.0116567611694336e-07,
+      "mean_abs_error": 3.8774742279201745e-08,
+      "rmse": 4.956152669509428e-08,
+      "timestep_49_max_abs_error": 6.705522537231445e-08
     },
     "encoder_host_c_vs_pytorch": {
-      "max_abs_error": 3.337860107421875e-06,
-      "mean_abs_error": 9.848905392573215e-08,
-      "rmse": 2.5162769077925435e-07,
-      "timestep_49_max_abs_error": 1.9073486328125e-06
+      "max_abs_error": 2.1457672119140625e-06,
+      "mean_abs_error": 8.003927234767616e-08,
+      "rmse": 1.9241971813392515e-07,
+      "timestep_49_max_abs_error": 1.6689300537109375e-06
     },
     "gru_head_host_c_vs_pytorch": {
-      "max_abs_error": 3.5762786865234375e-07,
-      "mean_abs_error": 6.399990525096655e-08,
-      "rmse": 8.671210387212926e-08,
-      "timestep_49_max_abs_error": 2.086162567138672e-07
+      "max_abs_error": 2.123415470123291e-07,
+      "mean_abs_error": 4.301255103200674e-08,
+      "rmse": 5.5389859608702876e-08,
+      "timestep_49_max_abs_error": 1.825392246246338e-07
     },
     "generated_c_chain_vs_pytorch": {
-      "max_abs_error": 3.8743019104003906e-07,
-      "mean_abs_error": 7.009657565504313e-08,
-      "rmse": 9.30595990547257e-08,
-      "timestep_49_max_abs_error": 1.4901161193847656e-07
+      "max_abs_error": 2.1606683731079102e-07,
+      "mean_abs_error": 5.095964297652245e-08,
+      "rmse": 6.470368195158612e-08,
+      "timestep_49_max_abs_error": 1.0803341865539551e-07
     }
   },
   "bundle": {
@@ -221,10 +221,10 @@
     "header_bytes": 256,
     "alignment_bytes": 32,
     "total_bytes": 349776,
-    "crc32": "61c44cfd",
-    "sha256": "205f935b3898843f61427494917ed2e3894d99d03f9e321045fda4cf4de86647",
-    "header_crc32": "e42dfcdc",
-    "body_sha256": "307b0139827cb9d900929c7710e46e9dac7f09062e99ed47c82f344d0b757f40",
+    "crc32": "74b0f17b",
+    "sha256": "00a64732bc1f94f7d289d7364f6ed5c59d8cb7bafb2b76df1c7308d6d1f0a919",
+    "header_crc32": "d91441ac",
+    "body_sha256": "8bb4dab97d7645d217c567c62d6f221595385dfb189bec28b1b71424d9ca49d0",
     "encoder_offset": 256,
     "gru_head_offset": 248416,
     "parameters_offset": 348800,
@@ -264,8 +264,8 @@
     "weight_binary_source": "official stedgeai generate --binary"
   },
   "python_environment": {
-    "python": "3.12.13",
-    "torch": "2.13.0+cpu",
+    "python": "3.12.10",
+    "torch": "2.13.0",
     "onnx": "1.22.0",
     "onnxruntime": "1.29.0",
     "tensorflow": "2.19.1",

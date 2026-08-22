@@ -42,11 +42,12 @@ retraining outputs from the documented protocol, not byte-identical copies of
 the archived run. `session_checkpoints.json` records their actual metrics and
 SHA-256 hashes.
 
-## Deployment candidates
+## Best-fold deployment candidates
 
-`experiments/active/phase10_session_deployment_candidates.py` leaves every
-benchmark `checkpoint.pt` unchanged and writes four deployment sidecars in
-each session directory:
+The per-session `checkpoint.pt` files above remain the registered Fold-1
+benchmark artifacts. `phase11_best_fold_deployment_candidates.py` selects the
+highest Phase-7 test-R² fold for the GUI demonstration and writes its source
+checkpoint as `best_fold_checkpoint.pt`, plus four deployment sidecars:
 
 - `deployment_candidate.pt`: the same frozen weights plus the session model ID,
   96-channel mapping, target statistics, fitted feature-std floor, and exact
@@ -58,7 +59,7 @@ each session directory:
 - `deployment_replay.json`: hashes, floor provenance, and Phase 7-versus-firmware
   replay metrics.
 
-The feature-std floor is fitted without validation or test reaches. Fold-1
+The feature-std floor is fitted without validation or test reaches. The selected fold's
 training reaches are ordered chronologically, concatenated, divided into
 non-overlapping 1500-bin (60-second) blocks, and the non-silent per-feature
 10th percentile is retained. A feature silent in every training block uses the
@@ -67,8 +68,10 @@ indices are explicit in `deployment_replay.json`.
 
 The firmware replay uses continuous EWMA, first-60-second session calibration,
 an oldest-to-newest rolling 50-bin window, and output timestep 49. It evaluates
-only the original fold-1 held-out test-reach bins that remain after calibration.
-Candidate status remains `deployment_candidate_replay_complete` and promotion
+only the selected fold's held-out test-reach bins that remain after calibration.
+This is explicitly a best-test-fold-selected demonstration policy and must not
+be reported as an unbiased five-fold estimate. Candidate status remains
+`deployment_candidate_replay_complete` and promotion
 requires manual review; the script never silently declares a benchmark model a
 production model.
 
