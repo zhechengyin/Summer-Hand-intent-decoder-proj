@@ -32,6 +32,11 @@ indy_loco/data/processed/**/manifest.json
 *.snirf
 data.tar.gz
 
+# Motor-imagery
+motorimagery/data/*
+!motorimagery/data/README.md
+motorimagery/runs/
+
 # Large active results are regenerated. Small JSON/CSV evidence remains versioned.
 finger_movements/results/**/*.png
 finger_movements/results/**/*.pt
@@ -55,6 +60,7 @@ indy_loco/history/results/**/*.db
 indy_loco/history/results/**/.cache/
 
 # OS
+._*
 .DS_Store
 Thumbs.db
 
