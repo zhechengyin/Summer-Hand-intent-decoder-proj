@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-08-25T19:40:11.339497+00:00",
+  "question": "Is GRU hidden[49] significantly better than Encoder[49] across benchmark sessions?",
+  "comparison": "held-out corrected mean R2, GRU minus Encoder",
+  "primary_unit": "session",
+  "session_count": 6,
+  "positive_sessions": 6,
+  "individually_significant_sessions_unadjusted": 4,
+  "session_bootstrap": {
+    "mean_delta_r2": 0.008607725302378336,
+    "median_delta_r2": 0.006842315196990967,
+    "ci95_low": 0.003664414087931315,
+    "ci95_high": 0.01529960831006368,
+    "repetitions": 100000,
+    "resampling_unit": "session"
+  },
+  "exact_one_sided_wilcoxon": {
+    "statistic": 21.0,
+    "p_value": 0.015625,
+    "alternative": "GRU minus Encoder > 0"
+  },
+  "exact_two_sided_wilcoxon_sensitivity": {
+    "statistic": 0.0,
+    "p_value": 0.03125,
+    "alternative": "GRU minus Encoder != 0"
+  },
+  "exact_one_sided_sign_test": {
+    "positive_sessions": 6,
+    "session_count": 6,
+    "p_value": 0.015625,
+    "alternative": "probability of positive session > 0.5"
+  },
+  "subject_summary": {
+    "indy": {
+      "session_count": 3,
+      "mean_delta_r2": 0.012604773044586182,
+      "median_delta_r2": 0.008860886096954346,
+      "minimum_delta_r2": 0.004924774169921875,
+      "maximum_delta_r2": 0.024028658866882324
+    },
+    "loco": {
+      "session_count": 3,
+      "mean_delta_r2": 0.004610677560170491,
+      "median_delta_r2": 0.005926012992858887,
+      "minimum_delta_r2": 0.00014740228652954102,
+      "maximum_delta_r2": 0.007758617401123047
+    }
+  },
+  "decision": {
+    "cross_session_significant_at_0_05": true,
+    "individual_session_effect_is_uniformly_significant": false,
+    "interpretation": "Overall paired evidence supports GRU, but the effect is not individually significant in every session."
+  },
+  "methodology": {
+    "per_session": "1,000 reach-level bootstrap repetitions from each saved Phase-12 run",
+    "cross_session": "unweighted session effect; 100,000 session bootstrap repetitions",
+    "primary_test": "exact one-sided Wilcoxon signed-rank over six paired session deltas",
+    "sensitivity_test": "exact one-sided sign test",
+    "why_not_bin_level": "adjacent bins within a reach are autocorrelated and not independent experimental units",
+    "multiple_comparison_note": "per-session intervals are exploratory and unadjusted; the cross-session pair is prespecified"
+  }
+}

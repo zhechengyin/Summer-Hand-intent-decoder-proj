@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-08-25T19:56:40.976689+00:00",
+  "session": "loco_20170301_05",
+  "subject": "loco",
+  "status": "complete",
+  "selected_fold": 1,
+  "selection_policy": "highest_phase7_test_r2_fold",
+  "selection_test_r2_mean": 0.7500005960464478,
+  "protocol": {
+    "candidate": "indy_loco/models/midsize/loco_20170301_05/deployment_candidate.pt",
+    "calibration_bins": 1500,
+    "continuous_session_ewma": true,
+    "rolling_window_bins": 50,
+    "train_only_bank_and_pca": true,
+    "validation_only_retrieval_tuning": true,
+    "test_bins_match_existing_deployment_replay": true,
+    "key_numeric_path": "32D GRU PCA + 32D context PCA; int8 quantized",
+    "residual_storage_path": "FP16 rounded",
+    "search": "PC exact cKDTree over quantized keys; not firmware IVF",
+    "split_reaches": {
+      "train": 371,
+      "validation": 47,
+      "test": 46
+    },
+    "split_bins_after_calibration": {
+      "train": 15251,
+      "validation": 1979,
+      "test": 1803
+    }
+  },
+  "calibration": {
+    "mean_min": 0.46799999475479126,
+    "mean_max": 2.9066667556762695,
+    "effective_std_min": 0.15486007928848267,
+    "effective_std_max": 1.1418864727020264
+  },
+  "bank_absent": {
+    "r2_x": 0.6716131567955017,
+    "r2_y": 0.8171197175979614,
+    "r2_mean": 0.7443664073944092,
+    "mse": 0.008779405616223812
+  },
+  "bank_ready_gru": {
+    "r2_x": 0.6883398294448853,
+    "r2_y": 0.846047043800354,
+    "r2_mean": 0.7671934366226196,
+    "mse": 0.008088256232440472
+  },
+  "ready_minus_absent": {
+    "r2_mean": 0.02282702922821045,
+    "mse": -0.0006911493837833405,
+    "reach_bootstrap": {
+      "mean": 0.022660469949245452,
+      "ci95_low": 0.003427459299564362,
+      "ci95_high": 0.040769821405410765,
+      "probability_positive": 0.987,
+      "repetitions": 1000,
+      "unit": "reach"
+    }
+  },
+  "retrieval": {
+    "tuning": {
+      "neighbours": 128,
+      "temperature": 0.2,
+      "blend": 0.75,
+      "validation_r2_mean": 0.7353587746620178
+    },
+    "residual_consistency": {
+      "residual_r2_x": 0.041510581970214844,
+      "residual_r2_y": 0.1772472858428955,
+      "residual_r2_mean": 0.10937893390655518,
+      "neighbour_residual_dispersion": 0.005336554255336523
+    },
+    "bank_entries": 15251,
+    "pc_exact_search_us_per_query": 139.32085408004238
+  },
+  "memlib": {
+    "path": "indy_loco/models/large/loco_20170301_05/phase12_deployment_parity_gru_hidden_49.memlib",
+    "bytes": 890935,
+    "schema": "phase12_pc_memlib_v1",
+    "firmware_bcimem_compatible": false
+  },
+  "caveats": [
+    "The checkpoint/fold was selected using test R2; absolute accuracy is selection-biased.",
+    "Calibration and continuous rolling windows intentionally match deployment replay but allow unsupervised temporal context across reach splits.",
+    "Search is exact PC KNN over int8 keys, not firmware IVF; this estimates memory quality, not final recall or latency."
+  ]
+}

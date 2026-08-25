@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "experiment": "phase12_external_memory_representation_ablation",
+  "comparison": "gru_hidden_49 versus encoder_49",
+  "sessions": [
+    "indy_20160622_01",
+    "indy_20160630_01",
+    "indy_20170131_02",
+    "loco_20170210_03",
+    "loco_20170215_02",
+    "loco_20170301_05"
+  ],
+  "checkpoint": {
+    "model": "MidsizeTCNGRU",
+    "file": "checkpoint.pt",
+    "fold": 1,
+    "parameter_count": 86978,
+    "frozen": true
+  },
+  "model_input": {
+    "features": 192,
+    "window_bins": 50,
+    "query_timestep": 49,
+    "tcn_width": 64,
+    "gru_width": 64
+  },
+  "key": {
+    "representation_pca_dimensions": 32,
+    "context_source_dimensions": 576,
+    "context_pca_dimensions": 32,
+    "final_dimensions": 64,
+    "fast_context_alpha": 0.02,
+    "slow_context_alpha": 0.005,
+    "context_weight": 0.5,
+    "row_normalized": true
+  },
+  "retrieval": {
+    "engine": "PC exact cKDTree",
+    "neighbours_grid": [8, 16, 32, 64, 128],
+    "temperature_grid": [0.02, 0.05, 0.1, 0.2],
+    "blend_grid": [0.25, 0.5, 0.75, 1.0],
+    "selection_split": "validation reaches",
+    "bank_split": "train reaches only"
+  },
+  "uncertainty": {
+    "per_session_bootstrap_repetitions": 1000,
+    "per_session_resampling_unit": "reach",
+    "cross_session_bootstrap_repetitions": 100000,
+    "cross_session_resampling_unit": "session",
+    "primary_test": "exact one-sided paired Wilcoxon signed-rank",
+    "sensitivity_tests": [
+      "exact one-sided sign test",
+      "exact two-sided paired Wilcoxon signed-rank"
+    ]
+  },
+  "firmware_projection_only": {
+    "entry_stride_bytes": 96,
+    "ivf_clusters": 256,
+    "ivf_probes": 16,
+    "measured_on_stm32": false
+  }
+}

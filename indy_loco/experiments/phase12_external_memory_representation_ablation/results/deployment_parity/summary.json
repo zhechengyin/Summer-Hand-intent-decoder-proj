@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-08-25T19:56:40.988328+00:00",
+  "question": "What is the GUI-selected deployment uplift from GRU memory READY versus ABSENT?",
+  "sessions": 6,
+  "mean_selection_test_r2": 0.7460691332817078,
+  "mean_absent_r2": 0.6224298477172852,
+  "mean_ready_gru_r2": 0.7395725846290588,
+  "mean_ready_minus_absent_r2": 0.11714273691177368,
+  "median_ready_minus_absent_r2": 0.12112826108932495,
+  "session_bootstrap_ci95": [
+    0.06259618202845256,
+    0.17220269640286764
+  ],
+  "positive_sessions": 6,
+  "individually_significant_sessions": 6,
+  "exact_one_sided_wilcoxon_p": 0.015625,
+  "exact_two_sided_wilcoxon_p": 0.03125,
+  "exact_one_sided_sign_test_p": 0.015625,
+  "interpretation": "READY versus ABSENT is a paired deployment-preprocessing comparison. The 0.746 selection score remains a different chunked-inference metric."
+}

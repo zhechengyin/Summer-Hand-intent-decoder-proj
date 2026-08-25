@@ -1,0 +1,322 @@
+{
+  "schema_version": 1,
+  "phase": "phase12_external_memory_representation_ablation",
+  "created_at_utc": "2026-08-25T19:36:39.897677+00:00",
+  "status": "complete",
+  "session": "loco_20170215_02",
+  "subject": "loco",
+  "checkpoint": {
+    "path": "indy_loco/models/midsize/loco_20170215_02/checkpoint.pt",
+    "sha256": "7fc8b63b6fa03049c1b941df99f759342b58e211011dee7a0bcb8c6731952179",
+    "fold": 1,
+    "best_epoch": 13,
+    "why_not_best_fold_checkpoint": "best_fold_checkpoint.pt was selected using test R2"
+  },
+  "protocol": {
+    "split_unit": "reach",
+    "split_reaches": {
+      "train": 311,
+      "validation": 39,
+      "test": 39
+    },
+    "split_bins": {
+      "train": 16872,
+      "validation": 2116,
+      "test": 2312
+    },
+    "pca_fit": "train only",
+    "bank_entries": "train only",
+    "hyperparameter_selection": "validation only, independently per representation",
+    "final_evaluation": "held-out test reaches",
+    "bootstrap_unit": "reach",
+    "rolling_window_bins": 50,
+    "early_reach_policy": "left-zero-pad; pooling masks padding",
+    "long_context": {
+      "source": "normalized 192D reach features",
+      "fast_ewma_alpha": 0.02,
+      "slow_ewma_alpha": 0.005,
+      "layout": "[fast, slow, current-fast]",
+      "reset": "each reach",
+      "source_dims": 576,
+      "pca_dims": 32,
+      "weight": 0.5
+    }
+  },
+  "base_metrics": {
+    "validation": {
+      "r2_x": 0.545319676399231,
+      "r2_y": 0.7701229453086853,
+      "r2_mean": 0.6577212810516357,
+      "mse": 0.007000869605690241
+    },
+    "test": {
+      "r2_x": 0.4114338159561157,
+      "r2_y": 0.7103785276412964,
+      "r2_mean": 0.560906171798706,
+      "mse": 0.007217501290142536
+    }
+  },
+  "selection": {
+    "criterion": "highest validation corrected R2",
+    "winner": "gru_hidden_49",
+    "winner_test_metrics_are_reported_but_not_used_for_selection": true
+  },
+  "representations": {
+    "encoder_49": {
+      "pca_explained_variance_ratio_sum": 0.9590368270874023,
+      "tuning": {
+        "neighbours": 64,
+        "temperature": 0.2,
+        "blend": 0.5,
+        "validation_r2_mean": 0.662647008895874
+      },
+      "test_corrected": {
+        "r2_x": 0.4102880358695984,
+        "r2_y": 0.7123569250106812,
+        "r2_mean": 0.5613224506378174,
+        "mse": 0.0072121587581932545
+      },
+      "test_delta_vs_base": {
+        "mean": -3.4311652183532715e-05,
+        "ci95_low": -0.01684086173772812,
+        "ci95_high": 0.01639013439416885,
+        "probability_positive": 0.515,
+        "repetitions": 1000,
+        "unit": "reach"
+      },
+      "nearest_neighbour_residual_consistency": {
+        "residual_r2_x": -0.03917276859283447,
+        "residual_r2_y": -0.012503504753112793,
+        "residual_r2_mean": -0.025838136672973633,
+        "neighbour_residual_dispersion": 0.004084616433829069
+      },
+      "pc_search": {
+        "index": "scipy.spatial.cKDTree exact Euclidean over normalized keys",
+        "build_seconds": 0.007428291952237487,
+        "validation_search_seconds": 0.3638560420367867,
+        "test_search_seconds": 0.45327058294788003,
+        "test_us_per_query": 196.05129020237027
+      },
+      "mcu_cost_proxy": {
+        "entry_count": 16872,
+        "entry_stride_bytes": 96,
+        "projected_bank_bytes": 1721860,
+        "projected_bank_mib": 1.6420936584472656,
+        "ivf_clusters": 256,
+        "ivf_probes": 16,
+        "expected_candidate_entries_uniform": 1055,
+        "estimated_int8_mac_per_query": 83904,
+        "estimated_key_bytes_read_per_query": 83904
+      },
+      "memlib": {
+        "path": "indy_loco/models/large/loco_20170215_02/phase12_encoder_49.memlib",
+        "schema": "phase12_pc_memlib_v1",
+        "bytes": 934440,
+        "firmware_v1_compatible": false
+      },
+      "test_delta_vs_encoder_49": {
+        "mean": 0.0,
+        "ci95_low": 0.0,
+        "ci95_high": 0.0,
+        "probability_positive": 0.0,
+        "repetitions": 1000,
+        "unit": "reach"
+      }
+    },
+    "gru_hidden_49": {
+      "pca_explained_variance_ratio_sum": 0.9803167581558228,
+      "tuning": {
+        "neighbours": 32,
+        "temperature": 0.2,
+        "blend": 0.5,
+        "validation_r2_mean": 0.6667762994766235
+      },
+      "test_corrected": {
+        "r2_x": 0.41920340061187744,
+        "r2_y": 0.7152935266494751,
+        "r2_mean": 0.5672484636306763,
+        "mse": 0.00711388885974884
+      },
+      "test_delta_vs_base": {
+        "mean": 0.006126727432012558,
+        "ci95_low": -0.014402659237384796,
+        "ci95_high": 0.02652537003159523,
+        "probability_positive": 0.724,
+        "repetitions": 1000,
+        "unit": "reach"
+      },
+      "nearest_neighbour_residual_consistency": {
+        "residual_r2_x": -0.021718263626098633,
+        "residual_r2_y": -0.009552240371704102,
+        "residual_r2_mean": -0.015635251998901367,
+        "neighbour_residual_dispersion": 0.003278801217675209
+      },
+      "pc_search": {
+        "index": "scipy.spatial.cKDTree exact Euclidean over normalized keys",
+        "build_seconds": 0.007365459110587835,
+        "validation_search_seconds": 0.429118667030707,
+        "test_search_seconds": 0.5107554169371724,
+        "test_us_per_query": 220.91497272369048
+      },
+      "mcu_cost_proxy": {
+        "entry_count": 16872,
+        "entry_stride_bytes": 96,
+        "projected_bank_bytes": 1721860,
+        "projected_bank_mib": 1.6420936584472656,
+        "ivf_clusters": 256,
+        "ivf_probes": 16,
+        "expected_candidate_entries_uniform": 1055,
+        "estimated_int8_mac_per_query": 83904,
+        "estimated_key_bytes_read_per_query": 83904
+      },
+      "memlib": {
+        "path": "indy_loco/models/large/loco_20170215_02/phase12_gru_hidden_49.memlib",
+        "schema": "phase12_pc_memlib_v1",
+        "bytes": 933821,
+        "firmware_v1_compatible": false
+      },
+      "test_delta_vs_encoder_49": {
+        "mean": 0.006185174882411957,
+        "ci95_low": -0.0008928388357162475,
+        "ci95_high": 0.015124019980430602,
+        "probability_positive": 0.95,
+        "repetitions": 1000,
+        "unit": "reach"
+      }
+    },
+    "encoder_gru_49": {
+      "pca_explained_variance_ratio_sum": 0.9504149556159973,
+      "tuning": {
+        "neighbours": 32,
+        "temperature": 0.2,
+        "blend": 0.5,
+        "validation_r2_mean": 0.6638559103012085
+      },
+      "test_corrected": {
+        "r2_x": 0.4074210524559021,
+        "r2_y": 0.7129383087158203,
+        "r2_mean": 0.5601797103881836,
+        "mse": 0.007232124917209148
+      },
+      "test_delta_vs_base": {
+        "mean": -0.0014539596140384673,
+        "ci95_low": -0.023187019675970078,
+        "ci95_high": 0.017161775380372987,
+        "probability_positive": 0.448,
+        "repetitions": 1000,
+        "unit": "reach"
+      },
+      "nearest_neighbour_residual_consistency": {
+        "residual_r2_x": -0.05838906764984131,
+        "residual_r2_y": -0.017727017402648926,
+        "residual_r2_mean": -0.03805804252624512,
+        "neighbour_residual_dispersion": 0.003840564750134945
+      },
+      "pc_search": {
+        "index": "scipy.spatial.cKDTree exact Euclidean over normalized keys",
+        "build_seconds": 0.007163875037804246,
+        "validation_search_seconds": 0.48149429191835225,
+        "test_search_seconds": 0.4487876249477267,
+        "test_us_per_query": 194.11229452756345
+      },
+      "mcu_cost_proxy": {
+        "entry_count": 16872,
+        "entry_stride_bytes": 96,
+        "projected_bank_bytes": 1730308,
+        "projected_bank_mib": 1.6501502990722656,
+        "ivf_clusters": 256,
+        "ivf_probes": 16,
+        "expected_candidate_entries_uniform": 1055,
+        "estimated_int8_mac_per_query": 83904,
+        "estimated_key_bytes_read_per_query": 83904
+      },
+      "memlib": {
+        "path": "indy_loco/models/large/loco_20170215_02/phase12_encoder_gru_49.memlib",
+        "schema": "phase12_pc_memlib_v1",
+        "bytes": 942367,
+        "firmware_v1_compatible": false
+      },
+      "test_delta_vs_encoder_49": {
+        "mean": -0.0011951698362827302,
+        "ci95_low": -0.005877649039030075,
+        "ci95_high": 0.00327024608850479,
+        "probability_positive": 0.286,
+        "repetitions": 1000,
+        "unit": "reach"
+      }
+    },
+    "encoder_50step_mean": {
+      "pca_explained_variance_ratio_sum": 0.9830846190452576,
+      "tuning": {
+        "neighbours": 128,
+        "temperature": 0.2,
+        "blend": 0.25,
+        "validation_r2_mean": 0.6589948534965515
+      },
+      "test_corrected": {
+        "r2_x": 0.41647130250930786,
+        "r2_y": 0.7101891040802002,
+        "r2_mean": 0.5633301734924316,
+        "mse": 0.007176075130701065
+      },
+      "test_delta_vs_base": {
+        "mean": 0.0023037722408771515,
+        "ci95_low": -0.003482586145401001,
+        "ci95_high": 0.0067280083894729606,
+        "probability_positive": 0.811,
+        "repetitions": 1000,
+        "unit": "reach"
+      },
+      "nearest_neighbour_residual_consistency": {
+        "residual_r2_x": -0.000746607780456543,
+        "residual_r2_y": -0.027397632598876953,
+        "residual_r2_mean": -0.014072120189666748,
+        "neighbour_residual_dispersion": 0.0039581735618412495
+      },
+      "pc_search": {
+        "index": "scipy.spatial.cKDTree exact Euclidean over normalized keys",
+        "build_seconds": 0.006887916941195726,
+        "validation_search_seconds": 0.3486652919091284,
+        "test_search_seconds": 0.40343716694042087,
+        "test_us_per_query": 174.4970445244035
+      },
+      "mcu_cost_proxy": {
+        "entry_count": 16872,
+        "entry_stride_bytes": 96,
+        "projected_bank_bytes": 1721860,
+        "projected_bank_mib": 1.6420936584472656,
+        "ivf_clusters": 256,
+        "ivf_probes": 16,
+        "expected_candidate_entries_uniform": 1055,
+        "estimated_int8_mac_per_query": 83904,
+        "estimated_key_bytes_read_per_query": 83904
+      },
+      "memlib": {
+        "path": "indy_loco/models/large/loco_20170215_02/phase12_encoder_50step_mean.memlib",
+        "schema": "phase12_pc_memlib_v1",
+        "bytes": 923983,
+        "firmware_v1_compatible": false
+      },
+      "test_delta_vs_encoder_49": {
+        "mean": 0.0021644483506679537,
+        "ci95_low": -0.011132271587848663,
+        "ci95_high": 0.01598770692944526,
+        "probability_positive": 0.628,
+        "repetitions": 1000,
+        "unit": "reach"
+      }
+    }
+  },
+  "extraction_seconds": {
+    "train": 10.89748162520118,
+    "validation": 1.329371582949534,
+    "test": 1.4359729590360075
+  },
+  "caveats": [
+    "This is a one-session result and is not evidence of cross-session generalization.",
+    "The gain is relative to the identical fold-1 rolling-window baseline; Phase-7 chunked inference and the test-selected best-fold score are not apples-to-apples baselines.",
+    "PC cKDTree timing and MCU MAC/byte counts are cost proxies, not measured STM32 latency.",
+    "The Phase-12 memlib archives are experimental PC artifacts, not BCIMEM firmware-v1 binaries.",
+    "GRU/pooled/concatenated queries require exposing the matching intermediate state in the MCU graph."
+  ]
+}

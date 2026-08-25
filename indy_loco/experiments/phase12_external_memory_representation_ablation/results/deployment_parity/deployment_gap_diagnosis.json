@@ -1,0 +1,40 @@
+{
+  "session": "indy_20160622_01",
+  "selected_fold": 5,
+  "test_bins": 3950,
+  "decomposition_note": "Sequential/order-dependent counterfactuals; deltas are not causal Shapley effects.",
+  "variants": [
+    {
+      "variant": "phase7_chunked_reach_reset_train_stats",
+      "r2_x": 0.8145098686218262,
+      "r2_y": 0.8285959959030151,
+      "r2_mean": 0.8215529322624207,
+      "mse": 0.013569943606853485,
+      "sequential_delta_r2_mean": null
+    },
+    {
+      "variant": "rolling_reach_reset_train_stats",
+      "r2_x": 0.7785032987594604,
+      "r2_y": 0.8027130961418152,
+      "r2_mean": 0.7906081676483154,
+      "mse": 0.016068631783127785,
+      "sequential_delta_r2_mean": -0.030944764614105225
+    },
+    {
+      "variant": "rolling_continuous_ewma_train_stats",
+      "r2_x": 0.8025250434875488,
+      "r2_y": 0.8155997395515442,
+      "r2_mean": 0.8090623617172241,
+      "mse": 0.014481927268207073,
+      "sequential_delta_r2_mean": 0.01845419406890869
+    },
+    {
+      "variant": "rolling_continuous_ewma_60s_calibration",
+      "r2_x": 0.7196776866912842,
+      "r2_y": 0.7425298690795898,
+      "r2_mean": 0.731103777885437,
+      "mse": 0.020478906109929085,
+      "sequential_delta_r2_mean": -0.07795858383178711
+    }
+  ]
+}
