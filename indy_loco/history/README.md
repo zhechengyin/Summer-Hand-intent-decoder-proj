@@ -1,5 +1,10 @@
 # Indy Loco Experiment Archive
 
+> **Archive only.** Nothing under `history/` is an active model-selection or
+> deployment instruction. Use `../models/manifest.json` for the twelve
+> canonical session packages. Older statements below are retained solely to
+> preserve the original decision trail.
+
 This directory preserves completed Indy Loco experiments and their evidence.
 Nothing here is imported by the retained Indy model or by the independent
 FingerMovements project.

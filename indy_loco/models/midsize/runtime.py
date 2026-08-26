@@ -1,4 +1,4 @@
-"""Phase 9 rolling past-window runtime for the Midsize deployment bundle."""
+"""Rolling PC reference runtime for a canonical per-session Midsize package."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ try:
 except ImportError:  # Allow direct execution/import from this directory.
     from model import load_checkpoint
 
-CHECKPOINT = Path(__file__).with_name("checkpoint.pt")
+PACKAGE_ROOT = Path(__file__).resolve().parent
 CALIBRATION_BINS = 1_500
 WINDOW_BINS = 50
 BIN_SECONDS = 0.04
@@ -43,10 +43,20 @@ def _device(requested: str) -> torch.device:
 class MidsizeRuntime:
     """60-second calibration followed by a continuous 50-bin past window."""
 
-    def __init__(self, *, device: str = "auto") -> None:
+    def __init__(self, session: str, *, device: str = "auto") -> None:
         self.device = _device(device)
-        self.model, checkpoint = load_checkpoint(CHECKPOINT, map_location=self.device)
+        self.checkpoint_path = PACKAGE_ROOT / session / "checkpoint.pt"
+        if not self.checkpoint_path.is_file():
+            raise ValueError(f"Unknown Midsize session package: {session}")
+        self.model, checkpoint = load_checkpoint(
+            self.checkpoint_path, map_location=self.device
+        )
         self.model.to(self.device)
+        self.session = session
+        self.source_channel_count = int(checkpoint["source_channel_count"])
+        self.selected_channels = np.asarray(
+            checkpoint["selected_channel_indices"], dtype=np.int64
+        )
         self.std_floor = np.asarray(
             checkpoint["feature_std_floor"], dtype=np.float32
         ).reshape(192)
@@ -64,14 +74,15 @@ class MidsizeRuntime:
         self.std: np.ndarray | None = None
         self.window: deque[np.ndarray] = deque(maxlen=WINDOW_BINS)
 
-    @staticmethod
-    def _counts(raw_counts: np.ndarray) -> np.ndarray:
+    def _counts(self, raw_counts: np.ndarray) -> np.ndarray:
         counts = np.asarray(raw_counts, dtype=np.float32).reshape(-1)
-        if counts.size != 96:
-            raise ValueError("Midsize runtime requires channels 0..95 in order")
+        if counts.size != self.source_channel_count:
+            raise ValueError(
+                f"{self.session} requires {self.source_channel_count} source channels"
+            )
         if not np.isfinite(counts).all() or np.any(counts < 0):
             raise ValueError("Counts must be finite and non-negative")
-        return counts
+        return counts[self.selected_channels]
 
     def _feature(self, raw_counts: np.ndarray) -> np.ndarray:
         counts = self._counts(raw_counts)

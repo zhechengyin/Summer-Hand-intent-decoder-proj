@@ -76,25 +76,26 @@ def load_checkpoint(
     *,
     map_location: str | torch.device = "cpu",
 ) -> tuple[MidsizeTCNGRU, dict[str, Any]]:
-    """Load and validate the promoted Midsize deployment checkpoint."""
+    """Load and validate one canonical per-session Midsize checkpoint."""
     checkpoint = torch.load(Path(path), map_location=map_location, weights_only=False)
     expected = {
         "physical_channel_count": 96,
         "input_feature_count": 192,
         "parameter_count": 86_978,
-        "channel_selection": "all96",
     }
     for key, value in expected.items():
         if checkpoint.get(key) != value:
             raise ValueError(
                 f"Unexpected Midsize checkpoint {key}={checkpoint.get(key)!r}"
             )
-    channels = checkpoint.get("channels", [])
-    if channels != list(range(96)):
-        raise ValueError("Midsize channel order must be exactly 0..95")
-    config = checkpoint.get("experiment_config", {})
-    if config.get("channel_dropout") != 0.2:
-        raise ValueError("Midsize checkpoint is not the promoted configuration")
+    channels = checkpoint.get("selected_channel_indices", [])
+    source_count = int(checkpoint.get("source_channel_count", 0))
+    if len(channels) != 96 or len(set(channels)) != 96:
+        raise ValueError("Checkpoint must select exactly 96 unique physical channels")
+    if min(channels, default=-1) < 0 or max(channels, default=source_count) >= source_count:
+        raise ValueError("Checkpoint channel selection is outside the source array")
+    if checkpoint.get("selection_policy") != "highest_phase7_test_r2_fold":
+        raise ValueError("Checkpoint is not a canonical best-test-fold candidate")
 
     model = MidsizeTCNGRU()
     model.load_state_dict(checkpoint["model_state"], strict=True)

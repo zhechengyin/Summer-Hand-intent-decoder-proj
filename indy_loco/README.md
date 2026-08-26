@@ -1,72 +1,63 @@
-# Indy Loco Project
+# Indy/Loco decoder packages
 
-The historical decoder and detector work is preserved under `history/`. Phase 6
-is complete and promotes a regularized 96-channel decoder as the strongest
-validation candidate. Phase 7 completed all 30 six-session five-fold fits with
-test R² `0.7056 ± 0.0722`; its session-local checkpoints are benchmark evidence
-and do not replace the Phase 6 firmware candidate. Earlier checkpoints remain
-available for comparison. Phase 8 found Indy test R² `0.7576 ± 0.0396` at
-48 ms lookahead and `0.7554 ± 0.0397` at 100 ms. The same controlled
-accuracy/latency comparison is now ready to run on the three Loco benchmark
-sessions. Phase 9 then replayed two strictly causal cold-start policies for the
-promoted Phase 6 checkpoint. On December validation, a continuous rolling
-past-window reached pooled R² `0.7526`, versus `0.7021` for the original
-50-bin block-reset protocol, and was frozen before one January test inference.
+The authoritative active surface contains exactly **12 session packages**:
+six Midsize packages and six Large packages. Start from
+[`models/manifest.json`](models/manifest.json); do not select a checkpoint from
+`history/`.
 
-## Problem definition
+## Canonical sessions and scores
 
-The project decoded x/y fingertip velocity every 40 ms from intracortical spike
-counts. Every input window contains the previous 50 bins (2 seconds). The
-promoted Phase 6 model uses all 96 raw-count channels plus 96 causal EWMAs;
-historical compact models use 32 selected raw-count channels plus 32 EWMAs.
-Targets are two-dimensional velocity.
+Every package uses the checkpoint from the fold with the highest Phase-7 test
+R² for that session. This is an explicit GUI/deployment demonstration policy,
+not an unbiased generalization estimate.
 
-All preprocessing used past information only:
+| Session | Selected fold | Phase-7 chunked test R² | Midsize rolling R² | Large rolling R² |
+|---|---:|---:|---:|---:|
+| indy_20160622_01 | 5 | 0.8216 | 0.7311 | 0.8115 |
+| indy_20160630_01 | 4 | 0.7004 | 0.5377 | 0.7016 |
+| indy_20170131_02 | 4 | 0.7998 | 0.5660 | 0.7838 |
+| loco_20170210_03 | 5 | 0.7067 | 0.6421 | 0.6982 |
+| loco_20170215_02 | 4 | 0.6981 | 0.5133 | 0.6751 |
+| loco_20170301_05 | 1 | 0.7500 | 0.7444 | 0.7672 |
+| **Mean** | — | **0.7461** | **0.6224** | **0.7396** |
 
-- channel selection and normalization were estimated from training data;
-- each session used its first 60 seconds for causal calibration;
-- EWMA features were updated forward in time;
-- validation and test data never updated model weights.
+The Phase-7 number uses reach-local chunked preprocessing. The Midsize and
+Large numbers use the same continuous rolling deployment preprocessing, so
+only the final two columns form a matched deployment A/B.
 
-## Retained systems
+## Package definitions
 
-The strongest validation candidate is the 96-channel 64/64 TCN+GRU checkpoint
-in `models/midsize/checkpoint.pt`. It has 86,978 parameters
-and achieved pooled December validation R² `0.7004 ± 0.0019` over seeds
-42–44. Training used 0.20 paired channel dropout; the promoted seed-43 epoch-15
-checkpoint reached pooled R² 0.7022 and macro R² 0.7041.
+### Midsize
 
-The 32-channel 48/48 checkpoint in `models/tiny/checkpoint.pt`
-remains the smaller firmware reference. It reduced parameters from 78,786 to
-45,266 while remaining non-inferior in its five-seed, leave-one-month-out
-comparison.
+`models/midsize/<session>/` contains `checkpoint.pt` and `manifest.json`.
+The shared 86,978-parameter causal TCN+GRU is in `models/midsize/model.py`.
+`models/midsize/runtime.py` requires an explicit session and implements
+60-second calibration followed by stride-1 rolling inference.
 
-The drift detector remained coupled to the older 64/64 representation. Its two layers were:
+### Large
 
-1. label-free 60-second firing-rate and channel-pattern checks;
-2. frozen-decoder hidden-state and output-distribution checks.
+`models/large/<session>/` contains `checkpoint.pt`, `memory.memlib`, and
+`manifest.json`. Large means **the same Midsize neural base plus GRU external
+memory**; it is not a separately trained larger neural network.
 
-The detector was retrospective safety research, not a validated production gate. January was inspected before the detector design was finalized, and no truly prospective sessions were collected.
+The memory uses 32D GRU PCA + 32D long-context PCA, int8 keys and FP16
+residuals. Reported retrieval used exact PC cKDTree search. The memlib is not
+yet a firmware BCIMEM/IVF binary, so the Large score is a PC memory-quality
+result rather than an STM32 latency result.
 
-## Validity boundaries
+## Validation
 
-- The 29/4/4 split is chronological by session.
-- December validation influenced model and checkpoint choices.
-- January test was opened once in Phase 2 and cannot be called untouched afterward.
-- Phase 3 leave-one-month-out results are the strongest cross-month robustness evidence.
-- Phase 5 confirmed the 64-channel hyperparameters over seeds 42–44 and found no mean benefit from retrospective detector filtering.
-- Phase 6 confirmed the 96-channel paired-dropout winner over seeds 42–44. December selected the model; January remained unloaded.
-- Phase 9 selected the rolling calibration-seeded window using December only.
-  The selected policy then reached pooled January R² `0.7277`; January did not
-  participate in policy selection.
+```bash
+.venv-deploy/bin/python indy_loco/models/package_tools.py validate
+```
 
-Start with `docs/STATUS.md` for the current state and
-`history/EXPERIMENT_LOG.md` for the decision trail. Completed runners and
-results are under `history/`; the retained implementations and checkpoints are
-under `models/`; the completed Phase 6 reproduction runners remain under
-`experiments/active/`.
+The validator requires exactly 12 packages, verifies SHA-256 hashes, checks
+that both tiers share the same session checkpoint, and validates memory schema,
+dimensions and dtypes.
 
-The deployment packages are self-contained. `models/tiny/` and
-`models/midsize/` each contain only `model.py`, `runtime.py`, and
-`checkpoint.pt`. Large will be added only after a general Large checkpoint
-exists.
+## Archive boundary
+
+Previous experiments, checkpoints, generated CubeAI material, results and old
+descriptions are under `history/`. They are retained only for provenance and
+are **not active model-selection guidance**. Local datasets remain under
+`data/` and are not part of the package contract.

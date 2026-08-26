@@ -55,6 +55,11 @@ indy_loco/history/results/**/*.png
 indy_loco/history/results/**/*.pt
 indy_loco/history/results/**/*.db
 indy_loco/history/results/**/.cache/
+# The package cleanup nests the previous active tree one level deeper.
+indy_loco/history/legacy_pre_package_cleanup/results/**/*.png
+indy_loco/history/legacy_pre_package_cleanup/results/**/*.pt
+indy_loco/history/legacy_pre_package_cleanup/results/**/*.db
+indy_loco/history/legacy_pre_package_cleanup/results/**/.cache/
 
 # OS
 .DS_Store
