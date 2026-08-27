@@ -1,21 +1,31 @@
 #!/usr/bin/env python3
-"""Build and validate the twelve canonical session model packages."""
+"""Build and validate the final Phase-13 pre-CubeAI model package."""
 
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
+import shutil
 from pathlib import Path
 from typing import Any, Final
 
-import numpy as np
 import torch
 
 ROOT = Path(__file__).resolve().parent
 PROJECT = ROOT.parent
-ARCHIVE = PROJECT / "history" / "legacy_pre_package_cleanup"
-PHASE12 = ARCHIVE / "experiments" / "phase12_external_memory_representation_ablation"
+ROUND3 = (
+    PROJECT
+    / "experiment"
+    / "phase13_deployment_validation"
+    / "results"
+    / "rolling_retrain"
+    / "phase7_all"
+)
+SOURCE_CHECKPOINTS = ROUND3 / "checkpoints"
+FOLD_METRICS = ROUND3 / "phase13_round3_folds.csv"
+SUMMARY_METRICS = ROUND3 / "phase13_round3_summary.csv"
 SESSIONS: Final = (
     "indy_20160622_01",
     "indy_20160630_01",
@@ -24,6 +34,9 @@ SESSIONS: Final = (
     "loco_20170215_02",
     "loco_20170301_05",
 )
+TIERS: Final = ("midsize", "large")
+FOLDS: Final = (1, 2, 3, 4, 5)
+SELECTION_POLICY = "minimum_validation_loss_test_opened_once"
 
 
 def sha256(path: Path) -> str:
@@ -38,170 +51,292 @@ def write_json(path: Path, payload: Any) -> None:
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
-def build() -> None:
-    packages: list[dict[str, Any]] = []
-    for session in SESSIONS:
-        replay = json.loads(
-            (ARCHIVE / "models" / "midsize" / session / "deployment_replay.json").read_text()
-        )
-        metrics = json.loads(
-            (
-                PHASE12
-                / "results"
-                / "deployment_parity"
-                / "by_session"
-                / session
-                / "metrics.json"
-            ).read_text()
-        )
-        midsize_dir = ROOT / "midsize" / session
-        large_dir = ROOT / "large" / session
-        checkpoint = midsize_dir / "checkpoint.pt"
-        checkpoint_hash = sha256(checkpoint)
-        checkpoint_data = torch.load(checkpoint, map_location="cpu", weights_only=False)
-        common = {
-            "schema_version": 1,
-            "session": session,
-            "subject": metrics["subject"],
-            "selection": {
-                "policy": "highest_phase7_test_r2_fold",
-                "selected_fold": int(metrics["selected_fold"]),
-                "phase7_chunked_test_r2_mean": float(metrics["selection_test_r2_mean"]),
-                "selection_bias_warning": (
-                    "The fold was chosen by test R2. This package is a GUI/deployment "
-                    "demonstration candidate, not an unbiased generalization estimate."
-                ),
-            },
-            "model": {
-                "architecture": "MidsizeTCNGRU",
-                "parameters": 86_978,
-                "input_features": 192,
-                "physical_channels": 96,
-                "source_channels": int(checkpoint_data["source_channel_count"]),
-                "selected_channel_indices": [
-                    int(value) for value in checkpoint_data["selected_channel_indices"]
-                ],
-                "window_bins": 50,
-                "bin_seconds": 0.04,
-                "checkpoint": "checkpoint.pt",
-                "checkpoint_sha256": checkpoint_hash,
-            },
-            "preprocessing": {
-                "ewma_alpha": 0.1,
-                "calibration_bins": 1_500,
-                "calibration_seconds": 60.0,
-                "continuous_rolling_window": True,
-                "prediction_timestep": 49,
-            },
-        }
-        midsize_manifest = {
-            **common,
-            "tier": "midsize",
-            "package_status": "best-test-fold demonstration candidate",
-            "held_out_replay": {
-                "policy": "continuous rolling, bank ABSENT",
-                **metrics["bank_absent"],
-            },
-        }
-        write_json(midsize_dir / "manifest.json", midsize_manifest)
+def read_rows(path: Path) -> list[dict[str, str]]:
+    with path.open(newline="", encoding="utf-8") as source:
+        return list(csv.DictReader(source))
 
-        memory = large_dir / "memory.memlib"
-        with np.load(memory, allow_pickle=False) as archive:
-            entry_count = int(archive["keys_int8"].shape[0])
-            key_dims = int(archive["keys_int8"].shape[1])
-            representation = str(archive["representation"])
-            schema = str(archive["schema"])
-        tuning = metrics["retrieval"]["tuning"]
-        large_manifest = {
-            **common,
-            "tier": "large",
-            "definition": "the same best-fold Midsize base plus GRU residual memory",
-            "package_status": "PC external-memory demonstration candidate",
-            "held_out_replay": {
-                "policy": "continuous rolling, GRU bank READY",
-                **metrics["bank_ready_gru"],
-                "ready_minus_absent_r2_mean": metrics["ready_minus_absent"]["r2_mean"],
-            },
-            "memory": {
-                "file": "memory.memlib",
-                "sha256": sha256(memory),
-                "schema": schema,
-                "representation": representation,
-                "representation_pca_dims": 32,
-                "context_pca_dims": 32,
-                "key_dims": key_dims,
-                "key_storage": "int8",
-                "residual_storage": "float16",
-                "entries": entry_count,
-                "neighbours": int(tuning["neighbours"]),
-                "temperature": float(tuning["temperature"]),
-                "blend": float(tuning["blend"]),
-                "search_used_for_reported_score": "PC exact cKDTree",
-                "firmware_bcimem_compatible": False,
-            },
-        }
-        write_json(large_dir / "manifest.json", large_manifest)
-        packages.extend(
-            {
-                "tier": tier,
+
+def fold_filename(fold: int, best_fold: int) -> str:
+    suffix = "_best-test-fold" if fold == best_fold else ""
+    return f"fold-{fold}{suffix}.pt"
+
+
+def fold_rows() -> dict[str, list[dict[str, str]]]:
+    rows = read_rows(FOLD_METRICS)
+    grouped = {session: [] for session in SESSIONS}
+    for row in rows:
+        session = row["session"]
+        if session not in grouped:
+            raise ValueError(f"Unexpected session in fold metrics: {session}")
+        grouped[session].append(row)
+    for session, session_rows in grouped.items():
+        folds = sorted(int(row["fold"]) for row in session_rows)
+        if folds != list(FOLDS):
+            raise ValueError(f"{session}: expected folds 1..5, found {folds}")
+    return grouped
+
+
+def summary_rows() -> tuple[dict[str, dict[str, str]], dict[str, str]]:
+    rows = read_rows(SUMMARY_METRICS)
+    sessions = {row["session"]: row for row in rows if row["session"] in SESSIONS}
+    overall = next(row for row in rows if row["session"] == "overall_fold_macro")
+    if set(sessions) != set(SESSIONS):
+        raise ValueError("Round-3 summary does not contain exactly six sessions")
+    return sessions, overall
+
+
+def checkpoint_record(
+    session: str,
+    row: dict[str, str],
+    best_fold: int,
+    destination: Path,
+) -> dict[str, Any]:
+    fold = int(row["fold"])
+    source = SOURCE_CHECKPOINTS / f"{session}_fold{fold}.pt"
+    if not source.is_file():
+        raise FileNotFoundError(source)
+    filename = fold_filename(fold, best_fold)
+    target = destination / filename
+    shutil.copy2(source, target)
+    payload = torch.load(target, map_location="cpu", weights_only=False)
+    if payload.get("session") != session or int(payload.get("fold", -1)) != fold:
+        raise ValueError(f"Checkpoint identity mismatch: {target}")
+    if payload.get("selection_policy") != SELECTION_POLICY:
+        raise ValueError(f"Checkpoint was not selected by validation loss: {target}")
+    if payload.get("test_evaluated_during_training") is not False:
+        raise ValueError(f"Checkpoint opened test data during training: {target}")
+    return {
+        "fold": fold,
+        "file": filename,
+        "sha256": sha256(target),
+        "best_test_fold": fold == best_fold,
+        "best_epoch": int(row["best_epoch"]),
+        "test_r2_mean": float(row["retrained_7min_rolling_r2"]),
+        "test_bins": int(row["test_bins"]),
+        "selection_policy": SELECTION_POLICY,
+        "source": str(source.relative_to(PROJECT)),
+    }
+
+
+def build() -> None:
+    grouped = fold_rows()
+    summaries, overall = summary_rows()
+    packages: list[dict[str, Any]] = []
+
+    for session in SESSIONS:
+        rows = sorted(grouped[session], key=lambda row: int(row["fold"]))
+        best_row = max(rows, key=lambda row: float(row["retrained_7min_rolling_r2"]))
+        best_fold = int(best_row["fold"])
+        session_summary = summaries[session]
+
+        for tier in TIERS:
+            directory = ROOT / tier / session
+            directory.mkdir(parents=True, exist_ok=True)
+            unexpected = [path for path in directory.iterdir() if path.is_file()]
+            if unexpected:
+                names = ", ".join(sorted(path.name for path in unexpected))
+                raise ValueError(f"Refusing to overwrite non-empty {directory}: {names}")
+
+            checkpoints = [
+                checkpoint_record(session, row, best_fold, directory) for row in rows
+            ]
+            first_payload = torch.load(
+                directory / checkpoints[0]["file"],
+                map_location="cpu",
+                weights_only=False,
+            )
+            manifest: dict[str, Any] = {
+                "schema_version": 2,
+                "phase": "phase13_round3_final_pre_cubeai",
                 "session": session,
-                "manifest": f"{tier}/{session}/manifest.json",
+                "subject": first_payload["subject"],
+                "tier": tier,
+                "package_status": "final_python_checkpoints_cubeai_pending",
+                "paper_reporting": {
+                    "primary_metric": "mean test R2 across five validation-selected folds",
+                    "folds": 5,
+                    "test_r2_mean": float(
+                        session_summary["retrained_7min_rolling_r2_mean"]
+                    ),
+                    "test_r2_std": float(
+                        session_summary["retrained_7min_rolling_r2_std"]
+                    ),
+                    "best_test_fold": best_fold,
+                    "best_test_fold_r2": float(
+                        best_row["retrained_7min_rolling_r2"]
+                    ),
+                    "best_fold_is_descriptive_only": True,
+                    "selection_note": (
+                        "Each fold checkpoint was selected by validation loss. The best-test-fold "
+                        "marker is for inspection/deployment convenience and is not the paper estimate."
+                    ),
+                },
+                "model": {
+                    "architecture": "MidsizeTCNGRU",
+                    "parameters": 86_978,
+                    "input_features": 192,
+                    "physical_channels": 96,
+                    "source_channels": int(first_payload["source_channel_count"]),
+                    "window_bins": 50,
+                    "bin_seconds": 0.04,
+                    "output_timestep": 49,
+                    "shared_python_definition": "../model.py" if tier == "midsize" else "../../midsize/model.py",
+                    "checkpoints": checkpoints,
+                },
+                "preprocessing": {
+                    "ewma_alpha": 0.1,
+                    "calibration_bins": 10_500,
+                    "calibration_seconds": 420.0,
+                    "calibration_minutes": 7.0,
+                    "continuous_rolling_window": True,
+                    "ewma_reset_at_reach": False,
+                    "window_order": "oldest_to_newest",
+                },
+                "cubeai": {
+                    "status": "not_run_in_this_phase",
+                    "python_inputs_ready": True,
+                    "input_files": [record["file"] for record in checkpoints],
+                    "shared_model_definition": "midsize/model.py",
+                    "generated_onnx_h5_c_aibundle_present": False,
+                    "next_action": "Convert and validate every fold in the next CubeAI phase.",
+                },
             }
-            for tier in ("midsize", "large")
-        )
+            if tier == "large":
+                manifest["definition"] = (
+                    "The same neural checkpoint as Midsize plus fold-specific GRU-hidden[49] "
+                    "external residual memory."
+                )
+                manifest["external_memory"] = {
+                    "query_representation": "gru_hidden_49_plus_long_context",
+                    "status": "fold_specific_memlib_rebuild_pending",
+                    "compatible_memlib_files_present": False,
+                    "reason": (
+                        "Archived Phase-12 memlibs were built for older checkpoints and a "
+                        "different preprocessing/evaluation protocol; reusing them would be invalid."
+                    ),
+                    "paper_test_r2_mean": None,
+                    "next_action": (
+                        "Build and evaluate one train-only residual bank per fold, then export "
+                        "the validated firmware-compatible memory format."
+                    ),
+                }
+            write_json(directory / "manifest.json", manifest)
+            packages.append(
+                {
+                    "tier": tier,
+                    "session": session,
+                    "manifest": f"{tier}/{session}/manifest.json",
+                    "checkpoint_count": 5,
+                    "best_test_fold": best_fold,
+                }
+            )
 
     write_json(
         ROOT / "manifest.json",
         {
-            "schema_version": 1,
+            "schema_version": 2,
             "authoritative": True,
-            "package_count": 12,
+            "phase": "phase13_round3_final_pre_cubeai",
+            "status": "python_checkpoint_packaging_complete_cubeai_pending",
             "sessions": list(SESSIONS),
+            "folds_per_session": 5,
             "tiers": {
-                "midsize": "best-test-fold Midsize base, bank ABSENT",
-                "large": "same base plus GRU residual memory, bank READY",
+                "midsize": {
+                    "definition": "Phase-13 Round-3 deployment-aligned neural decoder",
+                    "checkpoint_count": 30,
+                    "paper_test_r2_mean": float(
+                        overall["retrained_7min_rolling_r2_mean"]
+                    ),
+                    "paper_test_r2_std": float(
+                        overall["retrained_7min_rolling_r2_std"]
+                    ),
+                    "paper_unit": "30 folds (six sessions x five folds)",
+                },
+                "large": {
+                    "definition": "Same decoder plus fold-specific GRU residual memory",
+                    "neural_checkpoint_count": 30,
+                    "compatible_memlib_count": 0,
+                    "paper_test_r2_mean": None,
+                    "status": "memory_rebuild_and_evaluation_pending",
+                },
+            },
+            "cubeai": {
+                "status": "not_run",
+                "generated_files_present": False,
+                "planned_next_phase": True,
             },
             "packages": packages,
+            "source_metrics": str(SUMMARY_METRICS.relative_to(PROJECT)),
         },
     )
 
 
 def validate() -> None:
-    index = json.loads((ROOT / "manifest.json").read_text())
-    assert index["authoritative"] is True
-    assert index["package_count"] == 12
-    assert tuple(index["sessions"]) == SESSIONS
-    allowed = {
-        "midsize": {"checkpoint.pt", "manifest.json"},
-        "large": {"checkpoint.pt", "memory.memlib", "manifest.json"},
-    }
+    index = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
+    if index["phase"] != "phase13_round3_final_pre_cubeai":
+        raise ValueError("Unexpected active model phase")
+    if index["cubeai"]["status"] != "not_run":
+        raise ValueError("CubeAI status must remain not_run in this phase")
+    grouped = fold_rows()
+    summaries, overall = summary_rows()
+    loaded_count = 0
+
     for session in SESSIONS:
-        checkpoint_hashes = []
-        for tier in ("midsize", "large"):
+        expected_best = int(
+            max(
+                grouped[session],
+                key=lambda row: float(row["retrained_7min_rolling_r2"]),
+            )["fold"]
+        )
+        tier_hashes: dict[str, list[str]] = {}
+        for tier in TIERS:
             directory = ROOT / tier / session
-            actual = {path.name for path in directory.iterdir() if path.is_file()}
-            assert actual == allowed[tier], (tier, session, actual)
-            manifest = json.loads((directory / "manifest.json").read_text())
-            assert manifest["session"] == session and manifest["tier"] == tier
-            checkpoint = directory / manifest["model"]["checkpoint"]
-            assert sha256(checkpoint) == manifest["model"]["checkpoint_sha256"]
-            payload = torch.load(checkpoint, map_location="cpu", weights_only=False)
-            assert payload["session"] == session
-            assert int(payload["fold"]) == manifest["selection"]["selected_fold"]
-            assert payload["selection_policy"] == "highest_phase7_test_r2_fold"
-            checkpoint_hashes.append(sha256(checkpoint))
-            if tier == "large":
-                memory = directory / manifest["memory"]["file"]
-                assert sha256(memory) == manifest["memory"]["sha256"]
-                with np.load(memory, allow_pickle=False) as archive:
-                    assert str(archive["schema"]) == "phase12_pc_memlib_v1"
-                    assert str(archive["representation"]) == "deployment_parity_gru_hidden_49"
-                    assert archive["keys_int8"].shape == (manifest["memory"]["entries"], 64)
-                    assert archive["keys_int8"].dtype == np.int8
-                    assert archive["residual_fp16"].shape == (manifest["memory"]["entries"], 2)
-                    assert archive["residual_fp16"].dtype == np.float16
-        assert checkpoint_hashes[0] == checkpoint_hashes[1]
-    print("Package validation passed: 6 sessions x 2 tiers = 12 canonical packages")
+            manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
+            records = manifest["model"]["checkpoints"]
+            expected_files = {"manifest.json", *(record["file"] for record in records)}
+            actual_files = {path.name for path in directory.iterdir() if path.is_file()}
+            if actual_files != expected_files:
+                raise ValueError(f"Unexpected files in {directory}: {actual_files ^ expected_files}")
+            if len(records) != 5 or sorted(record["fold"] for record in records) != list(FOLDS):
+                raise ValueError(f"{tier}/{session}: incomplete fold set")
+            if sum(bool(record["best_test_fold"]) for record in records) != 1:
+                raise ValueError(f"{tier}/{session}: expected one best-test-fold marker")
+            if manifest["paper_reporting"]["best_test_fold"] != expected_best:
+                raise ValueError(f"{tier}/{session}: wrong best-test fold")
+            expected_mean = float(summaries[session]["retrained_7min_rolling_r2_mean"])
+            if abs(manifest["paper_reporting"]["test_r2_mean"] - expected_mean) > 1e-12:
+                raise ValueError(f"{tier}/{session}: session R2 mismatch")
+
+            hashes = []
+            for record in records:
+                checkpoint = directory / record["file"]
+                digest = sha256(checkpoint)
+                if digest != record["sha256"]:
+                    raise ValueError(f"Hash mismatch: {checkpoint}")
+                payload = torch.load(checkpoint, map_location="cpu", weights_only=False)
+                if payload["session"] != session or int(payload["fold"]) != record["fold"]:
+                    raise ValueError(f"Identity mismatch: {checkpoint}")
+                if payload["selection_policy"] != SELECTION_POLICY:
+                    raise ValueError(f"Selection policy mismatch: {checkpoint}")
+                if payload["deployment_policy"]["calibration_bins"] != 10_500:
+                    raise ValueError(f"Calibration mismatch: {checkpoint}")
+                hashes.append(digest)
+                loaded_count += 1
+            tier_hashes[tier] = hashes
+            if tier == "large" and manifest["external_memory"]["compatible_memlib_files_present"]:
+                raise ValueError("Large package must not claim compatible memlibs before rebuild")
+        if tier_hashes["midsize"] != tier_hashes["large"]:
+            raise ValueError(f"{session}: Midsize/Large neural checkpoints differ")
+
+    expected_overall = float(overall["retrained_7min_rolling_r2_mean"])
+    if abs(index["tiers"]["midsize"]["paper_test_r2_mean"] - expected_overall) > 1e-12:
+        raise ValueError("Overall paper R2 mismatch")
+    if loaded_count != 60:
+        raise ValueError(f"Expected 60 packaged checkpoint copies, loaded {loaded_count}")
+    print(
+        "Package validation passed: 6 sessions x 5 folds x 2 tiers = "
+        "60 checkpoint copies; CubeAI not run; Large memlib rebuild pending"
+    )
 
 
 def main() -> None:

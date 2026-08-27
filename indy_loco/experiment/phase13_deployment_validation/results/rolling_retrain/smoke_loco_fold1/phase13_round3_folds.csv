@@ -1,0 +1,2 @@
+session,subject,fold,best_epoch,phase7_reach_local_r2,phase7_continuous_training_norm_r2,phase7_7min_rolling_r2,retrained_7min_rolling_r2,rolling_only_delta,calibration_delta,retraining_gain,net_delta_vs_phase7,rolling_gap_recovered_fraction,test_bins,checkpoint
+loco_20170215_02,loco,1,2,0.5836878418922424,0.654999315738678,0.5745038986206055,0.6227359771728516,0.07131147384643555,-0.08049541711807251,0.048232078552246094,0.03904813528060913,,1416,results/rolling_retrain/smoke_loco_fold1/checkpoints/loco_20170215_02_fold1.pt

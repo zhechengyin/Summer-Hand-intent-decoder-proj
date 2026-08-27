@@ -250,3 +250,36 @@ current operating points: compact causal Tiny, promoted causal Mid-size, and
 evidence only; the Phase 6 seed-43 checkpoint remains the strongest general
 validation candidate. The compact 48/48 checkpoint remains the smaller
 firmware reference; neither retained checkpoint was overwritten.
+
+## Phase 13 — Final deployment-aligned five-fold package
+
+Completed on 2026-08-27. Round 2 selected a seven-minute unlabeled calibration
+prefix as the practical deployment knee. Round 3 then retrained all six
+sessions and all five reach folds for the exact deployment temporal contract:
+continuous session-level causal EWMA, rolling 50-bin past windows, seven-minute
+calibration, and loss/output at GRU timestep 49. Each checkpoint was selected
+by validation loss; test targets were opened only after the selected checkpoint
+was saved.
+
+| Session | Five-fold retrained test R² mean ± SD | Best test fold |
+|---|---:|---:|
+| `indy_20160622_01` | 0.8381 ± 0.0214 | 5 |
+| `indy_20160630_01` | 0.7152 ± 0.0172 | 4 |
+| `indy_20170131_02` | 0.7725 ± 0.0562 | 4 |
+| `loco_20170210_03` | 0.7163 ± 0.0450 | 5 |
+| `loco_20170215_02` | 0.6826 ± 0.0431 | 5 |
+| `loco_20170301_05` | 0.7221 ± 0.0638 | 1 |
+| **All 30 folds** | **0.7411 ± 0.0656** | — |
+
+The Phase-13 model package is now the **final Python pre-CubeAI state**. Both
+Midsize and Large session folders contain all five fold checkpoints; one
+filename per session is marked `_best-test-fold` for inspection only. Midsize
+and Large share byte-identical neural weights fold by fold. The paper must use
+the 30-fold mean above, not the six best-fold mean.
+
+Large remains a system tier consisting of the same neural base plus GRU
+hidden[49] external residual memory. The old Phase-12 memlibs were archived
+because they were built for older checkpoints and cannot be reused. Therefore
+the final Large five-fold corrected R² is pending 30 fold-specific bank builds
+and held-out replays. CubeAI conversion, generated C, firmware, GUI, and board
+testing were intentionally left unchanged for the next phase.

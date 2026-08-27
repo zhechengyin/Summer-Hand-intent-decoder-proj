@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "authoritative": true,
+  "package_count": 12,
+  "sessions": [
+    "indy_20160622_01",
+    "indy_20160630_01",
+    "indy_20170131_02",
+    "loco_20170210_03",
+    "loco_20170215_02",
+    "loco_20170301_05"
+  ],
+  "tiers": {
+    "midsize": "best-test-fold Midsize base, bank ABSENT",
+    "large": "same base plus GRU residual memory, bank READY"
+  },
+  "packages": [
+    {
+      "tier": "midsize",
+      "session": "indy_20160622_01",
+      "manifest": "midsize/indy_20160622_01/manifest.json"
+    },
+    {
+      "tier": "large",
+      "session": "indy_20160622_01",
+      "manifest": "large/indy_20160622_01/manifest.json"
+    },
+    {
+      "tier": "midsize",
+      "session": "indy_20160630_01",
+      "manifest": "midsize/indy_20160630_01/manifest.json"
+    },
+    {
+      "tier": "large",
+      "session": "indy_20160630_01",
+      "manifest": "large/indy_20160630_01/manifest.json"
+    },
+    {
+      "tier": "midsize",
+      "session": "indy_20170131_02",
+      "manifest": "midsize/indy_20170131_02/manifest.json"
+    },
+    {
+      "tier": "large",
+      "session": "indy_20170131_02",
+      "manifest": "large/indy_20170131_02/manifest.json"
+    },
+    {
+      "tier": "midsize",
+      "session": "loco_20170210_03",
+      "manifest": "midsize/loco_20170210_03/manifest.json"
+    },
+    {
+      "tier": "large",
+      "session": "loco_20170210_03",
+      "manifest": "large/loco_20170210_03/manifest.json"
+    },
+    {
+      "tier": "midsize",
+      "session": "loco_20170215_02",
+      "manifest": "midsize/loco_20170215_02/manifest.json"
+    },
+    {
+      "tier": "large",
+      "session": "loco_20170215_02",
+      "manifest": "large/loco_20170215_02/manifest.json"
+    },
+    {
+      "tier": "midsize",
+      "session": "loco_20170301_05",
+      "manifest": "midsize/loco_20170301_05/manifest.json"
+    },
+    {
+      "tier": "large",
+      "session": "loco_20170301_05",
+      "manifest": "large/loco_20170301_05/manifest.json"
+    }
+  ]
+}

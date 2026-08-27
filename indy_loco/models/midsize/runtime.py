@@ -15,7 +15,7 @@ except ImportError:  # Allow direct execution/import from this directory.
     from model import load_checkpoint
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
-CALIBRATION_BINS = 1_500
+CALIBRATION_BINS = 10_500
 WINDOW_BINS = 50
 BIN_SECONDS = 0.04
 EWMA_ALPHA = 0.1
@@ -41,18 +41,24 @@ def _device(requested: str) -> torch.device:
 
 
 class MidsizeRuntime:
-    """60-second calibration followed by a continuous 50-bin past window."""
+    """Seven-minute calibration followed by a continuous 50-bin past window."""
 
-    def __init__(self, session: str, *, device: str = "auto") -> None:
+    def __init__(self, session: str, fold: int, *, device: str = "auto") -> None:
         self.device = _device(device)
-        self.checkpoint_path = PACKAGE_ROOT / session / "checkpoint.pt"
+        if fold not in {1, 2, 3, 4, 5}:
+            raise ValueError("fold must be one of 1, 2, 3, 4, or 5")
+        matches = sorted((PACKAGE_ROOT / session).glob(f"fold-{fold}*.pt"))
+        if len(matches) != 1:
+            raise ValueError(f"Unknown or ambiguous Midsize package: {session} fold {fold}")
+        self.checkpoint_path = matches[0]
         if not self.checkpoint_path.is_file():
-            raise ValueError(f"Unknown Midsize session package: {session}")
+            raise ValueError(f"Unknown Midsize session package: {session} fold {fold}")
         self.model, checkpoint = load_checkpoint(
             self.checkpoint_path, map_location=self.device
         )
         self.model.to(self.device)
         self.session = session
+        self.fold = fold
         self.source_channel_count = int(checkpoint["source_channel_count"])
         self.selected_channels = np.asarray(
             checkpoint["selected_channel_indices"], dtype=np.int64

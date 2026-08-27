@@ -76,7 +76,7 @@ def load_checkpoint(
     *,
     map_location: str | torch.device = "cpu",
 ) -> tuple[MidsizeTCNGRU, dict[str, Any]]:
-    """Load and validate one canonical per-session Midsize checkpoint."""
+    """Load and validate one canonical Phase-13 per-session fold checkpoint."""
     checkpoint = torch.load(Path(path), map_location=map_location, weights_only=False)
     expected = {
         "physical_channel_count": 96,
@@ -94,8 +94,13 @@ def load_checkpoint(
         raise ValueError("Checkpoint must select exactly 96 unique physical channels")
     if min(channels, default=-1) < 0 or max(channels, default=source_count) >= source_count:
         raise ValueError("Checkpoint channel selection is outside the source array")
-    if checkpoint.get("selection_policy") != "highest_phase7_test_r2_fold":
-        raise ValueError("Checkpoint is not a canonical best-test-fold candidate")
+    if checkpoint.get("selection_policy") != "minimum_validation_loss_test_opened_once":
+        raise ValueError("Checkpoint was not selected by validation loss")
+    if checkpoint.get("test_evaluated_during_training") is not False:
+        raise ValueError("Checkpoint evaluated test targets during training")
+    deployment = checkpoint.get("deployment_policy", {})
+    if deployment.get("calibration_bins") != 10_500:
+        raise ValueError("Checkpoint does not use the final seven-minute calibration contract")
 
     model = MidsizeTCNGRU()
     model.load_state_dict(checkpoint["model_state"], strict=True)

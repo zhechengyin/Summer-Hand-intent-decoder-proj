@@ -1,8 +1,8 @@
 # Indy Loco Experiment Archive
 
 > **Archive only.** Nothing under `history/` is an active model-selection or
-> deployment instruction. Use `../models/manifest.json` for the twelve
-> canonical session packages. Older statements below are retained solely to
+> deployment instruction. Use `../STATUS.md` and `../models/manifest.json` for
+> the final Phase-13 six-session/five-fold packages. Older statements below are retained solely to
 > preserve the original decision trail.
 
 This directory preserves completed Indy Loco experiments and their evidence.
@@ -22,7 +22,8 @@ FingerMovements project.
 
 ## Where to read
 
-- `../docs/STATUS.md`: final technical snapshot and validity limits.
+- `../STATUS.md`: current final technical snapshot and validity limits.
+- `legacy_pre_package_cleanup/docs/STATUS.md`: archived pre-Phase-13 snapshot.
 - `EXPERIMENT_LOG.md`: concise experiment history and decisions.
 - `EXPERIMENT_CODE_INDEX.md`: maps experiment phases to scripts and outputs.
 - `experiments/`: archived experiment scripts.

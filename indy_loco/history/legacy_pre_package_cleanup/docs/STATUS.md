@@ -1,5 +1,9 @@
 # Indy Loco Status
 
+> **Archived snapshot.** This status predates Phase 13 and is not the active
+> model-selection or deployment state. Use `../../../STATUS.md` and
+> `../../../models/manifest.json` for the final pre-CubeAI package.
+
 **State:** Phase 9 is complete. For the promoted Phase 6 causal checkpoint, a
 continuous rolling 50-bin past-window reached pooled December validation R²
 `0.7526`, compared with `0.7021` for the original 50-bin block-reset policy.
