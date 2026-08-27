@@ -1,0 +1,238 @@
+{
+  "schema_version": 1,
+  "phase": "phase14_cubeai_best_fold_conversion",
+  "status": "best_fold_validated_not_promoted_to_firmware_or_gui",
+  "session": "loco_20170215_02",
+  "fold": 5,
+  "best_test_fold": true,
+  "checkpoint": {
+    "file": "fold-5_best-test-fold.pt",
+    "bytes": 363820,
+    "sha256": "0a2720994ccca9b8204559389b7b256b36f801b78ec6426982ca4113f314466e"
+  },
+  "checkpoint_shared_by_tiers": [
+    "midsize",
+    "large"
+  ],
+  "paper_reporting": {
+    "required_metric": "30-fold mean and standard deviation",
+    "midsize_r2_mean": 0.7411375800768535,
+    "midsize_r2_std": 0.06559769297745317,
+    "pilot_fold_r2_is_descriptive_only": true
+  },
+  "graph": {
+    "abi_id": "tcn64i8-gruseq64-xcai10-v1",
+    "encoder": "INT8 TCN with float32 input/output ABI",
+    "gru_hidden_head": "FP32 GRU with velocity and state-sequence outputs; hidden[49] is row 49",
+    "state_output_shape": [
+      1,
+      50,
+      64
+    ],
+    "hidden_49_view": "state_output[0][49][0:64]",
+    "state_output_bytes_float32": 12800
+  },
+  "quantization": {
+    "file": "encoder_int8.tflite",
+    "bytes": 86544,
+    "sha256": "9542219bd45457adf41bd9c789473fe01c153e542ca49612d08d5175334d2a48",
+    "representative_windows": 512,
+    "representative_source": "fold-5 training bins only",
+    "external_input_dtype": "<class 'numpy.float32'>",
+    "external_output_dtype": "<class 'numpy.float32'>",
+    "int8_tensor_count": 60,
+    "float_tensor_count": 4
+  },
+  "python_parity": {
+    "causal_encoder_keras_vs_pytorch": {
+      "max_abs_error": 2.6226043701171875e-06,
+      "mean_abs_error": 1.2474561572162202e-07,
+      "rmse": 2.5901567077400146e-07,
+      "timestep_49_max_abs_error": 1.430511474609375e-06
+    },
+    "tflite_encoder_vs_pytorch": {
+      "max_abs_error": 0.21599102020263672,
+      "mean_abs_error": 0.013982434766203368,
+      "rmse": 0.027067843306025303,
+      "timestep_49_max_abs_error": 0.12132865190505981
+    },
+    "keras_velocity_vs_torch_gru": {
+      "max_abs_error": 4.76837158203125e-07,
+      "mean_abs_error": 7.203023415058851e-08,
+      "rmse": 1.0105163365900255e-07,
+      "timestep_49_max_abs_error": 4.76837158203125e-07
+    },
+    "keras_hidden49_vs_torch_gru": {
+      "max_abs_error": 2.384185791015625e-07,
+      "mean_abs_error": 3.778404789045453e-08,
+      "rmse": 5.3347059244442376e-08,
+      "timestep_49_max_abs_error": 5.960464477539063e-08
+    },
+    "torch_final_hidden_shape": [
+      8,
+      64
+    ]
+  },
+  "cubeai": {
+    "parity": {
+      "encoder_cubeai_host_vs_tflite": {
+        "max_abs_error": 0.18700599670410156,
+        "mean_abs_error": 0.005834804006881313,
+        "rmse": 0.01840839597863328,
+        "timestep_49_max_abs_error": 0.09350323677062988
+      },
+      "gru_hidden_head_cubeai_host_vs_python": {
+        "velocity": {
+          "max_abs_error": 4.76837158203125e-07,
+          "mean_abs_error": 7.542548701167106e-08,
+          "rmse": 1.0253594559673062e-07,
+          "timestep_49_max_abs_error": 2.384185791015625e-07
+        },
+        "gru_states": {
+          "max_abs_error": 2.4959444999694824e-07,
+          "mean_abs_error": 3.822579060397402e-08,
+          "rmse": 5.5646489760807794e-08,
+          "timestep_49_max_abs_error": 2.384185791015625e-07
+        },
+        "hidden_49": {
+          "max_abs_error": 2.384185791015625e-07,
+          "mean_abs_error": 3.910463419742882e-08,
+          "rmse": 5.689607554798637e-08,
+          "timestep_49_max_abs_error": 1.1920928955078125e-07
+        },
+        "output_file_order": [
+          "indy_gru_hidden_head_val_c_outputs_1.csv",
+          "indy_gru_hidden_head_val_c_outputs_2.csv"
+        ]
+      },
+      "chain_cubeai_host_vs_python": {
+        "velocity": {
+          "max_abs_error": 0.03136920928955078,
+          "mean_abs_error": 0.003735168843413703,
+          "rmse": 0.005610720500711023,
+          "timestep_49_max_abs_error": 0.01871103048324585
+        },
+        "gru_states": {
+          "max_abs_error": 0.04095850884914398,
+          "mean_abs_error": 0.0025365937950198258,
+          "rmse": 0.004061410957160636,
+          "timestep_49_max_abs_error": 0.018594011664390564
+        },
+        "hidden_49": {
+          "max_abs_error": 0.018594011664390564,
+          "mean_abs_error": 0.0025937961672752863,
+          "rmse": 0.004168201902732052,
+          "timestep_49_max_abs_error": 0.005616605281829834
+        },
+        "output_file_order": [
+          "indy_gru_hidden_head_val_c_outputs_1.csv",
+          "indy_gru_hidden_head_val_c_outputs_2.csv"
+        ]
+      }
+    },
+    "encoder": {
+      "weights_bytes": 62860,
+      "activations_bytes": 38400,
+      "macc": 3154870
+    },
+    "gru_hidden_head": {
+      "weights_bytes": 100360,
+      "activations_bytes": 27136,
+      "macc": 1241700
+    }
+  },
+  "held_out_accuracy": {
+    "float32_pytorch": {
+      "bins": 1180,
+      "r2_x": 0.6181659698486328,
+      "r2_y": 0.8355569243431091,
+      "r2_mean": 0.7268614768981934,
+      "mse": 0.007277624681591988
+    },
+    "tflite_int8_encoder_torch_gru": {
+      "bins": 1180,
+      "r2_x": 0.6166742444038391,
+      "r2_y": 0.8346203565597534,
+      "r2_mean": 0.7256473302841187,
+      "mse": 0.007309149019420147
+    },
+    "cubeai_c_int8_encoder_torch_gru": {
+      "bins": 1180,
+      "r2_x": 0.6170198917388916,
+      "r2_y": 0.8344835042953491,
+      "r2_mean": 0.7257516980171204,
+      "mse": 0.007305568549782038
+    },
+    "tflite_r2_mean_drop": 0.001214146614074707,
+    "cubeai_r2_mean_drop": 0.001109778881072998,
+    "accepted_max_drop": 0.01,
+    "accepted": true
+  },
+  "components": {
+    "encoder_weights": {
+      "file": "encoder.weights.bin",
+      "bytes": 62860,
+      "sha256": "46a15af61e6ce1cd8cf5fd8d3cad93383fb32c2f9ec0ff2e4c4268f424568d32"
+    },
+    "gru_hidden_head_weights": {
+      "file": "gru_hidden_head.weights.bin",
+      "bytes": 100360,
+      "sha256": "d8f15b7a36463d48a3228b7a7f6a8e2ddfc363496fbe14a7bd509ab63bfb3da3"
+    },
+    "encoder_model": {
+      "file": "encoder_int8.tflite",
+      "bytes": 86544,
+      "sha256": "9542219bd45457adf41bd9c789473fe01c153e542ca49612d08d5175334d2a48"
+    },
+    "gru_hidden_head_model": {
+      "file": "gru_hidden_head.h5",
+      "bytes": 117968,
+      "sha256": "e0536e254e5a53cbbbf59fc4f2e50d017b59519e4f49c35b2384302d687f9f00"
+    }
+  },
+  "bundle": {
+    "format": "bci-cubeai-bundle-v1",
+    "format_version": 1,
+    "graph_abi_id": "tcn64i8-gruseq64-xcai10-v1",
+    "magic_hex": "4243494149423100",
+    "header_bytes": 256,
+    "alignment_bytes": 32,
+    "total_bytes": 164496,
+    "crc32": "d5279350",
+    "sha256": "add6e2a75e67f701f293122e761166d348e6ba029ad879e74e943b5eeac69840",
+    "header_crc32": "212e1087",
+    "body_sha256": "a4dcc7caa3c06a99d42a28d6343cae8f389595e29bb8dbcfce4f0f2f4e6ed906",
+    "encoder_offset": 256,
+    "gru_head_offset": 63136,
+    "parameters_offset": 163520,
+    "parameters_layout": {
+      "endianness": "little",
+      "feature_std_floor": {
+        "dtype": "float32",
+        "count": 192,
+        "offset": 0
+      },
+      "target_mean": {
+        "dtype": "float32",
+        "count": 2,
+        "offset": 768
+      },
+      "target_std": {
+        "dtype": "float32",
+        "count": 2,
+        "offset": 776
+      },
+      "selected_channel_indices": {
+        "dtype": "uint16",
+        "count": 96,
+        "offset": 784
+      },
+      "total_bytes": 976
+    }
+  },
+  "cubeai_version": [
+    "ST Edge AI Core v2.2.0-20266 2adc00962",
+    "   STM32CubeAI 10.2.0-RC1"
+  ],
+  "next_gate": "After review, batch-convert the highlighted best fold for the remaining five sessions; continue reporting the 30-fold average."
+}

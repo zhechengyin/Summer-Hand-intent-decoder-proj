@@ -132,11 +132,11 @@ All checkpoints, state files, CSVs, and JSON results remain under
 `results/rolling_retrain/`; nothing is copied into the deployable model package
 until a separate promotion decision is made.
 
-The completed default run (`phase7_all`) produced a five-fold macro mean R² of
+The completed default run (`final_30fold`) produced a five-fold macro mean R² of
 `0.7411`, compared with `0.6728` for the same Phase-7 weights under seven-minute
 rolling deployment preprocessing and `0.7089` for matched Phase-7 reach-local
 inference. Retraining improved 29 of 30 folds and all six session means. See
-`results/rolling_retrain/phase7_all/ROUND3_TECHNICAL_REPORT.md` for the full
+`results/rolling_retrain/final_30fold/ROUND3_TECHNICAL_REPORT.md` for the full
 decomposition, paired statistics, weight-change audit, and limitations.
 
 Rebuild the paired statistics and parameter-change audit from the saved

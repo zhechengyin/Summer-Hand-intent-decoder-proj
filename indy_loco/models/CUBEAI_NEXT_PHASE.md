@@ -1,39 +1,33 @@
-# CubeAI next-phase handoff
+# CubeAI and Large-memory handoff
 
-This phase stops at validated PyTorch checkpoints. Do not reuse archived ONNX,
-H5, generated C, weights binaries, `.aibundle`, or `.memlib` artifacts with the
-new weights.
+The six highlighted per-session best folds are converted and host-validated.
+Midsize and Large share each neural package, so there are six unique CubeAI
+packages rather than twelve copies.
 
-## Inputs that are ready
+## Ready now
 
-- Shared architecture: `midsize/model.py`
-- Per-fold metadata and SHA-256: each session's `manifest.json`
-- Neural weights: five `fold-*.pt` files in every Midsize and Large session
-  folder
-- Preprocessing constants inside every checkpoint: selected channels, feature
-  mean/std/floor, target mean/std, and seven-minute deployment policy
+- Six INT8-encoder + FP32-GRU/head CubeAI packages under
+  `midsize/<session>/cubeai/fold-<best>/`.
+- Six Large reference manifests under `large/<session>/cubeai/manifest.json`.
+- Full GRU state output `[1, 50, 64]`; hidden[49] is row 49 and can seed the
+  new residual-memory query.
+- Generated-C held-out replay passed all six accuracy gates. The selected-fold
+  diagnostic mean is 0.7941, while official reporting remains **0.7411 ±
+  0.0656 across all 30 folds**.
 
-Midsize and Large contain byte-identical neural checkpoints for the same
-session/fold. Convert the neural graph once per unique checkpoint; Large adds a
-separate external-memory artifact after the base neural path is validated.
+## Remaining sequence
 
-## Required next-phase sequence
+1. Build a compatible train-only GRU-hidden[49] memlib for the first Indy
+   package and validate retrieval on PC.
+2. Integrate that one neural package and memlib into firmware/GUI and run board
+   latency, parity, bank-ABSENT, and bank-READY tests.
+3. If the pilot board result passes, build the remaining five best-fold
+   memlibs and integrate all six session packages.
+4. To obtain a paper-facing Large result, separately build/evaluate all 30
+   fold-specific banks with validation-only tuning. Never average only the six
+   test-selected folds for the paper.
 
-1. Export each unique fold checkpoint to the existing split CubeAI graph
-   contract, preserving the encoder and GRU/head interfaces.
-2. Verify PyTorch ↔ exported model parity before CubeAI.
-3. Run X-CUBE-AI analyze, validate, and generate for all 30 unique checkpoints.
-4. Run generated-C parity with the same post-seven-minute held-out bins.
-5. Package fold-specific constants/weights without choosing a test fold for the
-   paper result.
-6. For Large, expose GRU hidden state at timestep 49, rebuild one train-only
-   memory bank per fold, tune retrieval on validation reaches only, and score
-   held-out test reaches once.
-7. Export the validated MCU memory format and run board latency/recall/R² tests.
-
-## Completion gate
-
-CubeAI is complete only when every manifest records generated artifact hashes,
-PyTorch/exported/C parity tolerances, CubeAI version, graph ABI, and per-fold
-status. Large is complete only when all 30 compatible memory banks exist and
-the aggregate corrected R² is computed from all 30 test folds.
+CubeAI 10.2 cannot import GRU `return_state`, and its Keras importer fails on
+`Cropping1D`. The active ABI therefore exposes the complete GRU state sequence
+and reads timestep 49 without recomputing the GRU. This adds a 12.8 KB float32
+output view/buffer requirement that must be included in the MCU RAM audit.

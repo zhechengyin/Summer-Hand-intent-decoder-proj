@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "phase": "phase14_best_fold_cubeai_conversion",
+  "status": "six_best_session_folds_converted_and_host_validated",
+  "graph_abi_id": "tcn64i8-gruseq64-xcai10-v1",
+  "converted_unique_neural_checkpoints": 6,
+  "shared_by_tiers": [
+    "midsize",
+    "large"
+  ],
+  "firmware_or_gui_promoted": false,
+  "selected_fold_deployment_diagnostic": {
+    "unit": "macro mean across six per-session best-test folds",
+    "selection_warning": "descriptive deployment check only; test-selected folds are not the paper estimate",
+    "float32_r2_mean": 0.7944413622220358,
+    "tflite_r2_mean": 0.7941949864228567,
+    "cubeai_c_r2_mean": 0.794113278388977,
+    "cubeai_r2_mean_drop": 0.0003280838330586751,
+    "maximum_abs_session_r2_drop": 0.001109778881072998,
+    "all_accuracy_gates_passed": true
+  },
+  "official_paper_reporting": {
+    "metric": "mean test R2 across all 30 validation-selected folds",
+    "r2_mean": 0.7411375800768535,
+    "r2_std": 0.06559769297745317,
+    "unit": "six sessions x five folds"
+  },
+  "sessions": [
+    {
+      "session": "indy_20160622_01",
+      "best_fold": 5,
+      "float32_r2": 0.8634085655212402,
+      "tflite_r2": 0.8626248836517334,
+      "cubeai_c_r2": 0.8627896308898926,
+      "cubeai_r2_drop": 0.0006189346313476562,
+      "accepted": true,
+      "package": "models/midsize/indy_20160622_01/cubeai/fold-5"
+    },
+    {
+      "session": "indy_20160630_01",
+      "best_fold": 4,
+      "float32_r2": 0.7357951402664185,
+      "tflite_r2": 0.7363355755805969,
+      "cubeai_c_r2": 0.7362872958183289,
+      "cubeai_r2_drop": -0.0004921555519104004,
+      "accepted": true,
+      "package": "models/midsize/indy_20160630_01/cubeai/fold-4"
+    },
+    {
+      "session": "indy_20170131_02",
+      "best_fold": 4,
+      "float32_r2": 0.8502611517906189,
+      "tflite_r2": 0.8497166633605957,
+      "cubeai_c_r2": 0.8501249551773071,
+      "cubeai_r2_drop": 0.00013619661331176758,
+      "accepted": true,
+      "package": "models/midsize/indy_20170131_02/cubeai/fold-4"
+    },
+    {
+      "session": "loco_20170210_03",
+      "best_fold": 5,
+      "float32_r2": 0.7877972722053528,
+      "tflite_r2": 0.7876706123352051,
+      "cubeai_c_r2": 0.7871158123016357,
+      "cubeai_r2_drop": 0.000681459903717041,
+      "accepted": true,
+      "package": "models/midsize/loco_20170210_03/cubeai/fold-5"
+    },
+    {
+      "session": "loco_20170215_02",
+      "best_fold": 5,
+      "float32_r2": 0.7268614768981934,
+      "tflite_r2": 0.7256473302841187,
+      "cubeai_c_r2": 0.7257516980171204,
+      "cubeai_r2_drop": 0.001109778881072998,
+      "accepted": true,
+      "package": "models/midsize/loco_20170215_02/cubeai/fold-5"
+    },
+    {
+      "session": "loco_20170301_05",
+      "best_fold": 1,
+      "float32_r2": 0.8025245666503906,
+      "tflite_r2": 0.8031748533248901,
+      "cubeai_c_r2": 0.8026102781295776,
+      "cubeai_r2_drop": -8.571147918701172e-05,
+      "accepted": true,
+      "package": "models/midsize/loco_20170301_05/cubeai/fold-1"
+    }
+  ],
+  "large_external_memory": {
+    "status": "not_built",
+    "query_source_available": "GRU state sequence output; hidden[49] is state row 49"
+  }
+}

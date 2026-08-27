@@ -14,7 +14,7 @@ from scipy.stats import wilcoxon
 
 HERE = Path(__file__).resolve().parent
 INDY_ROOT = HERE.parents[1]
-DEFAULT_RUN_ROOT = HERE / "results" / "rolling_retrain" / "phase7_all"
+DEFAULT_RUN_ROOT = HERE / "results" / "rolling_retrain" / "final_30fold"
 PHASE7_CHECKPOINTS = (
     INDY_ROOT
     / "history"

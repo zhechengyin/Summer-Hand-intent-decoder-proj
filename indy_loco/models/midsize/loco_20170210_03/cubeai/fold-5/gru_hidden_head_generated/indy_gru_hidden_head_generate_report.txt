@@ -1,0 +1,125 @@
+ST Edge AI Core v2.2.0-20266 2adc00962
+Created date          : 2026-08-27 12:31:39
+Parameters            : generate --target stm32 --model /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/experiment/phase14_cubeai_conversion/results/loco_20170210_03_fold5/build/model/gru_hidden_head.h5 --type keras --name indy_gru_hidden_head --optimization time --c-api legacy --workspace /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/experiment/phase14_cubeai_conversion/results/loco_20170210_03_fold5/build/workspace/gru_generate --output /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/experiment/phase14_cubeai_conversion/results/loco_20170210_03_fold5/build/cubeai/gru_generate --verbosity 1 --binary
+
+Exec/report summary (generate)
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+model file         :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/experiment/phase14_cubeai_conversion/results/loco_20170210_03_fold5/build/model/gru_hidden_head.h5   
+type               :   keras                                                                                                                                                                                                     
+c_name             :   indy_gru_hidden_head                                                                                                                                                                                      
+compression        :   lossless                                                                                                                                                                                                  
+options            :   allocate-inputs, allocate-outputs                                                                                                                                                                         
+optimization       :   time                                                                                                                                                                                                      
+target/series      :   stm32                                                                                                                                                                                                     
+workspace dir      :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/experiment/phase14_cubeai_conversion/results/loco_20170210_03_fold5/build/workspace/gru_generate     
+output dir         :   /Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/experiment/phase14_cubeai_conversion/results/loco_20170210_03_fold5/build/cubeai/gru_generate        
+model_fmt          :   float                                                                                                                                                                                                     
+model_name         :   gru_hidden_head                                                                                                                                                                                           
+model_hash         :   0xe276d299e4f5d93f7308452fad11483b                                                                                                                                                                        
+params #           :   25,090 items (98.01 KiB)                                                                                                                                                                                  
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+input 1/1          :   'encoded_sequence', f32(1x50x64), 12.50 KBytes, activations                                                                                                                                               
+output 1/2         :   'velocity_norm', f32(1x50x2), 400 Bytes, activations                                                                                                                                                      
+output 2/2         :   'gru0', f32(1x50x64), 12.50 KBytes, activations                                                                                                                                                           
+outputs (total)    :   12.89 KBytes                                                                                                                                                                                              
+macc               :   1,241,700                                                                                                                                                                                                 
+weights (ro)       :   100,360 B (98.01 KiB) (1 segment)                                                                                                                                                                         
+activations (rw)   :   27,136 B (26.50 KiB) (1 segment) *                                                                                                                                                                        
+ram (total)        :   27,136 B (26.50 KiB) = 27,136 + 0 + 0                                                                                                                                                                     
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+(*) 'input'/'output' buffers are allocated in the activations buffer
+
+Model name - gru_hidden_head
+------ -------------------------------------- ----------------- --------------- ----------- ------------------ --- -------- -------- -------------- 
+m_id   layer (type,original)                  oshape            param/size             macc       connected to   | c_size   c_macc   c_type         
+------ -------------------------------------- ----------------- --------------- ----------- ------------------ --- -------- -------- -------------- 
+0      encoded_sequence (Input, InputLayer)   [b:1,h:50,c:64]                                                    |                   
+------ -------------------------------------- ----------------- --------------- ----------- ------------------ --- -------- -------- -------------- 
+1      gru (GRU, GRU)                         [b:1,h:50,c:64]   24,960/99,840     1,235,200   encoded_sequence   |                   GRU_[o][0]     
+------ -------------------------------------- ----------------- --------------- ----------- ------------------ --- -------- -------- -------------- 
+2      velocity_norm (Dense, Dense)           [b:1,h:50,c:2]    130/520               6,500                gru   |                   Dense_[o][1]   
+------ -------------------------------------- ----------------- --------------- ----------- ------------------ --- -------- -------- -------------- 
+model/c-model: macc=1,241,700/1,241,700  weights=100,360/100,360  activations=--/27,136 io=--/0
+
+
+
+Generated C-graph summary
+------------------------------------------------------------------------------------------------------------------------
+model name            : gru_hidden_head
+c-name                : indy_gru_hidden_head
+c-node #              : 2
+c-array #             : 9
+activations size      : 27136 (1 segment)
+weights size          : 100360 (1 segment)
+macc                  : 1241700
+inputs                : ['encoded_sequence_output']
+outputs               : ['velocity_norm_output', 'gru_output0']
+
+C-Arrays (9)
+------ ------------------------- ------------- ------------------------- ------------- --------- 
+c_id   name (*_array)            item/size     domain/mem-pool           c-type        comment   
+------ ------------------------- ------------- ------------------------- ------------- --------- 
+0      encoded_sequence_output   3200/12800    activations/**default**   float         /input    
+1      gru_bias                  384/1536      weights/weights           const float             
+2      gru_kernel                12288/49152   weights/weights           const float             
+3      gru_output0               3200/12800    activations/**default**   float         /output   
+4      gru_recurrent             12288/49152   weights/weights           const float             
+5      gru_scratch0              384/1536      activations/**default**   float                   
+6      velocity_norm_bias        2/8           weights/weights           const float             
+7      velocity_norm_output      100/400       activations/**default**   float         /output   
+8      velocity_norm_weights     128/512       weights/weights           const float             
+------ ------------------------- ------------- ------------------------- ------------- --------- 
+
+C-Layers (2)
+------ ---------------- ---- ------------ --------- ------- ---------------------------- ------------------ 
+c_id   name (*_layer)   id   layer_type   macc      rom     tensors                      shape (array id)   
+------ ---------------- ---- ------------ --------- ------- ---------------------------- ------------------ 
+0      gru              1    GRU          1235200   99840   I: encoded_sequence_output   f32(1x50x64) (0)   
+                                                            S: gru_scratch0                                 
+                                                            W: gru_kernel                f32(192x64) (2)    
+                                                            W: gru_recurrent             f32(192x64) (4)    
+                                                            W: gru_bias                  f32(2x192) (1)     
+                                                            O: gru_output0               f32(1x50x64) (3)   
+------ ---------------- ---- ------------ --------- ------- ---------------------------- ------------------ 
+1      velocity_norm    2    Dense        6500      520     I: gru_output0               f32(1x50x64) (3)   
+                                                            W: velocity_norm_weights     f32(2x64) (8)      
+                                                            W: velocity_norm_bias        f32(2) (6)         
+                                                            O: velocity_norm_output      f32(1x50x2) (7)    
+------ ---------------- ---- ------------ --------- ------- ---------------------------- ------------------ 
+
+
+
+Number of operations per c-layer
+------- ------ ----------------------- ----------- -------------- 
+c_id    m_id   name (type)                     #op           type 
+------- ------ ----------------------- ----------- -------------- 
+0       1      gru (GRU)                 1,235,200   smul_f32_f32 
+1       2      velocity_norm (Dense)         6,500   smul_f32_f32 
+------- ------ ----------------------- ----------- -------------- 
+total                                    1,241,700 
+
+Number of operation types
+---------------- ----------- ----------- 
+operation type             #           % 
+---------------- ----------- ----------- 
+smul_f32_f32       1,241,700      100.0% 
+
+Complexity report (model)
+------ --------------- ------------------------- ------------------------- ------ 
+m_id   name            c_macc                    c_rom                     c_id   
+------ --------------- ------------------------- ------------------------- ------ 
+1      gru             ||||||||||||||||  99.5%   ||||||||||||||||  99.5%   [0]    
+2      velocity_norm   |                  0.5%   |                  0.5%   [1]    
+------ --------------- ------------------------- ------------------------- ------ 
+macc=1,241,700 weights=100,360 act=27,136 ram_io=0
+
+Generated files (8)
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
+/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/experiment/phase14_cubeai_conversion/results/loco_20170210_03_fold5/build/cubeai/gru_generate/indy_gru_hidden_head_data_params.h   
+/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/experiment/phase14_cubeai_conversion/results/loco_20170210_03_fold5/build/cubeai/gru_generate/indy_gru_hidden_head_data_params.c   
+/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/experiment/phase14_cubeai_conversion/results/loco_20170210_03_fold5/build/cubeai/gru_generate/indy_gru_hidden_head_data.h          
+/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/experiment/phase14_cubeai_conversion/results/loco_20170210_03_fold5/build/cubeai/gru_generate/indy_gru_hidden_head_data.c          
+/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/experiment/phase14_cubeai_conversion/results/loco_20170210_03_fold5/build/cubeai/gru_generate/indy_gru_hidden_head_data.bin        
+/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/experiment/phase14_cubeai_conversion/results/loco_20170210_03_fold5/build/cubeai/gru_generate/indy_gru_hidden_head_config.h        
+/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/experiment/phase14_cubeai_conversion/results/loco_20170210_03_fold5/build/cubeai/gru_generate/indy_gru_hidden_head.h               
+/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/experiment/phase14_cubeai_conversion/results/loco_20170210_03_fold5/build/cubeai/gru_generate/indy_gru_hidden_head.c               

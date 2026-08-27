@@ -1,0 +1,280 @@
+{
+  "schema_version": 1,
+  "status": "phase13_midsize_best_folds_promoted",
+  "graph_abi_id": "tcn64i8x6-gru64f32-p13-v3",
+  "calibration_bins": 10500,
+  "paper_r2_mean": 0.7411375800768535,
+  "paper_r2_std": 0.06559769297745317,
+  "sessions": [
+    {
+      "session": "indy_20160622_01",
+      "selected_fold": 5,
+      "encoder_graph": "indy_enc_i622",
+      "bundle": {
+        "format": "bci-cubeai-bundle-v1",
+        "format_version": 1,
+        "graph_abi_id": "tcn64i8x6-gru64f32-p13-v3",
+        "magic_hex": "4243494149423100",
+        "header_bytes": 256,
+        "alignment_bytes": 32,
+        "total_bytes": 164496,
+        "crc32": "a2e309f3",
+        "sha256": "2ca23be567d86b7850384361725642bd607f1778bd359644948138dbbc3bd1ed",
+        "header_crc32": "69a969b6",
+        "body_sha256": "7ed0d8db43548892012c967e4b2028f3b84e16bf817c35515abc31d625142602",
+        "encoder_offset": 256,
+        "gru_head_offset": 63136,
+        "parameters_offset": 163520,
+        "parameters_layout": {
+          "endianness": "little",
+          "feature_std_floor": {
+            "dtype": "float32",
+            "count": 192,
+            "offset": 0
+          },
+          "target_mean": {
+            "dtype": "float32",
+            "count": 2,
+            "offset": 768
+          },
+          "target_std": {
+            "dtype": "float32",
+            "count": 2,
+            "offset": 776
+          },
+          "selected_channel_indices": {
+            "dtype": "uint16",
+            "count": 96,
+            "offset": 784
+          },
+          "total_bytes": 976
+        }
+      }
+    },
+    {
+      "session": "indy_20160630_01",
+      "selected_fold": 4,
+      "encoder_graph": "indy_enc_i630",
+      "bundle": {
+        "format": "bci-cubeai-bundle-v1",
+        "format_version": 1,
+        "graph_abi_id": "tcn64i8x6-gru64f32-p13-v3",
+        "magic_hex": "4243494149423100",
+        "header_bytes": 256,
+        "alignment_bytes": 32,
+        "total_bytes": 164496,
+        "crc32": "6b9acba9",
+        "sha256": "71a2fae516bfda1e25f8a975b7bb822a7aa90c76ca5c137d2b3551ba00a000e3",
+        "header_crc32": "4c2eae93",
+        "body_sha256": "3b1f31c44d5f41e79905f61d17c6ed6793025bbfd5391eec601054852d218b34",
+        "encoder_offset": 256,
+        "gru_head_offset": 63136,
+        "parameters_offset": 163520,
+        "parameters_layout": {
+          "endianness": "little",
+          "feature_std_floor": {
+            "dtype": "float32",
+            "count": 192,
+            "offset": 0
+          },
+          "target_mean": {
+            "dtype": "float32",
+            "count": 2,
+            "offset": 768
+          },
+          "target_std": {
+            "dtype": "float32",
+            "count": 2,
+            "offset": 776
+          },
+          "selected_channel_indices": {
+            "dtype": "uint16",
+            "count": 96,
+            "offset": 784
+          },
+          "total_bytes": 976
+        }
+      }
+    },
+    {
+      "session": "indy_20170131_02",
+      "selected_fold": 4,
+      "encoder_graph": "indy_enc_i131",
+      "bundle": {
+        "format": "bci-cubeai-bundle-v1",
+        "format_version": 1,
+        "graph_abi_id": "tcn64i8x6-gru64f32-p13-v3",
+        "magic_hex": "4243494149423100",
+        "header_bytes": 256,
+        "alignment_bytes": 32,
+        "total_bytes": 164496,
+        "crc32": "ad04d708",
+        "sha256": "976de59eaecd382242bbad45cf8c637294671d8b35ffc93ae0808ffb9530806a",
+        "header_crc32": "00849213",
+        "body_sha256": "7f077f8d5d6925a44e978443aca6fe7b741df3b9dc35bd663e139b0167ec0563",
+        "encoder_offset": 256,
+        "gru_head_offset": 63136,
+        "parameters_offset": 163520,
+        "parameters_layout": {
+          "endianness": "little",
+          "feature_std_floor": {
+            "dtype": "float32",
+            "count": 192,
+            "offset": 0
+          },
+          "target_mean": {
+            "dtype": "float32",
+            "count": 2,
+            "offset": 768
+          },
+          "target_std": {
+            "dtype": "float32",
+            "count": 2,
+            "offset": 776
+          },
+          "selected_channel_indices": {
+            "dtype": "uint16",
+            "count": 96,
+            "offset": 784
+          },
+          "total_bytes": 976
+        }
+      }
+    },
+    {
+      "session": "loco_20170210_03",
+      "selected_fold": 5,
+      "encoder_graph": "indy_enc_l210",
+      "bundle": {
+        "format": "bci-cubeai-bundle-v1",
+        "format_version": 1,
+        "graph_abi_id": "tcn64i8x6-gru64f32-p13-v3",
+        "magic_hex": "4243494149423100",
+        "header_bytes": 256,
+        "alignment_bytes": 32,
+        "total_bytes": 164496,
+        "crc32": "9fd5531e",
+        "sha256": "bc0764c6c10de5588c4f5d1513325971b085b2fd8abb2785d88bd51a48c797b6",
+        "header_crc32": "f9267bf3",
+        "body_sha256": "5902891cc29cdcf09ab85c0832fb9069e498a9337e65e634a3b0a70d851465b9",
+        "encoder_offset": 256,
+        "gru_head_offset": 63136,
+        "parameters_offset": 163520,
+        "parameters_layout": {
+          "endianness": "little",
+          "feature_std_floor": {
+            "dtype": "float32",
+            "count": 192,
+            "offset": 0
+          },
+          "target_mean": {
+            "dtype": "float32",
+            "count": 2,
+            "offset": 768
+          },
+          "target_std": {
+            "dtype": "float32",
+            "count": 2,
+            "offset": 776
+          },
+          "selected_channel_indices": {
+            "dtype": "uint16",
+            "count": 96,
+            "offset": 784
+          },
+          "total_bytes": 976
+        }
+      }
+    },
+    {
+      "session": "loco_20170215_02",
+      "selected_fold": 5,
+      "encoder_graph": "indy_enc_l215",
+      "bundle": {
+        "format": "bci-cubeai-bundle-v1",
+        "format_version": 1,
+        "graph_abi_id": "tcn64i8x6-gru64f32-p13-v3",
+        "magic_hex": "4243494149423100",
+        "header_bytes": 256,
+        "alignment_bytes": 32,
+        "total_bytes": 164496,
+        "crc32": "65dfda6d",
+        "sha256": "82a791d5452483e50e6dc61c1dd8e5931bd7c72ade25677faa304d919e55c49d",
+        "header_crc32": "264cd720",
+        "body_sha256": "a4dcc7caa3c06a99d42a28d6343cae8f389595e29bb8dbcfce4f0f2f4e6ed906",
+        "encoder_offset": 256,
+        "gru_head_offset": 63136,
+        "parameters_offset": 163520,
+        "parameters_layout": {
+          "endianness": "little",
+          "feature_std_floor": {
+            "dtype": "float32",
+            "count": 192,
+            "offset": 0
+          },
+          "target_mean": {
+            "dtype": "float32",
+            "count": 2,
+            "offset": 768
+          },
+          "target_std": {
+            "dtype": "float32",
+            "count": 2,
+            "offset": 776
+          },
+          "selected_channel_indices": {
+            "dtype": "uint16",
+            "count": 96,
+            "offset": 784
+          },
+          "total_bytes": 976
+        }
+      }
+    },
+    {
+      "session": "loco_20170301_05",
+      "selected_fold": 1,
+      "encoder_graph": "indy_enc_l301",
+      "bundle": {
+        "format": "bci-cubeai-bundle-v1",
+        "format_version": 1,
+        "graph_abi_id": "tcn64i8x6-gru64f32-p13-v3",
+        "magic_hex": "4243494149423100",
+        "header_bytes": 256,
+        "alignment_bytes": 32,
+        "total_bytes": 164496,
+        "crc32": "c5ed2879",
+        "sha256": "89339aed88f25ec9d6c26a4e3e74ccc21b6270796643dbf20d39cd4f78f5fc42",
+        "header_crc32": "bc348854",
+        "body_sha256": "39cf6888a9886dcb95e98a65e53688b1355765ef9a5e263cb6fa34b31c227901",
+        "encoder_offset": 256,
+        "gru_head_offset": 63136,
+        "parameters_offset": 163520,
+        "parameters_layout": {
+          "endianness": "little",
+          "feature_std_floor": {
+            "dtype": "float32",
+            "count": 192,
+            "offset": 0
+          },
+          "target_mean": {
+            "dtype": "float32",
+            "count": 2,
+            "offset": 768
+          },
+          "target_std": {
+            "dtype": "float32",
+            "count": 2,
+            "offset": 776
+          },
+          "selected_channel_indices": {
+            "dtype": "uint16",
+            "count": 96,
+            "offset": 784
+          },
+          "total_bytes": 976
+        }
+      }
+    }
+  ]
+}

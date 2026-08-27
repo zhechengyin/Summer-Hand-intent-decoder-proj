@@ -283,3 +283,31 @@ because they were built for older checkpoints and cannot be reused. Therefore
 the final Large five-fold corrected R² is pending 30 fold-specific bank builds
 and held-out replays. CubeAI conversion, generated C, firmware, GUI, and board
 testing were intentionally left unchanged for the next phase.
+
+## Phase 14 — Best-fold CubeAI deployment conversion
+
+Completed on 2026-08-27. Conversion was gated first on
+`indy_20160622_01` fold 5, then expanded to the highlighted best-test fold for
+each of the other five sessions. Because Midsize and Large share identical
+neural checkpoints, only six unique neural packages were generated.
+
+| Session | Fold | FP32 R² | C-encoder + FP32 GRU R² | Drop |
+|---|---:|---:|---:|---:|
+| `indy_20160622_01` | 5 | 0.8634 | 0.8628 | +0.0006 |
+| `indy_20160630_01` | 4 | 0.7358 | 0.7363 | −0.0005 |
+| `indy_20170131_02` | 4 | 0.8503 | 0.8501 | +0.0001 |
+| `loco_20170210_03` | 5 | 0.7878 | 0.7871 | +0.0007 |
+| `loco_20170215_02` | 5 | 0.7269 | 0.7258 | +0.0011 |
+| `loco_20170301_05` | 1 | 0.8025 | 0.8026 | −0.0001 |
+| **Selected-fold mean** | — | **0.7944** | **0.7941** | **+0.0003** |
+
+All six passed the 0.01 R²-drop gate. The selected-fold mean is a conversion
+diagnostic, not a cross-validation estimate, because those folds were marked
+using test R². Paper reporting therefore remains the complete Phase-13
+30-fold mean of **0.7411 ± 0.0656**.
+
+CubeAI did not support Keras GRU `return_state`, and `Cropping1D` triggered an
+importer error. The validated ABI exposes the full `[1, 50, 64]` GRU state
+sequence, with hidden[49] read as row 49 for the future Large memlib. Firmware,
+GUI, board deployment, and compatible Large-memory construction were not
+changed in this phase.

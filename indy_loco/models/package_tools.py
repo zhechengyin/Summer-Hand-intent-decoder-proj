@@ -21,7 +21,7 @@ ROUND3 = (
     / "phase13_deployment_validation"
     / "results"
     / "rolling_retrain"
-    / "phase7_all"
+    / "final_30fold"
 )
 SOURCE_CHECKPOINTS = ROUND3 / "checkpoints"
 FOLD_METRICS = ROUND3 / "phase13_round3_folds.csv"
@@ -273,10 +273,19 @@ def build() -> None:
 
 def validate() -> None:
     index = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
-    if index["phase"] != "phase13_round3_final_pre_cubeai":
+    if index["phase"] not in {
+        "phase13_round3_final_pre_cubeai",
+        "phase14_best_fold_cubeai_validated",
+    }:
         raise ValueError("Unexpected active model phase")
-    if index["cubeai"]["status"] != "not_run":
-        raise ValueError("CubeAI status must remain not_run in this phase")
+    cubeai_complete = index["phase"] == "phase14_best_fold_cubeai_validated"
+    expected_cubeai_status = (
+        "six_best_session_folds_converted_and_host_validated"
+        if cubeai_complete
+        else "not_run"
+    )
+    if index["cubeai"]["status"] != expected_cubeai_status:
+        raise ValueError("CubeAI status does not match the active model phase")
     grouped = fold_rows()
     summaries, overall = summary_rows()
     loaded_count = 0
@@ -325,6 +334,37 @@ def validate() -> None:
             tier_hashes[tier] = hashes
             if tier == "large" and manifest["external_memory"]["compatible_memlib_files_present"]:
                 raise ValueError("Large package must not claim compatible memlibs before rebuild")
+            if cubeai_complete:
+                cubeai = manifest["cubeai"]
+                if cubeai["status"] != "best_test_fold_converted_and_host_validated":
+                    raise ValueError(f"{tier}/{session}: CubeAI best fold is not validated")
+                if int(cubeai["converted_fold"]) != expected_best:
+                    raise ValueError(f"{tier}/{session}: converted the wrong fold")
+                if cubeai["firmware_or_gui_promoted"]:
+                    raise ValueError(f"{tier}/{session}: premature firmware/GUI promotion claim")
+                midsize_package = ROOT / "midsize" / session / "cubeai" / f"fold-{expected_best}"
+                conversion_manifest = json.loads(
+                    (midsize_package / "manifest.json").read_text(encoding="utf-8")
+                )
+                if not conversion_manifest["held_out_accuracy"]["accepted"]:
+                    raise ValueError(f"{tier}/{session}: CubeAI accuracy gate failed")
+                if conversion_manifest["checkpoint"]["sha256"] != hashes[expected_best - 1]:
+                    raise ValueError(f"{tier}/{session}: CubeAI checkpoint hash mismatch")
+                if conversion_manifest["graph"]["hidden_49_view"] != "state_output[0][49][0:64]":
+                    raise ValueError(f"{tier}/{session}: GRU hidden[49] output contract mismatch")
+                for component in conversion_manifest["components"].values():
+                    artifact_path = midsize_package / component["file"]
+                    if sha256(artifact_path) != component["sha256"]:
+                        raise ValueError(f"{tier}/{session}: CubeAI artifact hash mismatch")
+                bundle_path = midsize_package / f"{session}_fold{expected_best}.aibundle"
+                if sha256(bundle_path) != conversion_manifest["bundle"]["sha256"]:
+                    raise ValueError(f"{tier}/{session}: CubeAI bundle hash mismatch")
+                if tier == "large":
+                    reference = json.loads(
+                        (directory / "cubeai" / "manifest.json").read_text(encoding="utf-8")
+                    )
+                    if reference["external_memory_status"] != "compatible_gru_hidden_memlib_not_built":
+                        raise ValueError(f"large/{session}: invalid external-memory status")
         if tier_hashes["midsize"] != tier_hashes["large"]:
             raise ValueError(f"{session}: Midsize/Large neural checkpoints differ")
 
@@ -333,9 +373,14 @@ def validate() -> None:
         raise ValueError("Overall paper R2 mismatch")
     if loaded_count != 60:
         raise ValueError(f"Expected 60 packaged checkpoint copies, loaded {loaded_count}")
+    cubeai_message = (
+        "six shared best-fold CubeAI packages host-validated"
+        if cubeai_complete
+        else "CubeAI not run"
+    )
     print(
         "Package validation passed: 6 sessions x 5 folds x 2 tiers = "
-        "60 checkpoint copies; CubeAI not run; Large memlib rebuild pending"
+        f"60 checkpoint copies; {cubeai_message}; Large memlib rebuild pending"
     )
 
 

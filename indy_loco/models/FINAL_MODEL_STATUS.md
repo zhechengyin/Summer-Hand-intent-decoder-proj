@@ -47,8 +47,8 @@ reporting rather than an exact reproduction of the paper's model pipeline.
 
 | Tier | Neural folds ready | Compatible memory banks | Current paper R² | Status |
 |---|---:|---:|---:|---|
-| Midsize | 30/30 | not applicable | **0.7411 ± 0.0656** | final Python checkpoints; CubeAI pending |
-| Large | 30/30 | 0/30 | not yet reportable | memory rebuild, five-fold replay, and CubeAI pending |
+| Midsize | 30/30 | not applicable | **0.7411 ± 0.0656** | six best folds promoted to firmware/GUI; board test pending |
+| Large | 30/30 | 0/30 | not yet reportable | same six CubeAI neural packages; memory rebuild pending |
 
 Large uses the same neural weights as Midsize and adds residual retrieval. The
 Phase-12 evidence supports GRU hidden[49] over Encoder[49] as the query
@@ -62,11 +62,16 @@ held-out test score per fold under the Phase-13 preprocessing contract.
 - Final: checkpoint weights, five folds per session, metric definition,
   seven-minute preprocessing contract, best-fold markers, hashes, and Python
   model definition.
-- Not run in this phase: ONNX/H5 export, X-CUBE-AI analyze/validate/generate,
-  generated C, `.aibundle`, PC generated-C replay, or STM32 board testing.
+- Phase-14 deployment subset: one best-test fold per session was exported to
+  H5/TFLite, validated/generated with X-CUBE-AI, packaged as `.aibundle`, and
+  replayed through generated C on PC. Six-fold CubeAI diagnostic R² is 0.7941
+  versus 0.7944 FP32; this is not the paper estimate.
+- Promoted: six best-fold Midsize bundles, session-specific encoder C graphs,
+  velocity-only GRU graph, Phase-13 replay masks, and seven-minute GUI assets.
+- Not run: the other 24 fold conversions and STM32 board testing.
 - Pending for Large: 30 compatible GRU residual-memory banks and their
   cross-validated corrected R².
 
 Source metrics are in
-`../experiment/phase13_deployment_validation/results/rolling_retrain/phase7_all/phase13_round3_folds.csv`
+`../experiment/phase13_deployment_validation/results/rolling_retrain/final_30fold/phase13_round3_folds.csv`
 and `phase13_round3_summary.csv` in the same directory.

@@ -1,7 +1,7 @@
 {
   "phase": "phase13_round3_rolling_retrain_analysis",
   "status": "complete",
-  "run_root": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/experiment/phase13_deployment_validation/results/rolling_retrain/phase7_all",
+  "run_root": "/Users/yinzhecheng/Documents/UT/SECOND YEAR/STM32_Research/Summer-Hand-intent-decoder-proj/indy_loco/experiment/phase13_deployment_validation/results/rolling_retrain/final_30fold",
   "fold_count": 30,
   "session_count": 6,
   "fold_distributions": {

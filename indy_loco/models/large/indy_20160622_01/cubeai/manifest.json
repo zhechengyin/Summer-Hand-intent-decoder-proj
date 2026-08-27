@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "session": "indy_20160622_01",
+  "fold": 5,
+  "status": "shared_neural_cubeai_package_validated",
+  "shared_package": "../../../midsize/indy_20160622_01/cubeai/fold-5",
+  "checkpoint_sha256": "5a31e1636b76fcd5a4a5a9c827067c724ca4245b6103f3f095c16f4264008dfd",
+  "graph_abi_id": "tcn64i8-gruseq64-xcai10-v1",
+  "external_memory_status": "compatible_gru_hidden_memlib_not_built",
+  "firmware_or_gui_promoted": false
+}

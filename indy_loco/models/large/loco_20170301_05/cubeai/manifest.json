@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "session": "loco_20170301_05",
+  "fold": 1,
+  "status": "shared_neural_cubeai_package_validated",
+  "shared_package": "../../../midsize/loco_20170301_05/cubeai/fold-1",
+  "checkpoint_sha256": "d5247237b4c90455b4fb524acc441093f9415727bd1d44c3052b7da72d7d10a5",
+  "graph_abi_id": "tcn64i8-gruseq64-xcai10-v1",
+  "external_memory_status": "compatible_gru_hidden_memlib_not_built",
+  "firmware_or_gui_promoted": false
+}

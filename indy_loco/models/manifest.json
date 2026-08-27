@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
   "authoritative": true,
-  "phase": "phase13_round3_final_pre_cubeai",
-  "status": "python_checkpoint_packaging_complete_cubeai_pending",
+  "phase": "phase14_best_fold_cubeai_validated",
+  "status": "six_best_fold_midsize_promoted_board_test_pending",
   "sessions": [
     "indy_20160622_01",
     "indy_20160630_01",
@@ -18,7 +18,10 @@
       "checkpoint_count": 30,
       "paper_test_r2_mean": 0.7411375800768535,
       "paper_test_r2_std": 0.06559769297745317,
-      "paper_unit": "30 folds (six sessions x five folds)"
+      "paper_unit": "30 folds (six sessions x five folds)",
+      "deployment_status": "six_best_folds_promoted_to_firmware_and_gui",
+      "deployment_graph_abi_id": "tcn64i8x6-gru64f32-p13-v3",
+      "calibration_bins": 10500
     },
     "large": {
       "definition": "Same decoder plus fold-specific GRU residual memory",
@@ -29,9 +32,20 @@
     }
   },
   "cubeai": {
-    "status": "not_run",
-    "generated_files_present": false,
-    "planned_next_phase": true
+    "status": "six_best_session_folds_converted_and_host_validated",
+    "generated_files_present": true,
+    "unique_checkpoint_count": 6,
+    "shared_by_tiers": [
+      "midsize",
+      "large"
+    ],
+    "graph_abi_id": "tcn64i8-gruseq64-xcai10-v1",
+    "midsize_firmware_and_gui_promoted": true,
+    "large_firmware_and_gui_promoted": false,
+    "summary": "../experiment/phase14_cubeai_conversion/results/best_fold_conversion_summary.json",
+    "selected_fold_cubeai_c_r2_mean_descriptive_only": 0.794113278388977,
+    "paper_r2_mean": 0.7411375800768535,
+    "paper_r2_std": 0.06559769297745317
   },
   "packages": [
     {
@@ -119,5 +133,5 @@
       "best_test_fold": 1
     }
   ],
-  "source_metrics": "experiment/phase13_deployment_validation/results/rolling_retrain/phase7_all/phase13_round3_summary.csv"
+  "source_metrics": "experiment/phase13_deployment_validation/results/rolling_retrain/final_30fold/phase13_round3_summary.csv"
 }

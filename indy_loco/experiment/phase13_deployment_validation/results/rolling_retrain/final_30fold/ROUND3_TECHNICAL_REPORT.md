@@ -108,7 +108,7 @@ calibration durations after retraining, or test genuinely unseen users.
 ## Recommended next experiment
 
 Run the same 30-fold protocol with `--train-scope gru-head` and compare it with
-`phase7_all`. If GRU/head-only tuning preserves most of the +0.0684 gain, it is
+`final_30fold`. If GRU/head-only tuning preserves most of the +0.0684 gain, it is
 a cleaner and cheaper deployment-alignment method. If it loses materially,
 retain all-weight tuning and treat the improvement as joint encoder/TCN/GRU
 adaptation.

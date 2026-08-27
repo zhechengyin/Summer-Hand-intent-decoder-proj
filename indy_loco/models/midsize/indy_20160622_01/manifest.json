@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "phase": "phase13_round3_final_pre_cubeai",
+  "phase": "phase14_best_fold_cubeai_validated",
   "session": "indy_20160622_01",
   "subject": "indy",
   "tier": "midsize",
-  "package_status": "final_python_checkpoints_cubeai_pending",
+  "package_status": "all_python_folds_present_best_fold_midsize_promoted_board_test_pending",
   "paper_reporting": {
     "primary_metric": "mean test R2 across five validation-selected folds",
     "folds": 5,
@@ -35,7 +35,7 @@
         "test_r2_mean": 0.8465137481689453,
         "test_bins": 3815,
         "selection_policy": "minimum_validation_loss_test_opened_once",
-        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/phase7_all/checkpoints/indy_20160622_01_fold1.pt"
+        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/final_30fold/checkpoints/indy_20160622_01_fold1.pt"
       },
       {
         "fold": 2,
@@ -46,7 +46,7 @@
         "test_r2_mean": 0.8059223890304565,
         "test_bins": 4161,
         "selection_policy": "minimum_validation_loss_test_opened_once",
-        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/phase7_all/checkpoints/indy_20160622_01_fold2.pt"
+        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/final_30fold/checkpoints/indy_20160622_01_fold2.pt"
       },
       {
         "fold": 3,
@@ -57,7 +57,7 @@
         "test_r2_mean": 0.8438674211502075,
         "test_bins": 3620,
         "selection_policy": "minimum_validation_loss_test_opened_once",
-        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/phase7_all/checkpoints/indy_20160622_01_fold3.pt"
+        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/final_30fold/checkpoints/indy_20160622_01_fold3.pt"
       },
       {
         "fold": 4,
@@ -68,7 +68,7 @@
         "test_r2_mean": 0.8308200836181641,
         "test_bins": 3935,
         "selection_policy": "minimum_validation_loss_test_opened_once",
-        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/phase7_all/checkpoints/indy_20160622_01_fold4.pt"
+        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/final_30fold/checkpoints/indy_20160622_01_fold4.pt"
       },
       {
         "fold": 5,
@@ -79,7 +79,7 @@
         "test_r2_mean": 0.8634085655212402,
         "test_bins": 3515,
         "selection_policy": "minimum_validation_loss_test_opened_once",
-        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/phase7_all/checkpoints/indy_20160622_01_fold5.pt"
+        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/final_30fold/checkpoints/indy_20160622_01_fold5.pt"
       }
     ]
   },
@@ -93,17 +93,67 @@
     "window_order": "oldest_to_newest"
   },
   "cubeai": {
-    "status": "not_run_in_this_phase",
-    "python_inputs_ready": true,
-    "input_files": [
-      "fold-1.pt",
-      "fold-2.pt",
-      "fold-3.pt",
-      "fold-4.pt",
-      "fold-5_best-test-fold.pt"
+    "status": "best_test_fold_converted_and_host_validated",
+    "converted_fold": 5,
+    "converted_checkpoint": "fold-5_best-test-fold.pt",
+    "converted_checkpoint_count": 1,
+    "other_fold_conversions_intentionally_not_run": 4,
+    "package": "cubeai/fold-5",
+    "shared_by_tiers": [
+      "midsize",
+      "large"
     ],
-    "shared_model_definition": "midsize/model.py",
-    "generated_onnx_h5_c_aibundle_present": false,
-    "next_action": "Convert and validate every fold in the next CubeAI phase."
+    "graph_abi_id": "tcn64i8-gruseq64-xcai10-v1",
+    "generated_c_aibundle_present": true,
+    "firmware_or_gui_promoted": true,
+    "held_out_cubeai_c_r2": 0.8627896308898926,
+    "held_out_cubeai_r2_drop": 0.0006189346313476562,
+    "paper_metric_is_not_this_selected_fold": true
+  },
+  "midsize_deployment": {
+    "status": "firmware_and_gui_promoted_board_test_pending",
+    "selected_fold": 5,
+    "graph_abi_id": "tcn64i8x6-gru64f32-p13-v3",
+    "calibration_bins": 10500,
+    "bundle": {
+      "format": "bci-cubeai-bundle-v1",
+      "format_version": 1,
+      "graph_abi_id": "tcn64i8x6-gru64f32-p13-v3",
+      "magic_hex": "4243494149423100",
+      "header_bytes": 256,
+      "alignment_bytes": 32,
+      "total_bytes": 164496,
+      "crc32": "a2e309f3",
+      "sha256": "2ca23be567d86b7850384361725642bd607f1778bd359644948138dbbc3bd1ed",
+      "header_crc32": "69a969b6",
+      "body_sha256": "7ed0d8db43548892012c967e4b2028f3b84e16bf817c35515abc31d625142602",
+      "encoder_offset": 256,
+      "gru_head_offset": 63136,
+      "parameters_offset": 163520,
+      "parameters_layout": {
+        "endianness": "little",
+        "feature_std_floor": {
+          "dtype": "float32",
+          "count": 192,
+          "offset": 0
+        },
+        "target_mean": {
+          "dtype": "float32",
+          "count": 2,
+          "offset": 768
+        },
+        "target_std": {
+          "dtype": "float32",
+          "count": 2,
+          "offset": 776
+        },
+        "selected_channel_indices": {
+          "dtype": "uint16",
+          "count": 96,
+          "offset": 784
+        },
+        "total_bytes": 976
+      }
+    }
   }
 }

@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "phase": "phase13_round3_final_pre_cubeai",
+  "phase": "phase14_best_fold_cubeai_validated",
   "session": "loco_20170301_05",
   "subject": "loco",
   "tier": "large",
-  "package_status": "final_python_checkpoints_cubeai_pending",
+  "package_status": "all_python_folds_present_best_fold_cubeai_validated_not_firmware_promoted",
   "paper_reporting": {
     "primary_metric": "mean test R2 across five validation-selected folds",
     "folds": 5,
@@ -35,7 +35,7 @@
         "test_r2_mean": 0.8025245666503906,
         "test_bins": 767,
         "selection_policy": "minimum_validation_loss_test_opened_once",
-        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/phase7_all/checkpoints/loco_20170301_05_fold1.pt"
+        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/final_30fold/checkpoints/loco_20170301_05_fold1.pt"
       },
       {
         "fold": 2,
@@ -46,7 +46,7 @@
         "test_r2_mean": 0.7228239178657532,
         "test_bins": 921,
         "selection_policy": "minimum_validation_loss_test_opened_once",
-        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/phase7_all/checkpoints/loco_20170301_05_fold2.pt"
+        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/final_30fold/checkpoints/loco_20170301_05_fold2.pt"
       },
       {
         "fold": 3,
@@ -57,7 +57,7 @@
         "test_r2_mean": 0.7142242789268494,
         "test_bins": 963,
         "selection_policy": "minimum_validation_loss_test_opened_once",
-        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/phase7_all/checkpoints/loco_20170301_05_fold3.pt"
+        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/final_30fold/checkpoints/loco_20170301_05_fold3.pt"
       },
       {
         "fold": 4,
@@ -68,7 +68,7 @@
         "test_r2_mean": 0.7449718117713928,
         "test_bins": 1339,
         "selection_policy": "minimum_validation_loss_test_opened_once",
-        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/phase7_all/checkpoints/loco_20170301_05_fold4.pt"
+        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/final_30fold/checkpoints/loco_20170301_05_fold4.pt"
       },
       {
         "fold": 5,
@@ -79,7 +79,7 @@
         "test_r2_mean": 0.6260251402854919,
         "test_bins": 1083,
         "selection_policy": "minimum_validation_loss_test_opened_once",
-        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/phase7_all/checkpoints/loco_20170301_05_fold5.pt"
+        "source": "experiment/phase13_deployment_validation/results/rolling_retrain/final_30fold/checkpoints/loco_20170301_05_fold5.pt"
       }
     ]
   },
@@ -93,18 +93,22 @@
     "window_order": "oldest_to_newest"
   },
   "cubeai": {
-    "status": "not_run_in_this_phase",
-    "python_inputs_ready": true,
-    "input_files": [
-      "fold-1_best-test-fold.pt",
-      "fold-2.pt",
-      "fold-3.pt",
-      "fold-4.pt",
-      "fold-5.pt"
+    "status": "best_test_fold_converted_and_host_validated",
+    "converted_fold": 1,
+    "converted_checkpoint": "fold-1_best-test-fold.pt",
+    "converted_checkpoint_count": 1,
+    "other_fold_conversions_intentionally_not_run": 4,
+    "package": "../../midsize/loco_20170301_05/cubeai/fold-1",
+    "shared_by_tiers": [
+      "midsize",
+      "large"
     ],
-    "shared_model_definition": "midsize/model.py",
-    "generated_onnx_h5_c_aibundle_present": false,
-    "next_action": "Convert and validate every fold in the next CubeAI phase."
+    "graph_abi_id": "tcn64i8-gruseq64-xcai10-v1",
+    "generated_c_aibundle_present": true,
+    "firmware_or_gui_promoted": false,
+    "held_out_cubeai_c_r2": 0.8026102781295776,
+    "held_out_cubeai_r2_drop": -8.571147918701172e-05,
+    "paper_metric_is_not_this_selected_fold": true
   },
   "definition": "The same neural checkpoint as Midsize plus fold-specific GRU-hidden[49] external residual memory.",
   "external_memory": {

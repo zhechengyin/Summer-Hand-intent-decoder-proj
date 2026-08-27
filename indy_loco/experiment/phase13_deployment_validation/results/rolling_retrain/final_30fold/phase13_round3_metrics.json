@@ -482,7 +482,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/indy_20160622_01_fold1.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/indy_20160622_01_fold1.pt",
       "checkpoint_sha256": "e1b0f69c8ec881ca10ec93fecf32c43ee7ff558061551e181218088dce1a24df"
     },
     {
@@ -883,7 +883,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/indy_20160622_01_fold2.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/indy_20160622_01_fold2.pt",
       "checkpoint_sha256": "e68ec2c5901f84ad295c15266f64c98a1a0bc062c1449a61bc149bdcf63096e3"
     },
     {
@@ -1326,7 +1326,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/indy_20160622_01_fold3.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/indy_20160622_01_fold3.pt",
       "checkpoint_sha256": "1c65da38bc38ac5e3051629c8b9a9043a205fd26ba32cd8b4ed40cf3406fca66"
     },
     {
@@ -1769,7 +1769,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/indy_20160622_01_fold4.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/indy_20160622_01_fold4.pt",
       "checkpoint_sha256": "d367ef9295bb96a845f2c1a99085147d59916f7c1053e0a09780ca9307d003b5"
     },
     {
@@ -2212,7 +2212,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/indy_20160622_01_fold5.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/indy_20160622_01_fold5.pt",
       "checkpoint_sha256": "5a31e1636b76fcd5a4a5a9c827067c724ca4245b6103f3f095c16f4264008dfd"
     },
     {
@@ -2641,7 +2641,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/indy_20160630_01_fold1.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/indy_20160630_01_fold1.pt",
       "checkpoint_sha256": "a45a226b9a6a42fa0630aebf5f7f500aa41c2d3b095a38a715afaa4fd87b09a1"
     },
     {
@@ -3000,7 +3000,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/indy_20160630_01_fold2.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/indy_20160630_01_fold2.pt",
       "checkpoint_sha256": "c250a1cfcfdb4e9127049570c441fc1da75e7ebdc40da7547e184f73360b7ea2"
     },
     {
@@ -3331,7 +3331,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/indy_20160630_01_fold3.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/indy_20160630_01_fold3.pt",
       "checkpoint_sha256": "0e894a47f3303664f2e83ec5cca71a23392394ff53bd9a595300f99998846db5"
     },
     {
@@ -3648,7 +3648,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/indy_20160630_01_fold4.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/indy_20160630_01_fold4.pt",
       "checkpoint_sha256": "e3aaa5c3a45418d78a4331ac971f98853bd1a85a84e25298991c05d861e7721b"
     },
     {
@@ -4035,7 +4035,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/indy_20160630_01_fold5.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/indy_20160630_01_fold5.pt",
       "checkpoint_sha256": "e8ad79083fb5349cfd7e7e37061cc11d29a2c7b23ab784190ecebb58b183e238"
     },
     {
@@ -4394,7 +4394,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/indy_20170131_02_fold1.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/indy_20170131_02_fold1.pt",
       "checkpoint_sha256": "3e28c08fdbaf8edd879fd1ea389c5ed697e74a5cdcb9bd763232420a93975253"
     },
     {
@@ -4781,7 +4781,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/indy_20170131_02_fold2.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/indy_20170131_02_fold2.pt",
       "checkpoint_sha256": "fac8243609bef225a4558cc3efaa72aed2802770f2598647bc8e2d759a316ce7"
     },
     {
@@ -5112,7 +5112,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/indy_20170131_02_fold3.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/indy_20170131_02_fold3.pt",
       "checkpoint_sha256": "b453d9bb5856bde3d77e3f7e272a2f6f6454b7c6cc9f4397912ef03c1fd6f160"
     },
     {
@@ -5541,7 +5541,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/indy_20170131_02_fold4.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/indy_20170131_02_fold4.pt",
       "checkpoint_sha256": "29d2f5c66cdaa7a4677935b174565814e9530c322bccd9b6a15e99bb1158cbf7"
     },
     {
@@ -5802,7 +5802,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/indy_20170131_02_fold5.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/indy_20170131_02_fold5.pt",
       "checkpoint_sha256": "4461daf02cb8d650c3b544842588525d458c8b74478bb54168e5200500921b94"
     },
     {
@@ -6217,7 +6217,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/loco_20170210_03_fold1.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/loco_20170210_03_fold1.pt",
       "checkpoint_sha256": "c501fe0a6f2e8f8e357486e9582505c86caad062069d07265c1a572b3b05e865"
     },
     {
@@ -6548,7 +6548,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/loco_20170210_03_fold2.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/loco_20170210_03_fold2.pt",
       "checkpoint_sha256": "6e4648843f4b31e963af482782bdc301c6141fbe027fdeee2e8ca1ddd0f0f511"
     },
     {
@@ -6977,7 +6977,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/loco_20170210_03_fold3.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/loco_20170210_03_fold3.pt",
       "checkpoint_sha256": "608fa38e3cf6d4afe932408e5d69fd8d4dfbd6eeec00acd9f127a61572480569"
     },
     {
@@ -7322,7 +7322,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/loco_20170210_03_fold4.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/loco_20170210_03_fold4.pt",
       "checkpoint_sha256": "8db52cea6f5217dc4e66adfca6213f405e17826a0d3da7b2f90ba37fed172d61"
     },
     {
@@ -7709,7 +7709,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/loco_20170210_03_fold5.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/loco_20170210_03_fold5.pt",
       "checkpoint_sha256": "d65a679a09918f088f4142d8582fdc9e788551df6c3b2a5db1e1412b2ca77900"
     },
     {
@@ -8040,7 +8040,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/loco_20170215_02_fold1.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/loco_20170215_02_fold1.pt",
       "checkpoint_sha256": "4f48d6565fff80be410eef3a6b6909ee78ace82597669c0c4a6926c32a84127c"
     },
     {
@@ -8441,7 +8441,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/loco_20170215_02_fold2.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/loco_20170215_02_fold2.pt",
       "checkpoint_sha256": "eef2747655217f80fc8c5402e2ea88c3f0f7e8dd2d5a0e40cf62e06d76496dd6"
     },
     {
@@ -8884,7 +8884,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/loco_20170215_02_fold3.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/loco_20170215_02_fold3.pt",
       "checkpoint_sha256": "749c0d6b0b77376aeb8e744ecdebb655766163dbec21f6fd6b34ecee8bc7b476"
     },
     {
@@ -9145,7 +9145,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/loco_20170215_02_fold4.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/loco_20170215_02_fold4.pt",
       "checkpoint_sha256": "cf025f207b0f9126b626224e0fe734cfbcb9e2f6c8ca7516879fd2372b745e18"
     },
     {
@@ -9588,7 +9588,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/loco_20170215_02_fold5.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/loco_20170215_02_fold5.pt",
       "checkpoint_sha256": "0a2720994ccca9b8204559389b7b256b36f801b78ec6426982ca4113f314466e"
     },
     {
@@ -9933,7 +9933,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/loco_20170301_05_fold1.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/loco_20170301_05_fold1.pt",
       "checkpoint_sha256": "d5247237b4c90455b4fb524acc441093f9415727bd1d44c3052b7da72d7d10a5"
     },
     {
@@ -10320,7 +10320,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/loco_20170301_05_fold2.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/loco_20170301_05_fold2.pt",
       "checkpoint_sha256": "6b1e63d10cf1ebbe90d107e1e385b49eb1551b70e2d770352c4a356c2b4fb7d9"
     },
     {
@@ -10735,7 +10735,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/loco_20170301_05_fold3.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/loco_20170301_05_fold3.pt",
       "checkpoint_sha256": "166821b97a7c2c5f45078e4cf3c6a0183377e9d944796178b75e55de2e8689bd"
     },
     {
@@ -11122,7 +11122,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/loco_20170301_05_fold4.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/loco_20170301_05_fold4.pt",
       "checkpoint_sha256": "233291bcbd5c7572d0ee3f387c44c9b4c1d759967b92f559e08a4875c4646f73"
     },
     {
@@ -11565,7 +11565,7 @@
           "best": false
         }
       ],
-      "checkpoint": "results/rolling_retrain/phase7_all/checkpoints/loco_20170301_05_fold5.pt",
+      "checkpoint": "results/rolling_retrain/final_30fold/checkpoints/loco_20170301_05_fold5.pt",
       "checkpoint_sha256": "b44295a9388f373793380550feff5545862de9529275f1d615effc076e5a2d2c"
     }
   ],

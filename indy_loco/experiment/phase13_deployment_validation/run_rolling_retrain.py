@@ -985,9 +985,13 @@ def main() -> None:
 
     torch.set_num_threads(args.threads)
     device = select_device(args.device)
-    output_name = (
-        args.output_name or f"{args.init}_{args.train_scope.replace('-', '_')}"
-    )
+    output_name = args.output_name
+    if output_name is None:
+        output_name = (
+            "final_30fold"
+            if args.init == "phase7" and args.train_scope == "all"
+            else f"{args.init}_{args.train_scope.replace('-', '_')}"
+        )
     run_root = RESULT_BASE / output_name
     # Session-input caches are protocol-independent and shared by all variants.
     # Keeping them outside run_root means a dry run never makes the later real
