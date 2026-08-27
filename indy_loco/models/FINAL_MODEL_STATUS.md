@@ -1,4 +1,4 @@
-# Final Phase-13 model conclusion
+# Final Phase-13 neural and Phase-15 Large-memory conclusion
 
 ## Final decision
 
@@ -48,14 +48,14 @@ reporting rather than an exact reproduction of the paper's model pipeline.
 | Tier | Neural folds ready | Compatible memory banks | Current paper R² | Status |
 |---|---:|---:|---:|---|
 | Midsize | 30/30 | not applicable | **0.7411 ± 0.0656** | six best folds promoted to firmware/GUI; board test pending |
-| Large | 30/30 | 0/30 | not yet reportable | same six CubeAI neural packages; memory rebuild pending |
+| Large | 30/30 | 30/30 PC evaluation; 0/30 firmware BCIMEM | **0.7498 ± 0.0632** | exact PC KNN validated; firmware conversion pending |
 
-Large uses the same neural weights as Midsize and adds residual retrieval. The
-Phase-12 evidence supports GRU hidden[49] over Encoder[49] as the query
-representation, but those old results used older checkpoints. They cannot be
-combined numerically with the Phase-13 Midsize mean. A valid Large paper number
-requires one train-only bank per fold, validation-only retrieval tuning, and one
-held-out test score per fold under the Phase-13 preprocessing contract.
+Large uses the same neural weights as Midsize and adds residual retrieval.
+Phase 15 rebuilt one train-only bank per fold, tuned retrieval on validation
+bins only, and evaluated the held-out test bins once under the exact Phase-13
+preprocessing contract. All six session means improved, 26/30 folds improved,
+and the 30-fold mean gain was **+0.0086 R²**. The exact PC KNN replay validates
+memory quality; it does not establish firmware IVF recall or MCU latency.
 
 ## What is and is not final
 
@@ -69,9 +69,15 @@ held-out test score per fold under the Phase-13 preprocessing contract.
 - Promoted: six best-fold Midsize bundles, session-specific encoder C graphs,
   velocity-only GRU graph, Phase-13 replay masks, and seven-minute GUI assets.
 - Not run: the other 24 fold conversions and STM32 board testing.
-- Pending for Large: 30 compatible GRU residual-memory banks and their
-  cross-validated corrected R².
+- Phase-15 PC result: 30 GRU-hidden[49] evaluation banks and cross-validated
+  corrected R² are complete under `experiment/phase15_large_memory_validation/`.
+- Pending for Large deployment: convert the six selected best-fold banks to
+  firmware BCIMEM/IVF, then run PC parity, MCU latency, bank-ABSENT/READY, and
+  board validation.
 
 Source metrics are in
 `../experiment/phase13_deployment_validation/results/rolling_retrain/final_30fold/phase13_round3_folds.csv`
 and `phase13_round3_summary.csv` in the same directory.
+Large metrics are in
+`../experiment/phase15_large_memory_validation/results/phase15_large_memory_folds.csv`
+and `phase15_large_memory_summary.json` in the same directory.

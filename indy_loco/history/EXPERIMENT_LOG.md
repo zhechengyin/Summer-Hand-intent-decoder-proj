@@ -311,3 +311,32 @@ importer error. The validated ABI exposes the full `[1, 50, 64]` GRU state
 sequence, with hidden[49] read as row 49 for the future Large memlib. Firmware,
 GUI, board deployment, and compatible Large-memory construction were not
 changed in this phase.
+
+## Phase 15 — Large external-memory 30-fold PC validation
+
+Completed on 2026-08-27. The frozen Phase-13 checkpoint for every session and
+fold was paired with a newly built train-only residual bank using a 32D PCA of
+GRU hidden[49] and a 32D PCA of long context. Retrieval hyperparameters were
+selected from validation bins only. Test bins were opened once for the final
+bank-ABSENT versus bank-READY comparison.
+
+| Session | Bank ABSENT R² | Bank READY R² | Delta |
+|---|---:|---:|---:|
+| `indy_20160622_01` | 0.8381 | 0.8481 | +0.0100 |
+| `indy_20160630_01` | 0.7152 | 0.7217 | +0.0065 |
+| `indy_20170131_02` | 0.7725 | 0.7792 | +0.0068 |
+| `loco_20170210_03` | 0.7163 | 0.7223 | +0.0060 |
+| `loco_20170215_02` | 0.6826 | 0.6970 | +0.0144 |
+| `loco_20170301_05` | 0.7221 | 0.7302 | +0.0081 |
+| **All 30 folds** | **0.7411 ± 0.0656** | **0.7498 ± 0.0632** | **+0.0086** |
+
+All six session means and 26/30 fold scores improved. Session-level bootstrap
+95% CI for the mean gain was `[+0.0066, +0.0111]`; exact paired Wilcoxon was
+one-sided `p=0.015625` and two-sided `p=0.03125`. The four negative folds were
+retained. The much larger old best-fold memory gain is not substituted for this
+cross-validated result.
+
+The exported `phase15_pc_memlib_v1` artifacts use INT8-rounded 64D keys and
+FP16 residuals with exact PC KNN. They validate memory quality but are not
+firmware BCIMEM binaries and do not measure IVF recall, MCU latency, or board
+parity. Firmware and GUI were not changed in Phase 15.

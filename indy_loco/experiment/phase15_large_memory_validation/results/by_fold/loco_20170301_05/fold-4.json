@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-08-27T17:57:49.167297+00:00",
+  "status": "complete",
+  "session": "loco_20170301_05",
+  "subject": "loco",
+  "fold": 4,
+  "checkpoint": "indy_loco/models/large/loco_20170301_05/fold-4.pt",
+  "checkpoint_sha256": "233291bcbd5c7572d0ee3f387c44c9b4c1d759967b92f559e08a4875c4646f73",
+  "protocol": {
+    "phase13_checkpoint_frozen": true,
+    "calibration_minutes": 7.0,
+    "continuous_session_ewma": true,
+    "rolling_window_bins": 50,
+    "query": "GRU hidden[49] 64D -> train PCA 32D + long context 576D -> train PCA 32D",
+    "bank_and_pca": "train bins only",
+    "retrieval_tuning": "validation bins only",
+    "test_use": "one final evaluation after tuning",
+    "key_numeric_path": "row-normalized, INT8 rounded, exact PC KNN",
+    "residual_numeric_path": "FP16 rounded",
+    "search_caveat": "exact PC KNN; not firmware IVF recall or latency"
+  },
+  "bin_counts": {
+    "train": 8244,
+    "validation": 1051,
+    "test": 1339
+  },
+  "bank_absent": {
+    "bins": 1339,
+    "mse": 0.00511536281555891,
+    "r2_x": 0.7300368547439575,
+    "r2_y": 0.7599067687988281,
+    "r2_mean": 0.7449718117713928
+  },
+  "bank_ready": {
+    "bins": 1339,
+    "mse": 0.004993460141122341,
+    "r2_x": 0.7348852753639221,
+    "r2_y": 0.7694905400276184,
+    "r2_mean": 0.7521879076957703
+  },
+  "ready_minus_absent_r2": 0.007216095924377441,
+  "reach_bootstrap_delta": {
+    "repetitions": 1000,
+    "unit": "reach",
+    "mean": 0.007943110585212708,
+    "ci95_low": 0.004296800494194031,
+    "ci95_high": 0.01278994083404541,
+    "probability_positive": 1.0
+  },
+  "retrieval": {
+    "tuning": {
+      "neighbours": 128,
+      "temperature": 0.2,
+      "blend": 0.25,
+      "validation_r2_mean": 0.778632640838623
+    },
+    "bank_entries": 8244,
+    "key_dimensions": 64,
+    "test_exact_search_us_per_query": 104.0677125464855,
+    "hidden_pca_explained_variance": 0.9762934446334839,
+    "context_pca_explained_variance": 0.48010510206222534
+  },
+  "memlib": {
+    "path": "indy_loco/experiment/phase15_large_memory_validation/results/memlibs/loco_20170301_05/fold-4.memlib",
+    "schema": "phase15_pc_memlib_v1",
+    "bytes": 519018,
+    "firmware_bcimem_compatible": false
+  },
+  "elapsed_seconds": 7.44042104203254
+}

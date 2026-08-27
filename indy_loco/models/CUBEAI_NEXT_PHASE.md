@@ -13,19 +13,20 @@ packages rather than twelve copies.
   new residual-memory query.
 - Generated-C held-out replay passed all six accuracy gates. The selected-fold
   diagnostic mean is 0.7941, while official reporting remains **0.7411 ±
-  0.0656 across all 30 folds**.
+  0.0656 across all 30 folds** for Midsize.
+- Phase-15 exact PC KNN replay completed all 30 fold-specific GRU-hidden banks.
+  Large reached **0.7498 ± 0.0632**, or **+0.0086 R²** versus bank ABSENT.
 
 ## Remaining sequence
 
-1. Build a compatible train-only GRU-hidden[49] memlib for the first Indy
-   package and validate retrieval on PC.
-2. Integrate that one neural package and memlib into firmware/GUI and run board
+1. Convert the Phase-15 `indy_20160622_01` fold-5 PC evaluation bank to the
+   firmware BCIMEM/IVF format and validate exact-versus-IVF retrieval parity.
+2. Integrate that memlib with the existing neural package in firmware/GUI and run board
    latency, parity, bank-ABSENT, and bank-READY tests.
 3. If the pilot board result passes, build the remaining five best-fold
    memlibs and integrate all six session packages.
-4. To obtain a paper-facing Large result, separately build/evaluate all 30
-   fold-specific banks with validation-only tuning. Never average only the six
-   test-selected folds for the paper.
+4. Keep the paper result tied to all 30 Phase-15 folds. Never replace it with
+   the mean of the six test-selected deployment folds.
 
 CubeAI 10.2 cannot import GRU `return_state`, and its Keras importer fails on
 `Cropping1D`. The active ABI therefore exposes the complete GRU state sequence

@@ -1,8 +1,10 @@
-# Final pre-CubeAI model packages
+# Final model packages
 
-This directory is the authoritative Python checkpoint surface for the final
-Phase-13 Round-3 handoff. It contains six sessions, five cross-validation folds
-per session, and two system tiers.
+This directory is the authoritative model package surface for the final
+Phase-13 neural checkpoints and Phase-14 selected-fold CubeAI handoff. It
+contains six sessions, five cross-validation folds per session, and two system
+tiers. Phase-15 PC memory artifacts remain under `experiment/` until conversion
+to firmware-compatible BCIMEM/IVF.
 
 ```text
 models/
@@ -24,9 +26,9 @@ deviation across all five validation-selected test folds.
 - **Midsize:** the Phase-13 Round-3 TCN+GRU retrained for seven-minute
   calibration, continuous causal EWMA, rolling 50-bin windows, and output at
   timestep 49.
-- **Large:** the identical neural checkpoint plus a future fold-specific
-  GRU-hidden[49] residual-memory bank. The neural checkpoints are ready, but
-  compatible memory libraries have not yet been rebuilt.
+- **Large:** the identical neural checkpoint plus a fold-specific
+  GRU-hidden[49] residual-memory bank. Thirty PC evaluation banks are complete;
+  firmware-compatible BCIMEM/IVF libraries have not yet been generated.
 
 The archived Phase-12 `.memlib` files are deliberately absent from the active
 Large folders. They were built against older checkpoints and a different
@@ -35,9 +37,9 @@ preprocessing/evaluation protocol and are not valid for these weights.
 ## Paper result
 
 The final Midsize result is **R² 0.7411 ± 0.0656** over 30 folds (six sessions ×
-five folds). This is validation-selected cross-validation evidence, not a mean
-of six test-selected best folds. Large has no reportable five-fold corrected R²
-until all 30 fold-specific memory banks are rebuilt and evaluated.
+five folds). The Phase-15 Large PC result is **R² 0.7498 ± 0.0632**, a paired
+gain of **+0.0086** using train-only banks and validation-only retrieval tuning.
+Neither number is a mean of six test-selected best folds.
 
 See [`FINAL_MODEL_STATUS.md`](FINAL_MODEL_STATUS.md) for the complete table and
 validity limits.

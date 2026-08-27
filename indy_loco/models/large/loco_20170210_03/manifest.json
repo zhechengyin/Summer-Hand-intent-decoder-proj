@@ -113,10 +113,13 @@
   "definition": "The same neural checkpoint as Midsize plus fold-specific GRU-hidden[49] external residual memory.",
   "external_memory": {
     "query_representation": "gru_hidden_49_plus_long_context",
-    "status": "fold_specific_memlib_rebuild_pending",
+    "status": "phase15_pc_exact_knn_validated_firmware_bcimem_pending",
     "compatible_memlib_files_present": false,
     "reason": "Archived Phase-12 memlibs were built for older checkpoints and a different preprocessing/evaluation protocol; reusing them would be invalid.",
-    "paper_test_r2_mean": null,
-    "next_action": "Build and evaluate one train-only residual bank per fold, then export the validated firmware-compatible memory format."
+    "paper_test_r2_mean": 0.722318971157074,
+    "pc_evaluation_memlib_count": 5,
+    "pc_evaluation_schema": "phase15_pc_memlib_v1",
+    "pc_evaluation_summary": "../../../experiment/phase15_large_memory_validation/results/phase15_large_memory_summary.json",
+    "next_action": "Convert the selected best-fold evaluation bank to firmware BCIMEM/IVF after the first-session board gate passes."
   }
 }

@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-08-27T17:59:29.195809+00:00",
+  "status": "complete",
+  "question": "What is the 30-fold test R2 of Phase-13 Large with fold-specific GRU-hidden external residual memory?",
+  "reporting_unit": "unweighted macro average over 30 validation-selected folds",
+  "folds": 30,
+  "sessions": 6,
+  "bank_absent_r2_mean": 0.7411375800768535,
+  "bank_absent_r2_std_across_folds": 0.06559769297745317,
+  "bank_ready_r2_mean": 0.7497580587863922,
+  "bank_ready_r2_std_across_folds": 0.0631681418338204,
+  "ready_minus_absent_r2_mean": 0.008620478709538778,
+  "ready_minus_absent_r2_median": 0.007218420505523682,
+  "positive_folds": 26,
+  "positive_sessions": 6,
+  "session_bootstrap_delta_ci95": [
+    0.0066331168015797935,
+    0.01111596425374349
+  ],
+  "exact_one_sided_wilcoxon_session_p": 0.015625,
+  "exact_two_sided_wilcoxon_session_p": 0.03125,
+  "exact_one_sided_sign_test_session_p": 0.015625,
+  "indy_15fold": {
+    "absent_r2_mean": 0.7752565582593282,
+    "ready_r2_mean": 0.7830212394396464,
+    "delta_r2_mean": 0.007764681180318197
+  },
+  "loco_15fold": {
+    "absent_r2_mean": 0.7070186018943787,
+    "ready_r2_mean": 0.7164948781331381,
+    "delta_r2_mean": 0.009476276238759358
+  },
+  "session_results": [
+    {
+      "session": "indy_20160622_01",
+      "subject": "indy",
+      "folds": 5,
+      "absent_r2_mean": 0.8381064414978028,
+      "ready_r2_mean": 0.8481446266174316,
+      "delta_r2_mean": 0.010038185119628906
+    },
+    {
+      "session": "indy_20160630_01",
+      "subject": "indy",
+      "folds": 5,
+      "absent_r2_mean": 0.7151824474334717,
+      "ready_r2_mean": 0.7216785430908204,
+      "delta_r2_mean": 0.0064960956573486325
+    },
+    {
+      "session": "indy_20170131_02",
+      "subject": "indy",
+      "folds": 5,
+      "absent_r2_mean": 0.7724807858467102,
+      "ready_r2_mean": 0.7792405486106873,
+      "delta_r2_mean": 0.006759762763977051
+    },
+    {
+      "session": "loco_20170210_03",
+      "subject": "loco",
+      "folds": 5,
+      "absent_r2_mean": 0.7163216948509217,
+      "ready_r2_mean": 0.722318971157074,
+      "delta_r2_mean": 0.005997276306152344
+    },
+    {
+      "session": "loco_20170215_02",
+      "subject": "loco",
+      "folds": 5,
+      "absent_r2_mean": 0.6826201677322388,
+      "ready_r2_mean": 0.6969995260238647,
+      "delta_r2_mean": 0.014379358291625977
+    },
+    {
+      "session": "loco_20170301_05",
+      "subject": "loco",
+      "folds": 5,
+      "absent_r2_mean": 0.7221139430999756,
+      "ready_r2_mean": 0.7301661372184753,
+      "delta_r2_mean": 0.008052194118499756
+    }
+  ],
+  "caveats": [
+    "This is exact PC KNN over INT8-rounded keys, not firmware IVF search.",
+    "The seven-minute calibration and continuous causal context use no labels but are transductive within each session.",
+    "Folds from one session are correlated; session-level paired inference is primary."
+  ]
+}

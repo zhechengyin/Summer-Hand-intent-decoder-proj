@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "authoritative": true,
-  "phase": "phase14_best_fold_cubeai_validated",
+  "phase": "phase15_large_memory_pc_validated",
   "status": "six_best_fold_midsize_promoted_board_test_pending",
   "sessions": [
     "indy_20160622_01",
@@ -27,8 +27,13 @@
       "definition": "Same decoder plus fold-specific GRU residual memory",
       "neural_checkpoint_count": 30,
       "compatible_memlib_count": 0,
-      "paper_test_r2_mean": null,
-      "status": "memory_rebuild_and_evaluation_pending"
+      "pc_evaluation_memlib_count": 30,
+      "paper_test_r2_mean": 0.7497580587863922,
+      "paper_test_r2_std": 0.0631681418338204,
+      "paper_unit": "30 folds (six sessions x five folds)",
+      "paper_delta_vs_midsize": 0.008620478709538778,
+      "pc_evaluation_summary": "../experiment/phase15_large_memory_validation/results/phase15_large_memory_summary.json",
+      "status": "pc_exact_knn_validated_firmware_bcimem_pending"
     }
   },
   "cubeai": {

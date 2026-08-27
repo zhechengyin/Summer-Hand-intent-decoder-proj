@@ -276,9 +276,13 @@ def validate() -> None:
     if index["phase"] not in {
         "phase13_round3_final_pre_cubeai",
         "phase14_best_fold_cubeai_validated",
+        "phase15_large_memory_pc_validated",
     }:
         raise ValueError("Unexpected active model phase")
-    cubeai_complete = index["phase"] == "phase14_best_fold_cubeai_validated"
+    cubeai_complete = index["phase"] in {
+        "phase14_best_fold_cubeai_validated",
+        "phase15_large_memory_pc_validated",
+    }
     expected_cubeai_status = (
         "six_best_session_folds_converted_and_host_validated"
         if cubeai_complete
@@ -340,8 +344,14 @@ def validate() -> None:
                     raise ValueError(f"{tier}/{session}: CubeAI best fold is not validated")
                 if int(cubeai["converted_fold"]) != expected_best:
                     raise ValueError(f"{tier}/{session}: converted the wrong fold")
-                if cubeai["firmware_or_gui_promoted"]:
-                    raise ValueError(f"{tier}/{session}: premature firmware/GUI promotion claim")
+                expected_promoted = bool(
+                    index["cubeai"][f"{tier}_firmware_and_gui_promoted"]
+                )
+                if bool(cubeai["firmware_or_gui_promoted"]) != expected_promoted:
+                    raise ValueError(
+                        f"{tier}/{session}: firmware/GUI promotion status differs "
+                        "from the authoritative package index"
+                    )
                 midsize_package = ROOT / "midsize" / session / "cubeai" / f"fold-{expected_best}"
                 conversion_manifest = json.loads(
                     (midsize_package / "manifest.json").read_text(encoding="utf-8")
@@ -371,6 +381,22 @@ def validate() -> None:
     expected_overall = float(overall["retrained_7min_rolling_r2_mean"])
     if abs(index["tiers"]["midsize"]["paper_test_r2_mean"] - expected_overall) > 1e-12:
         raise ValueError("Overall paper R2 mismatch")
+    if index["phase"] == "phase15_large_memory_pc_validated":
+        summary_path = ROOT / index["tiers"]["large"]["pc_evaluation_summary"]
+        memory_summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        large = index["tiers"]["large"]
+        checks = {
+            "paper_test_r2_mean": "bank_ready_r2_mean",
+            "paper_test_r2_std": "bank_ready_r2_std_across_folds",
+            "paper_delta_vs_midsize": "ready_minus_absent_r2_mean",
+        }
+        for manifest_key, result_key in checks.items():
+            if abs(float(large[manifest_key]) - float(memory_summary[result_key])) > 1e-12:
+                raise ValueError(f"Large {manifest_key} differs from Phase-15 results")
+        if int(large["pc_evaluation_memlib_count"]) != 30:
+            raise ValueError("Large Phase-15 PC memlib count mismatch")
+        if int(large["compatible_memlib_count"]) != 0:
+            raise ValueError("PC evaluation memlibs must not be claimed as firmware compatible")
     if loaded_count != 60:
         raise ValueError(f"Expected 60 packaged checkpoint copies, loaded {loaded_count}")
     cubeai_message = (
@@ -378,9 +404,14 @@ def validate() -> None:
         if cubeai_complete
         else "CubeAI not run"
     )
+    memory_message = (
+        "30 Large PC memlibs validated; firmware BCIMEM pending"
+        if index["phase"] == "phase15_large_memory_pc_validated"
+        else "Large memlib rebuild pending"
+    )
     print(
         "Package validation passed: 6 sessions x 5 folds x 2 tiers = "
-        f"60 checkpoint copies; {cubeai_message}; Large memlib rebuild pending"
+        f"60 checkpoint copies; {cubeai_message}; {memory_message}"
     )
 
 
