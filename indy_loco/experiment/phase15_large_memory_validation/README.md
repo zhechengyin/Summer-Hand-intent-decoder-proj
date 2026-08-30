@@ -34,3 +34,13 @@ firmware-ready BCIMEM binaries.
 Final result: **R² 0.7498 ± 0.0632** over 30 folds, versus **0.7411 ± 0.0656**
 with the bank absent (`+0.0086`). See `TECHNICAL_REPORT.md` for the session
 table, paired statistics, negative folds, and interpretation boundary.
+
+## Firmware deployment check
+
+The six GUI-deployed best-fold banks were separately packed into `BCIMEM1`
+images and replayed with the CM7 IVF policy (256 clusters, 32 probes, INT8 dot
+products, FP16 residuals). Across those six demonstration folds the mean was
+0.794441 bank-ABSENT, 0.796320 firmware-IVF READY (`+0.001879`); IVF was only
+0.000167 below exact KNN. This is a deployment-format check, not the paper
+estimate, and one selected fold (`loco_20170301_05` fold 1) remains negative.
+See `results/phase15_firmware_ivf_bestfolds.json`.

@@ -75,6 +75,20 @@ deployment-legal and label-free, but they are transductive within a session.
 This experiment is within-session five-fold validation, not cross-session or
 unseen-subject generalization.
 
+## Packed firmware best-fold check
+
+The deployment workflow intentionally carries one highlighted fold per session
+to the GUI. Those six banks were packed into the final `BCIMEM1` layout and
+replayed from the binary files with the CM7 IVF policy. The six-fold means were
+0.794441 for bank ABSENT, 0.796487 for exact KNN, and 0.796320 for firmware IVF.
+Thus the approximate packed search lost 0.000167 R² relative to exact KNN and
+retained a +0.001879 mean gain over ABSENT. The individual values are recorded
+in `results/phase15_firmware_ivf_bestfolds.json`.
+
+This result must not replace the 30-fold table above: the highlighted
+deployment folds are a demonstrator set and include a negative Large result
+for `loco_20170301_05` fold 1 (0.802525 ABSENT to 0.792472 firmware IVF).
+
 ## Reproducibility
 
 - Runner: `run.py`
@@ -83,6 +97,7 @@ unseen-subject generalization.
 - Machine-readable summary: `results/phase15_large_memory_summary.json`
 - Per-fold audit records: `results/by_fold/<session>/fold-<n>.json`
 - PC memory banks: `results/memlibs/<session>/fold-<n>.memlib`
+- Packed best-fold firmware replay: `results/phase15_firmware_ivf_bestfolds.json`
 
 Re-run from the repository root with:
 

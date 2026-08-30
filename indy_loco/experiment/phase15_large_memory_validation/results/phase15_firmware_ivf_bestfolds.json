@@ -1,0 +1,87 @@
+{
+  "schema_version": "phase15_firmware_ivf_bestfold_v1",
+  "scope": "six validation-selected best folds; held-out test bins",
+  "query": "GRU hidden[49] + continuous long context",
+  "search": "CM7-equivalent BCIMEM1 IVF dot-product policy",
+  "sessions": [
+    {
+      "session": "indy_20160622_01",
+      "fold": 5,
+      "test_bins": 3515,
+      "bank_absent_r2": 0.8634085655212402,
+      "exact_knn_ready_r2": 0.8687809705734253,
+      "firmware_ivf_ready_r2": 0.868782639503479,
+      "firmware_ivf_minus_absent_r2": 0.0053740739822387695,
+      "firmware_ivf_minus_exact_r2": 1.6689300537109375e-06,
+      "candidate_mean": 3917.4056899004268,
+      "candidate_max": 4556
+    },
+    {
+      "session": "indy_20160630_01",
+      "fold": 4,
+      "test_bins": 2581,
+      "bank_absent_r2": 0.7357951402664185,
+      "exact_knn_ready_r2": 0.7444358468055725,
+      "firmware_ivf_ready_r2": 0.7443135976791382,
+      "firmware_ivf_minus_absent_r2": 0.008518457412719727,
+      "firmware_ivf_minus_exact_r2": -0.00012224912643432617,
+      "candidate_mean": 2462.8287485470746,
+      "candidate_max": 2800
+    },
+    {
+      "session": "indy_20170131_02",
+      "fold": 4,
+      "test_bins": 1172,
+      "bank_absent_r2": 0.8502611517906189,
+      "exact_knn_ready_r2": 0.85589599609375,
+      "firmware_ivf_ready_r2": 0.855850100517273,
+      "firmware_ivf_minus_absent_r2": 0.005588948726654053,
+      "firmware_ivf_minus_exact_r2": -4.589557647705078e-05,
+      "candidate_mean": 928.9470989761093,
+      "candidate_max": 1112
+    },
+    {
+      "session": "loco_20170210_03",
+      "fold": 5,
+      "test_bins": 1877,
+      "bank_absent_r2": 0.7877972722053528,
+      "exact_knn_ready_r2": 0.7897119522094727,
+      "firmware_ivf_ready_r2": 0.7894570827484131,
+      "firmware_ivf_minus_absent_r2": 0.0016598105430603027,
+      "firmware_ivf_minus_exact_r2": -0.0002548694610595703,
+      "candidate_mean": 1646.914757591902,
+      "candidate_max": 1902
+    },
+    {
+      "session": "loco_20170215_02",
+      "fold": 5,
+      "test_bins": 1180,
+      "bank_absent_r2": 0.7268614768981934,
+      "exact_knn_ready_r2": 0.7271877527236938,
+      "firmware_ivf_ready_r2": 0.7270449995994568,
+      "firmware_ivf_minus_absent_r2": 0.00018352270126342773,
+      "firmware_ivf_minus_exact_r2": -0.00014275312423706055,
+      "candidate_mean": 1278.9694915254238,
+      "candidate_max": 1548
+    },
+    {
+      "session": "loco_20170301_05",
+      "fold": 1,
+      "test_bins": 767,
+      "bank_absent_r2": 0.8025245666503906,
+      "exact_knn_ready_r2": 0.7929118871688843,
+      "firmware_ivf_ready_r2": 0.7924718260765076,
+      "firmware_ivf_minus_absent_r2": -0.010052740573883057,
+      "firmware_ivf_minus_exact_r2": -0.000440061092376709,
+      "candidate_mean": 1125.3976531942633,
+      "candidate_max": 1369
+    }
+  ],
+  "mean": {
+    "bank_absent_r2": 0.7944413622220358,
+    "exact_knn_ready_r2": 0.7964874009291331,
+    "firmware_ivf_ready_r2": 0.7963200410207113,
+    "firmware_ivf_minus_absent_r2": 0.0018786787986755371,
+    "firmware_ivf_minus_exact_r2": -0.00016735990842183432
+  }
+}
