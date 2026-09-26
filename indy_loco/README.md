@@ -1,6 +1,11 @@
 # Indy/Loco decoder
 
-The active state combines the final Phase-13 neural checkpoints, six Phase-14
+The next experiment is [Phase 16 parameter scaling](experiment/phase16_parameter_scaling/README.md):
+modest width-80 TCN/GRU scaling with same-fold Midsize weight transfer and a
+faster validation stopping rule. Data/folds/loss/optimizer settings stay fixed;
+scripts and no-training checks are ready.
+
+The retained deployment state combines the final Phase-13 neural checkpoints, six Phase-14
 best-fold CubeAI packages, the Phase-15 30-fold Large PC evaluation, and the
 completed six-bank firmware/GUI deployment integration. No new numbered model
 phase was introduced for the deployment plumbing.

@@ -1,6 +1,16 @@
 # Indy/Loco final status
 
-**Current model phase:** Phase 15 — Large external-memory 30-fold PC validation complete.
+**Current experiment phase:** Phase 16 — neural parameter scaling; scripts and
+no-training validation complete, training and acceptance pending.
+
+See [`experiment/phase16_parameter_scaling/README.md`](experiment/phase16_parameter_scaling/README.md).
+Architecture sizes are configurable; the Phase-13 final Midsize preprocessing,
+folds, loss and optimizer recipe remain frozen. The revised default is width 80
+with 4 TCN blocks / 1 GRU layer, same-fold Midsize weight transfer, and the
+user-authorized fast stopping rule (minimum 4 epochs, patience 3, 0.5% relative
+validation improvement). No new training was run by the implementation task.
+
+**Retained model phase:** Phase 15 — Large external-memory 30-fold PC validation complete.
 
 **Current deployment state:** six selected-fold CubeAI bundles and six
 firmware-compatible `BCIMEM1` banks are integrated on firmware branch `AI` and
