@@ -1,0 +1,11 @@
+{
+  "exported_folds": 30,
+  "strict_state_loading": true,
+  "max_abs_difference_from_original_on_seed43_inputs": 0,
+  "comparison_inputs": [
+    3,
+    192,
+    50
+  ],
+  "source_unchanged": true
+}
