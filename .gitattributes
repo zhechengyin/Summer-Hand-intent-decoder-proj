@@ -1,0 +1,4 @@
+# Preserve frozen experiment source/evidence bytes used by integrity hashes.
+indy_loco/experiment/phase17_architecture_comparison/** -text
+indy_loco/experiment/phase18_large_mingru/** -text
+indy_loco/experiment/phase19_midsize_cuda/** -text

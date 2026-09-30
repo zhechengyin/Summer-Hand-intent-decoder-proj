@@ -1,6 +1,27 @@
 # Indy/Loco final status
 
-**Current experiment phase:** Phase 16 — neural parameter scaling; scripts and
+**Latest completed phase:** [Phase19](experiment/phase19_midsize_cuda/README.md), 2026-09-30.
+CUDA benchmark complete; LayerNorm/ReLU saved 9.28% full-epoch time, below the
+10% adoption threshold. GRU/combined candidates failed numerical update checks.
+Width sweep complete: 90/90 training jobs, followed by 120/120 test evaluations
+including original Midsize. Test R2 mean +/- sample SD: original64 0.741138 +/-
+0.065598; width96 0.739618 +/- 0.065505; width128 0.743070 +/- 0.066986;
+width256 0.741075 +/- 0.062379. Validation-selected checkpoints remained frozen
+before test. No automatic model promotion. All sweep checkpoints are retained.
+
+**Earlier phase:** Phase 17 — all three candidates completed and
+their 30-fold checkpoints/predictions were verified. Test R2 mean +/- sample SD:
+minGRU 0.6988 +/- 0.0750; Mamba-2 0.6865 +/- 0.0861; Transformer
+0.6818 +/- 0.0818. Historical warm-started Midsize remains 0.7411 +/- 0.0656.
+The user authorized a minGRU/Mamba-2 hyperparameter sweep on 2026-09-26:
+12 configurations per model, two-stage validation selection, then two extra
+training seeds per finalist (360 fits total). Architectures, preprocessing and
+folds remain fixed. See the
+[sweep protocol](experiment/phase17_architecture_comparison/sweep/README.md)
+and live Phase17 results/sweep_v1/progress.json. Larger-model training and board
+deployment are deferred. The original 16 checks and 7 new sweep checks pass.
+
+**Previous experiment:** Phase 16 — neural parameter scaling; scripts and
 no-training validation complete, training and acceptance pending.
 
 See [`experiment/phase16_parameter_scaling/README.md`](experiment/phase16_parameter_scaling/README.md).

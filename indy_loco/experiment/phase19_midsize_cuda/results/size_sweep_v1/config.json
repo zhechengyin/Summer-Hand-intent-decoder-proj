@@ -1,0 +1,125 @@
+{
+  "phase": "phase19_size_sweep_v1",
+  "widths": [
+    96,
+    128,
+    256
+  ],
+  "sessions": [
+    "indy_20160622_01",
+    "indy_20160630_01",
+    "indy_20170131_02",
+    "loco_20170210_03",
+    "loco_20170215_02",
+    "loco_20170301_05"
+  ],
+  "folds": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "seed": 43,
+  "training": {
+    "init": "midsize_transfer",
+    "train_scope": "all",
+    "epochs": 20,
+    "batch_size": 128,
+    "patience": 3,
+    "weight_decay": 0.025,
+    "gradient_clip": 1.0
+  },
+  "stopping": {
+    "metric": "validation_normalized_mse",
+    "min_epochs": 4,
+    "patience": 3,
+    "relative_improvement": 0.005,
+    "max_epochs": 20,
+    "checkpoint_selection": "exact_minimum_validation_mse",
+    "test_used_for_stopping": false
+  },
+  "learning_rate_gru_head": 0.0003,
+  "encoder_lr_scale": 0.25,
+  "kernels": "native PyTorch/cuDNN, FP32, no TF32",
+  "torch": "2.11.0+cu128",
+  "gpu": "NVIDIA GeForce RTX 4070 Laptop GPU",
+  "capacity": {
+    "96": {
+      "encoder_parameters": 129696,
+      "decoder_parameters": 56066,
+      "total_parameters": 185762,
+      "fp32_weight_bytes": 743048,
+      "fp32_weight_mib": 0.7086257934570312,
+      "ratio_to_midsize": 2.1357354733380856,
+      "memory_note": "Weights only; excludes activations, workspace, alignment and firmware."
+    },
+    "128": {
+      "encoder_parameters": 222080,
+      "decoder_parameters": 99330,
+      "total_parameters": 321410,
+      "fp32_weight_bytes": 1285640,
+      "fp32_weight_mib": 1.2260818481445312,
+      "ratio_to_midsize": 3.6953022603416956,
+      "memory_note": "Weights only; excludes activations, workspace, alignment and firmware."
+    },
+    "256": {
+      "encoder_parameters": 837376,
+      "decoder_parameters": 395266,
+      "total_parameters": 1232642,
+      "fp32_weight_bytes": 4930568,
+      "fp32_weight_mib": 4.702156066894531,
+      "ratio_to_midsize": 14.171882545011382,
+      "memory_note": "Weights only; excludes activations, workspace, alignment and firmware."
+    }
+  },
+  "source_sha256": {
+    "indy_loco\\experiment\\phase19_midsize_cuda\\size_sweep\\run.py": "2bdbd24e7ef4809335c893e39fa576a259cb84558d57e1fb4eebc4e3d272ae51",
+    "indy_loco\\experiment\\phase19_midsize_cuda\\size_sweep\\__init__.py": "0a8d7909de0e570d8b045a1ed9d6cd8604d0e834bebdc58d13ed7edbc2e7e68e",
+    "indy_loco\\experiment\\phase16_parameter_scaling\\fast_training.py": "1193b88bc14ff70f77f91b7560b13b566427ecdf2f6686e805d9250f0da605ae",
+    "indy_loco\\experiment\\phase16_parameter_scaling\\model.py": "3b6314a286801e8445d0ccb9878ccaf21e53b5e60f19002ce4c2469e35d58574",
+    "indy_loco\\experiment\\phase16_parameter_scaling\\protocol.py": "b9d6f31026d660e68251e13091bd03a69f9c875499e15eaa3779925ca33cd1ee",
+    "indy_loco\\experiment\\phase16_parameter_scaling\\run.py": "3280952c63768fa943b4bd96d05e3e03a4b0200f07c668d551d3f000b026f8f9",
+    "indy_loco\\experiment\\phase16_parameter_scaling\\session_data.py": "62d9c809a32a61c3c98555bc3a86b7440b77f0b00917f6fd82a5469261a2f5d2",
+    "indy_loco\\experiment\\phase16_parameter_scaling\\stopping.py": "73e72572817e9caa26cc4c776955fcd539996ee72f41edc4f92c775aa888d511",
+    "indy_loco\\experiment\\phase16_parameter_scaling\\test_contract.py": "8d9d5f485aa8319aa8e3566db92b66a0f4d2315165b6f03397b1cdc11b51ff54",
+    "indy_loco\\experiment\\phase16_parameter_scaling\\transfer.py": "ae55b150fd7cb994389d78469341fd8a31f8a3d4f911d4a79bc4f82c3d3d8cbb",
+    "indy_loco\\experiment\\phase16_parameter_scaling\\__init__.py": "36dd4bac12092c96bfc204805af902d229684396e28eef6fa578c6b36f50907a",
+    "indy_loco\\experiment\\phase16_parameter_scaling\\protocol_lock.json": "77819d62fc1d1c1ccc2528400c009f0a00fd2a1fdc8d430d3be203a8212d3631",
+    "indy_loco\\experiment\\phase17_architecture_comparison\\data_contract.py": "c622a518dd2c7fac112fc5e1c3ebff51f3b80b17a4b95c2ce9c8c438c3f12a39",
+    "indy_loco\\experiment\\phase17_architecture_comparison\\run.py": "935f179b329229a01cd0425b8f78601b6c5eb8eee9c991b4751a96d7c841f8ff"
+  },
+  "test_evaluated": false,
+  "references": {
+    "indy_20160622_01_fold1": "e1b0f69c8ec881ca10ec93fecf32c43ee7ff558061551e181218088dce1a24df",
+    "indy_20160622_01_fold2": "e68ec2c5901f84ad295c15266f64c98a1a0bc062c1449a61bc149bdcf63096e3",
+    "indy_20160622_01_fold3": "1c65da38bc38ac5e3051629c8b9a9043a205fd26ba32cd8b4ed40cf3406fca66",
+    "indy_20160622_01_fold4": "d367ef9295bb96a845f2c1a99085147d59916f7c1053e0a09780ca9307d003b5",
+    "indy_20160622_01_fold5": "5a31e1636b76fcd5a4a5a9c827067c724ca4245b6103f3f095c16f4264008dfd",
+    "indy_20160630_01_fold1": "a45a226b9a6a42fa0630aebf5f7f500aa41c2d3b095a38a715afaa4fd87b09a1",
+    "indy_20160630_01_fold2": "c250a1cfcfdb4e9127049570c441fc1da75e7ebdc40da7547e184f73360b7ea2",
+    "indy_20160630_01_fold3": "0e894a47f3303664f2e83ec5cca71a23392394ff53bd9a595300f99998846db5",
+    "indy_20160630_01_fold4": "e3aaa5c3a45418d78a4331ac971f98853bd1a85a84e25298991c05d861e7721b",
+    "indy_20160630_01_fold5": "e8ad79083fb5349cfd7e7e37061cc11d29a2c7b23ab784190ecebb58b183e238",
+    "indy_20170131_02_fold1": "3e28c08fdbaf8edd879fd1ea389c5ed697e74a5cdcb9bd763232420a93975253",
+    "indy_20170131_02_fold2": "fac8243609bef225a4558cc3efaa72aed2802770f2598647bc8e2d759a316ce7",
+    "indy_20170131_02_fold3": "b453d9bb5856bde3d77e3f7e272a2f6f6454b7c6cc9f4397912ef03c1fd6f160",
+    "indy_20170131_02_fold4": "29d2f5c66cdaa7a4677935b174565814e9530c322bccd9b6a15e99bb1158cbf7",
+    "indy_20170131_02_fold5": "4461daf02cb8d650c3b544842588525d458c8b74478bb54168e5200500921b94",
+    "loco_20170210_03_fold1": "c501fe0a6f2e8f8e357486e9582505c86caad062069d07265c1a572b3b05e865",
+    "loco_20170210_03_fold2": "6e4648843f4b31e963af482782bdc301c6141fbe027fdeee2e8ca1ddd0f0f511",
+    "loco_20170210_03_fold3": "608fa38e3cf6d4afe932408e5d69fd8d4dfbd6eeec00acd9f127a61572480569",
+    "loco_20170210_03_fold4": "8db52cea6f5217dc4e66adfca6213f405e17826a0d3da7b2f90ba37fed172d61",
+    "loco_20170210_03_fold5": "d65a679a09918f088f4142d8582fdc9e788551df6c3b2a5db1e1412b2ca77900",
+    "loco_20170215_02_fold1": "4f48d6565fff80be410eef3a6b6909ee78ace82597669c0c4a6926c32a84127c",
+    "loco_20170215_02_fold2": "eef2747655217f80fc8c5402e2ea88c3f0f7e8dd2d5a0e40cf62e06d76496dd6",
+    "loco_20170215_02_fold3": "749c0d6b0b77376aeb8e744ecdebb655766163dbec21f6fd6b34ecee8bc7b476",
+    "loco_20170215_02_fold4": "cf025f207b0f9126b626224e0fe734cfbcb9e2f6c8ca7516879fd2372b745e18",
+    "loco_20170215_02_fold5": "0a2720994ccca9b8204559389b7b256b36f801b78ec6426982ca4113f314466e",
+    "loco_20170301_05_fold1": "d5247237b4c90455b4fb524acc441093f9415727bd1d44c3052b7da72d7d10a5",
+    "loco_20170301_05_fold2": "6b1e63d10cf1ebbe90d107e1e385b49eb1551b70e2d770352c4a356c2b4fb7d9",
+    "loco_20170301_05_fold3": "166821b97a7c2c5f45078e4cf3c6a0183377e9d944796178b75e55de2e8689bd",
+    "loco_20170301_05_fold4": "233291bcbd5c7572d0ee3f387c44c9b4c1d759967b92f559e08a4875c4646f73",
+    "loco_20170301_05_fold5": "b44295a9388f373793380550feff5545862de9529275f1d615effc076e5a2d2c"
+  }
+}

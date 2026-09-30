@@ -1,0 +1,234 @@
+{
+  "seed": 43,
+  "session": "indy_20160622_01",
+  "fold": 1,
+  "epochs": 3,
+  "repeats": 3,
+  "requested_variants": [
+    "pytorch",
+    "epilogue",
+    "causal",
+    "layernorm",
+    "gru",
+    "combined"
+  ],
+  "batch_size": 128,
+  "parameters": 86978,
+  "initialization": "same_canonical_Midsize_fold1_checkpoint_all_arms",
+  "checkpoint_path": "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\models\\midsize\\indy_20160622_01\\fold-1.pt",
+  "checkpoint_sha256": "e1b0f69c8ec881ca10ec93fecf32c43ee7ff558061551e181218088dce1a24df",
+  "preprocessing_evidence": {
+    "channels": {
+      "shape": [
+        96
+      ],
+      "dtype": "int64",
+      "sha256": "89bec042b172bd3f39b6cc1b73dc1d6529d1510473e799fe9777b3aaacca8e65"
+    },
+    "calibration_mean": {
+      "shape": [
+        192
+      ],
+      "dtype": "float32",
+      "sha256": "79e5a34a13905d6112ee596dc9b70aa436209192236c9575ab5212277184b198"
+    },
+    "calibration_effective_std": {
+      "shape": [
+        192
+      ],
+      "dtype": "float32",
+      "sha256": "57e0b16c00aeea565fdb860e4e49cdbaf089c42ffd77f916cbe2659feada8627"
+    },
+    "calibration_local_std": {
+      "shape": [
+        192
+      ],
+      "dtype": "float32",
+      "sha256": "c3ca08eac2ca7e760d62acbe258a02d24b84a7d6f124fe36da065ce7baf37a15"
+    },
+    "feature_std_floor": {
+      "shape": [
+        192
+      ],
+      "dtype": "float32",
+      "sha256": "71a7639a71be01a651649b5475cab7c47bdf8f6489bcc3520b9b13f3044861ef"
+    },
+    "target_mean": {
+      "shape": [
+        2
+      ],
+      "dtype": "float32",
+      "sha256": "8013c1723ee740af0b46de6604bb3f4436d10ff9e4b89892f92201b9beccdd61"
+    },
+    "target_std": {
+      "shape": [
+        2
+      ],
+      "dtype": "float32",
+      "sha256": "dde79cef30d1fc5cbfae238d8755450b4920a172baaabbe761655a2d5cfc4d46"
+    },
+    "velocity": {
+      "shape": [
+        61242,
+        2
+      ],
+      "dtype": "float32",
+      "sha256": "8396f6c5986ae77dac939e264f5908ebe62373d3692eef5f9c033e0db31b3f4a"
+    },
+    "normalized_features": {
+      "shape": [
+        192,
+        61242
+      ],
+      "dtype": "float32",
+      "sha256": "090db49fac2dd6a3939794641dfb7e327d2a18500873777a783d2512412eadc8"
+    },
+    "train_reaches": {
+      "shape": [
+        754
+      ],
+      "dtype": "int64",
+      "sha256": "6dcc6404b3397cd51161e325e8fbec075a9ce295f264bf69c49158505d399130"
+    },
+    "validation_reaches": {
+      "shape": [
+        95
+      ],
+      "dtype": "int64",
+      "sha256": "cd87b3b3e74e662bc5a94fbe9fc77049835e0584606c2e8228aeb8c80a11cb72"
+    },
+    "test_reaches": {
+      "shape": [
+        94
+      ],
+      "dtype": "int64",
+      "sha256": "c04c174743844c98cc4ec5abba3415001d392f6ab44b8219f4f69f02e6e561a8"
+    },
+    "train_bins": {
+      "shape": [
+        31017
+      ],
+      "dtype": "int64",
+      "sha256": "33c097ac250d890ea3e96dc04c315c313672c37b42b16934a29a1feae695c551"
+    },
+    "validation_bins": {
+      "shape": [
+        3683
+      ],
+      "dtype": "int64",
+      "sha256": "7ba8c6ba7eb5ea7cb883c52ed6b042c615f225d6c869668373c8879482c1cca6"
+    },
+    "test_bins": {
+      "shape": [
+        3815
+      ],
+      "dtype": "int64",
+      "sha256": "6bdd1a44e582f0c9c8fc7799ae5038b12e4477d2443a3236e7049670678ee53a"
+    },
+    "numeric_reproducibility": {
+      "scalers": "canonical_same_fold_Midsize_after_recomputation_check",
+      "recomputation_rtol": 5e-07,
+      "recomputation_atol": 5e-08,
+      "statistics": {
+        "calibration_mean": {
+          "max_absolute_difference": 2.384185791015625e-07,
+          "exact_before_pinning": false
+        },
+        "calibration_effective_std": {
+          "max_absolute_difference": 1.1920928955078125e-07,
+          "exact_before_pinning": false
+        },
+        "calibration_local_std": {
+          "max_absolute_difference": 1.1920928955078125e-07,
+          "exact_before_pinning": false
+        },
+        "feature_std_floor": {
+          "max_absolute_difference": 1.1920928955078125e-07,
+          "exact_before_pinning": false
+        },
+        "target_mean": {
+          "max_absolute_difference": 0.0,
+          "exact_before_pinning": true
+        },
+        "target_std": {
+          "max_absolute_difference": 0.0,
+          "exact_before_pinning": true
+        }
+      }
+    }
+  },
+  "source_sha256": {
+    "indy_loco\\experiment\\phase19_midsize_cuda\\benchmark.py": "0ba71a7dd6e2720633d8104dc4d2aa03a1dbf3fde136fa8407dc14456e1da346",
+    "indy_loco\\experiment\\phase19_midsize_cuda\\model.py": "f59ec009d32e78eaa4b1f424e9e6f6e3e48f6262e7812b3e52d660a532d5a4f9",
+    "indy_loco\\experiment\\phase19_midsize_cuda\\ops.py": "7aee311f7185afc30ec4d6aa1a245b9c9fb9e0c7a34b3af16bb3a6c9c8f7c326",
+    "indy_loco\\experiment\\phase19_midsize_cuda\\runtime.py": "b8fbf8f5b3f0469387bb32c1935458dfa461ff83cde0f2c1a2f34c1b89a38bcd",
+    "indy_loco\\experiment\\phase19_midsize_cuda\\verify.py": "d94027ec9f373a0a311f4ff189b0e53f9d4a8d156d9effc021e864e9647b4199",
+    "indy_loco\\experiment\\phase19_midsize_cuda\\__init__.py": "eda5462627687a2093d901000951f0a3897fd5010279a5ac10fd79b030374b6f",
+    "indy_loco\\experiment\\phase19_midsize_cuda\\ops.cu": "20a552a9f423ddecb4e8adc6a37f6ad9acc10ae195a32f1edcbadca2ca673878",
+    "indy_loco\\experiment\\phase16_parameter_scaling\\model.py": "3b6314a286801e8445d0ccb9878ccaf21e53b5e60f19002ce4c2469e35d58574",
+    "indy_loco\\experiment\\phase16_parameter_scaling\\protocol.py": "b9d6f31026d660e68251e13091bd03a69f9c875499e15eaa3779925ca33cd1ee",
+    "indy_loco\\experiment\\phase16_parameter_scaling\\session_data.py": "62d9c809a32a61c3c98555bc3a86b7440b77f0b00917f6fd82a5469261a2f5d2",
+    "indy_loco\\experiment\\phase16_parameter_scaling\\protocol_lock.json": "77819d62fc1d1c1ccc2528400c009f0a00fd2a1fdc8d430d3be203a8212d3631",
+    "indy_loco\\experiment\\phase17_architecture_comparison\\data_contract.py": "c622a518dd2c7fac112fc5e1c3ebff51f3b80b17a4b95c2ce9c8c438c3f12a39",
+    "indy_loco\\experiment\\phase17_architecture_comparison\\run.py": "935f179b329229a01cd0425b8f78601b6c5eb8eee9c991b4751a96d7c841f8ff",
+    "indy_loco\\models\\midsize\\model.py": "c2372fcf571e5adecd63633d8b0bd9cbfb317ffe09ade18846c9ce12b5afdff4"
+  },
+  "hyperparameters": {
+    "learning_rate_gru_head": 0.0003,
+    "encoder_lr_scale": 0.25,
+    "weight_decay": 0.025,
+    "gradient_clip": 1.0,
+    "scheduler_T_max": 20,
+    "channel_dropout": 0.2,
+    "model_dropout": 0.1,
+    "early_stopping": false
+  },
+  "precision": "FP32, no TF32 or AMP; NVRTC fast math disabled",
+  "torch": "2.11.0+cu128",
+  "torch_cuda": "12.8",
+  "cudnn_version": 91900,
+  "gpu": "NVIDIA GeForce RTX 4070 Laptop GPU",
+  "cpu_threads": 4,
+  "numerical_tolerances": {
+    "output": {
+      "atol": 2e-05,
+      "rtol": 0.0002
+    },
+    "gradient": {
+      "atol": 3e-05,
+      "rtol": 0.0003
+    },
+    "update": {
+      "atol": 2e-06,
+      "rtol": 2e-05
+    }
+  },
+  "test_evaluated": false,
+  "verify_only": false,
+  "eligible_variants": [
+    "pytorch",
+    "epilogue",
+    "causal",
+    "layernorm"
+  ],
+  "order": [
+    [
+      "pytorch",
+      "epilogue",
+      "causal",
+      "layernorm"
+    ],
+    [
+      "epilogue",
+      "pytorch",
+      "layernorm",
+      "causal"
+    ],
+    [
+      "pytorch",
+      "epilogue",
+      "causal",
+      "layernorm"
+    ]
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "checks": [
+    {
+      "name": "canonical_deployment_vs_training_wrapper",
+      "kind": "output",
+      "shape": [
+        128,
+        50,
+        2
+      ],
+      "max_absolute_error": 0.0,
+      "max_tolerance_ratio": 0.0,
+      "passed": true
+    }
+  ]
+}

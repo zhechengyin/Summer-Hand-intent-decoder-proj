@@ -1,0 +1,155 @@
+{
+  "width": 256,
+  "session": "indy_20160630_01",
+  "fold": 5,
+  "test": {
+    "bins": 2650,
+    "mse": 0.02882334217429161,
+    "r2_x": 0.6535241603851318,
+    "r2_y": 0.7601168155670166,
+    "r2_mean": 0.7068204879760742,
+    "normalized_loss": 0.3287884294986725
+  },
+  "checkpoint_sha256": "d4762800c6f9a9e64359b99cc9de7fd5c19eccd9cfec1ec6e709676941829597",
+  "prediction_sha256": "6bd7cac7c8d823f5c64b1152f2afadfc99787c961c2693ebcb8ea4bcad1433d7",
+  "preprocessing_evidence": {
+    "channels": {
+      "shape": [
+        96
+      ],
+      "dtype": "int64",
+      "sha256": "89bec042b172bd3f39b6cc1b73dc1d6529d1510473e799fe9777b3aaacca8e65"
+    },
+    "calibration_mean": {
+      "shape": [
+        192
+      ],
+      "dtype": "float32",
+      "sha256": "b316c77c5691a8bed881ef860d53ab2b2fbc45ef874ab7aa5956e3064361c9d4"
+    },
+    "calibration_effective_std": {
+      "shape": [
+        192
+      ],
+      "dtype": "float32",
+      "sha256": "cf96682f687e805bf9e33227bae2a3842602a8725401e37b3976c137d11fa799"
+    },
+    "calibration_local_std": {
+      "shape": [
+        192
+      ],
+      "dtype": "float32",
+      "sha256": "fa682a9049eca59a9f2c4d158f1e0d914477fdcca26523338cb7c419fa4d0285"
+    },
+    "feature_std_floor": {
+      "shape": [
+        192
+      ],
+      "dtype": "float32",
+      "sha256": "3995f4326dc15b15fe960f31588ac81c4abd7f7feae039ef208b9472b03d169a"
+    },
+    "target_mean": {
+      "shape": [
+        2
+      ],
+      "dtype": "float32",
+      "sha256": "54a736a58ffcd6c2041990d37d88df185e9f67aa631ce0bbe7c61e14cef3f69d"
+    },
+    "target_std": {
+      "shape": [
+        2
+      ],
+      "dtype": "float32",
+      "sha256": "ac0febf9dd9be29fbf19dac02e184d11b41249a3fe87b59a7a8011e39e668df3"
+    },
+    "velocity": {
+      "shape": [
+        36580,
+        2
+      ],
+      "dtype": "float32",
+      "sha256": "5f0197a71682277dccbd744c46ed345f49055aeddfe60567c1a9d6a6508079a5"
+    },
+    "normalized_features": {
+      "shape": [
+        192,
+        36580
+      ],
+      "dtype": "float32",
+      "sha256": "29e2ddbb176330c87fa03e7dae22b4d4cc7738b1d7a61507b75cf3175fa88ff3"
+    },
+    "train_reaches": {
+      "shape": [
+        816
+      ],
+      "dtype": "int64",
+      "sha256": "f35d7b8dcdbc2917e13c7d2ddf259b30a30e71d14312f6837a59475f6766eafc"
+    },
+    "validation_reaches": {
+      "shape": [
+        102
+      ],
+      "dtype": "int64",
+      "sha256": "f287ae05b7ca5aa17dcb4b80b75da2df308c4edcf5901f80e104f3cba750f2da"
+    },
+    "test_reaches": {
+      "shape": [
+        102
+      ],
+      "dtype": "int64",
+      "sha256": "f00ee909edf1cea9997a4d81642ef0e885b5f8be4e27e3180bb6cff9683cd4fe"
+    },
+    "train_bins": {
+      "shape": [
+        19360
+      ],
+      "dtype": "int64",
+      "sha256": "b0fe4c940eb782afcc4161085974f186c7da49a18c91658dd695fe4c482e3aff"
+    },
+    "validation_bins": {
+      "shape": [
+        2470
+      ],
+      "dtype": "int64",
+      "sha256": "4a359dfb2915e964665c448ab02409bb7374b223023a7de9fca17c1d46ba1993"
+    },
+    "test_bins": {
+      "shape": [
+        2650
+      ],
+      "dtype": "int64",
+      "sha256": "1581afd2feea98f2226c4924463e0c425bbe673473982d73409a27285dacddd2"
+    },
+    "numeric_reproducibility": {
+      "scalers": "canonical_same_fold_Midsize_after_recomputation_check",
+      "recomputation_rtol": 5e-07,
+      "recomputation_atol": 5e-08,
+      "statistics": {
+        "calibration_mean": {
+          "max_absolute_difference": 2.384185791015625e-07,
+          "exact_before_pinning": false
+        },
+        "calibration_effective_std": {
+          "max_absolute_difference": 1.1920928955078125e-07,
+          "exact_before_pinning": false
+        },
+        "calibration_local_std": {
+          "max_absolute_difference": 1.1920928955078125e-07,
+          "exact_before_pinning": false
+        },
+        "feature_std_floor": {
+          "max_absolute_difference": 1.1920928955078125e-07,
+          "exact_before_pinning": false
+        },
+        "target_mean": {
+          "max_absolute_difference": 0.0,
+          "exact_before_pinning": true
+        },
+        "target_std": {
+          "max_absolute_difference": 0.0,
+          "exact_before_pinning": true
+        }
+      }
+    }
+  }
+}

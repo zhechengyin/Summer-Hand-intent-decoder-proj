@@ -1,0 +1,86 @@
+{
+  "status": "complete",
+  "variants": {
+    "pytorch": {
+      "full_epoch_seconds_mean": 8.514705066666668,
+      "repeat_mean_sample_sd": 0.892385376267633,
+      "training_seconds_mean": 8.089566355555538,
+      "peak_allocated_bytes": 255165952,
+      "peak_reserved_bytes": 348127232,
+      "last_epoch_validation_r2": [
+        0.8610752820968628,
+        0.8610752820968628,
+        0.8610752820968628
+      ]
+    },
+    "epilogue": {
+      "full_epoch_seconds_mean": 9.340150988888885,
+      "repeat_mean_sample_sd": 0.4020564636938006,
+      "training_seconds_mean": 8.86661239999997,
+      "peak_allocated_bytes": 255165952,
+      "peak_reserved_bytes": 348127232,
+      "last_epoch_validation_r2": [
+        0.8610752820968628,
+        0.8610752820968628,
+        0.8610752820968628
+      ],
+      "speedup_vs_pytorch": 0.9116239209404459,
+      "time_reduction_fraction": -0.09694357182771585,
+      "paired_repeat_speedups": [
+        1.0117814743124411,
+        0.7930194676452594,
+        0.935785976859137
+      ],
+      "max_epoch_validation_r2_difference": 0.0,
+      "adoption_candidate": false
+    },
+    "causal": {
+      "full_epoch_seconds_mean": 9.210038844444574,
+      "repeat_mean_sample_sd": 0.5450029682958788,
+      "training_seconds_mean": 8.763443499999994,
+      "peak_allocated_bytes": 255186944,
+      "peak_reserved_bytes": 352321536,
+      "last_epoch_validation_r2": [
+        0.8611297011375427,
+        0.8611297011375427,
+        0.8611297011375427
+      ],
+      "speedup_vs_pytorch": 0.9245026226792381,
+      "time_reduction_fraction": -0.08166269675035442,
+      "paired_repeat_speedups": [
+        1.099903752195042,
+        0.8272084005972543,
+        0.8621618760816011
+      ],
+      "max_epoch_validation_r2_difference": 5.441904067993164e-05,
+      "adoption_candidate": false
+    },
+    "layernorm": {
+      "full_epoch_seconds_mean": 7.724377811111178,
+      "repeat_mean_sample_sd": 0.7193516020573759,
+      "training_seconds_mean": 7.325083833333338,
+      "peak_allocated_bytes": 254641152,
+      "peak_reserved_bytes": 348127232,
+      "last_epoch_validation_r2": [
+        0.8610922694206238,
+        0.8610922694206238,
+        0.8610922694206238
+      ],
+      "speedup_vs_pytorch": 1.1023159761060157,
+      "time_reduction_fraction": 0.09281909935429933,
+      "paired_repeat_speedups": [
+        1.1348984163284173,
+        1.11183428305617,
+        1.059426829419517
+      ],
+      "max_epoch_validation_r2_difference": 2.6226043701171875e-05,
+      "adoption_candidate": false
+    }
+  },
+  "rejected_variants": {
+    "gru": "real_batch/AdamW/gru.weight_ih_l0: {'name': 'real_batch/AdamW/gru.weight_ih_l0', 'kind': 'update', 'shape': [192, 64], 'max_absolute_error': 4.7283247113227844e-05, 'max_tolerance_ratio': 18.32797622680664, 'passed': False}",
+    "combined": "real_batch/AdamW/gru.weight_ih_l0: {'name': 'real_batch/AdamW/gru.weight_ih_l0', 'kind': 'update', 'shape': [192, 64], 'max_absolute_error': 4.783831536769867e-05, 'max_tolerance_ratio': 18.543132781982422, 'passed': False}"
+  },
+  "test_evaluated": false,
+  "limitations": "One session/fold/seed, warm-started from canonical fold1. Repeats measure timing, not independent accuracy seeds. Short-run validation does not establish final test R2 or STM32 speed. cuDNN may beat custom GRU. No automatic adoption."
+}

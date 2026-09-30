@@ -1,6 +1,23 @@
 # Indy/Loco decoder
 
-The next experiment is [Phase 16 parameter scaling](experiment/phase16_parameter_scaling/README.md):
+The latest completed phase is [Phase 19 Midsize CUDA and width sweep](experiment/phase19_midsize_cuda/README.md).
+LayerNorm/ReLU fusion reduced full-epoch time by 9.28%; the original implementation
+remains default. The 96/128/256 paired encoder/GRU width sweep completed 90 jobs.
+Thirty-fold test R2: original Midsize 0.741138, width96 0.739618, width128 0.743070,
+width256 0.741075. See the [test report](experiment/phase19_midsize_cuda/results/size_sweep_test_v1/REPORT.md).
+The previously published [Phase18 minGRU B package](models/mingru_b/manifest.json)
+remains available. Newer mixed-precision work is separate from this phase snapshot.
+
+Earlier work: [Phase 17 architecture comparison](experiment/phase17_architecture_comparison/README.md):
+minGRU, Mamba-2 and a small causal Transformer at approximately Midsize capacity,
+with the same preprocessing and five-fold splits. All three candidates completed
+30 folds: minGRU test R2 0.6988 +/- 0.0750, Mamba-2 0.6865 +/- 0.0861,
+Transformer 0.6818 +/- 0.0818 (mean +/- sample SD). The authorized next step is
+the [minGRU/Mamba-2 validation sweep](experiment/phase17_architecture_comparison/sweep/README.md):
+12 configurations per model, top-two five-fold confirmation, and three-seed
+finalists. Its live status is in Phase17 results/sweep_v1/progress.json.
+
+The previous experiment is [Phase 16 parameter scaling](experiment/phase16_parameter_scaling/README.md):
 modest width-80 TCN/GRU scaling with same-fold Midsize weight transfer and a
 faster validation stopping rule. Data/folds/loss/optimizer settings stay fixed;
 scripts and no-training checks are ready.

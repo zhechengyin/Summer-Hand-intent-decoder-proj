@@ -1,0 +1,12 @@
+{
+  "options": [
+    "--gpu-architecture=compute_89",
+    "--std=c++14",
+    "--fmad=false",
+    "--prec-div=true",
+    "--prec-sqrt=true"
+  ],
+  "source_sha256": "20a552a9f423ddecb4e8adc6a37f6ad9acc10ae195a32f1edcbadca2ca673878",
+  "log": "",
+  "compile_and_load_seconds": 0.7993102000000363
+}

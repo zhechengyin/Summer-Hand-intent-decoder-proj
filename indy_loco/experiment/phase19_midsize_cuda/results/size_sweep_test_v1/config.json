@@ -1,0 +1,21 @@
+{
+  "training_signature": "84d627c5b8ae47239c5e8851e1c272b47bc5d2b0c8a54d5458e3ee4a1be041c1",
+  "training_metrics_sha256": "f20ca3639db0c434b0428d9b8b10a726bbe4d038bfd7b64d410188fb14144a30",
+  "evaluation_source_sha256": "7addd14dcbf9b1029b9a3e3e0172dd802893469bc39e26da8b839a98a103bfe5",
+  "torch": "2.11.0+cu128",
+  "device": "cpu",
+  "gpu": null,
+  "precision": "FP32, TF32 disabled",
+  "widths": [
+    64,
+    96,
+    128,
+    256
+  ],
+  "selection_frozen_before_test": true,
+  "validation_ranking": [
+    256,
+    96,
+    128
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "width": 64,
+  "session": "indy_20160630_01",
+  "fold": 3,
+  "test": {
+    "bins": 2335,
+    "mse": 0.024239057675004005,
+    "r2_x": 0.6173145174980164,
+    "r2_y": 0.8264464139938354,
+    "r2_mean": 0.7218804359436035,
+    "normalized_loss": 0.26392874121665955
+  },
+  "checkpoint_sha256": "0e894a47f3303664f2e83ec5cca71a23392394ff53bd9a595300f99998846db5",
+  "prediction_sha256": "a6bfadc5c998bfccbb01d653af8d971da86069cde08f4530404b16d13fbf589e",
+  "preprocessing_evidence": {
+    "channels": {
+      "shape": [
+        96
+      ],
+      "dtype": "int64",
+      "sha256": "89bec042b172bd3f39b6cc1b73dc1d6529d1510473e799fe9777b3aaacca8e65"
+    },
+    "calibration_mean": {
+      "shape": [
+        192
+      ],
+      "dtype": "float32",
+      "sha256": "b316c77c5691a8bed881ef860d53ab2b2fbc45ef874ab7aa5956e3064361c9d4"
+    },
+    "calibration_effective_std": {
+      "shape": [
+        192
+      ],
+      "dtype": "float32",
+      "sha256": "4438bfb33cc8be0541d61c9c1aabe4e39173dbfdad746dd5d9a37aa79ffc75dc"
+    },
+    "calibration_local_std": {
+      "shape": [
+        192
+      ],
+      "dtype": "float32",
+      "sha256": "fa682a9049eca59a9f2c4d158f1e0d914477fdcca26523338cb7c419fa4d0285"
+    },
+    "feature_std_floor": {
+      "shape": [
+        192
+      ],
+      "dtype": "float32",
+      "sha256": "edfb5048358b94e1a78c9cc4ee93e363b8749373f38f451e008d51e02bd25edf"
+    },
+    "target_mean": {
+      "shape": [
+        2
+      ],
+      "dtype": "float32",
+      "sha256": "6d719332ec7a8da17546a890d39556019f8d2d89072e5f82937ee5982d5f51b7"
+    },
+    "target_std": {
+      "shape": [
+        2
+      ],
+      "dtype": "float32",
+      "sha256": "348b2478d0f13c2faf84c42e1d722612ca1df7740f321e521d3237d0e678f75c"
+    },
+    "velocity": {
+      "shape": [
+        36580,
+        2
+      ],
+      "dtype": "float32",
+      "sha256": "5f0197a71682277dccbd744c46ed345f49055aeddfe60567c1a9d6a6508079a5"
+    },
+    "normalized_features": {
+      "shape": [
+        192,
+        36580
+      ],
+      "dtype": "float32",
+      "sha256": "452b8208e59ab7f0f13bf624c0efdbdfefdffc917d29f10333d19e722d52f4dc"
+    },
+    "train_reaches": {
+      "shape": [
+        816
+      ],
+      "dtype": "int64",
+      "sha256": "68c8316402cdcf56d8d3cfc2b8a2184cfed0af28483998df1368042e734e9e4a"
+    },
+    "validation_reaches": {
+      "shape": [
+        102
+      ],
+      "dtype": "int64",
+      "sha256": "1846abd180d2212eef26a83cbbb296aefaf29a6ead95099e16f74e95be790eef"
+    },
+    "test_reaches": {
+      "shape": [
+        102
+      ],
+      "dtype": "int64",
+      "sha256": "f2c20761bcccfaa308ee95bb9cde438f1cae86ede74d1c60c040aa723925022b"
+    },
+    "train_bins": {
+      "shape": [
+        19669
+      ],
+      "dtype": "int64",
+      "sha256": "b89d0c7a601e857813502a6905311f4bd1ec4a52a3b816577e5cc7519fb2e97a"
+    },
+    "validation_bins": {
+      "shape": [
+        2476
+      ],
+      "dtype": "int64",
+      "sha256": "eefd4f417cf86d3a1f67b6ac1602322462c761b327bcaa7c4e9688c1681dda54"
+    },
+    "test_bins": {
+      "shape": [
+        2335
+      ],
+      "dtype": "int64",
+      "sha256": "bfbb1f0f064bf3e5177597605d61d46d332a0d6fa459bf3c539d4296570427fb"
+    },
+    "numeric_reproducibility": {
+      "scalers": "canonical_same_fold_Midsize_after_recomputation_check",
+      "recomputation_rtol": 5e-07,
+      "recomputation_atol": 5e-08,
+      "statistics": {
+        "calibration_mean": {
+          "max_absolute_difference": 2.384185791015625e-07,
+          "exact_before_pinning": false
+        },
+        "calibration_effective_std": {
+          "max_absolute_difference": 1.1920928955078125e-07,
+          "exact_before_pinning": false
+        },
+        "calibration_local_std": {
+          "max_absolute_difference": 1.1920928955078125e-07,
+          "exact_before_pinning": false
+        },
+        "feature_std_floor": {
+          "max_absolute_difference": 1.1920928955078125e-07,
+          "exact_before_pinning": false
+        },
+        "target_mean": {
+          "max_absolute_difference": 0.0,
+          "exact_before_pinning": true
+        },
+        "target_std": {
+          "max_absolute_difference": 0.0,
+          "exact_before_pinning": true
+        }
+      }
+    }
+  }
+}
