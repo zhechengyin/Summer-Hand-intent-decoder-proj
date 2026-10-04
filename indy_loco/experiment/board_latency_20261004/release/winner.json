@@ -1,0 +1,211 @@
+{
+  "architecture": "w96_d3",
+  "qualified": true,
+  "runtime": "offline_gelu_lut_v5",
+  "test_used_for_selection": false,
+  "baseline_validation_mean": 0.770299086968104,
+  "rule": "six-session fold-1 C validation mean above matched Midsize, then lowest pooled 3x1024 board p95",
+  "candidates": [
+    {
+      "architecture": "w128_d2",
+      "validation": [
+        {
+          "session": "indy_20160622_01",
+          "bins": 3683,
+          "mse": 0.00912671722471714,
+          "r2_x": 0.9142403602600098,
+          "r2_y": 0.8493760824203491,
+          "r2_mean": 0.8818082213401794
+        },
+        {
+          "session": "indy_20160630_01",
+          "bins": 2467,
+          "mse": 0.01942729577422142,
+          "r2_x": 0.7280242443084717,
+          "r2_y": 0.840826153755188,
+          "r2_mean": 0.7844251990318298
+        },
+        {
+          "session": "indy_20170131_02",
+          "bins": 666,
+          "mse": 0.016934961080551147,
+          "r2_x": 0.7931778430938721,
+          "r2_y": 0.7567541599273682,
+          "r2_mean": 0.7749660015106201
+        },
+        {
+          "session": "loco_20170210_03",
+          "bins": 1457,
+          "mse": 0.00759184779599309,
+          "r2_x": 0.7074583768844604,
+          "r2_y": 0.8062567710876465,
+          "r2_mean": 0.7568575739860535
+        },
+        {
+          "session": "loco_20170215_02",
+          "bins": 1216,
+          "mse": 0.003981611225754023,
+          "r2_x": 0.7017308473587036,
+          "r2_y": 0.8488149642944336,
+          "r2_mean": 0.7752729058265686
+        },
+        {
+          "session": "loco_20170301_05",
+          "bins": 858,
+          "mse": 0.0075931428000330925,
+          "r2_x": 0.6623201370239258,
+          "r2_y": 0.8310726284980774,
+          "r2_mean": 0.7466963529586792
+        }
+      ],
+      "validation_mean": 0.7866710424423218,
+      "qualified": true,
+      "receipts": {
+        "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\results\\w128_d2\\indy_20160622_01_fold1_export\\lut_validation.json": "28e0ec4eeb5e0ca3d825f80ea29e1797dcbad68245d8a9e177d1883dac4fc7c4",
+        "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\results\\w128_d2\\indy_20160630_01_fold1_export\\lut_validation.json": "fc3911329191676defbef7055e2c3b3ba930f8c35844f0c152b7737d4606b0cc",
+        "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\results\\w128_d2\\indy_20170131_02_fold1_export\\lut_validation.json": "8687a02384ce216fb61b97381d53db4fef24ec7a90f4b6b02a72ad47b2e41f3e",
+        "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\results\\w128_d2\\loco_20170210_03_fold1_export\\lut_validation.json": "a6201a10738af93479d004ec441cd90186a58fbdd941d52ba03f28fe5eed33ea",
+        "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\results\\w128_d2\\loco_20170215_02_fold1_export\\lut_validation.json": "28ae46b578a57ddb2e3e7ad355bc264ceafc7070f661ef6b7fa063a9cc99b77f",
+        "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\results\\w128_d2\\loco_20170301_05_fold1_export\\lut_validation.json": "14368918ffec223756142d8859cae0e6ef65f654ca3cfff5b53051dfd9890b81"
+      },
+      "runs": [
+        {
+          "path": "C:\\Users\\fangz\\Documents\\STM32\\BCI-STM32-Plot\\data\\board_b2_logs\\fallback-w128-d2-lut-1024-r1-20261004",
+          "samples": 1024,
+          "predictions": 1024,
+          "missing_timing_snapshots": 0,
+          "first_ms": 35.818,
+          "median_ms": 35.862,
+          "p95_ms": 35.981,
+          "p99_ms": 36.02654,
+          "max_ms": 36.039
+        },
+        {
+          "path": "C:\\Users\\fangz\\Documents\\STM32\\BCI-STM32-Plot\\data\\board_b2_logs\\fallback-w128-d2-lut-1024-r2-20261004",
+          "samples": 1024,
+          "predictions": 1024,
+          "missing_timing_snapshots": 0,
+          "first_ms": 35.822,
+          "median_ms": 35.862,
+          "p95_ms": 35.981,
+          "p99_ms": 36.02377,
+          "max_ms": 36.048
+        },
+        {
+          "path": "C:\\Users\\fangz\\Documents\\STM32\\BCI-STM32-Plot\\data\\board_b2_logs\\fallback-w128-d2-lut-1024-r3-20261004",
+          "samples": 1021,
+          "predictions": 1024,
+          "missing_timing_snapshots": 3,
+          "first_ms": null,
+          "median_ms": 35.86,
+          "p95_ms": 35.982,
+          "p99_ms": 36.0278,
+          "max_ms": 36.047
+        }
+      ],
+      "pooled_p95_ms": 35.982,
+      "pooled_median_ms": 35.861
+    },
+    {
+      "architecture": "w96_d3",
+      "validation": [
+        {
+          "session": "indy_20160622_01",
+          "bins": 3683,
+          "mse": 0.00980276707559824,
+          "r2_x": 0.906368613243103,
+          "r2_y": 0.8463066816329956,
+          "r2_mean": 0.8763376474380493
+        },
+        {
+          "session": "indy_20160630_01",
+          "bins": 2467,
+          "mse": 0.01975887641310692,
+          "r2_x": 0.7082548141479492,
+          "r2_y": 0.8547984957695007,
+          "r2_mean": 0.7815266847610474
+        },
+        {
+          "session": "indy_20170131_02",
+          "bins": 666,
+          "mse": 0.017482638359069824,
+          "r2_x": 0.7839804887771606,
+          "r2_y": 0.7531738877296448,
+          "r2_mean": 0.7685772180557251
+        },
+        {
+          "session": "loco_20170210_03",
+          "bins": 1457,
+          "mse": 0.007235125172883272,
+          "r2_x": 0.7088079452514648,
+          "r2_y": 0.8326031565666199,
+          "r2_mean": 0.7707055807113647
+        },
+        {
+          "session": "loco_20170215_02",
+          "bins": 1216,
+          "mse": 0.004149913787841797,
+          "r2_x": 0.6806490421295166,
+          "r2_y": 0.8488730192184448,
+          "r2_mean": 0.7647610306739807
+        },
+        {
+          "session": "loco_20170301_05",
+          "bins": 858,
+          "mse": 0.007459826767444611,
+          "r2_x": 0.669342041015625,
+          "r2_y": 0.8320417404174805,
+          "r2_mean": 0.7506918907165527
+        }
+      ],
+      "validation_mean": 0.7854333420594534,
+      "qualified": true,
+      "receipts": {
+        "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\results\\w96_d3\\indy_20160622_01_fold1_export\\lut_validation.json": "4375b98a617f149f11eb116fbcb8880337e71d0f29c2d30f922cce0cc3599c46",
+        "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\results\\w96_d3\\indy_20160630_01_fold1_export\\lut_validation.json": "8ac44b488bdfd2e8c5304a9f5b43dea6c70fd2160d4b5a50462ebc62641bf86d",
+        "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\results\\w96_d3\\indy_20170131_02_fold1_export\\lut_validation.json": "a067ac67a2407773a72f371b2dc5ccf92bd9a19dc961f072f640413670b1a75f",
+        "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\results\\w96_d3\\loco_20170210_03_fold1_export\\lut_validation.json": "ac7f2011e89fca2de64ffa33c095f256e0589596abe338883e8e0c88b7b73a95",
+        "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\results\\w96_d3\\loco_20170215_02_fold1_export\\lut_validation.json": "1c3c9d987cb987d60f9f83afeb2dcbef7fdf72ab900f3f8fd327f6241c2c0163",
+        "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\results\\w96_d3\\loco_20170301_05_fold1_export\\lut_validation.json": "c7398cb00fb0fec094b7ac3d35aae248c49132010be1e63f1cb91f30388014cf"
+      },
+      "runs": [
+        {
+          "path": "C:\\Users\\fangz\\Documents\\STM32\\BCI-STM32-Plot\\data\\board_b2_logs\\fallback-w96-d3-lut-1024-r1-20261004",
+          "samples": 1024,
+          "predictions": 1024,
+          "missing_timing_snapshots": 0,
+          "first_ms": 35.869,
+          "median_ms": 35.868,
+          "p95_ms": 35.913,
+          "p99_ms": 35.927769999999995,
+          "max_ms": 35.941
+        },
+        {
+          "path": "C:\\Users\\fangz\\Documents\\STM32\\BCI-STM32-Plot\\data\\board_b2_logs\\fallback-w96-d3-lut-1024-r2-20261004",
+          "samples": 1024,
+          "predictions": 1024,
+          "missing_timing_snapshots": 0,
+          "first_ms": 35.871,
+          "median_ms": 35.869,
+          "p95_ms": 35.914,
+          "p99_ms": 35.927,
+          "max_ms": 35.94
+        },
+        {
+          "path": "C:\\Users\\fangz\\Documents\\STM32\\BCI-STM32-Plot\\data\\board_b2_logs\\fallback-w96-d3-lut-1024-r3-20261004",
+          "samples": 1023,
+          "predictions": 1024,
+          "missing_timing_snapshots": 1,
+          "first_ms": 35.877,
+          "median_ms": 35.869,
+          "p95_ms": 35.914,
+          "p99_ms": 35.927,
+          "max_ms": 35.938
+        }
+      ],
+      "pooled_p95_ms": 35.914,
+      "pooled_median_ms": 35.869
+    }
+  ],
+  "screen_config_sha256": "9abaf330e1f5aa0fc5769edcf4e4541af684916c562013d8ef7a1f491577cfa2"
+}

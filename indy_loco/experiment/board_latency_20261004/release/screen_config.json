@@ -1,0 +1,53 @@
+{
+  "architectures": {
+    "w128_d2": [
+      128,
+      2
+    ],
+    "w96_d3": [
+      96,
+      3
+    ]
+  },
+  "trial": {
+    "learning_rate": 0.0012,
+    "stem_lr_scale": 1.0,
+    "weight_decay": 0.01,
+    "head_weight_decay": 0.03,
+    "channel_dropout": 0.1,
+    "dropout": 0.1
+  },
+  "training": {
+    "epochs": 60,
+    "patience": 15,
+    "batch_size": 128,
+    "gradient_clip": 1.0,
+    "initialization": "scratch",
+    "optimizer": "AdamW",
+    "scheduler": "CosineAnnealingLR(T_max=60)",
+    "precision": "FP32",
+    "checkpoint_selection": "minimum_validation_normalized_MSE_separately_for_raw_and_ema",
+    "early_stopping": "15_epochs_without_either_policy_improving_its_own_best",
+    "ema_decay_per_optimizer_step": 0.99,
+    "trial_selection": "maximum_fold_macro_validation_R2_at_selected_checkpoint",
+    "split_seed": 43
+  },
+  "seed": 43,
+  "screen_folds": [
+    1
+  ],
+  "sessions": [
+    "indy_20160622_01",
+    "indy_20160630_01",
+    "indy_20170131_02",
+    "loco_20170210_03",
+    "loco_20170215_02",
+    "loco_20170301_05"
+  ],
+  "test_evaluated": false,
+  "code_sha256": {
+    "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\model.py": "4511809ab58fd6a2987c7e75d1fd275e0174b9038fc727e949befccef4f9625e",
+    "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\train.py": "7883ca75e08681640bbb897d9683fc4d08f7228e0243cc1ce6d133252261a1d9",
+    "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\phase18_large_mingru\\ab_study\\train.py": "e6d158f0814e4b9b7d5a52f87ef370ace82105bf13fd9a7fa50f85c37999e61e"
+  }
+}

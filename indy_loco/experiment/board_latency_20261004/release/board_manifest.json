@@ -1,0 +1,734 @@
+{
+  "architecture": "w96_d3",
+  "file": "w96_d3_lut_slot2.bin",
+  "bytes": 232904,
+  "abi": "mingru_w96_d3_lut_v5",
+  "sha256": "417e268e18cdd65adc8b439ff90d1e5679e34fb8cda96ae15b1943345646f9a9",
+  "crc32": "92220f80",
+  "checkpoint_sha256": "50bc9439a87ef225a9e9a9db3ccbaebae5c9f7643bc05b9dc62253c7ffd0ca7e",
+  "quantization_sha256": "0ea3c147a23db4d950bbc8b12701a2a014e66a4570f4e562a530e9a4d59355c7",
+  "runtime_sha256": "33aaa24f6b023c981e52bac98a29f0ebbbb9fcd9b5da51a471d7349a005803f5",
+  "workspace_bytes": 105600,
+  "lut_bytes": 98304,
+  "sdram_payload_bytes": 112128,
+  "tensors": [
+    {
+      "index": 0,
+      "name": "model_stem_bias_3D_array",
+      "bytes": 384,
+      "offset": 2528,
+      "bank": 0,
+      "sha256": "19d7db7e26dbbe32db0faf3d75d7651344f907b91a3e4761b6680ea4fd3326d9"
+    },
+    {
+      "index": 1,
+      "name": "_frontend_norm_Constant_output_0_3D_array",
+      "bytes": 4,
+      "offset": 2912,
+      "bank": 0,
+      "sha256": "d88c86f15bbea365d658ad95a81d45367c465f7af6f7264fb077f01747ddc77d"
+    },
+    {
+      "index": 2,
+      "name": "model_frontend_norm_weight_3D_array",
+      "bytes": 384,
+      "offset": 2944,
+      "bank": 0,
+      "sha256": "834ed47e9d37cb9d69b9201902883eb7d015a501627b3fed188d4aa365a3d321"
+    },
+    {
+      "index": 3,
+      "name": "model_frontend_norm_bias_3D_array",
+      "bytes": 384,
+      "offset": 3328,
+      "bank": 0,
+      "sha256": "81be7b4b197358a16ef7dd70fa855249062af6238a997730791df686322f17ac"
+    },
+    {
+      "index": 4,
+      "name": "_frontend_Constant_8_output_0_3D_array",
+      "bytes": 4,
+      "offset": 3712,
+      "bank": 0,
+      "sha256": "9c16095ed50248c0e1658be07f5bafe5dc11382843a99c6fb3a87c141808ceeb"
+    },
+    {
+      "index": 5,
+      "name": "_frontend_Constant_10_output_0_3D_array",
+      "bytes": 4,
+      "offset": 3744,
+      "bank": 0,
+      "sha256": "d99e58435243d9fef9c88273b8d553b4fba4d0baf8009d29eae74fa99e0d9f57"
+    },
+    {
+      "index": 6,
+      "name": "model_frontend_pointwise_bias_3D_array",
+      "bytes": 384,
+      "offset": 3776,
+      "bank": 0,
+      "sha256": "c065e9c273918cec5f71201e86ed64dd162aaaa71f574b52a67ba74ffbec5085"
+    },
+    {
+      "index": 7,
+      "name": "_blocks_0_norm1_Constant_output_0_3D_array",
+      "bytes": 4,
+      "offset": 4160,
+      "bank": 0,
+      "sha256": "d88c86f15bbea365d658ad95a81d45367c465f7af6f7264fb077f01747ddc77d"
+    },
+    {
+      "index": 8,
+      "name": "model_blocks_0_norm1_weight_3D_array",
+      "bytes": 384,
+      "offset": 4192,
+      "bank": 0,
+      "sha256": "66b4517989c921a14dc359166751a4207b32005336ff94581164ed6720b4742b"
+    },
+    {
+      "index": 9,
+      "name": "model_blocks_0_norm1_bias_3D_array",
+      "bytes": 384,
+      "offset": 4576,
+      "bank": 0,
+      "sha256": "1c800b3ae2545ceb9b1fcdfd28d8dce301baa4a9d74a9fc9f2f15c5e60848271"
+    },
+    {
+      "index": 10,
+      "name": "model_blocks_0_mixer_projection_bias_3D_array",
+      "bytes": 768,
+      "offset": 4960,
+      "bank": 0,
+      "sha256": "5cd558e5d9aa0acdac5ae6fa8be85848264e7c7b126384b5d80d77ca1100d873"
+    },
+    {
+      "index": 11,
+      "name": "_blocks_0_mixer_Constant_6_output_0_3D_array",
+      "bytes": 4,
+      "offset": 5728,
+      "bank": 0,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "index": 12,
+      "name": "_blocks_0_mixer_Constant_8_output_0_3D_array",
+      "bytes": 4,
+      "offset": 5760,
+      "bank": 0,
+      "sha256": "e00e5eb9444182f352323374ef4e08ebcb784725fdd4fd612d7730540b3e0c8c"
+    },
+    {
+      "index": 13,
+      "name": "_blocks_0_norm2_Constant_output_0_3D_array",
+      "bytes": 4,
+      "offset": 5792,
+      "bank": 0,
+      "sha256": "d88c86f15bbea365d658ad95a81d45367c465f7af6f7264fb077f01747ddc77d"
+    },
+    {
+      "index": 14,
+      "name": "model_blocks_0_norm2_weight_3D_array",
+      "bytes": 384,
+      "offset": 5824,
+      "bank": 0,
+      "sha256": "91e7179367c66bfbeedd66a1632295a5af1416f996581cc15031e3b1799976de"
+    },
+    {
+      "index": 15,
+      "name": "model_blocks_0_norm2_bias_3D_array",
+      "bytes": 384,
+      "offset": 6208,
+      "bank": 0,
+      "sha256": "865f6a98732fafc1f7b1c17ee6df1b551bd4b7303878c5b97acf8e205fcfd16f"
+    },
+    {
+      "index": 16,
+      "name": "model_blocks_0_ffn_0_bias_3D_array",
+      "bytes": 768,
+      "offset": 6592,
+      "bank": 0,
+      "sha256": "123ecbb3baba5b63644f191e3ecd4ce2b3e9f9a6eefc46f810881e62563421c2"
+    },
+    {
+      "index": 17,
+      "name": "_blocks_0_ffn_ffn_1_Constant_output_0_3D_array",
+      "bytes": 4,
+      "offset": 7360,
+      "bank": 0,
+      "sha256": "9c16095ed50248c0e1658be07f5bafe5dc11382843a99c6fb3a87c141808ceeb"
+    },
+    {
+      "index": 18,
+      "name": "_blocks_0_ffn_ffn_1_Constant_2_output_0_3D_array",
+      "bytes": 4,
+      "offset": 7392,
+      "bank": 0,
+      "sha256": "d99e58435243d9fef9c88273b8d553b4fba4d0baf8009d29eae74fa99e0d9f57"
+    },
+    {
+      "index": 19,
+      "name": "model_blocks_0_ffn_2_bias_3D_array",
+      "bytes": 384,
+      "offset": 7424,
+      "bank": 0,
+      "sha256": "1bd4dd5354265061fa13be0aec1405a63336d1a71bff38ef326637622cc0864a"
+    },
+    {
+      "index": 20,
+      "name": "_blocks_1_norm1_Constant_output_0_3D_array",
+      "bytes": 4,
+      "offset": 7808,
+      "bank": 0,
+      "sha256": "d88c86f15bbea365d658ad95a81d45367c465f7af6f7264fb077f01747ddc77d"
+    },
+    {
+      "index": 21,
+      "name": "model_blocks_1_norm1_weight_3D_array",
+      "bytes": 384,
+      "offset": 7840,
+      "bank": 0,
+      "sha256": "908d441abe0df152043383dd48a09a72569f9661e60cb591d6c5a9414ebb2914"
+    },
+    {
+      "index": 22,
+      "name": "model_blocks_1_norm1_bias_3D_array",
+      "bytes": 384,
+      "offset": 8224,
+      "bank": 0,
+      "sha256": "09287f93a87aa75476e88cd128b81c37744530c606ac09406a45758a2a773231"
+    },
+    {
+      "index": 23,
+      "name": "model_blocks_1_mixer_projection_bias_3D_array",
+      "bytes": 768,
+      "offset": 8608,
+      "bank": 0,
+      "sha256": "57dbe3ccdf0e02ee24cd0ce93dfb02950cf253560a1bbcff62000a3a0a71d37e"
+    },
+    {
+      "index": 24,
+      "name": "_blocks_1_mixer_Constant_6_output_0_3D_array",
+      "bytes": 4,
+      "offset": 9376,
+      "bank": 0,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "index": 25,
+      "name": "_blocks_1_mixer_Constant_8_output_0_3D_array",
+      "bytes": 4,
+      "offset": 9408,
+      "bank": 0,
+      "sha256": "e00e5eb9444182f352323374ef4e08ebcb784725fdd4fd612d7730540b3e0c8c"
+    },
+    {
+      "index": 26,
+      "name": "_blocks_1_norm2_Constant_output_0_3D_array",
+      "bytes": 4,
+      "offset": 9440,
+      "bank": 0,
+      "sha256": "d88c86f15bbea365d658ad95a81d45367c465f7af6f7264fb077f01747ddc77d"
+    },
+    {
+      "index": 27,
+      "name": "model_blocks_1_norm2_weight_3D_array",
+      "bytes": 384,
+      "offset": 9472,
+      "bank": 0,
+      "sha256": "72792157b1741d41eba068a13f6ccaf718fb797a05cd6fbcdebe7d13a94fade4"
+    },
+    {
+      "index": 28,
+      "name": "model_blocks_1_norm2_bias_3D_array",
+      "bytes": 384,
+      "offset": 9856,
+      "bank": 0,
+      "sha256": "ac3b3f9177f4ffd110933b7e0998fed067ce38fb18684e152ab8db5e02165839"
+    },
+    {
+      "index": 29,
+      "name": "model_blocks_1_ffn_0_bias_3D_array",
+      "bytes": 768,
+      "offset": 10240,
+      "bank": 0,
+      "sha256": "dac2e7492176e3cb69ef1473592ccdb45c92528324ef45a8ccb13d7b30e448d0"
+    },
+    {
+      "index": 30,
+      "name": "_blocks_1_ffn_ffn_1_Constant_output_0_3D_array",
+      "bytes": 4,
+      "offset": 11008,
+      "bank": 0,
+      "sha256": "9c16095ed50248c0e1658be07f5bafe5dc11382843a99c6fb3a87c141808ceeb"
+    },
+    {
+      "index": 31,
+      "name": "_blocks_1_ffn_ffn_1_Constant_2_output_0_3D_array",
+      "bytes": 4,
+      "offset": 11040,
+      "bank": 0,
+      "sha256": "d99e58435243d9fef9c88273b8d553b4fba4d0baf8009d29eae74fa99e0d9f57"
+    },
+    {
+      "index": 32,
+      "name": "model_blocks_1_ffn_2_bias_3D_array",
+      "bytes": 384,
+      "offset": 11072,
+      "bank": 0,
+      "sha256": "ec2b63cdca8e9e3c9a94742f25bd3284ae04593e5b776457eaed6982279d7c2c"
+    },
+    {
+      "index": 33,
+      "name": "_blocks_2_norm1_Constant_output_0_3D_array",
+      "bytes": 4,
+      "offset": 11456,
+      "bank": 0,
+      "sha256": "d88c86f15bbea365d658ad95a81d45367c465f7af6f7264fb077f01747ddc77d"
+    },
+    {
+      "index": 34,
+      "name": "model_blocks_2_norm1_weight_3D_array",
+      "bytes": 384,
+      "offset": 11488,
+      "bank": 0,
+      "sha256": "a54c29998d3188b761544118e799bc5f403f0d83dc9197c2c617d1f4cef2797a"
+    },
+    {
+      "index": 35,
+      "name": "model_blocks_2_norm1_bias_3D_array",
+      "bytes": 384,
+      "offset": 11872,
+      "bank": 0,
+      "sha256": "dadbe501e952899114d36917b3a94aae3fc357f95e3366636bb64af9dba7e3c9"
+    },
+    {
+      "index": 36,
+      "name": "model_blocks_2_mixer_projection_bias_3D_array",
+      "bytes": 768,
+      "offset": 12256,
+      "bank": 0,
+      "sha256": "5f3315b5c7eb2cec88be00f4952d0a2ad8a976be017c04896945053c35c33b12"
+    },
+    {
+      "index": 37,
+      "name": "_blocks_2_mixer_Constant_6_output_0_3D_array",
+      "bytes": 4,
+      "offset": 13024,
+      "bank": 0,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "index": 38,
+      "name": "_blocks_2_mixer_Constant_8_output_0_3D_array",
+      "bytes": 4,
+      "offset": 13056,
+      "bank": 0,
+      "sha256": "e00e5eb9444182f352323374ef4e08ebcb784725fdd4fd612d7730540b3e0c8c"
+    },
+    {
+      "index": 39,
+      "name": "_blocks_2_norm2_Constant_output_0_3D_array",
+      "bytes": 4,
+      "offset": 13088,
+      "bank": 0,
+      "sha256": "d88c86f15bbea365d658ad95a81d45367c465f7af6f7264fb077f01747ddc77d"
+    },
+    {
+      "index": 40,
+      "name": "model_blocks_2_norm2_weight_3D_array",
+      "bytes": 384,
+      "offset": 13120,
+      "bank": 0,
+      "sha256": "71fed0459ac46fbbd6719f7aac072172eee975735a4ac4e1d2df02b70d3b4edf"
+    },
+    {
+      "index": 41,
+      "name": "model_blocks_2_norm2_bias_3D_array",
+      "bytes": 384,
+      "offset": 13504,
+      "bank": 0,
+      "sha256": "7acb59aab4b663783e2b234ce9f1837b0e29645a2cd3f5abe46293cbe5bcf388"
+    },
+    {
+      "index": 42,
+      "name": "model_blocks_2_ffn_0_bias_3D_array",
+      "bytes": 768,
+      "offset": 13888,
+      "bank": 0,
+      "sha256": "8a0e2f82077f98e2d534745c398b6e2370a24b0b043d0e1fe6cfd6fdeade4ec5"
+    },
+    {
+      "index": 43,
+      "name": "_blocks_2_ffn_ffn_1_Constant_output_0_3D_array",
+      "bytes": 4,
+      "offset": 14656,
+      "bank": 0,
+      "sha256": "9c16095ed50248c0e1658be07f5bafe5dc11382843a99c6fb3a87c141808ceeb"
+    },
+    {
+      "index": 44,
+      "name": "_blocks_2_ffn_ffn_1_Constant_2_output_0_3D_array",
+      "bytes": 4,
+      "offset": 14688,
+      "bank": 0,
+      "sha256": "d99e58435243d9fef9c88273b8d553b4fba4d0baf8009d29eae74fa99e0d9f57"
+    },
+    {
+      "index": 45,
+      "name": "model_blocks_2_ffn_2_bias_3D_array",
+      "bytes": 384,
+      "offset": 14720,
+      "bank": 0,
+      "sha256": "63f35195e24d84478eb5b2a6634def5fd1d9e0a665e4ee4cd0a0167d878ca2a5"
+    },
+    {
+      "index": 46,
+      "name": "_norm_Constant_output_0_3D_array",
+      "bytes": 4,
+      "offset": 15104,
+      "bank": 0,
+      "sha256": "d88c86f15bbea365d658ad95a81d45367c465f7af6f7264fb077f01747ddc77d"
+    },
+    {
+      "index": 47,
+      "name": "model_norm_weight_3D_array",
+      "bytes": 384,
+      "offset": 15136,
+      "bank": 4,
+      "sha256": "946aedd462b8696f197c3479bb75d28b9763a8fe0adf221d5d58282bd7616c84"
+    },
+    {
+      "index": 48,
+      "name": "model_norm_bias_3D_array",
+      "bytes": 384,
+      "offset": 15520,
+      "bank": 4,
+      "sha256": "13b216f8bd08957ff9a04216a3a7a24bd6b0e62f47398913dc231dd18aef178f"
+    },
+    {
+      "index": 49,
+      "name": "model_head_0_bias_3D_array",
+      "bytes": 768,
+      "offset": 15904,
+      "bank": 4,
+      "sha256": "76394eb6c94692abd70e4cb2a1800ef0182bc979bcd6a551938fab85e937d455"
+    },
+    {
+      "index": 50,
+      "name": "_head_head_1_Constant_output_0_3D_array",
+      "bytes": 4,
+      "offset": 16672,
+      "bank": 0,
+      "sha256": "9c16095ed50248c0e1658be07f5bafe5dc11382843a99c6fb3a87c141808ceeb"
+    },
+    {
+      "index": 51,
+      "name": "_head_head_1_Constant_2_output_0_3D_array",
+      "bytes": 4,
+      "offset": 16704,
+      "bank": 0,
+      "sha256": "d99e58435243d9fef9c88273b8d553b4fba4d0baf8009d29eae74fa99e0d9f57"
+    },
+    {
+      "index": 52,
+      "name": "model_head_2_bias_3D_array",
+      "bytes": 8,
+      "offset": 16736,
+      "bank": 0,
+      "sha256": "7bc136fdeac2674776413e593c699b9b33217aa0d0706587a399f04e5995f349"
+    },
+    {
+      "index": 53,
+      "name": "_stem_MatMul_output_0_gemm_to_dense_weights_array",
+      "bytes": 18432,
+      "offset": 16768,
+      "bank": 0,
+      "sha256": "0c856b983f9b7bb1a5ef78ae4adc046ea7d3275e3a749411390eacf16c638ff1"
+    },
+    {
+      "index": 54,
+      "name": "_stem_MatMul_output_0_gemm_to_dense_bias_array",
+      "bytes": 384,
+      "offset": 35200,
+      "bank": 0,
+      "sha256": "a1a4f5721c1c4610af7f71078f3a68c330536d679803b0e0507ee8dc10c5dfca"
+    },
+    {
+      "index": 55,
+      "name": "_frontend_norm_ReduceMean_output_0_Mul_scale_array",
+      "bytes": 200,
+      "offset": 35584,
+      "bank": 0,
+      "sha256": "f7f510a38a0cfe32ee56d67c7b2009a706202c79ddfb9e47efe3dea04593f2f2"
+    },
+    {
+      "index": 56,
+      "name": "_frontend_norm_ReduceMean_output_0_Mul_bias_array",
+      "bytes": 200,
+      "offset": 35808,
+      "bank": 0,
+      "sha256": "6d9c54dee5660c46886f32d80e57e9dd0ffa57ee0cd2a762b036d9c8e0c3a33a"
+    },
+    {
+      "index": 57,
+      "name": "_frontend_norm_ReduceMean_1_output_0_Mul_bias_array",
+      "bytes": 200,
+      "offset": 36032,
+      "bank": 0,
+      "sha256": "da850d50106d30db9730bf96805b64dbba89b89cee6799511cfe5132c1e49770"
+    },
+    {
+      "index": 58,
+      "name": "_frontend_depthwise_Conv_output_0_weights_array",
+      "bytes": 480,
+      "offset": 36256,
+      "bank": 0,
+      "sha256": "f5c144c96d1b57aa1697062e75af6bfe2b2f4ab022a12c6807c8e537a88f71ef"
+    },
+    {
+      "index": 59,
+      "name": "_frontend_depthwise_Conv_output_0_bias_array",
+      "bytes": 384,
+      "offset": 36736,
+      "bank": 0,
+      "sha256": "5646b732ac6f159483c72283b06baf7f3b85433f0ce343442a134c4c0501b1a8"
+    },
+    {
+      "index": 60,
+      "name": "_frontend_Add_output_0_scale_array",
+      "bytes": 200,
+      "offset": 37120,
+      "bank": 0,
+      "sha256": "12931115699e16446535237e2d65fb64aefa0f964193d7e793b2c846fcf9c3b3"
+    },
+    {
+      "index": 61,
+      "name": "_frontend_Add_output_0_bias_array",
+      "bytes": 200,
+      "offset": 37344,
+      "bank": 0,
+      "sha256": "12931115699e16446535237e2d65fb64aefa0f964193d7e793b2c846fcf9c3b3"
+    },
+    {
+      "index": 62,
+      "name": "_frontend_pointwise_MatMul_output_0_gemm_to_dense_weights_array",
+      "bytes": 9216,
+      "offset": 37568,
+      "bank": 0,
+      "sha256": "d124fa3de44e6eb95da0a8e25901eb3f0f66d18912df5b1f850994048a609d9c"
+    },
+    {
+      "index": 63,
+      "name": "_blocks_0_mixer_projection_MatMul_output_0_gemm_to_dense_weights_array",
+      "bytes": 18432,
+      "offset": 46784,
+      "bank": 0,
+      "sha256": "bc741405e3d71eb47592d15fb10822e16a7f9d1bee61297bd8f9730e845c0e6b"
+    },
+    {
+      "index": 64,
+      "name": "_blocks_0_mixer_projection_MatMul_output_0_gemm_to_dense_bias_array",
+      "bytes": 768,
+      "offset": 65216,
+      "bank": 0,
+      "sha256": "ef115a0e0c15cdc41958ca46b5b14b456115f4baec5e3ca68599d2a8f435e3b8"
+    },
+    {
+      "index": 65,
+      "name": "_blocks_0_mixer_Add_1_output_0_bias_array",
+      "bytes": 200,
+      "offset": 65984,
+      "bank": 0,
+      "sha256": "3fbe3314f87d1c65aa84a76d89716312bce94759e95bf5bf5d42fff4a22d92a2"
+    },
+    {
+      "index": 66,
+      "name": "_blocks_0_ffn_ffn_0_MatMul_output_0_gemm_to_dense_weights_array",
+      "bytes": 18432,
+      "offset": 66208,
+      "bank": 0,
+      "sha256": "529421bd85f81fe559132bc90ff0cfadd696a0a0f2e193946102dd6c6c9c4a2d"
+    },
+    {
+      "index": 67,
+      "name": "_blocks_0_ffn_ffn_2_MatMul_output_0_gemm_to_dense_weights_array",
+      "bytes": 18432,
+      "offset": 84640,
+      "bank": 0,
+      "sha256": "67e22f1251096cc1096f4948a243e7d9ec21fccd41f01d32afb29615df087659"
+    },
+    {
+      "index": 68,
+      "name": "_blocks_1_mixer_projection_MatMul_output_0_gemm_to_dense_weights_array",
+      "bytes": 18432,
+      "offset": 103072,
+      "bank": 0,
+      "sha256": "bfd82762b8e98a287063a9c8132fbace10458898ecec641f35255dacb39241d0"
+    },
+    {
+      "index": 69,
+      "name": "_blocks_1_ffn_ffn_0_MatMul_output_0_gemm_to_dense_weights_array",
+      "bytes": 18432,
+      "offset": 121504,
+      "bank": 4,
+      "sha256": "14a1bcac9d12492c952c4a7a4e43eb00a390efc1231838df74ff2107b4dec009"
+    },
+    {
+      "index": 70,
+      "name": "_blocks_1_ffn_ffn_2_MatMul_output_0_gemm_to_dense_weights_array",
+      "bytes": 18432,
+      "offset": 139936,
+      "bank": 4,
+      "sha256": "602f20839c9ae7dfae6703b128b164a36420d63880f6b4f7c193c8026efe90b6"
+    },
+    {
+      "index": 71,
+      "name": "_blocks_2_mixer_projection_MatMul_output_0_gemm_to_dense_weights_array",
+      "bytes": 18432,
+      "offset": 158368,
+      "bank": 4,
+      "sha256": "f2eafecc865c69f2d60fd9560be41ca964836ea8cca62166d01d334162ebb163"
+    },
+    {
+      "index": 72,
+      "name": "_blocks_2_norm2_ReduceMean_output_0_Mul_scale_array",
+      "bytes": 4,
+      "offset": 176800,
+      "bank": 0,
+      "sha256": "c4c34fdf6fe77497bd1796faa200ed0717063f8400996d0e8a3be143d29bcaae"
+    },
+    {
+      "index": 73,
+      "name": "_blocks_2_norm2_ReduceMean_output_0_Mul_bias_array",
+      "bytes": 4,
+      "offset": 176832,
+      "bank": 0,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    {
+      "index": 74,
+      "name": "_blocks_2_norm2_ReduceMean_1_output_0_Mul_bias_array",
+      "bytes": 4,
+      "offset": 176864,
+      "bank": 0,
+      "sha256": "e6540c5b3269d9a6e3646dd482c2a7fe6b58e101e80007556892bb770099a68c"
+    },
+    {
+      "index": 75,
+      "name": "_blocks_2_ffn_ffn_0_MatMul_output_0_gemm_to_dense_weights_array",
+      "bytes": 18432,
+      "offset": 176896,
+      "bank": 4,
+      "sha256": "86e434570924a5a41cb8fd2a54caadfb50153d19fd477ae2941488eb450a4785"
+    },
+    {
+      "index": 76,
+      "name": "_blocks_2_ffn_ffn_1_Add_output_0_scale_array",
+      "bytes": 4,
+      "offset": 195328,
+      "bank": 0,
+      "sha256": "e00e5eb9444182f352323374ef4e08ebcb784725fdd4fd612d7730540b3e0c8c"
+    },
+    {
+      "index": 77,
+      "name": "_blocks_2_ffn_ffn_1_Add_output_0_bias_array",
+      "bytes": 4,
+      "offset": 195360,
+      "bank": 0,
+      "sha256": "e00e5eb9444182f352323374ef4e08ebcb784725fdd4fd612d7730540b3e0c8c"
+    },
+    {
+      "index": 78,
+      "name": "_blocks_2_ffn_ffn_2_MatMul_output_0_gemm_to_dense_weights_array",
+      "bytes": 18432,
+      "offset": 195392,
+      "bank": 4,
+      "sha256": "c364f817a314824c13b8ea07c0379426c3a888643c8e32c5214cd6b6cdda88ea"
+    },
+    {
+      "index": 79,
+      "name": "_head_head_0_MatMul_output_0_gemm_to_dense_weights_array",
+      "bytes": 18432,
+      "offset": 213824,
+      "bank": 4,
+      "sha256": "902db8102408960f018c89fa0fc9a1d3377e8beeb4b519844fae7aeded91acc1"
+    },
+    {
+      "index": 80,
+      "name": "_head_head_2_MatMul_output_0_gemm_to_dense_weights_array",
+      "bytes": 384,
+      "offset": 232256,
+      "bank": 0,
+      "sha256": "b64544fa994226fc7f3ee7892629500e61a928f7ae32aa943e8470cb02fd9549"
+    },
+    {
+      "index": 81,
+      "name": "_head_head_2_MatMul_output_0_gemm_to_dense_bias_array",
+      "bytes": 8,
+      "offset": 232640,
+      "bank": 0,
+      "sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+    }
+  ],
+  "runtime_files": {
+    ".cproject": "e6583800cde8ea022137cd9404cb9c7adb4e14b83f402aa5208ec6c0574339b4",
+    "AI\\B2\\b2_gelu_lut.h": "1387b073d975df81672622a48bafe9ad60065bee079186f819c7caf004f8f259",
+    "AI\\B2\\b2_mingru.c": "a924da7376cdfa73944cffe45bc65ed386dd007ed15c1eb25aec362b914dc283",
+    "AI\\B2\\b2_mingru.h": "81201dc744ae8c07c994d2f025edaa077d99053eeb5669d2c3a283daffb3f111",
+    "AI\\B2\\b2_mingru_config.h": "c364340fe4c821a080b25b8cc3a966eb1d4b4350981d07317884448d0c14754a",
+    "AI\\B2\\b2_mingru_data.c": "af34d0069f86b1a4dcec403c59c3c439c86e47a8c637fe950460c6eddf5ad7b9",
+    "AI\\B2\\b2_mingru_data.h": "2d953724f2e927a09bf0490bcaf2ff342316bc98452a158777887dffdc8e369e",
+    "AI\\B2\\b2_mingru_data_params.h": "ab3007696cd005fbf1a31a19c95da0b54410a45631951d9af241726aeb72ce52",
+    "AI\\B2\\b2_profile_nodes.h": "9efe79057abe9d9bb0b3fd260c3cd916617812ef5f4f7a669a74d37122864991",
+    "AI\\B2\\ST_GENERATED_CODE_LICENSE.txt": "89a4b36db219612d2ccd64fc594919dddadc013f1c98ca1f019abc13fae1f14f",
+    "Core\\Inc\\m7_ai_decoder.h": "d836e42955b02a99c7d05d9e7eb436ff30a8a9d90aa3d3777f1c52e78aedfa6a",
+    "Core\\Inc\\m7_b2_build.h": "3dc6ebe41fc107a034c9444ff930fc04fc63125cbc36f934ed1c7304f3a1e162",
+    "Core\\Inc\\m7_b2_bundle.h": "e6a9846735cd6d4dca99b2d1d284531c0ade51e0cb63f032b3f01ec9e8e434c3",
+    "Core\\Inc\\m7_b2_profile.h": "9a21d2efe788c91978053afdd21313e5ef07f35842347a0a8ab731b957fec48d",
+    "Core\\Inc\\m7_b2_runtime.h": "2dc213d42240f937a42c25af4e03cf1b79c1d7ff4c298e3bfd789fa8c890197f",
+    "Core\\Inc\\m7_decoder_constants.h": "b083ea0cbe07ce0be33f77061512a9fbd371bd346acfe7305a8aea6e6f3f53db",
+    "Core\\Inc\\m7_decoder_preprocess.h": "8f5b1e19c4ccb9cc51ce07084d97f7d232685ee4963ddca496a0ec59f9ef94f3",
+    "Core\\Inc\\m7_external_nor.h": "85615f616f228c7a252089d1f6383ff0bfda9e996cb1fe4b38a240a9b7acd9db",
+    "Core\\Inc\\m7_feature_test.h": "05c97b4e8f67b2f4cc298557ded5f7f09128ee0018fdd5fee26414eec38bd414",
+    "Core\\Inc\\m7_intan.h": "4fe0cbc4ffd7a25155e1d0ea93dd5ca8595fb9ecdcc774a9922f788b3da9c9e6",
+    "Core\\Inc\\m7_latency.h": "ffbf5b2c1c8834d1f9c856a128a119c09768069e68857ccf43bdba08059c12bc",
+    "Core\\Inc\\m7_model_control.h": "b8f9ae6760e2d74e4ea2569965839e2f9b0d9986c08ce38ace75576617cfeb1c",
+    "Core\\Inc\\m7_model_memory.h": "0751665ffba2ce5e210b08f139959b87bdec0d3580790d3d463a230b2ef3bc07",
+    "Core\\Inc\\m7_model_store.h": "9760814752cf9c1fcbce017618450589dc9145de500fff5cb6f2b0d26f4db243",
+    "Core\\Inc\\m7_peak_detection.h": "67fdebf74565ce43fd4ddceca5c44527449200cc74b7822b38f1ed855790542c",
+    "Core\\Inc\\m7_retrieval.h": "094afc79a455b82b1e6dfc584586b4bb1562637dba96c0aad0c492c6aacecc08",
+    "Core\\Inc\\m7_rgb_stim.h": "08e076ec6f854474abcc95fac6503d400cffbbaa94a64ee9266d8cbd2a4c0163",
+    "Core\\Inc\\m7_share_data_handler.h": "7cc8722db725ac20c0d2b81e45b06cf43d53869b94d5faae007b0d4c2d6677d4",
+    "Core\\Inc\\m7_usb_msg_handler.h": "5ae82b2c96b034cb259a3977706f5fcde568f138a61e737d9e10dae7f53323b3",
+    "Core\\Inc\\m7_velocity_trigger.h": "d611bd82eddde8889c770eaeef3729be858d9edb8cf14cbb8845d18fb1f82b0b",
+    "Core\\Inc\\main.h": "3ccd2b7c9a54a9a2f4016c7497b0d7e5edecc7b3f85d9830c104dd0be8efb078",
+    "Core\\Inc\\sdram.h": "b6d4cb02bfa6763749dadd1750fb72f2f833ef28257e80cf0c3fe9cc929e1cb1",
+    "Core\\Inc\\stm32h7xx_hal_conf.h": "9e4997f1c24d190f2528415dedecda0494f5f79889a78d461bee0de7b8db1dfd",
+    "Core\\Inc\\stm32h7xx_it.h": "d1f95ad32d244ef1485cb6c2ab0400feafd25a8411f69a2b9638ed2b1064d8ad",
+    "Core\\Src\\m7_ai_decoder.c": "3da648c14a072a7450232300b90b483b8d7fc27a98d31122520f536b35f56632",
+    "Core\\Src\\m7_b2_bundle.c": "65324b5d8ec4e88c32bdbb886344830206d428c4a432e370481c7387e243e258",
+    "Core\\Src\\m7_b2_runtime.c": "494092822f3371a93225cba469f583bb2556d89ddb78a5df9008ee43ebefe131",
+    "Core\\Src\\m7_decoder_constants.c": "97ace8d306e7d54e0f6c69d62365c5ee28d1b364a67d9f8702c6843e5a791686",
+    "Core\\Src\\m7_decoder_preprocess.c": "b39504fd115a1b6cd0beb5547277ee67dfc0a7253fa3cc7684b024a075c579fe",
+    "Core\\Src\\m7_external_nor.c": "3f0e02aa8edcbe613f25b90109a574abc06ee1640780c22ed24a8caf87a0739d",
+    "Core\\Src\\m7_feature_test.c": "01198f789aee534499f2720a55db972ce75f8264b73221054b95edf9ca14f7e7",
+    "Core\\Src\\m7_intan.c": "6df805d4863063d4e4131789e0e8e0993e9211c7c9e017e60c60cfc2e51102e2",
+    "Core\\Src\\m7_latency.c": "531c67bd773da7852e972b2ac7a0770c86b2fd6f3d078bd1e75b370597c060ea",
+    "Core\\Src\\m7_model_control.c": "fa0846342fdbb8c54e627c6518853322274f20c4a12584f7ed9cb30c04aa42ff",
+    "Core\\Src\\m7_model_memory.c": "8b40fd5e61f486565af71d0242a3e6a1b82f55121bfc6ec02b59135e2bc93c57",
+    "Core\\Src\\m7_model_store.c": "dec9b6fef0de72b4e67d2590f3e7ffc2052eb66a36937ef97293d189f560c82f",
+    "Core\\Src\\m7_peak_detection.c": "f649bac803906b00ecbb7392230ab8248c30781fcd8224a16e3a83f7399d2584",
+    "Core\\Src\\m7_retrieval.c": "9b941bd1d1311345f4fcbd7552024754525dff0bb3bd162d4b95a246fcb440e7",
+    "Core\\Src\\m7_rgb_stim.c": "adf8b77b17e6f987ea9c34296cdd660d8f6567a37c3e0aed06eea9a31c1d6f85",
+    "Core\\Src\\m7_share_data_handler.c": "26d2dd3650eac495d8433c93c1b18f50692b894fc389c3beac38faa1ffdcbab1",
+    "Core\\Src\\m7_usb_msg_handler.c": "50e71fe0ce339f13ae3c3f451e3da6d4b74e1a7127db1e87a20fd15b57b3d6f3",
+    "Core\\Src\\m7_velocity_trigger.c": "75b272bd678f0bc4ab6b6da86010c31cda27b472380a2cddc927ddf8499b16bb",
+    "Core\\Src\\main.c": "548791b227b751443b399c81a95ce0ae88603e903abd2936882728f93503b8e0",
+    "Core\\Src\\sdram.c": "19b6a9e3ed9e95863355a23e10ce95561aa4012622f977c9a7bb300b76ea61ea",
+    "Core\\Src\\stm32h7xx_hal_msp.c": "1e968c165a9fc62b58ac61ed182b6c69b97790a4ebdeded9c4b29b02df9f4b86",
+    "Core\\Src\\stm32h7xx_it.c": "1d28e7697cdd6280593697830ef2174b32055a253bf9484aabd006fd8fff019c",
+    "Core\\Src\\syscalls.c": "2a18192fe02cbb0491f8fed0bc759dd7ec21547d53dc00d7ec35efbb6e1bf002",
+    "Core\\Src\\sysmem.c": "4a027c077be9da032725fbceb45746eaa89c3bfc2a8a8082a22a01abca2eadf6",
+    "STM32H747XIHX_FLASH.ld": "68ef1fd37b16128c42c28cde664225e6b04862c8e28a07b580d91a19cf190a71",
+    "STM32H747XIHX_RAM.ld": "d8efa8bcf195b0cecdd26f513990323df5a60c2f726d83a0181ffa795770e826"
+  }
+}

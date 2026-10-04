@@ -67,3 +67,9 @@ Thumbs.db
 
 # Codex CLI tool state (not part of the project)
 .codex/
+
+# Phase20 intermediates stay local; compact release evidence is tracked separately.
+/indy_loco/experiment/board_latency_20261004/results/
+/indy_loco/experiment/board_latency_20261004/*.log
+/indy_loco/experiment/mingru_mixed_precision/results/
+/indy_loco/experiment/mingru_mixed_precision/launch_logs/

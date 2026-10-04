@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "bit_exact": true,
+  "windows": 256,
+  "real_image_verified": true,
+  "staging_overwritten": true,
+  "independent_window_reset": true,
+  "destroy_reload": true,
+  "image_sha256": "417e268e18cdd65adc8b439ff90d1e5679e34fb8cda96ae15b1943345646f9a9"
+}

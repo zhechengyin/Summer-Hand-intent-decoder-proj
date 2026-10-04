@@ -1,0 +1,17 @@
+[
+  {
+    "file": "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\results\\w96_d3\\indy_20160622_01_fold4.validation.json",
+    "name": "promote",
+    "done": true
+  },
+  {
+    "file": "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\results\\w96_d3\\indy_20160622_01_fold3_export\\lut_validation.json",
+    "name": "final_exports",
+    "done": true
+  },
+  {
+    "file": "C:\\Users\\fangz\\Documents\\Summer-Hand-intent-decoder-proj\\indy_loco\\experiment\\board_latency_20261004\\results\\w96_d3\\indy_20160622_01_fold3_export\\deployed_evaluation.json",
+    "name": "final_evaluations",
+    "done": true
+  }
+]

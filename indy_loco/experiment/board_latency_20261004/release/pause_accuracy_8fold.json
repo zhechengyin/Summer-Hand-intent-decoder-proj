@@ -1,0 +1,245 @@
+{
+  "folds": 8,
+  "complete_30fold": false,
+  "architecture": "w96_d3",
+  "test_used_for_selection": false,
+  "rows": [
+    {
+      "session": "indy_20160622_01",
+      "fold": 1,
+      "test": {
+        "bins": 3815,
+        "mse": 0.009259669110178947,
+        "r2_x": 0.8936986923217773,
+        "r2_y": 0.8436298370361328,
+        "r2_mean": 0.8686642646789551
+      },
+      "midsize": {
+        "bins": 3815,
+        "mse": 0.011374613270163536,
+        "r2_x": 0.8636659383773804,
+        "r2_y": 0.8293614387512207,
+        "r2_mean": 0.8465136885643005,
+        "normalized_loss": 0.15826228260993958
+      },
+      "paired_delta": 0.02215057611465454,
+      "preprocessing": {
+        "max_feature_difference": 3.814697265625e-06,
+        "changed_feature_codes": 5,
+        "max_code_difference": 1.0,
+        "validation_windows_with_changed_input": 0,
+        "explanation": "Firmware EWMA FMA and online calibration rounding versus canonical training arrays; graph parity uses identical inputs separately"
+      }
+    },
+    {
+      "session": "indy_20160622_01",
+      "fold": 2,
+      "test": {
+        "bins": 4161,
+        "mse": 0.011887160129845142,
+        "r2_x": 0.8701163530349731,
+        "r2_y": 0.814267635345459,
+        "r2_mean": 0.8421919941902161
+      },
+      "midsize": {
+        "bins": 4161,
+        "mse": 0.015011271461844444,
+        "r2_x": 0.8334652185440063,
+        "r2_y": 0.7783795595169067,
+        "r2_mean": 0.8059223890304565,
+        "normalized_loss": 0.18871460855007172
+      },
+      "paired_delta": 0.03626960515975952,
+      "preprocessing": {
+        "max_feature_difference": 3.814697265625e-06,
+        "changed_feature_codes": 5,
+        "max_code_difference": 1.0,
+        "validation_windows_with_changed_input": 13,
+        "explanation": "Firmware EWMA FMA and online calibration rounding versus canonical training arrays; graph parity uses identical inputs separately"
+      }
+    },
+    {
+      "session": "indy_20160622_01",
+      "fold": 3,
+      "test": {
+        "bins": 3620,
+        "mse": 0.010886655189096928,
+        "r2_x": 0.8852461576461792,
+        "r2_y": 0.8445754051208496,
+        "r2_mean": 0.8649107813835144
+      },
+      "midsize": {
+        "bins": 3620,
+        "mse": 0.012794206850230694,
+        "r2_x": 0.8635024428367615,
+        "r2_y": 0.8242323398590088,
+        "r2_mean": 0.8438674211502075,
+        "normalized_loss": 0.17189334332942963
+      },
+      "paired_delta": 0.021043360233306885,
+      "preprocessing": {
+        "max_feature_difference": 3.814697265625e-06,
+        "changed_feature_codes": 5,
+        "max_code_difference": 1.0,
+        "validation_windows_with_changed_input": 19,
+        "explanation": "Firmware EWMA FMA and online calibration rounding versus canonical training arrays; graph parity uses identical inputs separately"
+      }
+    },
+    {
+      "session": "indy_20160630_01",
+      "fold": 1,
+      "test": {
+        "bins": 2348,
+        "mse": 0.025121530517935753,
+        "r2_x": 0.5561130046844482,
+        "r2_y": 0.7957873344421387,
+        "r2_mean": 0.6759501695632935
+      },
+      "midsize": {
+        "bins": 2348,
+        "mse": 0.023557024076581,
+        "r2_x": 0.5792778134346008,
+        "r2_y": 0.8129647970199585,
+        "r2_mean": 0.696121335029602,
+        "normalized_loss": 0.25717511773109436
+      },
+      "paired_delta": -0.020171165466308594,
+      "preprocessing": {
+        "max_feature_difference": 7.62939453125e-06,
+        "changed_feature_codes": 2,
+        "max_code_difference": 1.0,
+        "validation_windows_with_changed_input": 0,
+        "explanation": "Firmware EWMA FMA and online calibration rounding versus canonical training arrays; graph parity uses identical inputs separately"
+      }
+    },
+    {
+      "session": "indy_20170131_02",
+      "fold": 1,
+      "test": {
+        "bins": 1017,
+        "mse": 0.016156252473592758,
+        "r2_x": 0.8269020318984985,
+        "r2_y": 0.7320636510848999,
+        "r2_mean": 0.7794828414916992
+      },
+      "midsize": {
+        "bins": 1017,
+        "mse": 0.018310783430933952,
+        "r2_x": 0.8049777746200562,
+        "r2_y": 0.6931661367416382,
+        "r2_mean": 0.7490719556808472,
+        "normalized_loss": 0.25210899114608765
+      },
+      "paired_delta": 0.03041088581085205,
+      "preprocessing": {
+        "max_feature_difference": 0.0007038116455078125,
+        "changed_feature_codes": 24,
+        "max_code_difference": 1.0,
+        "validation_windows_with_changed_input": 157,
+        "explanation": "Firmware EWMA FMA and online calibration rounding versus canonical training arrays; graph parity uses identical inputs separately"
+      }
+    },
+    {
+      "session": "loco_20170210_03",
+      "fold": 1,
+      "test": {
+        "bins": 1420,
+        "mse": 0.006877800915390253,
+        "r2_x": 0.6844817399978638,
+        "r2_y": 0.7612012028694153,
+        "r2_mean": 0.7228415012359619
+      },
+      "midsize": {
+        "bins": 1420,
+        "mse": 0.007414801511913538,
+        "r2_x": 0.6698818206787109,
+        "r2_y": 0.7214895486831665,
+        "r2_mean": 0.6956856846809387,
+        "normalized_loss": 0.3032194674015045
+      },
+      "paired_delta": 0.027155816555023193,
+      "preprocessing": {
+        "max_feature_difference": 2.09808349609375e-05,
+        "changed_feature_codes": 22,
+        "max_code_difference": 1.0,
+        "validation_windows_with_changed_input": 20,
+        "explanation": "Firmware EWMA FMA and online calibration rounding versus canonical training arrays; graph parity uses identical inputs separately"
+      }
+    },
+    {
+      "session": "loco_20170215_02",
+      "fold": 1,
+      "test": {
+        "bins": 1416,
+        "mse": 0.0053827883675694466,
+        "r2_x": 0.45981353521347046,
+        "r2_y": 0.6781716346740723,
+        "r2_mean": 0.5689926147460938
+      },
+      "midsize": {
+        "bins": 1416,
+        "mse": 0.004618146922439337,
+        "r2_x": 0.5086430907249451,
+        "r2_y": 0.7511978149414062,
+        "r2_mean": 0.629920482635498,
+        "normalized_loss": 0.2299496978521347
+      },
+      "paired_delta": -0.0609278678894043,
+      "preprocessing": {
+        "max_feature_difference": 0.00012063980102539062,
+        "changed_feature_codes": 11,
+        "max_code_difference": 1.0,
+        "validation_windows_with_changed_input": 0,
+        "explanation": "Firmware EWMA FMA and online calibration rounding versus canonical training arrays; graph parity uses identical inputs separately"
+      }
+    },
+    {
+      "session": "loco_20170301_05",
+      "fold": 1,
+      "test": {
+        "bins": 767,
+        "mse": 0.0093910563737154,
+        "r2_x": 0.6984838247299194,
+        "r2_y": 0.8661966919898987,
+        "r2_mean": 0.7823402881622314
+      },
+      "midsize": {
+        "bins": 767,
+        "mse": 0.008383858017623425,
+        "r2_x": 0.741142988204956,
+        "r2_y": 0.86390620470047,
+        "r2_mean": 0.8025245666503906,
+        "normalized_loss": 0.32721397280693054
+      },
+      "paired_delta": -0.02018427848815918,
+      "preprocessing": {
+        "max_feature_difference": 2.765655517578125e-05,
+        "changed_feature_codes": 18,
+        "max_code_difference": 1.0,
+        "validation_windows_with_changed_input": 0,
+        "explanation": "Firmware EWMA FMA and online calibration rounding versus canonical training arrays; graph parity uses identical inputs separately"
+      }
+    }
+  ],
+  "x": {
+    "candidate": 0.7343569174408913,
+    "paired_midsize": 0.7330696359276772,
+    "delta": 0.0012872815132141113,
+    "candidate_fold_std": 0.16303897862603153,
+    "delta_std": 0.03409937816509928
+  },
+  "y": {
+    "candidate": 0.7919866740703583,
+    "paired_midsize": 0.784337230026722,
+    "delta": 0.007649444043636322,
+    "candidate_fold_std": 0.06430172297446195,
+    "delta_std": 0.038098436759252965
+  },
+  "mean": {
+    "candidate": 0.7631718069314957,
+    "paired_midsize": 0.7587034404277802,
+    "delta": 0.004468366503715515,
+    "candidate_fold_std": 0.10371448055677328,
+    "delta_std": 0.0343884767771097
+  }
+}

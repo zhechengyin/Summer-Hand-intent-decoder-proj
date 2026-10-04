@@ -1,0 +1,24 @@
+{
+  "samples": 3956,
+  "fixed_probes": 256,
+  "reference_vs_fused_max_abs": 0.0,
+  "failed_outputs": 0,
+  "passed": true,
+  "bit_exact": true,
+  "ort_vs_generated_max_abs": 0.030084848403930664,
+  "input_scale": 0.1440068781375885,
+  "input_zero_point": 0,
+  "validation": {
+    "bins": 3956,
+    "mse": 0.010424942709505558,
+    "r2_x": 0.8491356372833252,
+    "r2_y": 0.8527386784553528,
+    "r2_mean": 0.8509371280670166
+  },
+  "graph_sha256": {
+    "reference": "966b9fceb5fdab90bab837796cca95cf6293416ae9951acfa9aa0d70924c2084",
+    "fused": "a4f39debdc7f10b278a9e2ba1942a8154062c5df59503232eda86b19b525fb55"
+  },
+  "test_evaluated": false,
+  "board_tested": false
+}
